@@ -1,9 +1,5 @@
 [![Build Status](https://travis-ci.org/LiteOS/LiteOS.svg?branch=develop)](https://travis-ci.org/LiteOS/LiteOS)
 
-## 迁移公告
-
-欢迎大家访问LiteOS。为了提供更好的服务，本项目于2019年11月从GitHub迁出，后续代码更新、维护将在码云（https://gitee.com/LiteOS ）上进行。
-
 Huawei LiteOS一直致力于打造易用、安全、高性能的物联网系统，项目迁入码云(Gitee)后，LiteOS开源团队将开展社区项目更新，包括丰富的组件包、新平台的支持、配套工程工具。敬请关注，期待大家的参与。
 
 ## Huawei LiteOS简介
