@@ -56,7 +56,7 @@ char tmpbuf[AT_DATA_LEN]={0}; //transform to hex
 socket_info sockinfo[MAX_SOCK_NUM];
 static nb_data_ind_info_s g_data_ind_info;
 
-static char *strnstr(const char *s1, const char *s2, size_t len)
+static char *nb_strnstr(const char *s1, const char *s2, size_t len)
 {
     size_t l2;
 
@@ -353,7 +353,7 @@ int32_t nb_create_sock(int port,int proto)
 	nb_cmd_with_2_suffix((int8_t*)buf, cmd_len, "OK", "ERROR", rbuf, (uint32_t *)&rbuflen);
 	ret = sscanf(rbuf, "%d\r%s",&socket, tmpbuf);
     if ((2 == ret) && (socket >= 0)
-        && (strnstr(tmpbuf, "OK", sizeof(tmpbuf))))
+        && (nb_strnstr(tmpbuf, "OK", sizeof(tmpbuf))))
     {
         return socket;
     }
