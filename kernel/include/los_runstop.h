@@ -102,7 +102,7 @@ typedef INT32 (*FLASH_READ_FUNC)(VOID *memAddr, size_t start, size_t size);
  *
  * @par Description:
  * This API is used to define the type of a flash-writing function,
- * so that it can be called to write data from a certain flash.
+ * so that it can be called to write data to a certain flash.
  *
  * @attention
  * <ul>
