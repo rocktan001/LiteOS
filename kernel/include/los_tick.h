@@ -176,7 +176,7 @@ extern VOID LOS_Udelay(UINT32 usecs);
  * @see
  * @since Huawei LiteOS V100R001C00
  */
-extern VOID LOS_Mdelay(UINT32 usecs);
+extern VOID LOS_Mdelay(UINT32 msecs);
 
 #ifdef __cplusplus
 #if __cplusplus
