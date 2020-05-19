@@ -137,10 +137,10 @@ extern UINT64 LOS_TickCountGet(VOID);
 
 /**
  * @ingroup los_sys
- * @brief Obtain the number of cycles in one second.
+ * @brief Obtain the number of cycles in one tick.
  *
  * @par Description:
- * This API is used to obtain the number of cycles in one second.
+ * This API is used to obtain the number of cycles in one tick.
  * @attention
  * <ul>
  * <li>None</li>
@@ -148,7 +148,7 @@ extern UINT64 LOS_TickCountGet(VOID);
  *
  * @param  None
  *
- * @retval UINT32 Number of cycles obtained in one second.
+ * @retval UINT32 Number of cycles obtained in one tick.
  * @par Dependency:
  * <ul><li>los_sys.h: the header file that contains the API declaration.</li></ul>
  * @see None
