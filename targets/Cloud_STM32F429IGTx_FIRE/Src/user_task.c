@@ -192,14 +192,14 @@ UINT32 app_init(VOID)
     uwRet = creat_agenttiny_task();
     if (uwRet != LOS_OK)
     {
-    	return LOS_NOK;
+        return LOS_NOK;
     }
 
 #if defined(FS_SPIFFS) || defined(FS_FATFS)
     uwRet = creat_fs_task();
     if (uwRet != LOS_OK)
     {
-    	return LOS_NOK;
+        return LOS_NOK;
     }
 #endif
 
@@ -211,12 +211,11 @@ UINT32 app_init(VOID)
     task_create("main_ppp", main_ppp, 0x1500, NULL, NULL, 2);
 #endif
 
-
 #if defined(WITH_DTLS) && defined(SUPPORT_DTLS_SRV)
     uwRet = create_dtls_server_task();
     if (uwRet != LOS_OK)
     {
-    	return LOS_NOK;
+        return LOS_NOK;
     }
 #endif
 

@@ -462,7 +462,7 @@ sys_thread_new(char *name, lwip_thread_fn function, void *arg, int stacksize, in
     task.auwArgs[0] = (UINTPTR)arg;
     ret = LOS_TaskCreate(&taskid, &task);
 
-    if (LOS_OK != ret )
+    if (LOS_OK != ret)
     {
         LWIP_DEBUGF(SYS_DEBUG, ("sys_thread_new: LOS_TaskCreate error %u\n", (unsigned int)ret));
         return  (unsigned int) - 1;
