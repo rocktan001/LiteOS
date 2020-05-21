@@ -33,7 +33,7 @@
  *---------------------------------------------------------------------------*/
 #include "agent_tiny_demo.h"
 #include "los_base.h"
-#include "los_task.ph"
+#include "los_task_pri.h"
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "atiny_mqtt/mqtt_client.h"

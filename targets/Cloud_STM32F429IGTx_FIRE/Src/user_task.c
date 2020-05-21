@@ -213,7 +213,7 @@ UINT32 app_init(VOID)
 
 
 #if defined(WITH_DTLS) && defined(SUPPORT_DTLS_SRV)
-    uwRet = create_dtls_server_task()
+    uwRet = create_dtls_server_task();
     if (uwRet != LOS_OK)
     {
     	return LOS_NOK;
