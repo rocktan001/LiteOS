@@ -40,8 +40,8 @@
 #include "arch/sys_arch.h"
 
 //#include "linux/wait.h"
-#include "los_sys.ph"
-#include "los_sem.ph"
+#include "los_sys_pri.h"
+#include "los_sem_pri.h"
 #include "string.h"
 
 /*lint -e**/
@@ -459,10 +459,10 @@ sys_thread_new(char *name, lwip_thread_fn function, void *arg, int stacksize, in
     task.uwStackSize  = stacksize;
     task.pcName = (char *)name;
     task.usTaskPrio = prio;
-    task.uwArg = (UINT32)arg;
+    task.auwArgs[0] = (UINTPTR)arg;
     ret = LOS_TaskCreate(&taskid, &task);
 
-    if (LOS_OK != ret )
+    if (LOS_OK != ret)
     {
         LWIP_DEBUGF(SYS_DEBUG, ("sys_thread_new: LOS_TaskCreate error %u\n", (unsigned int)ret));
         return  (unsigned int) - 1;
@@ -587,7 +587,7 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
         }
     }
 
-    retval = LOS_SemPend(sem->sem->usSemID, timeout);
+    retval = LOS_SemPend(sem->sem->semID, timeout);
 
     if (retval != ERR_OK)
     {
@@ -617,7 +617,7 @@ void sys_sem_signal(sys_sem_t *sem)
         return;
     }
 
-    uwRet = LOS_SemPost(sem->sem->usSemID);
+    uwRet = LOS_SemPost(sem->sem->semID);
 
     if (uwRet != ERR_OK)
     {
@@ -646,7 +646,7 @@ void sys_sem_free(sys_sem_t *sem)
         return;
     }
 
-    uwRet = LOS_SemDelete(sem->sem->usSemID);
+    uwRet = LOS_SemDelete(sem->sem->semID);
     LWIP_ASSERT("LOS_SemDelete failed", (uwRet == 0));
 
     ((void)(uwRet));
