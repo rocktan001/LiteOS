@@ -294,7 +294,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_EventDestroy(PEVENT_CB_S eventCB)
     }
 
     eventCB->uwEventID = 0;
-    LOS_ListDelInit(&eventCB->stEventList);
+    //LOS_ListDelInit(&eventCB->stEventList);
     SCHEDULER_UNLOCK(intSave);
 
     return LOS_OK;
