@@ -36,7 +36,6 @@
 
 #include "gic_common.h"
 #include "los_hwi_pri.h"
-#include "los_mp.h"
 
 STATIC_ASSERT(OS_USER_HWI_MAX <= 1020, "hwi max is too large!");
 

@@ -43,8 +43,8 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif /* __cpluscplus */
-#endif /* __cpluscplus */
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #define OS_EXC_IN_INIT                      0
 #define OS_EXC_IN_TASK                      1
@@ -370,8 +370,8 @@ extern VOID OsTaskBackTrace(UINT32 taskID);
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif /* __cpluscplus */
-#endif /* __cpluscplus */
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _LOS_EXC_H */
 

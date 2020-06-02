@@ -37,8 +37,8 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif /* __cpluscplus */
-#endif /* __cpluscplus */
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 UINT32 LOS_CirBufUsedSize(CirBuf *cirbufCB)
 {
@@ -228,5 +228,5 @@ VOID LOS_CirBufDeinit(CirBuf *cirbufCB)
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif /* __cpluscplus */
-#endif /* __cpluscplus */
+#endif /* __cplusplus */
+#endif /* __cplusplus */

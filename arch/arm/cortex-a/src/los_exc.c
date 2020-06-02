@@ -243,13 +243,11 @@ VOID OsDumpContextMem(const ExcContext *excBufAddr)
     for (excReg = &(excBufAddr->R0); count <= DUMPREGS; excReg++, count++) {
         if (IS_VALID_ADDR(*excReg)) {
             PrintExcInfo("\ndump mem around R%u:%p", count, (*excReg));
-            OsDumpMemByte(DUMPSIZE, ((*excReg) - (DUMPSIZE >> 1)));
         }
     }
 
     if (IS_VALID_ADDR(excBufAddr->SP)) {
         PrintExcInfo("\ndump mem around SP:%p", excBufAddr->SP);
-        OsDumpMemByte(DUMPSIZE, (excBufAddr->SP - (DUMPSIZE >> 1)));
     }
 }
 
@@ -357,13 +355,11 @@ VOID OsExcHook(UINT32 excType, ExcContext *excBufAddr)
     OsExcRegsInfo(excBufAddr);
 
     BackTrace(excBufAddr->R11);
-    (VOID)OsShellCmdTskInfoGet(OS_ALL_TASK_MASK);
+
 
     OsExcStackInfo();
 
     OsDumpContextMem(excBufAddr);
-
-    (VOID)OsShellCmdMemCheck(0, NULL);
 
 #ifdef LOSCFG_COREDUMP
     LOS_CoreDumpV2(excType, excBufAddr);

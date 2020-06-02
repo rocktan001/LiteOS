@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
+ * Copyright (c) <2013-2018>, <Huawei Technologies Co., Ltd>
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -23,7 +23,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *---------------------------------------------------------------------------*/
- /*----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
  * Notice of Export Control Law
  * ===============================================
  * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
@@ -31,76 +31,27 @@
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
+/** @defgroup los_hw_cache Cache
+ *  @ingroup kernel
+*/
 
-#include <stdio.h>
-#include "los_membox.h"
-#include "los_api_static_mem.h"
-#include "los_inspect_entry.h"
+#define CACHE_LINE 64
+#define FUNCTION(x) .global x; .text; x:
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+.macro cache_range_op, cache op
+    bic     x3, x0, #(CACHE_LINE-1) // align the start with a cache line
+.Lcache_range_op_loop\@:
+    \cache  \op, x3
+    add     x3, x3, #CACHE_LINE
+    cmp     x3, x1
+    blo     .Lcache_range_op_loop\@
+    dsb     sy
+.endm
 
-static UINT32 pBoxMem[144];
-UINT32 Example_StaticMem(VOID)
-{
-    UINT32 *p_num = NULL;
-    UINT32 uwBlkSize = 3, uwBoxSize = 48;
-    UINT32 uwRet;
+FUNCTION(arm64_inv_cache_range)
+    cache_range_op dc ivac         // invalidate dcache to PoC by MVA
+    ret
 
-    uwRet = LOS_MemboxInit(&pBoxMem[0], uwBoxSize, uwBlkSize);
-    if (uwRet != LOS_OK)
-    {
-        dprintf("Mem box init failed .\r\n");
-        return LOS_NOK;
-    }
-    else
-    {
-        dprintf("Mem box init ok! .\r\n");
-    }
-
-    /* membox alloc */
-    p_num = (UINT32*)LOS_MemboxAlloc(pBoxMem);
-    if (NULL == p_num)
-    {
-        dprintf("Mem box alloc failed! .\r\n");
-        return LOS_NOK;
-    }
-    dprintf("Mem box alloc ok .\r\n");
-    /* assignment */
-    *p_num = 828;
-    dprintf("*p_num = %d .\r\n", *p_num);	
-    /* clear mem context */
-    LOS_MemboxClr(pBoxMem, p_num);
-    dprintf("clear data ok \r\n *p_num = %d .\r\n", *p_num);
-    /* membox free */
-    uwRet = LOS_MemboxFree(pBoxMem, p_num);
-    if (LOS_OK == uwRet)
-    {
-        dprintf("Mem box free ok! .\r\n");
-        uwRet = LOS_InspectStatusSetByID(LOS_INSPECT_SMEM, LOS_INSPECT_STU_SUCCESS);
-        if (LOS_OK != uwRet)
-        {
-            dprintf("Set Inspect Status Err .\r\n");
-        }
-    }
-    else
-    {
-        dprintf("Mem box free failed! .\r\n");
-        uwRet = LOS_InspectStatusSetByID(LOS_INSPECT_SMEM, LOS_INSPECT_STU_ERROR);
-        if (LOS_OK != uwRet)
-        {
-            dprintf("Set Inspect Status Err .\r\n");
-        }
-    }
-
-    return LOS_OK;
-}
-
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+FUNCTION(arm64_clean_cache_range)
+    cache_range_op dc cvac         // clean cache to PoC by MVA
+    ret

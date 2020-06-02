@@ -47,8 +47,8 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif /* __cpluscplus */
-#endif /* __cpluscplus */
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #ifdef LOSCFG_SHELL_EXCINFO
 STATIC log_read_write_fn g_excInfoRW = NULL; /* the hook of read-writing exception information */
@@ -256,5 +256,5 @@ VOID OsRecordExcInfoTime(VOID)
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif /* __cpluscplus */
-#endif /* __cpluscplus */
+#endif /* __cplusplus */
+#endif /* __cplusplus */

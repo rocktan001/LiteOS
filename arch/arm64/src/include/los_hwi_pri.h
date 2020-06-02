@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: Aarch32 Hw Runstop handle
+ * Description: AArch64 hwi Inner HeadFile
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,7 +22,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * -------------------------------------------------------------------------- */
+ * --------------------------------------------------------------------------- */
 /* ----------------------------------------------------------------------------
  * Notice of Export Control Law
  * ===============================================
@@ -32,104 +32,45 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#include "arch_config.h"
+#ifndef _LOS_HWI_PRI_H
+#define _LOS_HWI_PRI_H
 
-    .equ MPIDR_CPUID_MASK, 0xffU
+#include "los_hwi.h"
 
-    .extern  g_saveAR
-    .extern  g_saveSRContext
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-    .global  OsSRSaveRegister
-    .global  OsSRRestoreRegister
+/**
+ * @ingroup los_hwi
+ * The hwi form does not contain exceptions for AArch64
+ */
+#define OS_HWI_FORM_EXC_NUM 0
+#if OS_HWI_FORM_EXC_NUM != 0
+#error "OS_HWI_FORM_EXC_NUM must be zero"
+#endif
 
-    .fpu vfpv4
-    @.fpu neon
-    .arch armv7a
+#define OS_SYS_VECTOR_CNT 0
 
-    .text
+extern HWI_HANDLE_FORM_S g_hwiForm[OS_HWI_MAX_NUM + OS_SYS_VECTOR_CNT];
 
-OsSRSaveRegister:
-    PUSH    {R2}
-    LDR     R2, =g_saveAR
-    STR     R0, [R2]
-    STR     R1, [R2, #4]
-    POP     {R2}
+#ifdef LOSCFG_NO_SHARED_IRQ
+#define HWI_IS_REGISTED(num)             ((&g_hwiForm[num])->pfnHook != NULL)
+#else
+#define HWI_IS_REGISTED(num)             ((&g_hwiForm[num])->pstNext != NULL)
+#endif
 
-    MRC     P15, 0, R0, c0, c0, 5
-    AND     R0, R0, #MPIDR_CPUID_MASK
-    MOV     R1, #72 @This number is the total number of bytes in the task context register(R0~R15, SPSR, CPSR).
-    MUL     R1, R1, R0
+extern VOID OsHwiInit(VOID);
+extern UINT32 OsGetHwiFormCnt(UINT32 index);
+extern CHAR *OsGetHwiFormName(UINT32 index);
+extern VOID OsInterrupt(UINT32 intNum);
 
-    LDR     R0, =g_saveSRContext
-    ADD     R0, R0, R1
-    ADD     R0, R0, #72
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-    MOV     R1, SP
-    STMFD   R0!, {R1}
-
-    MRS     R1,  SPSR
-    STMFD   R0!, {R1}
-
-    MOV     R1,  LR
-    STMFD   R0!, {R1} @PC
-    STMFD   R0!, {R1} @LR
-
-    STMFD   R0!, {R12}
-
-    MOV     R12,  R0
-
-    LDR     R0, =g_saveAR
-    LDR     R0, [R0]
-    LDR     R1, =g_saveAR
-    LDR     R1, [R1, #4]
-
-    STMFD   R12!, {R0-R3}
-    STMFD   R12!, {R4-R11}
-
-    MRS     R0,  CPSR
-    STMFD   R12!,  {R0}
-
-    BX      LR
-
-OsSRRestoreRegister:
-    MRC     P15, 0, R0, c0, c0, 5
-    AND     R0, R0, #MPIDR_CPUID_MASK
-    MOV     R1, #72 @This number is the total number of bytes in the task context register(R0~R15, SPSR, CPSR).
-    MUL     R1, R1, R0
-
-    LDR     R12, =g_saveSRContext
-    ADD     R12, R12, R1
-
-    LDMFD   R12!, {R0}
-    MSR     CPSR_cxsf, R0
-
-    LDMFD   R12!, {R4-R11}
-    LDMFD   R12!, {R0-R3}
-
-    PUSH    {R2}
-    LDR     R2, =g_saveAR
-    STR     R0, [R2]
-    STR     R1, [R2, #4]
-    POP     {R2}
-
-    MOV     R0, R12
-    LDMFD   R0!, {R12}
-    LDMFD   R0!, {R1} @LR
-    LDMFD   R0!, {R1} @PC
-
-    MOV     LR, R1
-
-    LDMFD   R0!, {R1}
-    MSR     SPSR_cxsf, R1
-
-    LDMFD   R0!, {R1}
-    MOV     SP, R1
-
-    LDR     R0, =g_saveAR
-    LDR     R0, [R0]
-    LDR     R1, =g_saveAR
-    LDR     R1, [R1, #4]
-
-    BX      LR
-
-    .end
+#endif /* _LOS_HWI_PRI_H */
