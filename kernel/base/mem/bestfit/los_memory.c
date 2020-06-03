@@ -213,7 +213,7 @@ const VOID *OsMemFindNodeCtrl(const VOID *pool, const VOID *ptr);
 #endif
 #ifdef LOSCFG_MEM_HEAD_BACKUP
 #define CHECKSUM_MAGICNUM    0xDEADBEEF
-#define OS_MEM_NODE_CHECKSUN_CALCULATE(ctlNode)    \
+#define OS_MEM_NODE_CHECKSUM_CALCULATE(ctlNode)    \
     (((UINTPTR)(ctlNode)->freeNodeInfo.pstPrev) ^  \
     ((UINTPTR)(ctlNode)->freeNodeInfo.pstNext) ^   \
     ((UINTPTR)(ctlNode)->preNode) ^                \
@@ -225,7 +225,7 @@ STATIC INLINE VOID OsMemDispCtlNode(const LosMemCtlNode *ctlNode)
 {
     UINTPTR checksum;
 
-    checksum = OS_MEM_NODE_CHECKSUN_CALCULATE(ctlNode);
+    checksum = OS_MEM_NODE_CHECKSUM_CALCULATE(ctlNode);
 
     PRINTK("node:%p checksum=%p[%p] freeNodeInfo.pstPrev=%p "
            "freeNodeInfo.pstNext=%p preNode=%p gapSize=0x%x sizeAndFlag=0x%x\n",
@@ -296,12 +296,12 @@ STATIC INLINE VOID OsMemDispWildPointerMsg(const LosMemDynNode *node, const VOID
 
 STATIC INLINE VOID OsMemChecksumSet(LosMemCtlNode *ctlNode)
 {
-    ctlNode->checksum = OS_MEM_NODE_CHECKSUN_CALCULATE(ctlNode);
+    ctlNode->checksum = OS_MEM_NODE_CHECKSUM_CALCULATE(ctlNode);
 }
 
 STATIC INLINE BOOL OsMemChecksumVerify(const LosMemCtlNode *ctlNode)
 {
-    return ctlNode->checksum == OS_MEM_NODE_CHECKSUN_CALCULATE(ctlNode);
+    return ctlNode->checksum == OS_MEM_NODE_CHECKSUM_CALCULATE(ctlNode);
 }
 
 STATIC INLINE VOID OsMemBackupSetup(const LosMemDynNode *node)
