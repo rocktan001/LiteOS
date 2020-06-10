@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Hisoc Clock Implementation
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
+ * Description: System Config HeadFile
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,24 +32,65 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
-
-#include "asm/platform.h"
+#ifndef _SYSTEM_CONFIG_H
+#define _SYSTEM_CONFIG_H
 
 #ifdef __cplusplus
 #if __cplusplus
-extern "C"{
-#endif
+extern "C" {
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define get_bus_clk()                     180000000
+/** system source configuration**/
+#define LOSCFG_PLATFORM_HWI_LIMIT                  96
+/**
+ * @ingroup los_config
+ * Maximum supported number of tasks inluding the idle task
+ */
+#define LOSCFG_BASE_CORE_TSK_CONFIG                15
+/**
+ * @ingroup los_config
+ * Maximum supported number of semaphores
+ */
+#define LOSCFG_BASE_IPC_SEM_CONFIG                 20
+/**
+ * @ingroup los_config
+ * Maximum supported number of mutexes
+ */
+#define LOSCFG_BASE_IPC_MUX_CONFIG                 20
+/**
+ * @ingroup los_config
+ * Maximum supported number of queues rather than the number of usable queues
+ */
+#define LOSCFG_BASE_IPC_QUEUE_CONFIG               10
+/**
+ * @ingroup los_config
+ * Maximum supported number of software timers rather than the number of usable software timers
+ */
+#define LOSCFG_BASE_CORE_SWTMR_CONFIG              16
+
+#define LOSCFG_BASE_CORE_TSK_IDLE_STACK_SIZE       0x200
+
+#define LOS_TASK_MIN_STACK_SIZE                    0x200
+
+#define LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE    0x400
+
+#define LOSCFG_COMPAT_CMSIS_FW                     YES
+
+#define LOSCFG_NO_SHARED_IRQ
+
+#define LOSCFG_PLATFORM_EXC                        YES
+
+#define LOSCFG_CC_STACKPROTECTOR_STRONG            YES
+
+#define LOSCFG_BASE_CORE_EXC_TSK_SWITCH            YES
+
+#define LOSCFG_BASE_CORE_TICK_PER_SECOND           1000
 
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
-
+#endif /* _SYSTEM_CONFIG_H*/

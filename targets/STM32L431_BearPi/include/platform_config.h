@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Hisoc Clock Implementation
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
+ * Description: platform Config HeadFile
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,24 +32,26 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
+#ifndef __PLATFORM_CONFIG_H__
+#define __PLATFORM_CONFIG_H__
 
-#include "asm/platform.h"
+#include "clock.h"
 
 #ifdef __cplusplus
 #if __cplusplus
-extern "C"{
-#endif
+extern "C" {
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define get_bus_clk()                     180000000
+extern UINT32 __LOS_HEAP_ADDR_START__;
+extern UINT32 __LOS_HEAP_ADDR_END__;
+
+#define OS_SYS_MEM_SIZE                            ((UINT32)(__LOS_HEAP_ADDR_END__ - __LOS_HEAP_ADDR_START__ + 1))
 
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
 #endif
-

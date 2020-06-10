@@ -1,6 +1,6 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Hisoc Clock Implementation
+/*----------------------------------------------------------------------------
+ * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
+ * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,34 +22,66 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
+ *---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------
  * Notice of Export Control Law
  * ===============================================
  * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
  * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
+ *---------------------------------------------------------------------------*/
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
+ /**@defgroup hal_iwdg Watch Dog
+ * @ingroup hal
+ */
 
-#include "asm/platform.h"
+#ifndef _HAL_IWDG_H_
+#define _HAL_IWDG_H_
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C"{
+#include <stdint.h>
+
+#if defined(__cplusplus)
+extern "C" {
 #endif
-#endif /* __cplusplus */
 
-#define get_bus_clk()                     180000000
+/**
+ *@ingroup hal_iwdg
+ *@brief config the watch dog.
+ *
+ *@par Description:
+ *This API is used to config the watch dog. The time interval of feeding dog is prvscaler*reload/40.
+ *@attention none.
+ *
+ *@param prvscaler      [IN] select the prescaler of the IWDG.
+                             This parameter can be a value of @ref IWDG_Prescaler
+ *@param reload         [IN] specifies the IWDG down-counter reload value.
+                             This parameter must be a number between Min_Data = 0 and Max_Data = 0x0FFF
+ *
+ *@retval #int          0 if succeed or -1 if failed.
+ *@par Dependency: none.
+ *@see none.
+ */
+int hal_iwdg_config(uint8_t prvscaler, uint16_t reload);
 
-#ifdef __cplusplus
-#if __cplusplus
+/**
+ *@ingroup hal_iwdg
+ *@brief feed the watch dog.
+ *
+ *@par Description:
+ *This API is used to feed the watch dog.
+ *@attention none.
+ *
+ *@param none.
+ *
+ *@retval none.
+ *@par Dependency: none.
+ *@see none.
+ */
+void hal_iwdg_feed(void);
+
+#if defined(__cplusplus)
 }
 #endif
-#endif /* __cplusplus */
 
-#endif
-
+#endif  /* _HAL_IWDG_H_ */

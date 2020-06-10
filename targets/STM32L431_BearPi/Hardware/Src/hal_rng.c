@@ -1,6 +1,6 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Hisoc Clock Implementation
+/*----------------------------------------------------------------------------
+ * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
+ * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,34 +22,68 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
+ *---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------
  * Notice of Export Control Law
  * ===============================================
  * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
  * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
+ *---------------------------------------------------------------------------*/
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
+#include <string.h>
+#include "hal_rng.h"
+#include "stm32l4xx.h"
+#include "stm32l4xx_hal_rng.h"
 
-#include "asm/platform.h"
+#ifdef HAL_RNG_MODULE_ENABLED
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C"{
-#endif
-#endif /* __cplusplus */
+RNG_HandleTypeDef g_rng_handle;
 
-#define get_bus_clk()                     180000000
-
-#ifdef __cplusplus
-#if __cplusplus
+void hal_rng_config(void)
+{
+    __HAL_RCC_RNG_CLK_ENABLE();
+    g_rng_handle.Instance = RNG;
+    (void)HAL_RNG_Init(&g_rng_handle);
 }
-#endif
-#endif /* __cplusplus */
 
-#endif
+int hal_rng_generate_number()
+{
+    uint32_t random_number;
 
+    if (HAL_RNG_GenerateRandomNumber(&g_rng_handle, &random_number) != HAL_OK)
+    {
+        return 0U;
+    }
+
+    return (int)random_number;
+}
+
+int hal_rng_generate_buffer(void* buf, size_t len)
+{
+    size_t i;
+    uint32_t random_number;
+    uint8_t* pbuf;
+
+    if (NULL == buf)
+    {
+        return -1;
+    }
+
+    pbuf = (uint8_t*)buf;
+
+    for (i = 0; i < len; i += sizeof(uint32_t))
+    {
+        if (HAL_RNG_GenerateRandomNumber(&g_rng_handle, &random_number) != HAL_OK)
+        {
+            return -1;
+        }
+        memcpy(pbuf + i, &random_number,
+               sizeof(uint32_t) > len - i ? len - i : sizeof(uint32_t));
+    }
+
+    return 0;
+}
+
+#endif /* HAL_RNG_MODULE_ENABLED */

@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Hisoc Clock Implementation
+ * Description: hal platform header
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,24 +32,59 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
+#ifndef PLATFORM_HAL_PLATFORM_INTS_H
+#define PLATFORM_HAL_PLATFORM_INTS_H
 
-#include "asm/platform.h"
+#include "stm32l431xx.h"
+#include"los_typedef.h"
 
 #ifdef __cplusplus
 #if __cplusplus
-extern "C"{
-#endif
+extern "C" {
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define get_bus_clk()                     180000000
+/**
+ * Maximum number of supported hardware devices that generate hardware interrupts.
+ * The maximum number of hardware devices that generate hardware interrupts is 128.
+ */
+#define OS_HWI_MAX_NUM                  240
+
+/**
+ * Maximum interrupt number.
+ */
+#define OS_HWI_MAX                      ((OS_HWI_MAX_NUM) - 1)
+
+/**
+ * Minimum interrupt number.
+ */
+#define OS_HWI_MIN                      0
+
+/**
+ * Maximum usable interrupt number.
+ */
+#define OS_USER_HWI_MAX                 OS_HWI_MAX
+
+/**
+ * Minimum usable interrupt number.
+ */
+#define OS_USER_HWI_MIN                 OS_HWI_MIN
+
+#define OS_TICK_INT_NUM     (SysTick_IRQn + OS_SYS_VECTOR_CNT)
+
+#define IO_ADDRESS(x)       (x)
+
+#define HAL_READ_UINT8(addr, data)  READ_UINT8(data, addr)
+
+#define HAL_WRITE_UINT8(addr, data) WRITE_UINT8(data, addr)
+
+#define HAL_READ_UINT32(addr, data) READ_UINT32(data, addr)
+
+#define HAL_WRITE_UINT32(addr, data) WRITE_UINT32(data, addr)
 
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif
 #endif /* __cplusplus */
-
-#endif
-
+#endif /* __cplusplus */
+#endif // PLATFORM_HAL_PLATFORM_INTS_H

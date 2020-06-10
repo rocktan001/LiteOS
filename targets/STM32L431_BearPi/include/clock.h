@@ -32,8 +32,8 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
+#ifndef __CLOCK_H__
+#define __CLOCK_H__
 
 #include "asm/platform.h"
 
@@ -43,7 +43,7 @@ extern "C"{
 #endif
 #endif /* __cplusplus */
 
-#define get_bus_clk()                     180000000
+#define get_bus_clk()                     80000000
 
 #ifdef __cplusplus
 #if __cplusplus

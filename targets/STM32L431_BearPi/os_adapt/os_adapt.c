@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Hisoc Clock Implementation
+ * Description: LiteOS adaptor file.
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -31,25 +31,9 @@
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
+#include "los_typedef.h"
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
+VOID OsBackTrace(VOID)
+{
 
-#include "asm/platform.h"
-
-#ifdef __cplusplus
-#if __cplusplus
-extern "C"{
-#endif
-#endif /* __cplusplus */
-
-#define get_bus_clk()                     180000000
-
-#ifdef __cplusplus
-#if __cplusplus
 }
-#endif
-#endif /* __cplusplus */
-
-#endif
-

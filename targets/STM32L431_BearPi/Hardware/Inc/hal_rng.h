@@ -1,6 +1,6 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Hisoc Clock Implementation
+/*----------------------------------------------------------------------------
+ * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
+ * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,34 +22,81 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
+ *---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------
  * Notice of Export Control Law
  * ===============================================
  * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
  * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
+ *---------------------------------------------------------------------------*/
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
+ /**@defgroup hal_rng Ramdon Number
+ * @ingroup hal
+ */
 
-#include "asm/platform.h"
+#ifndef _HAL_RNG_H_
+#define _HAL_RNG_H_
+
+#include <stdint.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
-#if __cplusplus
-extern "C"{
+extern "C" {
 #endif
-#endif /* __cplusplus */
 
-#define get_bus_clk()                     180000000
+/**
+ *@ingroup hal_rng
+ *@brief config the rng.
+ *
+ *@par Description:
+ *This API is used to config the rng.
+ *@attention none.
+ *
+ *@param none.
+ *
+ *@retval none.
+ *@par Dependency: none.
+ *@see none.
+ */
+void hal_rng_config(void);
+
+/**
+ *@ingroup hal_rng
+ *@brief generate a random number.
+ *
+ *@par Description:
+ *This API is used to generate a random number.
+ *@attention none.
+ *
+ *@param none.
+ *
+ *@retval #int          random number
+ *@par Dependency: none.
+ *@see none.
+ */
+int hal_rng_generate_number(void);
+
+/**
+ *@ingroup hal_rng
+ *@brief generate the random data.
+ *
+ *@par Description:
+ *This API is used to generate the random data.
+ *@attention none.
+ *
+ *@param buf            [OUT] buffer to store the random data.
+ *@param len            [IN]  the length of the random data needed to generate.
+ *
+ *@retval #int          0 if succeed or -1 if failed.
+ *@par Dependency: none.
+ *@see none.
+ */
+int hal_rng_generate_buffer(void* buf, size_t len);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif
-#endif /* __cplusplus */
 
-#endif
-
+#endif  /* _HAL_RNG_H_ */

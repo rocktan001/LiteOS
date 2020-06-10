@@ -1,6 +1,6 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Hisoc Clock Implementation
+/*----------------------------------------------------------------------------
+ * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
+ * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,34 +22,51 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
+ *---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------
  * Notice of Export Control Law
  * ===============================================
  * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
  * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
+ *---------------------------------------------------------------------------*/
 
-#ifndef __HISOC_CLOCK_H__
-#define __HISOC_CLOCK_H__
+#include "dwt.h"
 
-#include "asm/platform.h"
+static uint32_t cpuclkfeq;
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C"{
-#endif
-#endif /* __cplusplus */
-
-#define get_bus_clk()                     180000000
-
-#ifdef __cplusplus
-#if __cplusplus
+void dwt_delay_init(uint32_t clk)
+{
+    cpuclkfeq = clk;
+    DEM_CR         |=  DEM_CR_TRCENA;
+    DWT_CYCCNT      = 0u;
+    DWT_CR         |= DWT_CR_CYCCNTENA;
 }
-#endif
-#endif /* __cplusplus */
 
-#endif
+void delayus(uint32_t usec)
 
+{
+    uint32_t startts, endts, ts;
+    UINT32 uwIntSave;
+    startts = DWT_CYCCNT;
+
+    ts =  usec * (cpuclkfeq / (1000 * 1000));
+    endts = startts + ts;
+    uwIntSave = LOS_IntLock();
+    if(endts > startts)
+    {
+        while(DWT_CYCCNT < endts);
+    }
+    else
+    {
+        while(DWT_CYCCNT > endts);
+        while(DWT_CYCCNT < endts);
+    }
+    (VOID)LOS_IntRestore(uwIntSave);
+}
+
+void delay10ms(__IO uint32_t nTime)
+{
+    delayus(1000 * nTime);
+}
