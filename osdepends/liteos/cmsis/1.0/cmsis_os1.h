@@ -630,7 +630,7 @@ osStatus osSemaphoreDelete (osSemaphoreId semaphore_id);
 extern const osPoolDef_t os_pool_def_##name
 #else                            // define the object
 #define osPoolDef(name, no, type)   \
-UINT32 os_pool_m_##name[LOS_MEMBOX_SIZE(sizeof(type), (queue_sz)) / 4]; \
+UINT32 os_pool_m_##name[LOS_MEMBOX_SIZE(sizeof(type), (no)) / 4]; \
 const osPoolDef_t os_pool_def_##name = \
 { (no), sizeof(type), (os_pool_m_##name) }
 #endif
