@@ -198,25 +198,28 @@ STATIC VOID OsExcSysInfo(UINT32 excType, const ExcContext *excBufAddr)
 
 STATIC VOID OsExcRegsInfo(const ExcContext *excBufAddr)
 {
+    /*
+     * Split register information into two parts:
+     * Ensure printing does not rely on memory modules.
+     */
     PrintExcInfo("R0         = 0x%x\n"
                  "R1         = 0x%x\n"
                  "R2         = 0x%x\n"
                  "R3         = 0x%x\n"
                  "R4         = 0x%x\n"
                  "R5         = 0x%x\n"
-                 "R6         = 0x%x\n"
-                 "R7         = 0x%x\n"
+                 "R6         = 0x%x\n",
+                 excBufAddr->R0, excBufAddr->R1, excBufAddr->R2, excBufAddr->R3,
+                 excBufAddr->R4, excBufAddr->R5, excBufAddr->R6);
+    PrintExcInfo("R7         = 0x%x\n"
                  "R8         = 0x%x\n"
                  "R9         = 0x%x\n"
                  "R10        = 0x%x\n"
                  "R11        = 0x%x\n"
                  "R12        = 0x%x\n"
                  "CPSR       = 0x%x\n",
-                 excBufAddr->R0, excBufAddr->R1, excBufAddr->R2,
-                 excBufAddr->R3, excBufAddr->R4, excBufAddr->R5,
-                 excBufAddr->R6, excBufAddr->R7, excBufAddr->R8,
-                 excBufAddr->R9, excBufAddr->R10, excBufAddr->R11,
-                 excBufAddr->R12, excBufAddr->regCPSR);
+                 excBufAddr->R7, excBufAddr->R8, excBufAddr->R9, excBufAddr->R10,
+                 excBufAddr->R11, excBufAddr->R12, excBufAddr->regCPSR);
 }
 
 LITE_OS_SEC_TEXT_INIT UINT32 LOS_ExcRegHook(EXC_PROC_FUNC excHook)
@@ -418,9 +421,9 @@ VOID OsBackTrace(VOID)
 {
     UINT32 regFP = Get_Fp();
     LosTaskCB *runTask = OsCurrTaskGet();
-    PRINTK("OsBackTrace fp = 0x%x\n", regFP);
-    PRINTK("runTask->taskName = %s\n", runTask->taskName);
-    PRINTK("runTask->taskID = %u\n", runTask->taskID);
+    PrintExcInfo("OsBackTrace fp = 0x%x\n", regFP);
+    PrintExcInfo("runTask->taskName = %s\n", runTask->taskName);
+    PrintExcInfo("runTask->taskID = %u\n", runTask->taskID);
     BackTrace(regFP);
 }
 

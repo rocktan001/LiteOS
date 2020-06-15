@@ -97,11 +97,11 @@ STATIC INLINE VOID OsMuxDbgTimeUpdateHook(UINT32 muxID)
 #endif
 }
 /* Update the MUX_DEBUG_CB of the mutex when created or deleted */
-extern VOID OsMuxDbgUpdate(UINT32 muxID, TSK_ENTRY_FUNC creater);
-STATIC INLINE VOID OsMuxDbgUpdateHook(UINT32 muxID, TSK_ENTRY_FUNC creater)
+extern VOID OsMuxDbgUpdate(UINT32 muxID, TSK_ENTRY_FUNC creator);
+STATIC INLINE VOID OsMuxDbgUpdateHook(UINT32 muxID, TSK_ENTRY_FUNC creator)
 {
 #ifdef LOSCFG_DEBUG_MUTEX
-    OsMuxDbgUpdate(muxID, creater);
+    OsMuxDbgUpdate(muxID, creator);
 #endif
 }
 /* check the leak of mutex */

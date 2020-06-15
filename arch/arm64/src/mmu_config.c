@@ -312,7 +312,7 @@ VOID OsSecPageInit(VOID)
     g_mmuOsPage.page_length = ALIGN((UINTPTR)&__ram_data_start - g_mmuOsPage.page_addr, MMU_2M);
     g_mmuOsPage.page_descriptor_addr = (UINTPTR)g_secondPageTableOs;
     if (g_mmuOsPage.page_length > SECOND_PAGE_TABLE_MAPPING_LEN(g_secondPageTableOs)) {
-        PRINT_ERR("the mapping size of os second page is 0x%llx, sholud be not bigger than 0x%llx\n",
+        PRINT_ERR("the mapping size of os second page is 0x%llx, should be not bigger than 0x%llx\n",
                   g_mmuOsPage.page_length, (UINT64)SECOND_PAGE_TABLE_MAPPING_LEN(g_secondPageTableOs));
         return;
     }
@@ -322,7 +322,7 @@ VOID OsSecPageInit(VOID)
     g_mmuAppPage.page_length = MMZ_MEM_LEN;
     g_mmuAppPage.page_descriptor_addr = (UINTPTR)g_secondPageTableApp;
     if (g_mmuAppPage.page_length > SECOND_PAGE_TABLE_MAPPING_LEN(g_secondPageTableApp)) {
-        PRINT_ERR("the mapping size of app second page is 0x%llx, sholud be not bigger than 0x%llx\n",
+        PRINT_ERR("the mapping size of app second page is 0x%llx, should be not bigger than 0x%llx\n",
                   g_mmuAppPage.page_length, (UINT64)SECOND_PAGE_TABLE_MAPPING_LEN(g_secondPageTableApp));
         return;
     }

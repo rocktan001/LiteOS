@@ -172,8 +172,7 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *ethHandle)
 
 void HAL_ETH_MspDeInit(ETH_HandleTypeDef *ethHandle)
 {
-    if (ethHandle->Instance == ETH)
-    {
+    if (ethHandle->Instance == ETH) {
         /* USER CODE BEGIN ETH_MspDeInit 0 */
 
         /* USER CODE END ETH_MspDeInit 0 */
@@ -236,8 +235,7 @@ static int8_t eth_init(struct netif *netif)
 
     hal_eth_init_status = HAL_ETH_Init(&heth);
 
-    if (hal_eth_init_status == HAL_OK)
-    {
+    if (hal_eth_init_status == HAL_OK) {
         /* Set netif link flag */
         netif->flags |= NETIF_FLAG_LINK_UP;
     }
@@ -285,8 +283,7 @@ static int8_t eth_init(struct netif *netif)
     netif->flags |= NETIF_FLAG_MLD6;
 #endif
 
-    if (ERR_OK != sys_sem_new(&s_xSemaphore, 1))
-    {
+    if (ERR_OK != sys_sem_new(&s_xSemaphore, 1)) {
         return -1;
     }
     /* create the task that handles the ETH_MAC */
@@ -314,11 +311,9 @@ static int8_t eth_output(struct netif *netif, struct pbuf *p)
     bufferoffset = 0;
 
     /* copy frame from pbufs to driver buffers */
-    for (q = p; q != NULL; q = q->next)
-    {
+    for (q = p; q != NULL; q = q->next) {
         /* Is this buffer available? If not, goto error */
-        if ((DmaTxDesc->Status & ETH_DMATXDESC_OWN) != (uint32_t)RESET)
-        {
+        if ((DmaTxDesc->Status & ETH_DMATXDESC_OWN) != (uint32_t)RESET) {
             errval = ERR_USE;
             goto error;
         }
@@ -328,8 +323,7 @@ static int8_t eth_output(struct netif *netif, struct pbuf *p)
         payloadoffset = 0;
 
         /* Check if the length of data to copy is bigger than Tx buffer size*/
-        while ( (byteslefttocopy + bufferoffset) > ETH_TX_BUF_SIZE )
-        {
+        while ( (byteslefttocopy + bufferoffset) > ETH_TX_BUF_SIZE ) {
             /* Copy data to Tx buffer*/
             memcpy( (uint8_t *)((uint8_t *)buffer + bufferoffset), (uint8_t *)((uint8_t *)q->payload + payloadoffset), (ETH_TX_BUF_SIZE - bufferoffset) );
 
@@ -337,8 +331,7 @@ static int8_t eth_output(struct netif *netif, struct pbuf *p)
             DmaTxDesc = (ETH_DMADescTypeDef *)(DmaTxDesc->Buffer2NextDescAddr);
 
             /* Check if the buffer is available */
-            if ((DmaTxDesc->Status & ETH_DMATXDESC_OWN) != (uint32_t)RESET)
-            {
+            if ((DmaTxDesc->Status & ETH_DMATXDESC_OWN) != (uint32_t)RESET) {
                 errval = ERR_USE;
                 goto error;
             }
@@ -365,8 +358,7 @@ static int8_t eth_output(struct netif *netif, struct pbuf *p)
 error:
 
     /* When Transmit Underflow flag is set, clear it and issue a Transmit Poll Demand to resume transmission */
-    if ((heth.Instance->DMASR & ETH_DMASR_TUS) != (uint32_t)RESET)
-    {
+    if ((heth.Instance->DMASR & ETH_DMASR_TUS) != (uint32_t)RESET) {
         /* Clear TUS ETHERNET DMA flag */
         heth.Instance->DMASR = ETH_DMASR_TUS;
 
@@ -389,7 +381,6 @@ static struct pbuf *eth_input(struct netif *netif)
     uint32_t byteslefttocopy = 0;
     uint32_t i = 0;
 
-
     /* get received frame */
     if (HAL_ETH_GetReceivedFrame(&heth) != HAL_OK)
     {
@@ -400,25 +391,21 @@ static struct pbuf *eth_input(struct netif *netif)
     len = heth.RxFrameInfos.length;
     buffer = (uint8_t *)heth.RxFrameInfos.buffer;
 
-    if (len > 0)
-    {
+    if (len > 0) {
         /* We allocate a pbuf chain of pbufs from the Lwip buffer pool */
         p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL);
     }
 
-    if (p != NULL)
-    {
+    if (p != NULL) {
         dmarxdesc = heth.RxFrameInfos.FSRxDesc;
         bufferoffset = 0;
 
-        for (q = p; q != NULL; q = q->next)
-        {
+        for (q = p; q != NULL; q = q->next) {
             byteslefttocopy = q->len;
             payloadoffset = 0;
 
             /* Check if the length of bytes to copy in current pbuf is bigger than Rx buffer size*/
-            while ( (byteslefttocopy + bufferoffset) > ETH_RX_BUF_SIZE )
-            {
+            while ( (byteslefttocopy + bufferoffset) > ETH_RX_BUF_SIZE ) {
                 /* Copy data to pbuf */
                 memcpy( (uint8_t *)((uint8_t *)q->payload + payloadoffset), (uint8_t *)((uint8_t *)buffer + bufferoffset), (ETH_RX_BUF_SIZE - bufferoffset));
 
@@ -442,8 +429,7 @@ static struct pbuf *eth_input(struct netif *netif)
     dmarxdesc = heth.RxFrameInfos.FSRxDesc;
 
     /* Set Own bit in Rx descriptors: gives the buffers back to DMA */
-    for (i = 0; i < heth.RxFrameInfos.SegCount; i++)
-    {
+    for (i = 0; i < heth.RxFrameInfos.SegCount; i++) {
         dmarxdesc->Status |= ETH_DMARXDESC_OWN;
         dmarxdesc = (ETH_DMADescTypeDef *)(dmarxdesc->Buffer2NextDescAddr);
     }
@@ -452,8 +438,7 @@ static struct pbuf *eth_input(struct netif *netif)
     heth.RxFrameInfos.SegCount = 0;
 
     /* When Rx Buffer unavailable flag is set: clear it and resume reception */
-    if ((heth.Instance->DMASR & ETH_DMASR_RBUS) != (uint32_t)RESET)
-    {
+    if ((heth.Instance->DMASR & ETH_DMASR_RBUS) != (uint32_t)RESET) {
         /* Clear RBUS ETHERNET DMA flag */
         heth.Instance->DMASR = ETH_DMASR_RBUS;
         /* Resume DMA reception */
@@ -468,5 +453,3 @@ struct ethernet_api g_eth_api = {
     .input    = eth_input,
 };
 #endif
-
-

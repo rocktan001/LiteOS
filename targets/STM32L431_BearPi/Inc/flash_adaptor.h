@@ -36,29 +36,28 @@
  * @ingroup agent
  */
 
-#ifndef FLASH_ADAPTOR_H
-#define FLASH_ADAPTOR_H
+#ifndef _FLASH_ADAPTOR_H
+#define _FLASH_ADAPTOR_H
 #include <stdbool.h>
 #include <stdint.h>
 
 #define FLASH_BLOCK_SIZE 0x1000
 
-
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 void flash_adaptor_init(void);
 int flash_adaptor_write(uint32_t offset, const uint8_t *buffer, uint32_t len);
 int flash_adaptor_write_mqtt_info(const void *buffer, uint32_t len);
 int flash_adaptor_read_mqtt_info(void *buffer, uint32_t len);
 
-
-
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 }
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif //FLASH_ADAPTOR_H
-
-
+#endif /* _FLASH_ADAPTOR_H */

@@ -39,8 +39,7 @@
 #include "los_typedef.h"
 #include "los_sys.h"
 
-
-VOID HardWare_Init(VOID)
+VOID HardwareInit(VOID)
 {
     SystemClock_Config();
     Debug_USART1_UART_Init();
@@ -48,14 +47,13 @@ VOID HardWare_Init(VOID)
     dwt_delay_init(SystemCoreClock);
 }
 
-int main(void)
+INT32 main(VOID)
 {
-    UINT32 uwRet = LOS_OK;
-    HardWare_Init();
+    UINT32 ret = LOS_OK;
+    HardwareInit();
 
-    uwRet = OsMain();
-    if (uwRet != LOS_OK)
-    {
+    ret = OsMain();
+    if (ret != LOS_OK) {
         return LOS_NOK;
     }
 

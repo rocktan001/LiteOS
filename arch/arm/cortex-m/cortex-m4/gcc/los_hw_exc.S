@@ -243,7 +243,7 @@ HwiActiveCheck:
     CMP   R3, #0
     BEQ   HwiActiveCheckNext
 
-    /* exc occured in IRQ */
+    /* exc occurred in IRQ */
     ORR   R0, #OS_EXC_FLAG_IN_HWI
     RBIT  R2, R3
     CLZ   R2, R2
@@ -282,17 +282,17 @@ HwiActiveCheckNext:
     CMP   R2,#0
     BNE   ExcInMSP
 
-    /* exc occured in Task or Init or exc reserved for register info from task stack */
+    /* exc occurred in Task or Init or exc reserved for register info from task stack */
     LDR   R2, =g_taskScheduled
     LDR   R2, [R2]
     TST   R2, #1 /*os scheduled */
-    BEQ   ExcInMSP /* if exc occured in Init then branch */
+    BEQ   ExcInMSP /* if exc occurred in Init then branch */
 
 
     CMP   LR, #0xFFFFFFED /*auto push floating registers */
     BNE   NoFloatInPsp
 
-    /* exc occured in Task */
+    /* exc occurred in Task */
     MOV   R2,  R13
     SUB   R13, #96 /* add 8 Bytes reg(for STMFD) */
 

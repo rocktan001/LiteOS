@@ -58,7 +58,7 @@ struct phys_mem
 };
 
 const struct phys_mem system_phys_mem [] =
-    {
+{
 #if defined (__CC_ARM)
         { Image$$RW_IRAM1$$ZI$$Limit, Image$$ARM_LIB_STACKHEAP$$Base },
 #elif defined (__GNUC__)
@@ -67,10 +67,10 @@ const struct phys_mem system_phys_mem [] =
 #error "fix me"
 #endif
         { 0, 0 }
-    };
+};
 
 
-VOID HardWare_Init(VOID)
+VOID HardwareInit(VOID)
 {
     HAL_Init();
     /* Configure the system clock */
@@ -94,19 +94,16 @@ VOID HardWare_Init(VOID)
 
 UINT32 app_init(VOID)
 {
-    UINT32 uwRet = LOS_OK;
+    UINT32 ret = LOS_OK;
     printf("Hello, welcome to liteos!");
-    return uwRet;
+    return ret;
 }
 
-int main(void)
+INT32 main(VOID)
 {
-    UINT32 uwRet = LOS_OK;
-
-    HardWare_Init();
-    uwRet = OsMain();
-    if (uwRet != LOS_OK)
-    {
+    HardwareInit();
+    UINT32 ret = OsMain();
+    if (ret != LOS_OK) {
         return LOS_NOK;
     }
 

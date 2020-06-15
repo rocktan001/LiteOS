@@ -33,8 +33,8 @@
  *---------------------------------------------------------------------------*/
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __SYS_H_
-#define __SYS_H_
+#ifndef _SYS_H
+#define _SYS_H
 
 /* Includes LiteOS------------------------------------------------------------------*/
 
@@ -69,17 +69,21 @@
 #endif
 
 #ifdef __cplusplus
- extern "C" {
-#endif
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 uint32_t HAL_GetTick(void);
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
 
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)
+
 #ifdef __cplusplus
+#if __cplusplus
 }
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif /* __SYS_H_ */
-
+#endif /* _SYS_H */

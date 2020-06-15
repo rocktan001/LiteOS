@@ -92,6 +92,10 @@ OsStartToRun:
     MOV     R1, #OS_TASK_STATUS_RUNNING
     STRH    R1, [R0, #4]
 
+    /* R0 is new task, save it on tpidrprw */
+    MCR     p15, 0, R0, c13, c0, 4
+    ISB
+
     VPUSH   {S0}                                     /* fpu */
     VPOP    {S0}
     VPUSH   {D0}
@@ -155,8 +159,18 @@ OsIrqHandler:
      * altered in interrupt handlers.
      */
     PUSH_FPU_REGS   R0
+#ifdef LOSCFG_IRQ_USE_STANDALONE_STACK
+    PUSH    {R4}
+    MOV     R4, SP
+    EXC_SP_SET __svc_stack_top, OS_EXC_SVC_STACK_SIZE, R1, R2
+#endif
 
     BLX     HalIrqHandler
+
+#ifdef LOSCFG_IRQ_USE_STANDALONE_STACK
+    MOV     SP, R4
+    POP     {R4}
+#endif
 
     /* process pending signals */
     BL      OsTaskProcSignal

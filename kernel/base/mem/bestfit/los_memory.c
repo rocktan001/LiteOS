@@ -464,7 +464,7 @@ LosMemDynNode *OsMemNodePrevGet(VOID *pool, const LosMemDynNode *node)
 
 LosMemDynNode *OsMemNodePrevTryGet(VOID *pool, LosMemDynNode **node, const VOID *ptr)
 {
-    UINTPTR nodeShoudBe = 0;
+    UINTPTR nodeShouldBe = 0;
     LosMemDynNode *nodeCur = NULL;
     LosMemDynNode *nodePre = NULL;
     LosMemPoolInfo *poolInfo = (LosMemPoolInfo *)pool;
@@ -507,8 +507,8 @@ LosMemDynNode *OsMemNodePrevTryGet(VOID *pool, LosMemDynNode **node, const VOID 
             }
         }
 
-        nodeShoudBe = (UINTPTR)nodeCur + nodeCur->selfNode.gapSize + sizeof(LosMemDynNode);
-        if (nodeShoudBe == (UINTPTR)ptr) {
+        nodeShouldBe = (UINTPTR)nodeCur + nodeCur->selfNode.gapSize + sizeof(LosMemDynNode);
+        if (nodeShouldBe == (UINTPTR)ptr) {
             *node = nodeCur;
             return nodePre;
         }
@@ -1022,7 +1022,7 @@ STATIC INLINE VOID OsMemSetMagicNumAndTaskID(LosMemDynNode *node)
     OS_MEM_SET_MAGIC(node->selfNode.freeNodeInfo.pstPrev);
 
     /*
-     * If the operation occured before task initialization(runTask was not assigned)
+     * If the operation occurred before task initialization(runTask was not assigned)
      * or in interrupt,make the value of taskid of node to 0xffffffff
      */
     if ((runTask != NULL) && OS_INT_INACTIVE) {
@@ -1359,7 +1359,7 @@ STATIC INLINE VOID *OsMemAllocWithCheck(VOID *pool, UINT32 size, UINT32 intSave)
  * Description : reAlloc a smaller memory node
  * Input       : pool      --- Pointer to memory pool
  *               allocSize --- the size of new node which will be alloced
- *               node      --- the node which wille be realloced
+ *               node      --- the node which will be realloced
  *               nodeSize  --- the size of old node
  * Output      : node      --- pointer to the new node after realloc
  */
@@ -1387,7 +1387,7 @@ STATIC INLINE VOID OsMemReAllocSmaller(VOID *pool, UINT32 allocSize, LosMemDynNo
  * Description : reAlloc a Bigger memory node after merge node and nextNode
  * Input       : pool      --- Pointer to memory pool
  *               allocSize --- the size of new node which will be alloced
- *               node      --- the node which wille be realloced
+ *               node      --- the node which will be realloced
  *               nodeSize  --- the size of old node
  *               nextNode  --- pointer next node which will be merged
  * Output      : node      --- pointer to the new node after realloc
@@ -1503,7 +1503,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_MemInit(VOID *pool, UINT32 size)
     }
 
     if (!IS_ALIGNED(size, OS_MEM_ALIGN_SIZE)) {
-        PRINT_WARN("pool [%p, %p) size 0x%x sholud be aligned with OS_MEM_ALIGN_SIZE\n",
+        PRINT_WARN("pool [%p, %p) size 0x%x should be aligned with OS_MEM_ALIGN_SIZE\n",
                    pool, (UINTPTR)pool + size, size);
         size = OS_MEM_ALIGN(size, OS_MEM_ALIGN_SIZE) - OS_MEM_ALIGN_SIZE;
     }

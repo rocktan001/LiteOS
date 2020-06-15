@@ -61,8 +61,7 @@ static DSTATUS stm32f4xx_fatfs_status(BYTE lun)
 {
     DSTATUS status = STA_NOINIT;
 
-    if(SPI_FLASH_ID == hal_spi_flash_get_id())
-    {
+    if (SPI_FLASH_ID == hal_spi_flash_get_id()) {
         status &= ~STA_NOINIT;
     }
     return status;
@@ -83,8 +82,9 @@ static DRESULT stm32f4xx_fatfs_read(BYTE lun, BYTE *buff, DWORD sector, UINT cou
     int ret;
     ret = hal_spi_flash_read(buff, count * SPI_FLASH_SECTOR_SIZE,
             FF_PHYS_ADDR + sector * SPI_FLASH_SECTOR_SIZE);
-    if(ret != 0)
+    if (ret != 0) {
         return RES_ERROR;
+    }
     return RES_OK;
 }
 
@@ -93,8 +93,9 @@ static DRESULT stm32f4xx_fatfs_write(BYTE lun, const BYTE *buff, DWORD sector, U
     int ret;
     ret = hal_spi_flash_erase_write(buff, count * SPI_FLASH_SECTOR_SIZE,
             FF_PHYS_ADDR + sector * SPI_FLASH_SECTOR_SIZE);
-    if(ret != 0)
+    if (ret != 0) {
         return RES_ERROR;
+    }
     return RES_OK;
 }
 
@@ -102,17 +103,18 @@ static DRESULT stm32f4xx_fatfs_ioctl(BYTE lun, BYTE cmd, void *buff)
 {
     DRESULT res = RES_PARERR;
 
-    switch (cmd)
-    {
-    case GET_SECTOR_COUNT:
-        *(DWORD *)buff = FF_PHYS_SIZE / SPI_FLASH_SECTOR_SIZE;
-        break;
-    case GET_SECTOR_SIZE:
-        *(WORD *)buff = SPI_FLASH_SECTOR_SIZE;
-        break;
-    case GET_BLOCK_SIZE:
-        *(DWORD *)buff = 1;
-        break;
+    switch (cmd) {
+        case GET_SECTOR_COUNT:
+            *(DWORD *)buff = FF_PHYS_SIZE / SPI_FLASH_SECTOR_SIZE;
+            break;
+        case GET_SECTOR_SIZE:
+            *(WORD *)buff = SPI_FLASH_SECTOR_SIZE;
+            break;
+        case GET_BLOCK_SIZE:
+            *(DWORD *)buff = 1;
+            break;
+        default:
+            break;
     }
     res = RES_OK;
     return res;
@@ -131,16 +133,14 @@ int stm32f4xx_fatfs_init(int need_erase)
 {
     int8_t drive = -1;
 
-    if (need_erase)
-    {
+    if (need_erase) {
         (void)hal_spi_flash_config();
         (void)hal_spi_flash_erase(FF_PHYS_ADDR, FF_PHYS_SIZE);
     }
 
     (void)fatfs_init();
 
-    if(fatfs_mount("/fatfs/", &spi_drv, (uint8_t *)&drive) < 0)
-    {
+    if (fatfs_mount("/fatfs/", &spi_drv, (uint8_t *)&drive) < 0) {
         PRINT_ERR ("failed to mount fatfs!\n");
     }
 
@@ -153,4 +153,3 @@ DWORD get_fattime (void)
 }
 
 /* Private functions --------------------------------------------------------*/
-

@@ -380,7 +380,7 @@ _hwiActiveCheck
     BEQ   _hwiActiveCheckNext
 
     ;/**
-    ; * Exception occured in external interrupt.
+    ; * Exception occurred in external interrupt.
     ; */
     ORR   R0, R0, #FLAG_HWI_ACTIVE     ; R0[b17] = 1, externel interrupt active valid    &&&&&&&&&&
     RBIT  R2, R3                       ; bit reversal
@@ -457,7 +457,7 @@ _hwiActiveCheckNext
     BEQ  _ExcInMSP                     ; initialization phase use MSP
 
     ;/**
-    ; * Exception occured in Task.
+    ; * Exception occurred in Task.
     ; */
     TST   LR, #0x10
     BNE   _NoFloatInPsp

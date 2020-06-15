@@ -309,7 +309,7 @@ _ExcMemNoADDR
 ;        UsageFault Handler.
 ;****************************************************************************************
 UsageFault_Handler
-	
+
     LDR  R0, =OS_NVIC_CFSR
     LDR  R0, [R0]
     LDR  R2, =OS_EXC_CAUSE_USAGEFAULT
@@ -318,7 +318,6 @@ UsageFault_Handler
     LSL  R1, R1, #16
     AND  R0, R0, R1                    ; R0:  reserved UFSR
     MOV  R12, #0                       ; R12: Fault addr invalid
-	
 
 
     ;/**
@@ -344,8 +343,8 @@ osExcCommonBMU
     LSL  R0, R0, #0x8
     ORR  R0, R0, R2
     ORR  R0, R0, R12
-	
-	;MRS R2,PSP		;PSP-->>37D8
+
+    ;MRS R2,PSP    ;PSP-->>37D8
 
     ;****************************************************************************************
     ; osExcDispatch: NMI_Handler, HardFault_Handler, SVC_Handler, BusFault_Handler, MemManage_Handler,
@@ -378,7 +377,6 @@ osExcCommonBMU
 osExcDispatch
     LDR   R2, =OS_NVIC_ACT_BASE
     MOV   R12, #8                      ; #8: externel interrupt active check loop counter(#0 - #239)
-	
 
 
 _hwiActiveCheck
@@ -387,7 +385,7 @@ _hwiActiveCheck
     BEQ   _hwiActiveCheckNext
 
     ;/**
-    ; * Exception occured in external interrupt.
+    ; * Exception occurred in external interrupt.
     ; */
     ORR   R0, R0, #FLAG_HWI_ACTIVE     ; R0[b17] = 1, externel interrupt active valid    &&&&&&&&&&
     RBIT  R2, R3                       ; bit reversal
@@ -419,7 +417,7 @@ _NoFloatInMsp
     MRS   R12, PRIMASK
     PUSH  {R4-R12}                     ; push R4-R11,PRIMASK to MSP
 
-	ORR   R0, R0, #FLAG_NO_FLOAT       ; R0[b28] = 1, no FPU    &&&&&&&&&&
+    ORR   R0, R0, #FLAG_NO_FLOAT       ; R0[b28] = 1, no FPU    &&&&&&&&&&
     B     _handleEntry
 
 _hwiActiveCheckNext
@@ -465,8 +463,8 @@ _NoFloatInPsp
 
     MRS   R3, PSP
     ADD   R12, R3, #32                 ; PSP+32 = Stack pointer of the task before entering the exception
-	
-	PUSH  {R12}                        ; push task SP to MSP
+
+    PUSH  {R12}                        ; push task SP to MSP
     MRS   R12, PRIMASK
     PUSH  {R4-R12}                     ; push R4-R11,PRIMASK of the current running task to MSP
 

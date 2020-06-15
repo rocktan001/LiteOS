@@ -32,8 +32,8 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef __UART_H__
-#define __UART_H__
+#ifndef _UART_H
+#define _UART_H
 
 #include "stm32f4xx_hal.h"
 
@@ -43,11 +43,4 @@
 extern int uart_write(const char *buf, int len, int timeout);
 #define UartPuts(str, len, isLock)   uart_write(str, len, 0xFFFF)
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-#ifdef __cplusplus
-}
-#endif
-#endif
+#endif /* _UART_H */

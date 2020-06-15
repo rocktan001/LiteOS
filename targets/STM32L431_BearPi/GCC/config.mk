@@ -84,4 +84,4 @@ WITH_CMOCKERY_TEST := no
 #######################################
 # LiteOS test
 #######################################
-WITHi_LITEOS_TEST := no
+WITH_LITEOS_TEST := no

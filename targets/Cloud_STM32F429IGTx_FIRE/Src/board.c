@@ -74,19 +74,16 @@ static int prv_spi2inner_copy(uint32_t addr_source, int32_t image_len)
     uint32_t addr_dest = OTA_DEFAULT_IMAGE_ADDR;
 
     ret = hal_flash_erase(addr_dest, image_len);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         OTA_LOG("write inner flash failed");
         return OTA_ERRNO_INNER_FLASH_WRITE;
     }
 
-    while (image_len > 0)
-    {
+    while (image_len > 0) {
         copy_len = image_len > OTA_COPY_BUF_SIZE ? OTA_COPY_BUF_SIZE : image_len;
 
         ret = hal_spi_flash_read(buf, copy_len, addr_source);
-        if (ret != 0)
-        {
+        if (ret != 0) {
             (void)hal_flash_lock();
             OTA_LOG("read spi flash failed");
             return OTA_ERRNO_SPI_FLASH_READ;
@@ -94,8 +91,7 @@ static int prv_spi2inner_copy(uint32_t addr_source, int32_t image_len)
         addr_source += copy_len;
 
         ret = hal_flash_write(buf, copy_len, &addr_dest);
-        if (ret != 0)
-        {
+        if (ret != 0) {
             (void)hal_flash_lock();
             OTA_LOG("write inner flash failed");
             return OTA_ERRNO_INNER_FLASH_WRITE;
@@ -118,27 +114,23 @@ static int prv_inner2spi_copy(int32_t image_len)
     uint32_t addr_dest = OTA_IMAGE_BCK_ADDR;
 
     ret = hal_spi_flash_erase(addr_dest, image_len);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         OTA_LOG("write spi flash failed");
         return OTA_ERRNO_SPI_FLASH_WRITE;
     }
 
-    while (image_len > 0)
-    {
+    while (image_len > 0) {
         copy_len = image_len > OTA_COPY_BUF_SIZE ? OTA_COPY_BUF_SIZE : image_len;
 
         ret = hal_flash_read(buf, copy_len, addr_source);
-        if (ret != 0)
-        {
+        if (ret != 0) {
             OTA_LOG("read inner flash failed");
             return OTA_ERRNO_INNER_FLASH_READ;
         }
         addr_source += copy_len;
 
         ret = hal_spi_flash_write(buf, copy_len, &addr_dest);
-        if (ret != 0)
-        {
+        if (ret != 0) {
             OTA_LOG("write spi flash failed");
             return OTA_ERRNO_SPI_FLASH_WRITE;
         }
@@ -155,22 +147,16 @@ int board_jump2app(void)
     uint32_t pc = *(__IO uint32_t *)(OTA_DEFAULT_IMAGE_ADDR + 4);
     uint32_t stack = *(__IO uint32_t *)(OTA_DEFAULT_IMAGE_ADDR);
 
-    if ((pc & OTA_PC_MASK) == OTA_FLASH_BASE)
-    {
-        if ((stack & OTA_STACK_MASK) == OTA_MEMORY_BASE)
-        {
+    if ((pc & OTA_PC_MASK) == OTA_FLASH_BASE) {
+        if ((stack & OTA_STACK_MASK) == OTA_MEMORY_BASE) {
             jump = (jump_func)pc;
             set_msp(stack);
             jump();
-        }
-        else
-        {
+        } else {
             OTA_LOG("stack value(%lx) of the image is ilegal", stack);
             return OTA_ERRNO_ILEGAL_STACK;
         }
-    }
-    else
-    {
+    } else {
         OTA_LOG("PC value(%lx) of the image is ilegal", pc);
         return OTA_ERRNO_ILEGAL_PC;
     }
@@ -182,22 +168,19 @@ int board_update_copy(int32_t old_image_len, int32_t new_image_len, uint32_t new
 {
     int ret;
 
-    if (old_image_len < 0 || new_image_len < 0)
-    {
+    if (old_image_len < 0 || new_image_len < 0) {
         OTA_LOG("ilegal old_image_len(%ld) or new_image_len(%ld)", old_image_len, new_image_len);
         return OTA_ERRNO_ILEGAL_PARAM;
     }
 
     ret = prv_inner2spi_copy(old_image_len);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         OTA_LOG("back up old image failed");
         return ret;
     }
 
     ret = prv_spi2inner_copy(new_image_addr, new_image_len);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         OTA_LOG("update image failed");
         return ret;
     }
@@ -209,15 +192,13 @@ int board_rollback_copy(int32_t image_len)
 {
     int ret;
 
-    if (image_len < 0)
-    {
+    if (image_len < 0) {
         OTA_LOG("ilegal image_len:%ld", image_len);
         return OTA_ERRNO_ILEGAL_PARAM;
     }
 
     ret = prv_spi2inner_copy(OTA_IMAGE_BCK_ADDR, image_len);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         OTA_LOG("rollback image failed");
         return ret;
     }

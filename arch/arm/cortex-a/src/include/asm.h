@@ -35,18 +35,23 @@
 #ifndef __ASM_H
 #define __ASM_H
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
 #define FUNCTION(x) .global x; .text; .code 32; x:
+#define MPIDR_CPUID_MASK 0xFFU
 
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+/*
+ *           ------------------------------------------
+ * stackTop |   cpu n   |  ... |   cpu 1   |   cpu 0   | stackBottom
+ *           ------------------------------------------
+ *          | stackSize |  ... | stackSize | stackSize |
+ */
+.macro EXC_SP_SET stackBottom, stackSize, reg0, reg1
+    mrc    p15, 0, \reg0, c0, c0, 5
+    and    \reg0, \reg0, #MPIDR_CPUID_MASK /* get cpu id */
+    mov    \reg1, #\stackSize
+    mul    \reg1, \reg1, \reg0             /* calculate current cpu stack offset */
+    ldr    \reg0, =\stackBottom
+    sub    \reg0, \reg0, \reg1             /* calculate current cpu stack bottom */
+    mov    sp, \reg0                       /* set  sp */
+.endm
 
 #endif /* __ASM_H */

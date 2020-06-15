@@ -51,7 +51,7 @@ extern "C" {
 #ifdef LOSCFG_DEBUG_MUTEX
 
 typedef struct {
-    TSK_ENTRY_FUNC creater; /* The task entry who created this mutex */
+    TSK_ENTRY_FUNC creator; /* The task entry who created this mutex */
     UINT64  lastAccessTime; /* The last access time */
 } MuxDebugCB;
 
@@ -88,10 +88,10 @@ VOID OsMuxDbgTimeUpdate(UINT32 muxID)
     muxDebug->lastAccessTime = LOS_TickCountGet();
 }
 
-VOID OsMuxDbgUpdate(UINT32 muxID, TSK_ENTRY_FUNC creater)
+VOID OsMuxDbgUpdate(UINT32 muxID, TSK_ENTRY_FUNC creator)
 {
     MuxDebugCB *muxDebug = &g_muxDebugArray[GET_MUX_INDEX(muxID)];
-    muxDebug->creater = creater;
+    muxDebug->creator = creator;
     muxDebug->lastAccessTime = LOS_TickCountGet();
 }
 
@@ -118,12 +118,12 @@ STATIC VOID SortMuxIndexArray(UINT32 *indexArray, UINT32 count)
                            &g_muxDebugArray[indexArray[index]], sizeof(MuxDebugCB));
             SCHEDULER_UNLOCK(intSave);
             if ((muxNode.muxStat != OS_MUX_USED) ||
-                ((muxNode.muxStat == OS_MUX_USED) && (muxDebugNode.creater == NULL))) {
+                ((muxNode.muxStat == OS_MUX_USED) && (muxDebugNode.creator == NULL))) {
                 continue;
             }
             PRINTK("Mutex ID <0x%x> may leak, TaskID of owner:0x%x, TaskEntry of owner: %p,"
-                   "TaskEntry of creater: %p,Latest operation time: 0x%llx\n",
-                   muxNode.muxID, muxNode.owner->taskID, muxNode.owner->taskEntry, muxDebugNode.creater,
+                   "TaskEntry of creator: %p,Latest operation time: 0x%llx\n",
+                   muxNode.muxID, muxNode.owner->taskID, muxNode.owner->taskEntry, muxDebugNode.creator,
                    muxDebugNode.lastAccessTime);
         }
     }
@@ -151,20 +151,20 @@ VOID OsMutexCheck(VOID)
         SCHEDULER_UNLOCK(intSave);
 
         if ((muxNode.muxStat != OS_MUX_USED) ||
-            ((muxNode.muxStat == OS_MUX_USED) && (muxDebugNode.creater == NULL))) {
+            ((muxNode.muxStat == OS_MUX_USED) && (muxDebugNode.creator == NULL))) {
             continue;
         } else if ((muxNode.muxStat == OS_MUX_USED) && (muxNode.owner == NULL)) {
-            PRINTK("Mutex ID <0x%x> may leak, Owner is null, TaskEntry of creater: %p,"
+            PRINTK("Mutex ID <0x%x> may leak, Owner is null, TaskEntry of creator: %p,"
                    "Latest operation time: 0x%llx\n",
-                   muxNode.muxID, muxDebugNode.creater, muxDebugNode.lastAccessTime);
+                   muxNode.muxID, muxDebugNode.creator, muxDebugNode.lastAccessTime);
         } else {
             if (indexArray != NULL) {
                 *(indexArray + count) = index;
                 count++;
             } else {
                 PRINTK("Mutex ID <0x%x> may leak, TaskID of owner:0x%x, TaskEntry of owner: %p,"
-                       "TaskEntry of creater: %p,Latest operation time: 0x%llx\n",
-                       muxNode.muxID, muxNode.owner->taskID, muxNode.owner->taskEntry, muxDebugNode.creater,
+                       "TaskEntry of creator: %p,Latest operation time: 0x%llx\n",
+                       muxNode.muxID, muxNode.owner->taskID, muxNode.owner->taskEntry, muxDebugNode.creator,
                        muxDebugNode.lastAccessTime);
             }
         }

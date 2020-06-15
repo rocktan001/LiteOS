@@ -32,8 +32,8 @@
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
 
-#ifndef __AT_HAL_H__
-#define __AT_HAL_H__
+#ifndef _AT_HAL_H
+#define _AT_HAL_H
 
 #include "at_frame/at_main.h"
 
@@ -43,5 +43,4 @@ void at_usart_deinit(void);
 int read_resp(uint8_t *buf, recv_buff* recv_buf);
 void write_at_task_msg(at_msg_type_e type);
 
-
-#endif
+#endif /* _AT_HAL_H */
