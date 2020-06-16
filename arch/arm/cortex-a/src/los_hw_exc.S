@@ -31,6 +31,7 @@
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
+#include "asm.h"
 #include "arch_config.h"
 
     .extern   g_losTask
@@ -57,18 +58,7 @@
     .global   _osExceptUndefInstrHdl
     .global   __stack_chk_guard_setup
 
-    .equ MPIDR_CPUID_MASK, 0xffU
-
     .fpu vfpv4
-
-/* param0 is stack bottom, param1 is stack size, R4 hold cpu id */
-.macro EXC_SP_SET param0, param1
-    LDR    R6, =\param0
-    MOV    R7, \param1
-    MUL    R7, R7, R4
-    SUB    R6, R6, R7
-    MOV    SP, R6
-.endm
 
 #ifdef LOSCFG_GDB
 .macro GDB_HANDLE fun
@@ -226,9 +216,7 @@ _osExceptDispatch:
 
     MSR     CPSR_c, #(CPSR_INT_DISABLE | CPSR_SVC_MODE)       @ Switch to SVC mode, and disable all interrupts
     MOV     R5, SP
-    MRC     P15, 0, R4, C0, C0, 5
-    AND     R4,  R4, #MPIDR_CPUID_MASK                        @ Get Current cpu id
-    EXC_SP_SET __exc_stack_top, #OS_EXC_STACK_SIZE
+    EXC_SP_SET __exc_stack_top, OS_EXC_STACK_SIZE, R6, R7
 
     STMFD   SP!, {R2}                                         @ Push Exception PC
     STMFD   SP!, {LR}
@@ -257,7 +245,7 @@ _osExceptionSwi:
     CMP     R2, #0                                            @ if (g_intCount[ArchCurrCpuid()] > 0)
     BNE     _osExceptionGetSP                                 @ can not switch svc stack
 
-    EXC_SP_SET __svc_stack_top, #OS_EXC_SVC_STACK_SIZE        @ Switch to unified exception stack.
+    EXC_SP_SET __svc_stack_top, OS_EXC_SVC_STACK_SIZE, R6, R7 @ Switch to unified exception stack.
     ADD     R2, R2, #1
     STR     R2, [R3]
 

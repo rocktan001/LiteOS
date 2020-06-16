@@ -32,8 +32,8 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef __PLATFORM_CONFIG_H__
-#define __PLATFORM_CONFIG_H__
+#ifndef _PLATFORM_CONFIG_H
+#define _PLATFORM_CONFIG_H
 
 #include "clock.h"
 
@@ -54,4 +54,4 @@ extern UINT32 __LOS_HEAP_ADDR_END__;
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif /* _PLATFORM_CONFIG_H */

@@ -93,30 +93,21 @@ static void atio_irq(void)
 {
     unsigned char  value;
     unsigned short ringspace;
-    if(__HAL_UART_GET_FLAG(&uart_at, UART_FLAG_RXNE) != RESET)
-    {
+    if (__HAL_UART_GET_FLAG(&uart_at, UART_FLAG_RXNE) != RESET) {
        value = (uint8_t)(uart_at.Instance->RDR & 0x00FF);
        g_atio_cb.rcvlen++;
-       if(g_atio_cb.w_next < CONFIG_UARTAT_RCVMAX)
-       {
+       if (g_atio_cb.w_next < CONFIG_UARTAT_RCVMAX) {
            g_atio_cb.rcvbuf[g_atio_cb.w_next] = value;
            g_atio_cb.w_next++;
-       }
-       else
-       {
+       } else {
             g_atio_cb.rframeover++;
        }
-    }
-    else if (__HAL_UART_GET_FLAG(&uart_at,UART_FLAG_IDLE) != RESET)
-    {
+    } else if (__HAL_UART_GET_FLAG(&uart_at,UART_FLAG_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&uart_at);
         ringspace = CN_RCVMEM_LEN - ring_buffer_datalen(&g_atio_cb.rcvring);
-        if(ringspace < g_atio_cb.w_next)  //not enough mem
-        {
+        if (ringspace < g_atio_cb.w_next) { //not enough mem
             g_atio_cb.rframedrop++;
-        }
-        else
-        {
+        } else {
             //write data to the ring buffer:len+data format
             ringspace = g_atio_cb.w_next;
             ring_buffer_write(&g_atio_cb.rcvring,(unsigned char *)&ringspace,sizeof(ringspace));
@@ -125,16 +116,12 @@ static void atio_irq(void)
             g_atio_cb.rcvframe++;
         }
         g_atio_cb.w_next=0; //write from the head
-    }
-    else ///< clear the flags
-    {
+    } else { ///< clear the flags
         __HAL_UART_CLEAR_PEFLAG(&uart_at);
         __HAL_UART_CLEAR_FEFLAG(&uart_at);
         __HAL_UART_CLEAR_NEFLAG(&uart_at);
         __HAL_UART_CLEAR_OREFLAG(&uart_at);
     }
-
-
 }
 
 /*******************************************************************************
@@ -146,8 +133,7 @@ bool_t uart_at_init(void *pri)
 {
     //initialize the at controller
     (void) memset(&g_atio_cb,0,sizeof(g_atio_cb));
-    if(false == osal_semp_create(&g_atio_cb.rcvsync,CN_RCVMEM_LEN,0))
-    {
+    if (false == osal_semp_create(&g_atio_cb.rcvsync,CN_RCVMEM_LEN,0)) {
         printf("%s:semp create error\n\r",__FUNCTION__);
         goto EXIT_SEMP;
     }
@@ -161,10 +147,10 @@ bool_t uart_at_init(void *pri)
     uart_at.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     uart_at.Init.Mode = UART_MODE_TX_RX;
     uart_at.Init.OverSampling = UART_OVERSAMPLING_16;
-    if(HAL_UART_Init(&uart_at) != HAL_OK)
-    {
+    if (HAL_UART_Init(&uart_at) != HAL_OK) {
         _Error_Handler(__FILE__, __LINE__);
     }
+
     __HAL_UART_CLEAR_FLAG(&uart_at,UART_FLAG_TC);
     LOS_HwiCreate(s_uwIRQn, 3, 0, atio_irq, 0);
     __HAL_UART_ENABLE_IT(&uart_at, UART_IT_IDLE);
@@ -195,6 +181,7 @@ static ssize_t uart_at_send(const char  *buf, size_t len,uint32_t timeout)
 
     return len;
 }
+
 /*******************************************************************************
 function     :use this function to read a frame from the uart
 parameters   :
@@ -207,34 +194,24 @@ static ssize_t uart_at_receive(void *buf,size_t len,uint32_t timeout)
     unsigned short readlen;
     int32_t ret = 0;
     unsigned int lock;
-    if(osal_semp_pend(g_atio_cb.rcvsync,timeout))
-    {
+    if (osal_semp_pend(g_atio_cb.rcvsync,timeout)) {
         lock = LOS_IntLock();
         readlen = sizeof(framelen);
         cpylen = ring_buffer_read(&g_atio_cb.rcvring,(unsigned char *)&framelen,readlen);
-        if(cpylen != readlen)
-        {
+        if (cpylen != readlen) {
             ring_buffer_reset(&g_atio_cb.rcvring);  //bad ring format here
             g_atio_cb.rcvringrst++;
-        }
-        else
-        {
-            if(framelen > len)
-            {
+        } else {
+            if (framelen > len) {
                 ring_buffer_reset(&g_atio_cb.rcvring);  //bad ring format here
                 g_atio_cb.rcvringrst++;
-            }
-            else
-            {
+            } else {
                 readlen = framelen;
                 cpylen = ring_buffer_read(&g_atio_cb.rcvring,(unsigned char *)buf,readlen);
-                if(cpylen != framelen)
-                {
+                if (cpylen != framelen) {
                     ring_buffer_reset(&g_atio_cb.rcvring);  //bad ring format here
                     g_atio_cb.rcvringrst++;
-                }
-                else
-                {
+                } else {
                     ret = cpylen;
                 }
             }
@@ -256,7 +233,6 @@ static ssize_t  __at_write (void *pri, size_t offset,const void *buf,size_t len,
 
 }
 
-
 static const los_driv_op_t s_at_op = {
 
         .init = uart_at_init,
@@ -266,4 +242,3 @@ static const los_driv_op_t s_at_op = {
 };
 
 OSDRIV_EXPORT(uart_at_driv,CONFIG_UARTAT_DEVNAME,(los_driv_op_t *)&s_at_op,NULL,O_RDWR);
-

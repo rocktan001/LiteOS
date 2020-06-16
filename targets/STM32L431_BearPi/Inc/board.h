@@ -32,8 +32,8 @@
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
 
-#ifndef _BOARD_H_
-#define _BOARD_H_
+#ifndef _BOARD_H
+#define _BOARD_H
 
 #include <stdint.h>
 
@@ -76,6 +76,4 @@ int board_rollback_copy(int32_t image_len);
 }
 #endif
 
-#endif /* _BOARD_H_*/
-
-
+#endif /* _BOARD_H */

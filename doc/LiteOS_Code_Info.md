@@ -25,7 +25,7 @@ int main(void)
 
 初始化LiteOS内核及例程：OsMain();
 
-调用OsStart(),开始task调度,LiteOS开始正常工作。
+调用OsStart()开始task调度，LiteOS开始正常工作。
 
 
 ## LiteOS的代码目录结构说明
@@ -34,11 +34,12 @@ int main(void)
 
 | 一级目录   | 二级目录                 | 三级目录             | 说明                                                         |
 | ---------- | ------------------------ | -------------------- | ------------------------------------------------------------ |
-| arch       | arm                      | cortex-a             | A核内存mmu、异常处理、时钟等相关代码，新增                   |
+| arch       | arm                      | cortex-a             | A核架构支持                   |
 |            |                          | cortex-m             | M核中断、调度、tick相关代码                                  |
 |            |                          | common               | arm核公用的cmsis core接口                                    |
 |            |                          | include              | arm头文件                                                    |
-|            | common                   |                      | cmsis头文件                                                  |
+|            | arm64                    |                      | arm64架构支持                                                  |
+|            | common                   |                      | 中断处理API                                                  |
 |            | msp430                   |                      | msp430架构中断、调度、tick相关代码                           |
 | build      |                          |                      | 预留的一个空的makefile                                       |
 | components | connectivity             | agent_tiny           | agent_tiny端云互通组件，包括公共头文件、示例代码、客户端实现代码、操作系统适配层代码 |
@@ -79,10 +80,8 @@ int main(void)
 |            |                          | sched                | 任务调度支持                                                 |
 |            | include                  |                      | LiteOS开源内核头文件                                         |
 |            | extended                 | tickless             | tickless定时机制实现                                         |
-| osdepends  | liteos                   | cmsis                | liteos cmsis_os 1.0和2.0支持                                 |
-| targets    | Cloud_STM32F429IGTx_FIRE |                      | 野火STM32F429(ARM Cortex M4)开发板对应的编程及开发工程源码包 |
-|            | Mini_Project             |                      | 最小工程                                                     |
-|            | NXP_LPC51U68             |                      | NXP ARM Cortex M0 ENC28J60以太网LiteOS SDK端云demo           |
-|            | STM32F103VET6_NB_GCC     |                      | F103（ARM Cortex M3）内核移植demo，NB-IoT，GCC环境           |
+| osdepends  | liteos                   | cmsis                | liteos提供的CMSIS-RTOS 1.0和2.0接口                                 |
+| targets    | Cloud_STM32F429IGTx_FIRE |                      | 野火STM32F429（ARM Cortex M4）开发板的开发工程源码包 |
+|            | STM32L431_BearPi           |                      | 小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包          |
 |            | bsp                      |                      | 通用板级支持包                                               |
-| test       |                          |                      | 内核及系统库的参考测试代码                                   |
+| tests      |                          |                      | 内核及系统库的参考测试代码                                   |

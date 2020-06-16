@@ -33,7 +33,6 @@
  *---------------------------------------------------------------------------*/
 /**
  *  DATE                AUTHOR      INSTRUCTION
- *  2019-05-28 09:48  zhangqianfu  The first version
  *
  */
 
@@ -41,4 +40,3 @@
  * @brief: this is the loader main file, if you need the loader, you should compile this
  *         this file  and run this code first
  * */
-

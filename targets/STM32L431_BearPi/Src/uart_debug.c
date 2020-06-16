@@ -38,13 +38,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-//#include <osal.h>
-//#include <link_misc.h>
-
 #include <los_hwi.h>
 #include <los_sem.h>
 #include <los_base.h>
-
 
 /* USART1 init function */
 UART_HandleTypeDef uart_debug;
@@ -59,8 +55,7 @@ void Debug_USART1_UART_Init(void)
     uart_debug.Init.Mode = UART_MODE_TX_RX;
     uart_debug.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     uart_debug.Init.OverSampling = UART_OVERSAMPLING_16;
-    if (HAL_UART_Init(&uart_debug) != HAL_OK)
-    {
+    if (HAL_UART_Init(&uart_debug) != HAL_OK) {
         _Error_Handler(__FILE__, __LINE__);
     }
 }
@@ -78,17 +73,15 @@ static unsigned char      s_uartdebug_rcv_ringmem[CN_RCV_RING_BUFLEN];
 static void uart_debug_irq(void)
 {
     unsigned char value;
-    if(__HAL_UART_GET_FLAG(&uart_debug, UART_FLAG_RXNE) != RESET)
-    {
+    if (__HAL_UART_GET_FLAG(&uart_debug, UART_FLAG_RXNE) != RESET) {
         value = (uint8_t)(uart_debug.Instance->RDR & 0x00FF);
         ring_buffer_write(&s_uartdebug_rcv_ring,&value,1);
         LOS_SemPost(s_uartdebug_rcv_sync);
-    }
-    else if (__HAL_UART_GET_FLAG(&uart_debug,UART_FLAG_IDLE) != RESET)
-    {
+    } else if (__HAL_UART_GET_FLAG(&uart_debug,UART_FLAG_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&uart_debug);
     }
 }
+
 void shell_uart_init(int baud)
 {
     uart_debug.Instance = s_pUSART;
@@ -99,10 +92,10 @@ void shell_uart_init(int baud)
     uart_debug.Init.Mode = UART_MODE_TX_RX;
     uart_debug.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     uart_debug.Init.OverSampling = UART_OVERSAMPLING_16;
-    if (HAL_UART_Init(&uart_debug) != HAL_OK)
-    {
+    if (HAL_UART_Init(&uart_debug) != HAL_OK) {
         return;
     }
+
     LOS_HwiCreate(s_uwIRQn, 3, 0, uart_debug_irq, 0);
     //__HAL_UART_ENABLE_IT(&uart_debug, UART_IT_IDLE);
     __HAL_UART_ENABLE_IT(&uart_debug, UART_IT_RXNE);
@@ -114,7 +107,6 @@ void shell_uart_init(int baud)
     ring_buffer_init(&s_uartdebug_rcv_ring,s_uartdebug_rcv_ringmem,CN_RCV_RING_BUFLEN,0,0);
 #endif
     s_uart_init = true;
-
 }
 #endif
 
@@ -125,26 +117,23 @@ int fputc(int ch, FILE *f)
     HAL_UART_Transmit(&uart_debug, (uint8_t *)&ch, 1, 0xFFFF);
     return ch;
 }
+
 int fgetc(FILE *f){
     int ret = 0;
     unsigned char  value;
-    do
-    {
-        if(LOS_OK == LOS_SemPend(s_uartdebug_rcv_sync,LOS_WAIT_FOREVER))
-        {
+    do {
+        if (LOS_OK == LOS_SemPend(s_uartdebug_rcv_sync,LOS_WAIT_FOREVER)) {
             ret = ring_buffer_read(&s_uartdebug_rcv_ring,&value,1);
         }
-    }while(ret <=0);
+    } while (ret <= 0);
     ret = value;
     return ret;
 }
 #elif defined ( __GNUC__ )  /* GCC: printf will call _write to print */
 
-
 __attribute__((used)) int _write(int fd, char *ptr, int len)
 {
-    if(s_uart_init)
-    {
+    if (s_uart_init) {
         HAL_UART_Transmit(&uart_debug, (uint8_t *)ptr, len, 0xFFFF);
     }
     return len;
@@ -155,14 +144,11 @@ __attribute__((used)) int _read(int fd, char *ptr, int len)
 {
     int ret = 0;
     unsigned char  value;
-    do
-    {
-        if(LOS_OK == LOS_SemPend(s_uartdebug_rcv_sync,LOS_WAIT_FOREVER))
-        {
-
+    do {
+        if(LOS_OK == LOS_SemPend(s_uartdebug_rcv_sync,LOS_WAIT_FOREVER)) {
             ret = ring_buffer_read(&s_uartdebug_rcv_ring,&value,1);
         }
-    }while(ret <=0);
+    } while (ret <= 0);
     *(unsigned char *)ptr = value;
     return 1;
 }

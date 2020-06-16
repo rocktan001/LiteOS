@@ -314,11 +314,11 @@ INT32 OsMemNoAccessSet(UINTPTR startaddr, size_t length)
     }
 
     if ((startaddr >= SYS_MEM_BASE) && (startaddr <= g_sys_mem_addr_end)) {
-        PRINT_ERR("The no access permission area sholud not contain os system mem,startaddr:0x%x\n", startaddr);
+        PRINT_ERR("The no access permission area should not contain os system mem,startaddr:0x%x\n", startaddr);
         return -1;
     }
     if ((endAddr >= SYS_MEM_BASE) && (endAddr <= g_sys_mem_addr_end)) {
-        PRINT_ERR("The no access permission area sholud not contain os system mem,endAddr:0x%x\n", endAddr);
+        PRINT_ERR("The no access permission area should not contain os system mem,endAddr:0x%x\n", endAddr);
         return -1;
     }
     if (((startaddr & (MMU_1M - 1)) != 0) || ((length & (MMU_1M - 1)) != 0)) {

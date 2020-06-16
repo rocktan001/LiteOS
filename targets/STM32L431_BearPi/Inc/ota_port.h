@@ -36,24 +36,24 @@
  * @ingroup agent
  */
 
-#ifndef OTA_PORT_H
-#define OTA_PORT_H
+#ifndef _OTA_PORT_H
+#define _OTA_PORT_H
 #include "ota/package.h"
 #include "ota/ota_api.h"
 
-
-
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 void hal_init_ota(void);
 void hal_get_ota_opt(ota_opt_s *opt);
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 }
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif //OTA_PORT_H
-
-
+#endif /* _OTA_PORT_H */

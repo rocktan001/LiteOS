@@ -68,7 +68,7 @@ void MX_SPI2_Init(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ spi_H */
+#endif /* __ spi_H */
 
 /**
   * @}

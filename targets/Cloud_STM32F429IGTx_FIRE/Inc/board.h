@@ -32,14 +32,16 @@
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
 
-#ifndef _BOARD_H_
-#define _BOARD_H_
+#ifndef _BOARD_H
+#define _BOARD_H
 
 #include <stdint.h>
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 // error code
 #define OTA_ERRNO_OK                0
@@ -56,8 +58,8 @@ extern "C" {
 // SPI flash address
 #define OTA_FLAG_ADDR1                0x00000000
 #define OTA_FLAG_ADDR2                0x00004000
-#define MQTT_INFO_ADDR              0x00008000
-#define MQTT_INFO_SIZE              0x00008000
+#define MQTT_INFO_ADDR                0x00008000
+#define MQTT_INFO_SIZE                0x00008000
 #define OTA_IMAGE_DOWNLOAD_ADDR       (MQTT_INFO_ADDR + MQTT_INFO_SIZE)
 #define OTA_IMAGE_DOWNLOAD_SIZE       0x00040000
 #define OTA_IMAGE_BCK_ADDR            (OTA_IMAGE_DOWNLOAD_ADDR + OTA_IMAGE_DOWNLOAD_SIZE)
@@ -72,8 +74,10 @@ int board_jump2app(void);
 int board_update_copy(int32_t old_image_len, int32_t new_image_len, uint32_t new_image_addr);
 int board_rollback_copy(int32_t image_len);
 
-#if defined(__cplusplus)
-}
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif /* _BOARD_H_*/
+#endif /* _BOARD_H */

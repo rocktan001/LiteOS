@@ -93,4 +93,4 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _SYSTEM_CONFIG_H*/
+#endif /* _SYSTEM_CONFIG_H */

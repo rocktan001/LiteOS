@@ -678,6 +678,9 @@ osStatus osMessagePutHead(const osMessageQId queueId, UINT32 info, UINT32 millis
 {
 #if (LOSCFG_BASE_IPC_QUEUE == YES)
     UINT32 ret;
+    if (queueId == NULL) {
+        return (osStatus)osErrorParameter;
+    }
     ret = LOS_QueueWriteHead(MESSAGEQID_TO_QUEUEID(queueId),
         (void *)(UINTPTR)info, sizeof(UINT32), LOS_MS2Tick(millisec));
     ret = osMessageCheckRet(ret);

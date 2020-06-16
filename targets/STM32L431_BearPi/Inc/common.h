@@ -36,8 +36,8 @@
  * @ingroup agent
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef _COMMON_H
+#define _COMMON_H
 #include <stdbool.h>
 #include <stdint.h>
 #include "osdepends/atiny_osdep.h"
@@ -49,6 +49,6 @@
 (void)printf("[%s:%d][%lu]" fmt "\r\n",  __FUNCTION__, __LINE__, (uint32_t) atiny_gettime_ms(),  ##__VA_ARGS__)
 
 
-#endif //COMMON_H
+#endif /* _COMMON_H */
 
 
