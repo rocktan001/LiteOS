@@ -45,6 +45,9 @@
 #else
 //#include "agenttiny_lwm2m/agent_tiny_demo.h"
 #endif
+#ifdef WITH_SENSORHUB
+#include "sensorhub_demo.h"
+#endif
 
 static UINT32 g_atiny_tskHandle;
 static UINT32 g_fs_tskHandle;
@@ -204,6 +207,10 @@ UINT32 app_init(VOID)
     if (ret != LOS_OK) {
         return LOS_NOK;
     }
+#endif
+
+#if defined(WITH_SENSORHUB)
+    MiscInit();
 #endif
 
     return ret;

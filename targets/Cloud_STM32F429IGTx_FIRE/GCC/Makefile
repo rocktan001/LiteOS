@@ -86,7 +86,9 @@ HAL_DRIVER_SRC =  \
         $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
         $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
         $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
-        $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c
+        $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c \
+        $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
+        $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c
         C_SOURCES += $(HAL_DRIVER_SRC)
 
 HARDWARE_SRC =  \
@@ -285,6 +287,15 @@ CMOCKERY_AGENTTINY_TEST_SRC = \
         ${wildcard $(TOP_DIR)/tests/test_agenttiny/*.c}
         C_SOURCES += $(CMOCKERY_AGENTTINY_TEST_SRC)
 endif
+endif
+
+ifeq ($(WITH_SENSORHUB), yes)
+SENSORHUB_SRC +=  \
+        ${wildcard $(TOP_DIR)/components/sensorhub/src/sensor_manager/*.c} \
+        ${wildcard $(TOP_DIR)/demos/sensorhub/gyro/src/*.c} \
+        ${wildcard $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/embedfire/i2c/*.c} \
+        ${wildcard $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/embedfire/sensors/mpu6050/*.c}
+        C_SOURCES += $(SENSORHUB_SRC)
 endif
 
 USER_SRC =  \
@@ -505,6 +516,10 @@ else
 C_DEFS += -DLWIP_IPV6=0
 endif
 
+ifeq ($(WITH_SENSORHUB), yes)
+C_DEFS += -DWITH_SENSORHUB
+endif
+
 # AS includes
 AS_INCLUDES =
 
@@ -640,6 +655,18 @@ ifeq ($(WITH_CMOCKERY_TEST), yes)
 CMOCKERY_TEST_INC = \
         -I $(TOP_DIR)/tests/cmockery/src/google
         C_INCLUDES += $(CMOCKERY_TEST_INC)
+endif
+
+ifeq ($(WITH_SENSORHUB), yes)
+SENSORHUB_INC += \
+        -I $(TOP_DIR)/components/sensorhub/include/app \
+        -I $(TOP_DIR)/components/sensorhub/include/arch \
+        -I $(TOP_DIR)/components/sensorhub/include/common \
+        -I $(TOP_DIR)/components/sensorhub/include/driver \
+        -I $(TOP_DIR)/demos/sensorhub/gyro/include \
+        -I $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/embedfire/i2c \
+        -I $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/embedfire/sensors/mpu6050
+        C_INCLUDES += $(SENSORHUB_INC)
 endif
 
 ifeq ($(WITH_LITEOS_TEST), yes)
