@@ -3,7 +3,7 @@
 ## LiteOS代码入口
 
 LiteOS入口在工程对应的main.c中，基本流程如下：
-
+```
 int main(void)
 {
     UINT32 uwRet = LOS_OK;
@@ -19,7 +19,7 @@ int main(void)
 
     return 0;
 }
-
+```
 
 首先进行硬件初始化：HardWare_Init();
 
