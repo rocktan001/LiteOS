@@ -42,7 +42,6 @@
 #include "cmsis_os.h"
 
 #include "los_tick_pri.h"
-#include "wifi_init.h"
 #if  USE_WIFI_ESP8266
 #include "stm32f7xx_it.h"
 #include "stm32f769i_discovery.h"
@@ -68,6 +67,11 @@
 extern PCD_HandleTypeDef               hpcd;
 extern SAI_HandleTypeDef               haudio_out_sai;
 extern LTDC_HandleTypeDef                hltdc_discovery;
+
+#ifdef LOSCFG_GUI_ENABLE
+extern DSI_HandleTypeDef     hdsi_discovery;
+#endif
+
 #if  USE_WIFI_ESP8266
 extern UART_HandleTypeDef WiFiUartHandle;
 extern DSI_HandleTypeDef hdsi_discovery;
@@ -227,6 +231,18 @@ void LTDC_IRQHandler(void)
 {
   HAL_LTDC_IRQHandler(&hltdc_discovery);
 }
+
+#ifdef LOSCFG_GUI_ENABLE
+/**
+  * @brief  This function handles DSI Handler.
+  * @param  None
+  * @retval None
+  */
+void DSI_IRQHandler(void)
+{
+  HAL_DSI_IRQHandler(&hdsi_discovery);
+}
+#endif
 
 void LTDC_ER_IRQHandler(void)
 {

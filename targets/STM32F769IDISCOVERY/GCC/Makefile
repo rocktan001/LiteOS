@@ -65,7 +65,9 @@ HAL_DRIVER_SRC =  \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/otm8009a/otm8009a.c \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/wm8994/wm8994.c \
         ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/*.c} \
-        ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/*.c}
+        ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/*.c} \
+        ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/tft/*.c} \
+        ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/touchpad/*.c} \
 
 HAL_DRIVER_SRC_FILTERS = \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_mmc.c \
@@ -132,10 +134,10 @@ USER_SRC =  \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/os_adapt/os_adapt.c \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Src/main.c \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Src/platform_init.c \
+        $(TOP_DIR)/targets/STM32F769IDISCOVERY/Src/stm32f7xx_it.c \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Src/system_stm32f7xx.c
         C_SOURCES += $(USER_SRC)
 
-#$(TOP_DIR)/targets/STM32F769IDISCOVERY/Src/stm32f7xx_it.c \
 ######################################
 # firmware library
 ######################################
@@ -173,6 +175,7 @@ AS_INCLUDES =
 
 # C includes
 HAL_DRIVER_INC = \
+        -I $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers \
         -I $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP \
         -I $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery \
         -I $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Inc \
@@ -261,6 +264,32 @@ endif
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 
 CFLAGS += -std=c99
+
+
+#LiteGL Build Options
+LVGL_DIR = $(TOP_DIR)/components/gui/lvgl
+LVGL_DEMO_DIR = $(TOP_DIR)/demos/gui
+LVGL_SRC_DIR = $(LVGL_DIR)/src
+
+LVGL_SRC = \
+    $(wildcard $(LVGL_SRC_DIR)/lv_core/*.c) \
+    $(wildcard $(LVGL_SRC_DIR)/lv_draw/*.c) \
+    $(wildcard $(LVGL_SRC_DIR)/lv_font/*.c) \
+    $(wildcard $(LVGL_SRC_DIR)/lv_gpu/*.c) \
+    $(wildcard $(LVGL_SRC_DIR)/lv_hal/*.c) \
+    $(wildcard $(LVGL_SRC_DIR)/lv_misc/*.c) \
+    $(wildcard $(LVGL_SRC_DIR)/lv_themes/*.c) \
+    $(wildcard $(LVGL_SRC_DIR)/lv_widgets/*.c)
+
+LVGL_DEMO_SRC = \
+    $(wildcard $(LVGL_DEMO_DIR)/*.c) \
+    $(wildcard $(LVGL_DEMO_DIR)/widgets/*.c)
+LITEGL_INCLUDE = -I$(LVGL_DIR) -I$(LVGL_SRC_DIR) -I$(LVGL_DEMO_DIR)
+LITEGL_LIB = -Xlinker -no-enum-size-warning
+
+C_SOURCES += $(LVGL_SRC) $(LVGL_DEMO_SRC)
+C_INCLUDES += $(LITEGL_INCLUDE) $(LIBSEC_INCLUDE) $(HAL_DRIVER_INC) $(USER_INC) $(CMSIS_INC) $(KERNEL_INC) $(ARCH_INC) $(THIRD_INC)
+CFLAGS += -DLV_CONF_INCLUDE_SIMPLE
 
 
 #######################################

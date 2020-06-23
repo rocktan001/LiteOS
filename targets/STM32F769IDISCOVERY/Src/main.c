@@ -37,10 +37,17 @@
 #include "los_sys.h"
 #include "platform_init.h"
 
+#ifdef LOSCFG_GUI_ENABLE
+#include "lvgl_demo.h"
+#endif
+
 UINT32 app_init(VOID)
 {
     UINT32 ret = LOS_OK;
     printf("Hello, welcome to liteos!");
+#ifdef LOSCFG_GUI_ENABLE
+    LvglDemo();
+#endif
     return ret;
 }
 

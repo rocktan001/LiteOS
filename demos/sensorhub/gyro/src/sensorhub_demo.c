@@ -82,7 +82,7 @@ STATIC VOID CloseGyro(VOID)
     SensorItemDisable(&g_gyroItem1, &para, g_gyroItem1.id, 0);
     // keep item2 working for 40000 ticks
     LOS_TaskDelay(40000);
-    SensorItemDisable(&g_gyroItem2, &para, g_gyroItem1.id, 0);
+    SensorItemDisable(&g_gyroItem2, &para, g_gyroItem2.id, 0);
 }
 
 STATIC VOID InitGyro(VOID)
