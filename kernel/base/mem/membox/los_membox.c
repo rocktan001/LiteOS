@@ -104,7 +104,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_MemboxInit(VOID *pool, UINT32 poolSize, UINT32 
     boxInfo->uwBlkSize = LOS_MEMBOX_ALLIGNED(blkSize + OS_MEMBOX_NODE_HEAD_SIZE);
     boxInfo->uwBlkNum = (poolSize - sizeof(LOS_MEMBOX_INFO)) / boxInfo->uwBlkSize;
     boxInfo->uwBlkCnt = 0;
-    if (boxInfo->uwBlkNum == 0) {
+    if ((boxInfo->uwBlkNum == 0) || (boxInfo->uwBlkSize < blkSize)) {
         MEMBOX_UNLOCK(intSave);
         return LOS_NOK;
     }

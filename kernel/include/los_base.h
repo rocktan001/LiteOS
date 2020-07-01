@@ -187,6 +187,7 @@ extern "C" {
  * @attention
  * <ul>
  * <li>the value of boundary usually is 4,8,16,32.</li>
+ * <li>users should avoid overflows due to alignment.</li>
  * </ul>
  *
  * @param addr     [IN]  The variable what you want to align.

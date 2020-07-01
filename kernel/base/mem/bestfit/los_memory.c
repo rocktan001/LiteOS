@@ -1095,9 +1095,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsMemPoolHeadInfoPrint(const VOID *pool)
     }
 }
 
-STATIC UINT32 OsMemIntegrityCheck(const VOID *pool,
-                                  LosMemDynNode **tmpNode,
-                                  LosMemDynNode **preNode)
+STATIC UINT32 OsMemIntegrityCheck(const VOID *pool, LosMemDynNode **tmpNode, LosMemDynNode **preNode)
 {
     const LosMemPoolInfo *poolInfo = (const LosMemPoolInfo *)pool;
     const UINT8 *endPool = (const UINT8 *)pool + poolInfo->poolSize;
@@ -1150,8 +1148,7 @@ STATIC UINT32 OsMemIntegrityCheck(const VOID *pool,
 }
 
 #ifdef LOSCFG_MEM_LEAKCHECK
-STATIC VOID OsMemNodeBacktraceInfo(const LosMemDynNode *tmpNode,
-                                   const LosMemDynNode *preNode)
+STATIC VOID OsMemNodeBacktraceInfo(const LosMemDynNode *tmpNode, const LosMemDynNode *preNode)
 {
     int i;
     PRINTK("\n broken node head LR info: \n");
@@ -1203,8 +1200,11 @@ STATIC VOID OsMemNodeInfo(const LosMemDynNode *tmpNode,
 #endif
 
     PRINTK("\n---------------------------------------------\n");
-    PRINTK(" dump mem tmpNode:0x%x ~ 0x%x\n", tmpNode, ((UINTPTR)tmpNode + NODEDUMPSIZE));
-    OsDumpMemByte(NODEDUMPSIZE, (UINTPTR)tmpNode);
+    UINTPTR dumpEnd = (((UINTPTR)tmpNode + NODEDUMPSIZE) > (UINTPTR)tmpNode) ?
+                      ((UINTPTR)tmpNode + NODEDUMPSIZE) : (UINTPTR)(UINTPTR_MAX) ;
+    UINT32 dumpSize = (UINTPTR)dumpEnd - (UINTPTR)tmpNode;
+    PRINTK(" dump mem tmpNode:%p ~ %p\n", tmpNode, dumpEnd);
+    OsDumpMemByte(dumpSize, (UINTPTR)tmpNode);
     PRINTK("\n---------------------------------------------\n");
     if (preNode != tmpNode) {
         PRINTK(" dump mem :0x%x ~ tmpNode:0x%x\n", ((UINTPTR)tmpNode - NODEDUMPSIZE), tmpNode);
@@ -1502,7 +1502,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_MemInit(VOID *pool, UINT32 size)
         return OS_ERROR;
     }
 
-    if (!IS_ALIGNED(size, OS_MEM_ALIGN_SIZE)) {
+    if (!IS_ALIGNED(size, OS_MEM_ALIGN_SIZE) || !IS_ALIGNED(pool, OS_MEM_ALIGN_SIZE)) {
         PRINT_WARN("pool [%p, %p) size 0x%x should be aligned with OS_MEM_ALIGN_SIZE\n",
                    pool, (UINTPTR)pool + size, size);
         size = OS_MEM_ALIGN(size, OS_MEM_ALIGN_SIZE) - OS_MEM_ALIGN_SIZE;

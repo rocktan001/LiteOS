@@ -44,7 +44,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define OS_MAX_MULTI_DLNK_LOG2  30
+#define OS_MAX_MULTI_DLNK_LOG2  29
 #define OS_MIN_MULTI_DLNK_LOG2  4
 #define OS_MULTI_DLNK_NUM       ((OS_MAX_MULTI_DLNK_LOG2 - OS_MIN_MULTI_DLNK_LOG2) + 1)
 #define OS_DLNK_HEAD_SIZE       OS_MULTI_DLNK_HEAD_SIZE

@@ -42,11 +42,7 @@ extern "C" {
 
 LITE_OS_SEC_TEXT UINTPTR LOS_Align(UINTPTR addr, UINT32 boundary)
 {
-    if ((addr + boundary - 1) > addr) {
-        return (addr + boundary - 1) & ~((UINTPTR)(boundary - 1));
-    } else {
-        return addr & ~((UINTPTR)(boundary - 1));
-    }
+    return (addr + boundary - 1) & ~((UINTPTR)(boundary - 1));
 }
 
 LITE_OS_SEC_TEXT_MINOR VOID LOS_Msleep(UINT32 msecs)
