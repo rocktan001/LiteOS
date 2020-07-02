@@ -307,7 +307,9 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsIdleTaskCreate(VOID)
     taskInitParam.usTaskPrio = OS_TASK_PRIORITY_LOWEST;
 
     ret = LOS_TaskCreate(idleTaskID, &taskInitParam);
-    OS_TCB_FROM_TID(*idleTaskID)->taskFlags |= OS_TASK_FLAG_SYSTEM;
+    if (ret == LOS_OK) {
+        OS_TCB_FROM_TID(*idleTaskID)->taskFlags |= OS_TASK_FLAG_SYSTEM;
+    }
 
     return ret;
 }
