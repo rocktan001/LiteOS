@@ -248,7 +248,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(void)
     }
 
 #ifdef LOSCFG_PLATFORM_UART_WITHOUT_VFS
-    uart_init();
+    // uart_init(); defined and used in target
 #ifdef LOSCFG_SHELL
     uart_hwiCreate();
 #endif //LOSCFG_SHELL
