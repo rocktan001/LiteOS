@@ -35,7 +35,6 @@
 #ifndef _UART_H
 #define _UART_H
 
-#include "stm32f4xx_hal.h"
 
 #define UART_WITH_LOCK    1
 #define UART_WITHOUT_LOCK 0
