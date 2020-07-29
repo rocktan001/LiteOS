@@ -34,6 +34,7 @@
 
 #define LV_USE_DEMO_WIDGETS
 
+#include "los_task.h"
 #include "lvgl_demo.h"
 
 #include "lvgl.h"
@@ -46,12 +47,11 @@
 #include "widgets/lv_demo_widgets.h"
 #endif
 
-/**
-* @brief  CPU L1-Cache enable.
-* @param  None
-* @retval None
-*/
-static void CPU_CACHE_Enable(void)
+#define LVGL_TASK_STACK_SIZE  0x2000
+#define LVGL_TASK_POLL_PERIOD  5
+
+
+STATIC VOID EnableCache(VOID)
 {
     /* Enable I-Cache */
     SCB_EnableICache();
@@ -60,10 +60,10 @@ static void CPU_CACHE_Enable(void)
     SCB_EnableDCache();
 }
 
-void LvglDemo(void)
+STATIC VOID LvglTaskEntry(VOID)
 {
     /* Enable the CPU Cache */
-    CPU_CACHE_Enable();
+    EnableCache();
 
     lv_init();
 
@@ -76,6 +76,20 @@ void LvglDemo(void)
 
     while(1) {
         lv_task_handler();
-        HAL_Delay(5);
+        LOS_Msleep(LVGL_TASK_POLL_PERIOD);
     }
+}
+
+VOID LvglDemo(VOID)
+{
+    UINT32 taskId;
+    TSK_INIT_PARAM_S lvglTask;
+
+    (VOID)memset_s(&lvglTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    lvglTask.pfnTaskEntry = (TSK_ENTRY_FUNC)LvglTaskEntry;
+    lvglTask.uwStackSize = LVGL_TASK_STACK_SIZE;
+    lvglTask.pcName = "Lvgl_Task";
+    lvglTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+    lvglTask.uwResved = LOS_TASK_STATUS_DETACHED;
+    (VOID)LOS_TaskCreate(&taskId, &lvglTask);
 }
