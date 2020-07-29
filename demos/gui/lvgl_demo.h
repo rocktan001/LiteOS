@@ -32,9 +32,9 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef LVGL_APP___H
-#define LVGL_APP___H
+#ifndef _LVGL_DEMO__H
+#define _LVGL_DEMO__H
 
-void LvglDemo(void);
+VOID LvglDemo(VOID);
 
-#endif //LVGL_APP___H
+#endif /* _LVGL_DEMO__H */
