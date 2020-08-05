@@ -56,7 +56,6 @@ extern "C" {
  *
  * Note: The following register names without uw are the register names used in the chip manual.
  */
-#ifdef LOSCFG_ARCH_ARM_AARCH64
 #define EXC_GEN_REGS_NUM     30
 typedef struct {
     UINT64 X[EXC_GEN_REGS_NUM]; /**< Register X0-X29 */
@@ -65,27 +64,6 @@ typedef struct {
     UINT64 regELR;
     UINT64 SPSR;
 } ExcContext;
-#else
-typedef struct {
-    UINT32 regCPSR; /**< Current program status register (CPSR) */
-    UINT32 R0;      /**< Register R0 */
-    UINT32 R1;      /**< Register R1 */
-    UINT32 R2;      /**< Register R2 */
-    UINT32 R3;      /**< Register R3 */
-    UINT32 R4;      /**< Register R4 */
-    UINT32 R5;      /**< Register R5 */
-    UINT32 R6;      /**< Register R6 */
-    UINT32 R7;      /**< Register R7 */
-    UINT32 R8;      /**< Register R8 */
-    UINT32 R9;      /**< Register R9 */
-    UINT32 R10;     /**< Register R10 */
-    UINT32 R11;     /**< Register R11 */
-    UINT32 R12;     /**< Register R12 */
-    UINT32 SP;      /**< Stack pointer */
-    UINT32 LR;      /**< Program returning address. */
-    UINT32 PC;      /**< PC pointer of the exceptional function */
-} ExcContext;
-#endif
 
 /**
  * @ingroup los_exc
@@ -123,11 +101,7 @@ STATIC INLINE UINTPTR Get_Fp(VOID)
 {
     UINTPTR regFp;
 
-#ifdef LOSCFG_ARCH_ARM_AARCH64
     __asm__ __volatile__("mov %0, X29" : "=r"(regFp));
-#else
-    __asm__ __volatile__("mov %0, fp" : "=r"(regFp));
-#endif
 
     return regFp;
 }

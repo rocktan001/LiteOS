@@ -50,7 +50,7 @@ void fs_demo(void)
 #endif
 
 #if defined(FS_FATFS)
-    extern void fatfs_demo();
+    extern void fatfs_demo(void);
     fatfs_demo();
 #endif
 }

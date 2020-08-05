@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: AArch64 Hw CPU HeadFile
+ * Description: Aarch64 Hw CPU HeadFile
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -125,7 +125,22 @@ STATIC INLINE VOID ArchCurrTaskSet(VOID *val)
 
 STATIC INLINE UINT32 ArchCurrCpuid(VOID)
 {
+#if (LOSCFG_KERNEL_SMP == YES)
+    UINT32 cpuid = 0;
+    UINT64 mpidr =  AARCH64_SYSREG_READ(mpidr_el1);
+
+    if (!(mpidr & MPIDR_MT_MASK)) {
+        /* single-thread type */
+        cpuid = MPIDR_AFF_LEVEL(mpidr, 0);
+    } else {
+        /* muti-thread type, aff1 is cpuid */
+        cpuid = MPIDR_AFF_LEVEL(mpidr, 1);
+    }
+
+    return cpuid;
+#else
     return 0;
+#endif
 }
 
 STATIC INLINE UINT32 ArchSPGet(VOID)

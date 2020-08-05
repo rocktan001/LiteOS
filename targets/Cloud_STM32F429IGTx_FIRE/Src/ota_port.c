@@ -38,7 +38,7 @@
 #include "upgrade_flag.h"
 #include <string.h>
 #include <stdlib.h>
-#include <board.h>
+#include "board_ota.h"
 #include "flash_adaptor.h"
 #include "hal_spi_flash.h"
 

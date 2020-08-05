@@ -15,7 +15,8 @@ endif
 
 LOCAL_INCLUDE := \
 	-I $(LITEOSTOPDIR)/kernel/base/include \
-	-I $(LITEOSTOPDIR)/kernel/base/mem
+	-I $(LITEOSTOPDIR)/kernel/base/mem \
+	-I $(LITEOSTOPDIR)/kernel/extended/include
 
 LOCAL_FLAGS := $(LITEOS_CFLAGS_INTERWORK) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 

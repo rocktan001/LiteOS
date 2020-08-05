@@ -202,6 +202,7 @@ __attribute__ ((noinline)) INT32 printf(const CHAR *fmt, ...)
     va_start(ap, fmt);
     OsVprintf(fmt, ap, UART_OUTPUT);
     va_end(ap);
+    return 0;
 }
 #endif
 

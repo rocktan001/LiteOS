@@ -253,8 +253,9 @@ extern UINT32 __heap_end;
  * @ingroup los_config
  * Maximum supported number of sortlink
  */
+
 #define OS_TSK_SORTLINK_LEN_CONFIG                  8U
-#define OS_TSK_SORTLINK_LEN                          OS_TSK_SORTLINK_LEN_CONFIG
+#define OS_TSK_SORTLINK_LEN                         OS_TSK_SORTLINK_LEN_CONFIG
 
 /****************************** mutex module configuration ******************************/
 /**
@@ -290,13 +291,6 @@ extern UINT32 __heap_end;
 #define LOSCFG_BASE_IPC_QUEUE_LIMIT LOSCFG_BASE_IPC_QUEUE_CONFIG
 #endif
 
-
-/**
-/ * @ingroup los_config
- * Maximum supported number of priority queue
- */
-#define OS_PRIORITY_QUEUE_NUM_CONFIG                  32
-#define OS_PRIORITY_QUEUE_NUM                         OS_PRIORITY_QUEUE_NUM_CONFIG
 
 /****************************** Software timer module configuration **************************/
 #if (LOSCFG_BASE_IPC_QUEUE == YES)
@@ -388,8 +382,32 @@ extern UINT32 __heap_end;
 #define LOSCFG_COMPAT_CMSIS                             NO
 #endif
 
-/****************************** CPU module configuration **************************/
+/****************************** SMP module configuration **************************/
+#ifndef LOSCFG_KERNEL_SMP
+#define LOSCFG_KERNEL_SMP                               NO
+#endif
+
+#ifndef LOSCFG_SCHED_MQ
+#define LOSCFG_SCHED_MQ                                 NO
+#endif
+
+#ifndef LOSCFG_KERNEL_SMP_LOCKDEP
+#define LOSCFG_KERNEL_SMP_LOCKDEP                       NO
+#endif
+
+#ifndef LOSCFG_KERNEL_SMP_TASK_SYNC
+#define LOSCFG_KERNEL_SMP_TASK_SYNC                     NO
+#endif
+
+#ifndef LOSCFG_KERNEL_SCHED_STATISTICS
+#define LOSCFG_KERNEL_SCHED_STATISTICS                  NO
+#endif
+
+#if (LOSCFG_KERNEL_SMP == YES)
+#define LOSCFG_KERNEL_CORE_NUM                          LOSCFG_KERNEL_SMP_CORE_NUM
+#else
 #define LOSCFG_KERNEL_CORE_NUM                          1
+#endif
 
 #define LOSCFG_KERNEL_CPU_MASK                          ((1 << LOSCFG_KERNEL_CORE_NUM) - 1)
 
@@ -460,7 +478,7 @@ extern UINT32 __heap_end;
  *
  * @par Description:
  * <ul>
- * <li>This defination is used to declare the type of functions for reading or writing exception information</li>
+ * <li>This definition is used to declare the type of functions for reading or writing exception information</li>
  * </ul>
  * @attention
  * <ul>
@@ -474,7 +492,7 @@ extern UINT32 __heap_end;
  *
  * @retval none.
  * @par Dependency:
- * <ul><li>los_config.h: the header file that contains the type defination.</li></ul>
+ * <ul><li>los_config.h: the header file that contains the type definition.</li></ul>
  * @see
  * @since Huawei LiteOS V200R002C00
  */

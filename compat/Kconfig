@@ -1,0 +1,4 @@
+menu "Compat"
+source "compat/cmsis/Kconfig"
+source "compat/posix/Kconfig"
+endmenu

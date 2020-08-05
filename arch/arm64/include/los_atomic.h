@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: AArch64 Atomic HeadFile
+ * Description: Aarch64 Atomic HeadFile
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -109,7 +109,7 @@ STATIC INLINE VOID LOS_AtomicSet(Atomic *v, INT32 setVal)
  * @attention
  * <ul>
  * <li>The pointer v must not be NULL.</li>
- * <li>If the addtion result is not in the range of representable values for 32-bit signed integer,
+ * <li>If the addition result is not in the range of representable values for 32-bit signed integer,
  * an int integer overflow may occur to the return value</li>
  * </ul>
  *
@@ -251,7 +251,7 @@ STATIC INLINE INT32 LOS_AtomicIncRet(Atomic *v)
  * @brief Atomic auto-decrement.
  *
  * @par Description:
- * This API is used to implementating the atomic auto-decrement.
+ * This API is used to implement the atomic auto-decrement.
  * @attention
  * <ul>
  * <li>The pointer v must not be NULL.</li>
@@ -284,7 +284,7 @@ STATIC INLINE VOID LOS_AtomicDec(Atomic *v)
  * @brief Atomic auto-decrement.
  *
  * @par Description:
- * This API is used to implementating the atomic auto-decrement and return the result of auto-decrement.
+ * This API is used to implement the atomic auto-decrement and return the result of auto-decrement.
  * @attention
  * <ul>
  * <li>The pointer v must not be NULL.</li>
@@ -372,7 +372,7 @@ STATIC INLINE VOID LOS_Atomic64Set(Atomic64 *v, INT64 setVal)
  * @attention
  * <ul>
  * <li>The pointer v must not be NULL.</li>
- * <li>If the addtion result is not in the range of representable values for 64-bit signed integer,
+ * <li>If the addition result is not in the range of representable values for 64-bit signed integer,
  * an int integer overflow may occur to the return value</li>
  * </ul>
  *
@@ -514,7 +514,7 @@ STATIC INLINE INT64 LOS_Atomic64IncRet(Atomic64 *v)
  * @brief Atomic64 auto-decrement.
  *
  * @par Description:
- * This API is used to implementating the atomic64 auto-decrement.
+ * This API is used to implement the atomic64 auto-decrement.
  * @attention
  * <ul>
  * <li>The pointer v must not be NULL.</li>
@@ -547,7 +547,7 @@ STATIC INLINE VOID LOS_Atomic64Dec(Atomic64 *v)
  * @brief Atomic64 auto-decrement.
  *
  * @par Description:
- * This API is used to implementating the atomic64 auto-decrement and return the result of auto-decrement.
+ * This API is used to implement the atomic64 auto-decrement and return the result of auto-decrement.
  * @attention
  * <ul>
  * <li>The pointer v must not be NULL.</li>

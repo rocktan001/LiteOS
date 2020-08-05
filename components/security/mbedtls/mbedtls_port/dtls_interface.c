@@ -268,7 +268,7 @@ exit_fail:
     return NULL;
 }
 
-static inline uint32_t dtls_gettime()
+static inline uint32_t dtls_gettime(void)
 {
     return (uint32_t)(atiny_gettime_ms() / 1000);
 }

@@ -93,7 +93,7 @@ void app_data_report(void)
 }
 /*lint +e550*/
 
-UINT32 creat_report_task()
+UINT32 creat_report_task(void)
 {
     UINT32 uwRet = LOS_OK;
     TSK_INIT_PARAM_S task_init_param;

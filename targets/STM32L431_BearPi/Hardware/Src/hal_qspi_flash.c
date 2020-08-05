@@ -34,6 +34,7 @@
 
 #include "hal_qspi_flash.h"
 #include "stm32l4xx.h"
+#include "sys_init.h"
 
 #ifdef HAL_QSPI_MODULE_ENABLED
 

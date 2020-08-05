@@ -80,7 +80,7 @@
 #define TIMER_REG_CNTP_CVAL         CP15_REG64(c14, 2)
 #define TIMER_REG_CNTPCT            CP15_REG64(c14, 0)
 
-/* CNTPS AArch32 registers are banked and accessed though CNTP */
+/* CNTPS AArch32 registers are banked and accessed through CNTP */
 #define CNTPS CNTP
 
 #define READ_TIMER_REG32(reg)       ARM_SYSREG_READ(reg)

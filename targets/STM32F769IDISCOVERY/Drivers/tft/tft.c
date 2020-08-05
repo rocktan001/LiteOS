@@ -145,7 +145,6 @@ void monitor_cb(lv_disp_drv_t * d, uint32_t t, uint32_t p)
  */
 void tft_init(void)
 {
-    uint32_t tmp = HAL_GetTick();
     static lv_color_t *buf = (lv_color_t *)VDB_BUF1_ADDRESS;
     memset(buf, 0, TFT_HOR_RES * TFT_VER_RES * sizeof(lv_color_t));
     static lv_disp_buf_t disp_buf;
@@ -193,7 +192,7 @@ static void tft_flush_cb(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t
     y_flush_act = act_y1;
     buf_to_flush = color_p;
 
-    CopyBuffer((const uint32_t *)color_p, my_fb, area->x1, area->y1, area->x2 - area->x1 + 1, area->y2 - area->y1 + 1);
+    CopyBuffer((const uint32_t *)color_p, (uint32_t *)my_fb, area->x1, area->y1, area->x2 - area->x1 + 1, area->y2 - area->y1 + 1);
 
     HAL_DSI_Refresh(&hdsi_discovery);
     lv_disp_flush_ready(drv);
@@ -202,8 +201,6 @@ static void tft_flush_cb(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t
 
 static void CopyBuffer(const uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y, uint16_t xsize, uint16_t ysize)
 {
-    uint32_t row;
-
     uint32_t destination = (uint32_t)pDst + (y * TFT_HOR_RES + x) * 2;
     uint32_t source      = (uint32_t)pSrc;
 

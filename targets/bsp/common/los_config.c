@@ -85,7 +85,6 @@
 #include "los_memrecord_pri.h"
 #endif
 #include "los_hw_tick_pri.h"
-#include "los_hwi_pri.h"
 #ifdef LOSCFG_KERNEL_DYNLOAD
 #include "los_ld_initlib_pri.h"
 #endif
@@ -123,26 +122,8 @@ extern UINT32 OsAppInit(VOID);
 extern VOID app_init(VOID);
 #endif
 
-#if (LOSCFG_LIB_CONFIGURABLE == YES)
-LITE_OS_SEC_BSS UINT32 g_taskLimit;
-LITE_OS_SEC_BSS UINT32 g_semLimit;
-LITE_OS_SEC_BSS UINT32 g_swtmrLimit;
-LITE_OS_SEC_BSS UINT32 g_muxLimit;
-LITE_OS_SEC_BSS UINT32 g_queLimit;
-
-#endif
-
-
 LITE_OS_SEC_TEXT_INIT VOID OsRegister(VOID)
 {
-#if (LOSCFG_LIB_CONFIGURABLE == YES)
-    g_taskLimit = LOSCFG_BASE_CORE_TSK_CONFIG;
-    g_semLimit = LOSCFG_BASE_IPC_SEM_CONFIG;
-    g_swtmrLimit = LOSCFG_BASE_CORE_SWTMR_CONFIG;
-    g_muxLimit = LOSCFG_BASE_IPC_MUX_CONFIG;
-    g_queLimit = LOSCFG_BASE_IPC_QUEUE_CONFIG;
-#endif
-
     /* LOSCFG_BASE_CORE_TSK_LIMIT include IDLE task */
     g_taskMaxNum = LOSCFG_BASE_CORE_TSK_LIMIT;
     g_sysClock = OS_SYS_CLOCK;
@@ -161,9 +142,16 @@ LITE_OS_SEC_TEXT_INIT VOID OsStart(VOID)
     LOS_SpinLock(&g_taskSpin);
     taskCB = OsGetTopTask();
 
+#if (LOSCFG_KERNEL_SMP == YES)
+    /*
+     * attention: current cpu needs to be set, in case first task deletion
+     * may fail because this flag mismatch with the real current cpu.
+     */
+    taskCB->currCpu = cpuid;
+#endif
     OS_SCHEDULER_SET(cpuid);
     OsCurrTaskSet(taskCB);
-    PRINTK("cpu %d entering scheduler\n", cpuid);
+    PRINTK("cpu %u entering scheduler\n", cpuid);
     OsStartToRun(taskCB);
 }
 
@@ -271,8 +259,9 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(void)
 #endif
 
     /*
-     * CPUP should be inited before first task creation. Don't change this init sequence
-     * if not neccessary. The sequence should be like this:
+     * CPUP should be inited before first task creation which depends on the semaphore
+     * when LOSCFG_KERNEL_SMP_TASK_SYNC is enabled. So don't change this init sequence
+     * if not necessary. The sequence should be like this:
      * 1. OsIpcInit
      * 2. OsCpupInit -> has first task creation
      * 3. other inits have task creation
@@ -290,6 +279,10 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(void)
     if (ret != LOS_OK) {
         return ret;
     }
+#endif
+
+#if (LOSCFG_KERNEL_SMP == YES)
+    (VOID)OsMpInit();
 #endif
 
 #ifdef LOSCFG_KERNEL_DYNLOAD
@@ -347,6 +340,9 @@ STATIC UINT32 OsAppTaskCreate(VOID)
     appTask.pcName = "app_Task";
     appTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
     appTask.uwResved = LOS_TASK_STATUS_DETACHED;
+#if (LOSCFG_KERNEL_SMP == YES)
+    appTask.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
+#endif
     return LOS_TaskCreate(&taskID, &appTask);
 }
 

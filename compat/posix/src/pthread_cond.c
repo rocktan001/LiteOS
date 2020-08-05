@@ -250,6 +250,7 @@ int pthread_cond_signal(pthread_cond_t *cond)
     return ret;
 }
 
+#ifndef LOSCFG_ARCH_CORTEX_M7
 STATIC INT32 PthreadCondWaitSub(pthread_cond_t *cond, INT32 value, UINT32 ticks)
 {
     EventCond eventCond = { &cond->value, value, ~0x01U };
@@ -266,6 +267,8 @@ STATIC INT32 PthreadCondWaitSub(pthread_cond_t *cond, INT32 value, UINT32 ticks)
     return (int)OsEventReadWithCond(&eventCond, &(cond->event), 0x0fU,
                                     LOS_WAITMODE_OR | LOS_WAITMODE_CLR, ticks);
 }
+#endif
+
 STATIC VOID PthreadCountSub(pthread_cond_t *cond)
 {
     (VOID)pthread_mutex_lock(cond->mutex);
@@ -301,7 +304,6 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 {
     UINT32 absTicks;
     INT32 ret;
-    INT32 oldValue;
     LosTaskCB *runTask = NULL;
 
     pthread_testcancel();
@@ -320,8 +322,9 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
             return ret;
         }
     }
-    oldValue = cond->value;
-
+#ifndef LOSCFG_ARCH_CORTEX_M7
+    INT32 oldValue = cond->value;
+#endif
     (VOID)pthread_mutex_lock(cond->mutex);
     cond->count++;
     (VOID)pthread_mutex_unlock(cond->mutex);
@@ -356,7 +359,6 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
     int ret;
-    int oldValue;
 
     if ((cond == NULL) || (mutex == NULL)) {
         return EINVAL;
@@ -368,7 +370,10 @@ int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
             return ret;
         }
     }
-    oldValue = cond->value;
+
+#ifndef LOSCFG_ARCH_CORTEX_M7
+    int oldValue = cond->value;
+#endif
 
     (VOID)pthread_mutex_lock(cond->mutex);
     cond->count++;

@@ -56,12 +56,11 @@ STATIC SensorItem g_gyroItem2 = {
 };
 STATIC UINT32 g_miscTskID;
 
-STATIC INT32 SensorReport(UINT32 arg, const INT8 *data, UINT32 len)
+STATIC VOID SensorReport(UINT32 arg, const INT8 *data, UINT32 len)
 {
     (VOID)(len);
     (VOID)(data);
     PRINTK("tag %u report\r\n", arg);
-    return LOS_OK;
 }
 
 STATIC VOID OpenGyro(VOID)

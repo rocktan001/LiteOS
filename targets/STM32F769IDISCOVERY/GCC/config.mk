@@ -28,6 +28,11 @@ WITH_MQTT  := no
 WITH_LWIP  := no
 
 #######################################
+# lvgl
+#######################################
+WITH_LVGL := yes
+
+#######################################
 # use usart AT command
 # (NB_NEUL95_NO_ATINY: nb without agenttiny)
 # (NB_NEUL95: nb with agenttiny)

@@ -49,6 +49,8 @@ COMPONENTS_DIR = $(TOP_DIR)/components
 DEMOS_DIR = $(TOP_DIR)/demos
 KERNEL_DIR = $(TOP_DIR)/kernel
 OSDEPENDS_DIR = $(TOP_DIR)/osdepends
+LIB_DIR = $(TOP_DIR)/lib
+COMPAT_DIR = $(TOP_DIR)/compat
 TARGETS_DIR = $(TOP_DIR)/targets
 TEST_DIR = $(TOP_DIR)/test
 TESTS_DIR = $(TOP_DIR)/tests
@@ -65,8 +67,61 @@ ASM_SOURCES_GCC= \
 ASM_SOURCES_ARCH =  \
          ${wildcard $(ARCH_DIR)/arm/cortex-m/cortex-m4/gcc/*.S}
 
-C_SOURCES =
 # C sources
+LIBSEC_SRC = \
+        ${wildcard $(LIB_DIR)/libsec/src/*.c}
+        C_SOURCES += $(LIBSEC_SRC)
+
+KERNEL_SRC =  \
+        ${wildcard $(KERNEL_DIR)/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/core/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/ipc/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/mem/bestfit_little/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/mem/membox/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/mem/common/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/misc/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/mp/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/om/*.c} \
+        ${wildcard $(KERNEL_DIR)/base/sched/sched_sq/*.c} \
+        ${wildcard $(KERNEL_DIR)/extended/tickless/*.c}
+        C_SOURCES += $(KERNEL_SRC)
+
+POSIX_SRC = \
+        ${wildcard $(COMPAT_DIR)/posix/src/*.c}
+        C_SOURCES += $(POSIX_SRC)
+
+ZLIB_SRC = \
+        ${wildcard $(LIB_DIR)/zlib/src/*.c}
+        C_SOURCES += $(ZLIB_SRC)
+
+LIBC_SRCS = \
+        ${wildcard $(LIB_DIR)/hw/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/errno/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/stdio/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/string/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/stdlib/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/prng/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/multibyte/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/internal/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/env/*.c)} \
+        ${wildcard $(LIB_DIR)/libc/src/locale/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/ctype/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/temp/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/linux/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/fcntl/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/process/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/legacy/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/thread/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/signal/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/network/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/unistd/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/termios/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/time/*.c} \
+        ${wildcard $(LIB_DIR)/libc/src/misc/*.c)}
+        C_SOURCES += $(LIBC_SRCS)
+
+#    ${wildcard $(LIB_DIR)/libc/src/exit/*.c} \
+
 HAL_DRIVER_SRC =  \
         $(TARGET_DIR)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash.c \
         $(TARGET_DIR)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim_ex.c \
@@ -99,24 +154,6 @@ HAL_DRIVER_SRC_NO_BOOTLOADER =  \
         $(TARGET_DIR)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c \
         $(TARGET_DIR)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rng.c
         C_SOURCES += $(HAL_DRIVER_SRC_NO_BOOTLOADER)
-
-LIBSEC_SRC = \
-        ${wildcard $(COMPONENTS_DIR)/lib/libsec/src/*.c}
-        C_SOURCES += $(LIBSEC_SRC)
-
-KERNEL_SRC =  \
-        ${wildcard $(KERNEL_DIR)/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/core/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/ipc/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/mem/bestfit_little/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/mem/membox/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/mem/common/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/misc/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/mp/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/om/*.c} \
-        ${wildcard $(KERNEL_DIR)/base/sched/sched_sq/*.c} \
-        ${wildcard $(KERNEL_DIR)/extended/tickless/*.c}
-        C_SOURCES += $(KERNEL_SRC)
 
 CMSIS_SRC =  \
         ${wildcard $(OSDEPENDS_DIR)/liteos/cmsis/*.c}
@@ -192,12 +229,6 @@ endif
 SOCKET_ADAPTER_SRC = \
         ${wildcard $(COMPONENTS_DIR)net/sal/*.c}
         C_SOURCES += $(SOCKET_ADAPTER_SRC)
-
-NEWLIB_SRC = \
-        ${wildcard $(COMPONENTS_DIR)lib/libc/malloc.c}\
-        ${wildcard $(COMPONENTS_DIR)lib/libc/newlib_stub.c} \
-        ${wildcard $(COMPONENTS_DIR)lib/libc/errno.c}
-        C_SOURCES += $(NEWLIB_SRC)
 
 ATINY_LOG = \
         ${wildcard $(COMPONENTS_DIR)log/*.c}
@@ -281,7 +312,10 @@ AS_DEFS =
 C_DEFS =  \
      -D USE_HAL_DRIVER \
      -D STM32L431xx \
-     -D NDEBUG
+     -D NDEBUG \
+     -D __LITEOS__ \
+     -D _ALL_SOURCE \
+     -DLOSCFG_PLATFORM_UART_WITHOUT_VFS
 
 ifeq ($(WITH_LWM2M), yes)
         C_DEFS += \
@@ -351,7 +385,40 @@ endif
 AS_INCLUDES =
 
 # C includes
-C_INCLUDES =
+LITEOS_LIBSEC_INCLUDE :=  $(LIB_DIR)/libsec/include
+        C_INCLUDES += $(LITEOS_LIBSEC_INCLUDE)
+
+LITEOS_LIBC_INCLUDE = \
+        -I $(LIB_DIR)/libc/arch/arm \
+        -I $(LIB_DIR)/libc/arch/generic \
+        -I $(LIB_DIR)/libc/src/include \
+        -I $(LIB_DIR)/libc/src/internal \
+        -I $(LIB_DIR)/libc/include \
+        -I $(LIB_DIR)/hw/include \
+        -I $(LIB_DIR)/hw/include/bits
+        C_INCLUDES += $(LITEOS_LIBC_INCLUDE)
+
+LIBS_INCLUDE := -I $(LIB_DIR)/libc/arch/generic \
+        -I $(LIB_DIR)/libc/src/internal \
+        -I $(LIB_DIR)/libc/src/crypt \
+        -I $(LIB_DIR)/libc/src/ctype \
+        -I $(LIB_DIR)/libc/src/dirent \
+        -I $(LIB_DIR)/libc/src/errno \
+        -I $(LIB_DIR)/libc/src/ipc \
+        -I $(LIB_DIR)/libc/src/locale \
+        -I $(LIB_DIR)/libc/src/math \
+        -I $(LIB_DIR)/libc/src/multibyte \
+        -I $(LIB_DIR)/libc/src/networknetwork \
+        -I $(LIB_DIR)/libc/src/passwd \
+        -I $(LIB_DIR)/libc/src/prng \
+        -I $(LIB_DIR)/libc/src/process \
+        -I $(LIB_DIR)/libc/src/regex \
+        -I $(LIB_DIR)/libc/src/search \
+        -I $(LIB_DIR)/libc/src/time \
+        -I $(COMPAT_DIR)/posix/src \
+        -I $(LIB_DIR)/linux/include \
+        -I $(LIB_DIR)/zlib/include
+        C_INCLUDES += $(LIBS_INCLUDE)
 
 INCLUDE_INC = \
         -I $(TOP_DIR)/include
@@ -394,7 +461,7 @@ KERNEL_INC = \
         -I $(KERNEL_DIR)/base/include \
         -I $(KERNEL_DIR)/extended/include \
         -I $(KERNEL_DIR)/include \
-        -I $(COMPONENTS_DIR)/lib/libsec/include
+        -I $(LIB_DIR)/libsec/include
         C_INCLUDES += $(KERNEL_INC)
 
 ARCH_INC = \
@@ -482,7 +549,7 @@ endif
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(LITEOS_SSP) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(LITEOS_SSP) -Wall -fdata-sections -ffunction-sections -nostdlib -nostdinc
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
@@ -510,6 +577,8 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 #######################################
 C_OBJ :=
 
+C_OBJ += $(patsubst $(LIB_DIR)/%.c,$(BUILD_DIR)/lib/%.o,$(filter $(LIB_DIR)/%.c,$(C_SOURCES)))
+C_OBJ += $(patsubst $(COMPAT_DIR)/%.c,$(BUILD_DIR)/compat/%.o,$(filter $(COMPAT_DIR)/%.c,$(C_SOURCES)))
 C_OBJ += $(patsubst $(ARCH_DIR)/%.c,$(BUILD_DIR)/arch/%.o,$(filter $(ARCH_DIR)/%.c,$(C_SOURCES)))
 C_OBJ += $(patsubst $(COMPONENTS_DIR)/%.c,$(BUILD_DIR)/components/%.o,$(filter $(COMPONENTS_DIR)/%.c,$(C_SOURCES)))
 C_OBJ += $(patsubst $(DEMOS_DIR)/%.c,$(BUILD_DIR)/demos/%.o,$(filter $(DEMOS_DIR)/%.c,$(C_SOURCES)))
@@ -545,7 +614,7 @@ $(C_OBJ):$(BUILD_DIR)/%.o:%.c
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(@:%.o=%.lst) $<  -o $@
 
 $(S_OBJ):$(BUILD_DIR)/%.o:%.S
-	$(AS) -c $(CFLAGS) $< -o $@
+	$(AS) -c $(ASFLAGS) $< -o $@
 
 #######################################
 # clean up

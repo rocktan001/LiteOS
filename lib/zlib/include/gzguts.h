@@ -26,6 +26,8 @@
 #  include <limits.h>
 #endif
 
+#include <unistd.h>
+
 #ifndef _POSIX_SOURCE
 #  define _POSIX_SOURCE
 #endif

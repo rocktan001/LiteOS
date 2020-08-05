@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2019-2019. All rights reserved.
- * Description: AArch64 Config HeadFile
+ * Description: Aarch64 Config HeadFile
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -37,7 +37,11 @@
 
 #include "menuconfig.h"
 
+#ifdef LOSCFG_KERNEL_SMP
+#define CORE_NUM                LOSCFG_KERNEL_SMP_CORE_NUM
+#else
 #define CORE_NUM                1
+#endif
 
 /* Initial bit64 stack value. */
 #define OS_STACK_INIT           0xCACACACACACACACA

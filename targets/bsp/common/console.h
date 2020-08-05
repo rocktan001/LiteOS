@@ -37,7 +37,7 @@
 
 #include "los_config.h"
 #ifdef LOSCFG_FS_VFS
-#include "asm/termbits.h"
+#include "termios.h"
 #ifdef LOSCFG_NET_TELNET
 #include "telnet_dev.h"
 #endif
@@ -73,6 +73,8 @@ extern "C" {
 #define CONSOLE_SHELL_EXITED           0x400
 #define CONSOLE_CONTROL_RIGHTS_CAPTURE 201
 #define CONSOLE_CONTROL_RIGHTS_RELEASE 202
+#define CONSOLE_CONTROL_CAPTURE_LINE   203
+#define CONSOLE_CONTROL_CAPTURE_CHAR   204
 #define CONSOLE_FIFO_SIZE              1024
 #define CONSOLE_NUM                    2
 

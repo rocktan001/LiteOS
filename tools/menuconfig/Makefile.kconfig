@@ -1,0 +1,17 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+
+.PHONY += menuconfig savemenuconfig
+
+MCONF = tools/menuconfig/extra/config/mconf
+KCONFIG = tools/menuconfig/extra/Configs/Config.in
+
+$(MCONF):
+	@$(MAKE) -C tools/menuconfig/extra/config ncurses mconf
+
+menuconfig: $(MCONF)
+	@$< $(KCONFIG)
+	-mv -f $(LITEOS_MENUCONFIG_H) $(LITEOS_PLATFORM_MENUCONFIG_H)
+
+savemenuconfig: $(MCONF)
+	@$< $(KCONFIG) save
+	-mv -f $(LITEOS_MENUCONFIG_H) $(LITEOS_PLATFORM_MENUCONFIG_H)

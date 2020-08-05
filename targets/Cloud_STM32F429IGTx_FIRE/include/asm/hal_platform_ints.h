@@ -82,6 +82,13 @@ extern "C" {
 
 #define HAL_WRITE_UINT32(addr, data) WRITE_UINT32(data, addr)
 
+/* just fix timer compile issue */
+#define TIMER0_BASE_ADDR   0x40002800
+#define PRVTIMER_BASE_ADDR TIMER0_BASE_ADDR
+#define GTIMER_BASE_ADDR   TIMER0_BASE_ADDR
+#define TIMER_FREQ          0x6000000
+#define PRVTIMER_INT_NUM    29
+
 #ifdef __cplusplus
 #if __cplusplus
 }

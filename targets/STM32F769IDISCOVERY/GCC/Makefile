@@ -59,15 +59,74 @@ ASM_SOURCES_S =  \
         ${wildcard $(TOP_DIR)/arch/arm/cortex-m/cortex-m7/gcc/*.S}
 
 # C sources
+LIBSEC_SRC = \
+        ${wildcard $(TOP_DIR)/lib/libsec/src/*.c}
+        C_SOURCES += $(LIBSEC_SRC)
+
+KERNEL_SRC =  \
+        ${wildcard $(TOP_DIR)/kernel/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/core/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/ipc/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/mem/bestfit_little/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/mem/membox/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/mem/common/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/misc/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/mp/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/om/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/base/sched/sched_sq/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/extended/tickless/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/extended/cpup/*.c} \
+        ${wildcard $(TOP_DIR)/kernel/extended/cppsupport/*.c}
+        C_SOURCES += $(KERNEL_SRC)
+POSIX_SRC = \
+        ${wildcard $(TOP_DIR)/compat/posix/src/*.c}
+        C_SOURCES += $(POSIX_SRC)
+
+ZLIB_SRC = \
+        ${wildcard $(TOP_DIR)/lib/zlib/src/*.c}
+#        C_SOURCES += $(ZLIB_SRC)
+
+LIBC_SRCS = \
+        ${wildcard $(TOP_DIR)/lib/hw/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/errno/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/stdio/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/string/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/stdlib/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/prng/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/multibyte/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/internal/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/env/*.c)} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/locale/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/ctype/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/temp/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/linux/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/fcntl/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/process/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/legacy/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/thread/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/signal/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/network/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/unistd/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/termios/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/time/*.c} \
+        ${wildcard $(TOP_DIR)/lib/libc/src/misc/*.c)}
+        C_SOURCES += $(LIBC_SRCS)
+
+#        ${wildcard $(TOP_DIR)/lib/libc/src/exit/*.c} \
+
 HAL_DRIVER_SRC =  \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/ft5336/ft5336.c \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/ft6x06/ft6x06.c \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/otm8009a/otm8009a.c \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/wm8994/wm8994.c \
         ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/*.c} \
-        ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/*.c} \
+        ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/*.c}
+
+ifeq ($(WITH_LVGL), yes)
+HAL_DRIVER_SRC +=  \
         ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/tft/*.c} \
-        ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/touchpad/*.c} \
+        ${wildcard $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/touchpad/*.c}
+endif
 
 HAL_DRIVER_SRC_FILTERS = \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_mmc.c \
@@ -91,26 +150,6 @@ HAL_DRIVER_SRC_FILTERS = \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_usart.c \
         $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_utils.c
         C_SOURCES += $(filter-out $(HAL_DRIVER_SRC_FILTERS), $(HAL_DRIVER_SRC))
-
-LIBSEC_SRC = \
-        ${wildcard $(TOP_DIR)/components/lib/libsec/src/*.c}
-        C_SOURCES += $(LIBSEC_SRC)
-
-KERNEL_SRC =  \
-        ${wildcard $(TOP_DIR)/kernel/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/core/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/ipc/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/mem/bestfit_little/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/mem/membox/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/mem/common/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/misc/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/mp/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/om/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/base/sched/sched_sq/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/extended/tickless/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/extended/cpup/*.c} \
-        ${wildcard $(TOP_DIR)/kernel/extended/cppsupport/*.c}
-        C_SOURCES += $(KERNEL_SRC)
 
 CMSIS_SRC =  \
         ${wildcard $(TOP_DIR)/osdepends/liteos/cmsis/*.c}
@@ -167,6 +206,8 @@ C_DEFS =  \
         -D USE_HAL_DRIVER \
         -D USE_STM32F769I_DISCO \
         -D USE_STM32769I_DISCOVERY \
+        -D __LITEOS__ \
+        -D _ALL_SOURCE \
         -D MBEDTLS_CONFIG_FILE=\"mbedtls_config.h\" \
         -D HAVE_STDINT_H
 
@@ -174,6 +215,40 @@ C_DEFS =  \
 AS_INCLUDES =
 
 # C includes
+LITEOS_LIBSEC_INCLUDE :=  $(TOP_DIR)/lib/libsec/include
+        C_INCLUDES += $(LITEOS_LIBSEC_INCLUDE)
+
+LITEOS_LIBC_INCLUDE = \
+        -I $(TOP_DIR)/lib/libc/arch/arm \
+        -I $(TOP_DIR)/lib/libc/arch/generic \
+        -I $(TOP_DIR)/lib/libc/src/include \
+        -I $(TOP_DIR)/lib/libc/src/internal \
+        -I $(TOP_DIR)/lib/libc/include \
+        -I $(TOP_DIR)/lib/hw/include \
+        -I $(TOP_DIR)/lib/hw/include/bits
+        C_INCLUDES += $(LITEOS_LIBC_INCLUDE)
+
+LIBS_INCLUDE := -I $(TOP_DIR)/lib/libc/arch/generic \
+        -I $(TOP_DIR)/lib/libc/src/internal \
+        -I $(TOP_DIR)/lib/libc/src/crypt \
+        -I $(TOP_DIR)/lib/libc/src/ctype \
+        -I $(TOP_DIR)/lib/libc/src/dirent \
+        -I $(TOP_DIR)/lib/libc/src/errno \
+        -I $(TOP_DIR)/lib/libc/src/ipc \
+        -I $(TOP_DIR)/lib/libc/src/locale \
+        -I $(TOP_DIR)/lib/libc/src/math \
+        -I $(TOP_DIR)/lib/libc/src/multibyte \
+        -I $(TOP_DIR)/lib/libc/src/networknetwork \
+        -I $(TOP_DIR)/lib/libc/src/passwd \
+        -I $(TOP_DIR)/lib/libc/src/prng \
+        -I $(TOP_DIR)/lib/libc/src/process \
+        -I $(TOP_DIR)/lib/libc/src/regex \
+        -I $(TOP_DIR)/lib/libc/src/search \
+        -I $(TOP_DIR)/lib/libc/src/time \
+        -I $(TOP_DIR)/compat/posix/src \
+        -I $(TOP_DIR)/lib/linux/include \
+        -I $(TOP_DIR)/lib/zlib/include
+        C_INCLUDES += $(LIBS_INCLUDE)
 HAL_DRIVER_INC = \
         -I $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers \
         -I $(TOP_DIR)/targets/STM32F769IDISCOVERY/Drivers/BSP \
@@ -215,7 +290,7 @@ KERNEL_INC = \
         -I $(TOP_DIR)/kernel/extended/include  \
         -I $(TOP_DIR)/kernel/include \
         -I $(TOP_DIR)/kernel/base/core \
-        -I $(TOP_DIR)/components/lib/libsec/include
+        -I $(TOP_DIR)/lib/libsec/include
         C_INCLUDES += $(KERNEL_INC)
 
 EXAMPLES_INC = \
@@ -253,7 +328,7 @@ endif
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(LITEOS_SSP) -Wall -fdata-sections -ffunction-sections #-nostartfiles -static -fno-short-enums -fno-short-wchar
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(LITEOS_SSP) -Wall -fdata-sections -ffunction-sections -nostdlib -nostdinc #-nostartfiles -static -fno-short-enums -fno-short-wchar
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
@@ -263,9 +338,9 @@ endif
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 
-CFLAGS += -std=c99
+#CFLAGS += -std=c99
 
-
+ifeq ($(WITH_LVGL), yes)
 #LiteGL Build Options
 LVGL_DIR = $(TOP_DIR)/components/gui/lvgl
 LVGL_DEMO_DIR = $(TOP_DIR)/demos/gui
@@ -290,7 +365,7 @@ LITEGL_LIB = -Xlinker -no-enum-size-warning
 C_SOURCES += $(LVGL_SRC) $(LVGL_DEMO_SRC)
 C_INCLUDES += $(LITEGL_INCLUDE) $(LIBSEC_INCLUDE) $(HAL_DRIVER_INC) $(USER_INC) $(CMSIS_INC) $(KERNEL_INC) $(ARCH_INC) $(THIRD_INC)
 CFLAGS += -DLV_CONF_INCLUDE_SIMPLE
-
+endif
 
 #######################################
 # LDFLAGS
@@ -324,10 +399,10 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
-	$(AS) -c $(CFLAGS) $< -o $@
+	$(AS) -c $(ASFLAGS) $< -o $@
 
 $(BUILD_DIR)/%.o: %.S Makefile | $(BUILD_DIR)
-	$(AS) -c $(CFLAGS) $< -o $@
+	$(AS) -c $(ASFLAGS) $< -o $@
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@

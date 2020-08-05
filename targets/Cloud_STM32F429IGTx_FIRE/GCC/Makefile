@@ -100,7 +100,6 @@ ZLIB_SRC = \
 LIBC_SRCS = \
         ${wildcard $(TOP_DIR)/lib/hw/*.c} \
         ${wildcard $(TOP_DIR)/lib/libc/src/errno/*.c} \
-        ${wildcard $(TOP_DIR)/lib/libc/src/exit/*.c} \
         ${wildcard $(TOP_DIR)/lib/libc/src/stdio/*.c} \
         ${wildcard $(TOP_DIR)/lib/libc/src/string/*.c} \
         ${wildcard $(TOP_DIR)/lib/libc/src/stdlib/*.c} \
@@ -123,6 +122,8 @@ LIBC_SRCS = \
         ${wildcard $(TOP_DIR)/lib/libc/src/time/*.c} \
         ${wildcard $(TOP_DIR)/lib/libc/src/misc/*.c)}
         C_SOURCES += $(LIBC_SRCS)
+
+#        ${wildcard $(TOP_DIR)/lib/libc/src/exit/*.c} \
 
 HAL_DRIVER_SRC =  \
         $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
@@ -728,7 +729,6 @@ SENSORHUB_INC += \
         -I $(TOP_DIR)/components/sensorhub/include/app \
         -I $(TOP_DIR)/components/sensorhub/include/arch \
         -I $(TOP_DIR)/components/sensorhub/include/common \
-        -I $(TOP_DIR)/components/sensorhub/include/driver \
         -I $(TOP_DIR)/demos/sensorhub/gyro/include \
         -I $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/embedfire/i2c \
         -I $(TOP_DIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/embedfire/sensors/mpu6050

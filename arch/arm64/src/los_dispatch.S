@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: AArch64 Dispatch Implementation
+ * Description: Aarch64 Dispatch Implementation
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -52,7 +52,7 @@
 #define lr  x30
 
 /*
- * Register usesages:
+ * Register usage:
  *  x0-x3   Arguments
  *  x9-x15  Scratch
  *  x19-x28 Globals
@@ -74,7 +74,7 @@
     ldp     \ra, \rb, [sp], #32
 .endm
 
-/***************  Genernal Registers  ***************/
+/***************  General Registers  ***************/
 
 .macro PUSH_REGS
     PUSH    x28, x29
@@ -279,7 +279,16 @@ _osExceptIrqHdl:
     IRQ_PUSH_REGS
 
 #ifdef LOSCFG_IRQ_USE_STANDALONE_STACK
+#ifdef LOSCFG_KERNEL_SMP
+    /* read core id from mpidr_el1 */
+    mrs     x1, mpidr_el1
+    and     w2, w1, #0xff
+    ubfx    x0, x1, #8, #8
+    tst     x1, #0x1000000
+    csel    w0, w0, w2, ne
+#else
     mov     x0, #0
+#endif
     /* check nesting count, if 0, switch sp to irq stack */
     ldr     x3, =g_intCount
     ldr     x4, [x3, x0, lsl #3]
