@@ -37,7 +37,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "osdepends/atiny_osdep.h"
-#include <board.h>
+#include "board_ota.h"
 #include "common.h"
 #include "securec.h"
 

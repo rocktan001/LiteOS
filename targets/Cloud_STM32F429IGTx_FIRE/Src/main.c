@@ -33,7 +33,6 @@
  *---------------------------------------------------------------------------*/
 #include "main.h"
 #include "sys_init.h"
-
 #include "los_base.h"
 #include "los_task_pri.h"
 #include "los_typedef.h"

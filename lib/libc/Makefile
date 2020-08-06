@@ -28,6 +28,7 @@ LOCAL_SRCS = $(wildcard ../hw/*.c) \
              $(wildcard src/termios/*.c)
 
 LOCAL_INCLUDE := -I $(LITEOSTOPDIR)/lib/libc/arch/generic \
+    -I $(LITEOSTOPDIR)/lib/libc/src/include \
     -I $(LITEOSTOPDIR)/lib/libc/src/internal \
     -I $(LITEOSTOPDIR)/lib/libc/src/crypt \
     -I $(LITEOSTOPDIR)/lib/libc/src/ctype \

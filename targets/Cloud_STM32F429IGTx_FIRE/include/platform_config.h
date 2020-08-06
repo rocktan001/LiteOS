@@ -36,6 +36,7 @@
 #define _PLATFORM_CONFIG_H
 
 #include "clock.h"
+#include "stm32f4xx.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -43,18 +44,12 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define __CM4_REV                 0x0001U  /*!< Core revision r0p1                            */
-#define __MPU_PRESENT             1U       /*!< STM32F4XX provides an MPU                     */
-#define __NVIC_PRIO_BITS          4U       /*!< STM32F4XX uses 4 Bits for the Priority Levels */
-#define __Vendor_SysTickConfig    0U       /*!< Set to 1 if different SysTick Config is used  */
-#define __FPU_PRESENT             1U       /*!< FPU present                                   */
-
-
 extern UINT32 __LOS_HEAP_ADDR_START__;
 extern UINT32 __LOS_HEAP_ADDR_END__;
 #define OS_SYS_MEM_SIZE                            ((UINT32)(__LOS_HEAP_ADDR_END__ - __LOS_HEAP_ADDR_START__ + 1))
 
 #define LOSCFG_BASE_CORE_TSK_CONFIG                15
+#define LOSCFG_BASE_CORE_TSK_LIMIT                 16
 #define LOSCFG_BASE_CORE_TICK_PER_SECOND           1000
 #define LOSCFG_BASE_CORE_SWTMR_CONFIG              16
 #define LOSCFG_BASE_IPC_QUEUE_CONFIG               10
@@ -65,8 +60,6 @@ extern UINT32 __LOS_HEAP_ADDR_END__;
 #define LOSCFG_BASE_CORE_EXC_TSK_SWITCH            YES
 #define LOSCFG_COMPAT_CMSIS_FW                     YES
 #define LOSCFG_PLATFORM_EXC                        YES
-#define LOSCFG_CC_STACKPROTECTOR_STRONG            YES
-#define LOSCFG_PLATFORM_UART_WITHOUT_VFS           YES
 #define LOSCFG_NO_SHARED_IRQ
 
 #ifdef __cplusplus

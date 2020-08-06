@@ -1,0 +1,9 @@
+ifeq ($(LOSCFG_COMPAT_CMSIS), y)
+    LITEOS_CMSIS_INCLUDE += -I $(LITEOSTOPDIR)/compat/cmsis/include
+endif
+
+ifeq ($(LOSCFG_COMPAT_POSIX), y)
+    LITEOS_POSIX_INCLUDE   += -I $(LITEOSTOPDIR)/compat/posix/include
+endif
+
+LITEOS_COMPAT_INCLUDE      := $(LITEOS_CMSIS_INCLUDE)   $(LITEOS_POSIX_INCLUDE)

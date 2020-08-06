@@ -1,0 +1,145 @@
+menu "Kernel"
+config LOSCFG_KERNEL_LITEKERNEL
+    bool "Enable Lite Kernel"
+    default y
+    help
+      This option will enable lite kernel of LiteOS. This is a basic feature,
+      so you should say Y here.
+
+choice
+    prompt "Mem Type"
+    default LOSCFG_KERNEL_MEM_BESTFIT
+    depends on  LOSCFG_KERNEL_LITEKERNEL
+
+config LOSCFG_KERNEL_MEM_BESTFIT
+    bool "Enable mem bestfit"
+    help
+      This option will change mem type as bestfit
+
+config LOSCFG_KERNEL_MEM_BESTFIT_LITTLE
+    bool "Enable mem bestfit_little"
+    help
+      This option will change mem type as bestfit little
+endchoice
+
+config LOSCFG_KERNEL_EXTKERNEL
+    bool "Enable Extend Kernel"
+    default y
+    depends on LOSCFG_KERNEL_LITEKERNEL
+    help
+      This option will enable extend Kernel of LiteOS.  Extend kernel include
+      cppsupport, cpup, dynload, runstop and scatter. You can select one or some
+      of them.
+
+config LOSCFG_KERNEL_CPPSUPPORT
+    bool "C++ Support"
+    default y
+    depends on LOSCFG_KERNEL_EXTKERNEL
+    help
+      If you wish to build LiteOS with support for C++.
+
+config LOSCFG_KERNEL_MPU
+   bool "Enable MPU Support"
+   default n
+   depends on LOSCFG_KERNEL_EXTKERNEL
+   help
+     Enable this option only when the processor has a Memory Protection Unit
+
+config LOSCFG_KERNEL_CPUP
+    bool "Enable Cpup"
+    default y
+    depends on LOSCFG_KERNEL_EXTKERNEL
+    help
+      If you wish to build LiteOS with support for cpup.
+
+config LOSCFG_CPUP_INCLUDE_IRQ
+    bool "Enable Cpup include irq"
+    default y
+    depends on LOSCFG_KERNEL_CPUP
+    help
+      If you wish to include irq usage for cpup.
+
+config LOSCFG_KERNEL_DYNLOAD
+    bool "Enable Dynamic Load Feature"
+    default y
+    depends on LOSCFG_KERNEL_EXTKERNEL
+    help
+      If you wish to build LiteOS with support for dynamic load.
+
+config LOSCFG_KERNEL_RUNSTOP
+    bool "Enable Run stop Feature"
+    default y
+    depends on LOSCFG_KERNEL_EXTKERNEL && (LOSCFG_DRIVERS_MTD_NAND || LOSCFG_DRIVERS_MTD_SPI_NOR)
+    help
+      If you wish to build LiteOS with support for run-stop.
+
+config LOSCFG_KERNEL_SCATTER
+    bool "Enable Scatter Feature"
+    default y
+    depends on LOSCFG_KERNEL_EXTKERNEL && (LOSCFG_DRIVERS_MTD_NAND || LOSCFG_DRIVERS_MTD_SPI_NOR)
+    help
+      If you wish to build LiteOS with support for scatter.
+
+config LOSCFG_KERNEL_TICKLESS
+    bool "Enable Tickless Feature"
+    default y
+    depends on LOSCFG_KERNEL_EXTKERNEL
+    help
+      If you wish to build LiteOS with support for tickless.
+
+config LOSCFG_KERNEL_TRACE
+    bool "Enable Trace Feature"
+    default n
+    depends on LOSCFG_KERNEL_EXTKERNEL
+    help
+      If you wish to record LiteOS's task and interrupt switch trace.
+
+config LOSCFG_KERNEL_SMP
+    bool "Enable Kernel SMP"
+    default n
+    help
+      This option will enable smp support of LiteOS.
+
+config LOSCFG_KERNEL_SMP_CORE_NUM
+    int "Muti-processing Core Numbers"
+    default 2
+    depends on LOSCFG_KERNEL_SMP
+    help
+      This represents the number of muti-processing cores.
+
+config LOSCFG_KERNEL_SMP_LOCKDEP
+    bool "Enable Spinlock Lockdep Check"
+    default n
+    depends on LOSCFG_KERNEL_SMP
+    help
+      This option will enable spinlock lockdep check.
+
+config LOSCFG_KERNEL_SMP_TASK_SYNC
+    bool "Enable Synchronized Task Operations"
+    default n
+    depends on LOSCFG_KERNEL_SMP
+    help
+      This option will enable task synchronized operate task across cores.
+
+config LOSCFG_KERNEL_SCHED_STATISTICS
+    bool "Enable Scheduler statistics"
+    default n
+    depends on LOSCFG_KERNEL_SMP
+    help
+      This option will enable schedulder statistics.
+
+choice
+    prompt "Scheduler"
+    default LOSCFG_SCHED_SQ
+    help
+      The scheduler used to dispacher tasks.
+config LOSCFG_SCHED_SQ
+    bool "Single Ready Queue"
+config LOSCFG_SCHED_MQ
+    bool "Mutiple Ready Queue"
+
+endchoice
+
+endmenu
+
+

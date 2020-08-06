@@ -36,6 +36,7 @@
 #define _PLATFORM_CONFIG_H
 
 #include "clock.h"
+#include "stm32f7xx.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -43,13 +44,25 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define LOSCFG_BASE_CORE_EXC_TSK_SWITCH   YES
-#define LOSCFG_BASE_CORE_TICK_PER_SECOND  1000
-
 extern UINT32 __LOS_HEAP_ADDR_START__;
 extern UINT32 __LOS_HEAP_ADDR_END__;
-
 #define OS_SYS_MEM_SIZE        ((UINT32)(__LOS_HEAP_ADDR_END__ - __LOS_HEAP_ADDR_START__ + 1))
+
+#define LOSCFG_BASE_CORE_TSK_CONFIG                15
+#define LOSCFG_BASE_CORE_TSK_LIMIT                 16
+#define LOSCFG_BASE_CORE_TICK_PER_SECOND           1000
+#define LOSCFG_BASE_CORE_SWTMR_CONFIG              16
+#define LOSCFG_BASE_IPC_QUEUE_CONFIG               10
+#define LOSCFG_BASE_IPC_MUX_CONFIG                 20
+#define LOSCFG_BASE_IPC_SEM_CONFIG                 20
+#define LOS_TASK_MIN_STACK_SIZE                    0x200
+#define LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE    0x600
+#define LOSCFG_BASE_CORE_EXC_TSK_SWITCH            YES
+#define LOSCFG_COMPAT_CMSIS_FW                     YES
+#define LOSCFG_PLATFORM_EXC                        YES
+#define LOSCFG_NO_SHARED_IRQ
+#define LOSCFG_GUI_ENABLE
+#define LOSCFG_CMSIS_VERSION                       1
 
 #ifdef __cplusplus
 #if __cplusplus

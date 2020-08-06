@@ -57,12 +57,11 @@ extern "C" {
 /* Inter-module variable */
 extern UINT32 g_uart_fputc_en;
 STATIC UINT32 ConsoleSendTask(UINTPTR param);
-STATIC UINT8 g_taskConsoleIDArray[LOSCFG_BASE_CORE_TSK_CONFIG];
+STATIC UINT8 g_taskConsoleIDArray[LOSCFG_BASE_CORE_TSK_LIMIT];
 
 
 STATIC SPIN_LOCK_INIT(g_consoleSpin);
 
-#define SHELL_TASK_PRIORITY       9
 #define CONSOLE_CIRBUF_EVENT      0x02U
 #define CONSOLE_SEND_TASK_EXIT    0x04U
 #define CONSOLE_SEND_TASK_RUNNING 0x10U
@@ -84,7 +83,7 @@ INT32 GetFilepOps(const struct file *filep, struct file **privFilep, const struc
         goto ERROUT;
     }
 
-    /* to find console device's filep(now it is *privFilep) throught i_private */
+    /* to find console device's filep(now it is *privFilep) through i_private */
     *privFilep = (struct file *)filep->f_inode->i_private;
     if (((*privFilep)->f_inode == NULL) || ((*privFilep)->f_inode->u.i_ops == NULL)) {
         ret = EINVAL;
@@ -173,6 +172,36 @@ BOOL IsConsoleOccupied(const CONSOLE_CB *consoleCB)
     } else {
         return FALSE;
     }
+}
+
+STATIC INT32 ConsoleCtrlCaptureLine(CONSOLE_CB *consoleCB)
+{
+    struct termios *consoleTermios = NULL;
+    UINT32 intSave;
+
+    LOS_SpinLockSave(&g_consoleSpin, &intSave);
+    consoleTermios = &consoleCB->consoleTermios;
+    (VOID)ConsoleTcGetAttr(consoleCB->fd, consoleTermios);
+    consoleTermios->c_lflag |= ICANON | ECHO;
+    (VOID)ConsoleTcSetAttr(consoleCB->fd, 0, consoleTermios);
+    LOS_SpinUnlockRestore(&g_consoleSpin, intSave);
+
+    return LOS_OK;
+}
+
+STATIC INT32 ConsoleCtrlCaptureChar(CONSOLE_CB *consoleCB)
+{
+    struct termios *consoleTermios = NULL;
+    UINT32 intSave;
+
+    LOS_SpinLockSave(&g_consoleSpin, &intSave);
+    consoleTermios = &consoleCB->consoleTermios;
+    (VOID)ConsoleTcGetAttr(consoleCB->fd, consoleTermios);
+    consoleTermios->c_lflag &= ~(ICANON | ECHO);
+    (VOID)ConsoleTcSetAttr(consoleCB->fd, 0, consoleTermios);
+    LOS_SpinUnlockRestore(&g_consoleSpin, intSave);
+
+    return LOS_OK;
 }
 
 STATIC INT32 ConsoleCtrlRightsCapture(CONSOLE_CB *consoleCB)
@@ -685,6 +714,12 @@ STATIC INT32 ConsoleIoctl(struct file *filep, INT32 cmd, unsigned long arg)
         case CONSOLE_CONTROL_RIGHTS_RELEASE:
             ret = ConsoleCtrlRightsRelease(consoleCB);
             break;
+        case CONSOLE_CONTROL_CAPTURE_LINE:
+            ret = ConsoleCtrlCaptureLine(consoleCB);
+            break;
+        case CONSOLE_CONTROL_CAPTURE_CHAR:
+            ret = ConsoleCtrlCaptureChar(consoleCB);
+            break;
         default:
             ret = fileOps->ioctl(privFilep, cmd, arg);
             break;
@@ -855,7 +890,7 @@ STATIC INT32 OsConsoleDevInit(CONSOLE_CB *consoleCB, const CHAR *deviceName)
     }
 
     /*
-     * Use filep to connect console and uart, we can find uart driver function throught filep.
+     * Use filep to connect console and uart, we can find uart driver function through filep.
      * now we can operate /dev/console to operate /dev/ttyS0 through filep.
      */
     (VOID)register_driver(consoleCB->name, &g_consoleDevOps, DEFFILEMODE, filep);
@@ -971,7 +1006,7 @@ STATIC UINT32 OsConsoleBufInit(CONSOLE_CB *consoleCB)
     }
 
     initParam.pfnTaskEntry = (TSK_ENTRY_FUNC)ConsoleSendTask;
-    initParam.usTaskPrio   = SHELL_TASK_PRIORITY;
+    initParam.usTaskPrio   = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
     initParam.auwArgs[0]   = (UINTPTR)consoleCB;
     initParam.uwStackSize  = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     if (consoleCB->consoleID == CONSOLE_SERIAL) {
@@ -1370,6 +1405,32 @@ ERROUT:
     return VFS_ERROR;
 }
 
+STATIC VOID ConsoleFlush(const CONSOLE_CB *consoleCB, CHAR *buf, UINT32 size)
+{
+    UINT32 cnt = 0;
+    UINT32 start = 0;
+    UINT32 temp = 0;
+
+    /*
+     * Since the console driver may require a lock which will affect the timing of
+     * the irq response. Put every single line to the driver to reduce the impact.
+     */
+    while (cnt < size) {
+        if (buf[cnt] == '\n') {
+            (VOID)WriteToTerminal(consoleCB, &buf[start], temp + 1);
+            start = ++cnt;
+            temp = 0;
+            continue;
+        }
+        cnt++;
+        temp++;
+    }
+
+    if (temp != 0) {
+        (VOID)WriteToTerminal(consoleCB, &buf[start], temp);
+    }
+}
+
 STATIC UINT32 ConsoleSendTask(UINTPTR param)
 {
     CONSOLE_CB *consoleCB = (CONSOLE_CB *)param;
@@ -1399,7 +1460,8 @@ STATIC UINT32 ConsoleSendTask(UINTPTR param)
             (VOID)LOS_CirBufRead(cirBufCB, buf, size);
             LOS_CirBufUnlock(cirBufCB, intSave);
 
-            (VOID)WriteToTerminal(consoleCB, buf, size);
+            ConsoleFlush(consoleCB, buf, size);
+
             (VOID)LOS_MemFree(m_aucSysMem1, buf);
         } else if (ret == CONSOLE_SEND_TASK_EXIT) {
             break;

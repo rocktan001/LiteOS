@@ -42,7 +42,6 @@
 #include "console.h"
 #endif
 #include "uart.h"
-#include "local.h"
 
 #ifdef __cplusplus
 #if __cplusplus

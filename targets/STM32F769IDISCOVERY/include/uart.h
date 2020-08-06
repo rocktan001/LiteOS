@@ -35,8 +35,6 @@
 #ifndef _UART_H
 #define _UART_H
 
-#include "stm32f7xx.h"
-
 #define UART_WITH_LOCK    1
 #define UART_WITHOUT_LOCK 0
 #define DEFAULT_TIMEOUT 0xFFFF

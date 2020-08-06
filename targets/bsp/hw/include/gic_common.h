@@ -39,6 +39,12 @@
 #include "asm/platform.h"
 #include "los_config.h"
 
+#ifdef  __cplusplus
+#if  __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
 /* gic arch revision */
 enum {
     GICV1 = 1,
@@ -80,8 +86,8 @@ enum {
 #define GICD_PIDR2V3                    (GICD_OFFSET + 0xffe8)
 
 #ifdef LOSCFG_PLATFORM_BSP_GIC_V3
-#define GICD_IGRPMODR(n)                (GICD_OFFSET + 0x0d00 + (n) * 4)/* Interrupt Group Mode Reisters */
-#define GICD_IROUTER(n)                 (GICD_OFFSET + 0x6000 + (n) * 8)/* Interrupt Rounter Reisters */
+#define GICD_IGRPMODR(n)                (GICD_OFFSET + 0x0d00 + (n) * 4)/* Interrupt Group Mode Registers */
+#define GICD_IROUTER(n)                 (GICD_OFFSET + 0x6000 + (n) * 8)/* Interrupt Rounter Registers */
 #endif
 
 #define GIC_REG_8(reg)                  (*(volatile UINT8 *)((UINTPTR)(GIC_BASE_ADDR + (reg))))
@@ -122,5 +128,11 @@ enum {
  * If the GIC_MAX_INTERRUPT_PREEMPTION_LEVEL is 0, the minimum priority is 0xff.
  */
 #define MIN_INTERRUPT_PRIORITY              ((UINT8)((GIC_MAX_INTERRUPT_PREEMPTION_LEVEL - 1) << PRIORITY_SHIFT))
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif

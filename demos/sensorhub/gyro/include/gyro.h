@@ -33,7 +33,6 @@
 #ifndef _GYRO_H
 #define _GYRO_H
 
-#include "sensors.h"
 #include "sensor_manager.h"
 
 #ifdef __cplusplus
@@ -43,7 +42,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-    GyroPlatformData gyroPlatData;
     UINT16 gyroTimerId;
 } Mpu6050Priv;
 

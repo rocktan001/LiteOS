@@ -44,6 +44,7 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 
+#define OS_PRIORITY_QUEUE_NUM         32
 #define PRIQUEUE_PRIOR0_BIT           0x80000000U
 
 LITE_OS_SEC_BSS LOS_DL_LIST g_priQueueList[OS_PRIORITY_QUEUE_NUM];

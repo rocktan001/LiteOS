@@ -162,8 +162,9 @@ exit_failed:
     }
 		return ctx;
 #endif
-
+   return NULL;
 }
+
 int atiny_net_accept( void *bind_ctx, void *client_ctx, void *client_ip, size_t buf_size, size_t *ip_len )
 {
 #if defined (WITH_LWIP) || defined (WITH_LINUX)
@@ -579,6 +580,6 @@ int atiny_net_send_timeout(void *ctx, const unsigned char *buf, size_t len,
         fd = ((atiny_net_context *)ctx)->fd;
         return at_api_send(fd , buf, (uint32_t)len);
 #endif
-
+   return 0;
 }
 

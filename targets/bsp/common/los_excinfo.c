@@ -218,7 +218,15 @@ VOID OsReadWriteExceptionInfo(UINT32 startAddr, UINT32 space, UINT32 flag, CHAR 
         if (OsWriteExcInfoToSpiFlash(startAddr, space, buf) != LOS_OK) {
             PRINT_ERR("Exception information written to flash failed\n");
         }
-        free(buf);  /* Consider whether or not the "buf" is released according to actual use */
+#ifndef LOSCFG_EXC_INTERACTION
+        /*
+         * When system is in the exception interaction, this buf was free,
+         * but this feature is still running. This buffer may be used again
+         * without malloc.
+         * So, consider whether or not the "buf" is released according to actual use.
+         */
+        free(buf);
+#endif
 #endif
     } else if (flag == 1) {
 #ifdef LOSCFG_DRIVERS_MTD_SPI_NOR

@@ -35,7 +35,6 @@
 #include "los_swtmr.h"
 #include "protocol.h"
 #include "sensor_manager.h"
-#include "sensors.h"
 #include "mpu6050.h"
 
 #ifdef __cplusplus
@@ -96,7 +95,7 @@ STATIC INT32 GyroOpen(SensorType *sensor, OpenParam *para)
     }
 
     // creat a timer, first parameter is ticks.
-    ret = LOS_SwtmrCreate(sensor->interval, LOS_SWTMR_MODE_PERIOD, GypoTimerFunc, &gyro->gyroTimerId, sensor);
+    ret = LOS_SwtmrCreate(sensor->interval, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)GypoTimerFunc, &gyro->gyroTimerId, (UINT32)sensor);
     if (ret != LOS_OK) {
         PRINT_ERR("creat a timer failed!\n");
         return LOS_NOK;

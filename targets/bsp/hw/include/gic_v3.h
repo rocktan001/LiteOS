@@ -39,6 +39,12 @@
 #include "asm/platform.h"
 #include "los_hw_cpu.h"
 
+#ifdef  __cplusplus
+#if  __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
 #define BIT_32(bit) (1u << bit)
 #define BIT_64(bit) (1ul << bit)
 
@@ -203,4 +209,11 @@ STATIC INLINE VOID GiccSetBpr0(UINT32 val)
     ISB;
     DSB;
 }
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
 #endif

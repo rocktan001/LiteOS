@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: AArch64 Exc Implementation
+ * Description: Aarch64 Exc Implementation
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -40,6 +40,7 @@
 #include "los_hw_pri.h"
 #include "los_excinfo_pri.h"
 #include "los_stackinfo_pri.h"
+#include "los_mp.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -211,11 +212,13 @@ VOID OsDumpContextMem(const ExcContext *excBufAddr)
     for (excReg = &(excBufAddr->X[0]); count <= (DUMPREGS - 1); excReg++, count++) {
         if (IS_VALID_ADDR(*excReg)) {
             PrintExcInfo("\ndump mem around X%u:%p", count, (*excReg));
+            OsDumpMemByte(DUMPSIZE, ((*excReg) - (DUMPSIZE >> 1)));
         }
     }
 
     if (IS_VALID_ADDR(excBufAddr->SP)) {
         PrintExcInfo("\ndump mem around SP:%p", excBufAddr->SP);
+        OsDumpMemByte(DUMPSIZE, (excBufAddr->SP - (DUMPSIZE >> 1)));
     }
 }
 
@@ -249,9 +252,13 @@ VOID OsExcDumpContext(const ExcContext *excBufAddr)
                  excBufAddr->LR, excBufAddr->regELR, excBufAddr->SPSR);
 
     BackTrace(excBufAddr->X[FP_NUM]);
+    (VOID)OsShellCmdTskInfoGet(OS_ALL_TASK_MASK);
+
     OsExcStackInfo();
 
     OsDumpContextMem(excBufAddr);
+
+    (VOID)OsShellCmdMemCheck(0, NULL);
 }
 
 VOID OsCurrentELGet(UINT32 reg)
@@ -263,6 +270,12 @@ VOID OsExceptSyncExcHdl(ExcContext *frame)
 {
     UINT32 regESR = AARCH64_SYSREG_READ(ESR_ELx);
     UINT32 bitsEC = NBIT(regESR, 31, 26);       /* get the 26-31bit for EC */
+
+#if (LOSCFG_KERNEL_SMP == YES)
+    /* use halt ipi to stop other active cores */
+    UINT32 target = (UINT32)(OS_MP_CPU_ALL & ~CPUID_TO_AFFI_MASK(ArchCurrCpuid()));
+    HalIrqSendIpi(target, LOS_MP_IPI_HALT);
+#endif
 
 #ifdef LOSCFG_SHELL_EXCINFO
     log_read_write_fn func = GetExcInfoRW();
