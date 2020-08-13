@@ -469,10 +469,6 @@ LosMemDynNode *OsMemNodePrevTryGet(VOID *pool, LosMemDynNode **node, const VOID 
     LosMemDynNode *nodePre = NULL;
     LosMemPoolInfo *poolInfo = (LosMemPoolInfo *)pool;
 
-    if (ptr == OS_MEM_FIRST_NODE(pool)) {
-        return OsMemFirstNodePrevGet(poolInfo);
-    }
-
     for (nodeCur = OS_MEM_FIRST_NODE(pool);
          nodeCur < OS_MEM_END_NODE(pool, poolInfo->poolSize);
          nodeCur = OS_MEM_NEXT_NODE(nodeCur)) {
