@@ -315,9 +315,9 @@ VOID OsMemRecordMalloc(const VOID *ptr, UINT32 size)
     if (g_memRecordShowEnable == 0) {
         return;
     }
-
-    OsMemRecord(ptr, size);
+    
     g_saveMemRecord[g_memRecordIndex].actType = OS_MEM_ALLOC;
+    OsMemRecord(ptr, size);
 }
 
 VOID OsMemRecordFree(const VOID *ptr, UINT32 size)
@@ -326,9 +326,9 @@ VOID OsMemRecordFree(const VOID *ptr, UINT32 size)
     if (g_memRecordShowEnable == 0) {
         return;
     }
-    actType = (size == 0) ? OS_MEM_INVALIDFREE : OS_MEM_VALIDFREE;
-    OsMemRecord(ptr, size);
+    actType = (size == 0) ? OS_MEM_INVALIDFREE : OS_MEM_VALIDFREE;    
     g_saveMemRecord[g_memRecordIndex].actType = actType;
+    OsMemRecord(ptr, size);
 }
 
 VOID OsMemRecordShowTask(VOID)
