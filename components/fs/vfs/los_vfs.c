@@ -1041,7 +1041,7 @@ int los_fs_mount (const char *fsname, const char *path, void *data)
     const char          *tmp = NULL;
 
     if (fsname == NULL || path == NULL ||
-            path [0] == '\0' || path [0] != '/')
+            path [0] != '/')
     {
         return LOS_NOK;
     }
