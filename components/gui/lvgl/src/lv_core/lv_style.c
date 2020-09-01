@@ -256,10 +256,10 @@ void _lv_style_list_remove_style(lv_style_list_t * list, lv_style_t * style)
         return;
     }
 
-    lv_style_t ** new_classes = lv_mem_realloc(list->style_list, sizeof(lv_style_t *) * (list->style_cnt - 1));
+    lv_style_t ** new_classes = lv_mem_alloc(sizeof(lv_style_t *) * (list->style_cnt - 1));
     LV_ASSERT_MEM(new_classes);
     if(new_classes == NULL) {
-        LV_LOG_WARN("lv_style_list_remove_style: couldn't reallocate class list");
+        LV_LOG_WARN("lv_style_list_remove_style: couldn't allocate class list");
         return;
     }
     uint8_t j;
@@ -270,6 +270,7 @@ void _lv_style_list_remove_style(lv_style_list_t * list, lv_style_t * style)
 
     }
 
+    lv_mem_free(list->style_list);
     list->style_cnt--;
     list->style_list = new_classes;
 }
