@@ -6,12 +6,11 @@ LiteOS入口在工程对应的main.c中，基本流程如下：
 ```
 int main(void)
 {
-    UINT32 uwRet = LOS_OK;
+    UINT32 ret = LOS_OK;
     HardWare_Init();
 
-    uwRet = OsMain();
-    if (uwRet != LOS_OK)
-    {
+    ret = OsMain();
+    if (ret != LOS_OK) {
         return LOS_NOK;
     }
 
@@ -43,8 +42,6 @@ int main(void)
 |            | msp430                   |                      | msp430架构中断、调度、tick相关代码                            |
 | build      |                          |                      | LiteOS编译系统需要的配置及脚本                                |
 | compat     | cmsis                    |                      | liteos提供的CMSIS-RTOS 1.0和2.0接口                           |
-|            | posix                    | include              | posix接口的头文件                                             |
-|            |                          | src                  | posix接口的源码                                               |
 | components | connectivity             | agent_tiny           | agent_tiny端云互通组件，包括公共头文件、示例代码、客户端实现代码、操作系统适配层代码 |
 |            |                          | lwm2m                | lwm2m协议实现                                                |
 |            |                          | mqtt                 | MQTT开源协议实现                                             |
@@ -79,7 +76,7 @@ int main(void)
 | kernel     | base                     | core                 | LiteOS基础内核代码，包括队列、task调度、软timer、时间片计算等功能  |
 |            |                          | include              | LiteOS内核内部使用的头文件                                   |
 |            |                          | ipc                  | LiteOS中task间通讯的相关接口，包括事件、信号量、消息队列、互斥锁等 |
-|            |                          | mem                  | LiteOS中的内核内存管理的相关代码                             |
+|            |                          | mem                  | LiteOS中的内存管理相关代码                             |
 |            |                          | misc                 | 内存对齐功能以及毫秒级休眠sleep功能                          |
 |            |                          | mp                   | 预留多CPU支持                                                |
 |            |                          | om                   | 与错误处理相关的文件                                         |
@@ -89,18 +86,18 @@ int main(void)
 |            |                          | include              | extended目录所需的头文件                                     |
 |            |                          | tickless             | tickless定时机制实现                                         |
 |            | include                  |                      | LiteOS开源内核头文件                                         |
-| lib        | hw                       |                      | LiteOS适配的malloc、errno、strnstr函数接口                   |
-|            | libc                     |                      | LiteOS适配的libc库                                           |
+| lib        | huawei_libc              |                      | LiteOS自研libc库和适配的posix接口                                             |
+|            | libc                     |                      | LiteOS适配的musl libc库                                      |
 |            | libsec                   |                      | 华为安全函数库                                               |
 |            | zlib                     |                      | 开源zlib库                                                   |
 | osdepends  | liteos                   |                      | LiteOS提供的部分OS适配接口                                     |
 | targets    | bsp                      |                      | 通用板级支持包                                               |
 |            | Cloud_STM32F429IGTx_FIRE |                      | 野火STM32F429（ARM Cortex M4）开发板的开发工程源码包         |
-|            | Mini_Project             |                      | 仿真工程                                                     |
-|            | STM32F769IDISCOVERY      |                      | STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包   |
-|            | STM32L431_BearPi         |                      | 小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包       |
-| tests      |                          |                      | 内核及系统库的参考测试代码                                   |
-| tools      | build                    |                      | LiteOS支持的开发板编译配置文件                               |
+|            | STM32F769IDISCOVERY      |                      | STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包    |
+|            | STM32L431_BearPi         |                      | 小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包        |
+| tests      |                          |                      | 内核及系统库的参考测试代码                                    |
+| tools      | build                    |                      | LiteOS支持的开发板编译配置文件                                |
 |            | menuconfig               |                      | LiteOS编译所需的menuconfig脚本                               |
 |            | stackusage               |                      | LiteOS栈使用估计工具                                         |
-| Makefile   |                          |                      | LiteOS Makefile                                              |
+| Makefile   |                          |                      | LiteOS Makefile                                             |
+| .config    |                          |                      | 开发板的配置文件，如果用户不重新选择开发板，默认为STM32F769IDISCOVERY开发板的配置文件 |

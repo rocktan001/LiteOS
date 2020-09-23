@@ -852,7 +852,7 @@ osMailQ(name)
 #define GET_EVENT_MAXTIME(event)
 #endif
 
-#define MESSAGEQID_TO_QUEUEID(_messageqid)  (((LosQueueCB *)(_messageqid))->queueID)
+#define MESSAGEQID_TO_QUEUEID(_messageqid)  (((LosQueueCB *)(_messageqid))->queueId)
 
 fwMailQId fwMailCreate (fwMailQDef_t *queue_def, osThreadId thread_id);
 void *fwMailAlloc (fwMailQId queue_id, UINT32 millisec, UINT8 tag, UINT8 cmd);

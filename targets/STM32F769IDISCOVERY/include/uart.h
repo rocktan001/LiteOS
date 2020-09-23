@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: uart config HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -39,6 +41,7 @@
 #define UART_WITHOUT_LOCK 0
 #define DEFAULT_TIMEOUT 0xFFFF
 
+extern void uart_init(void);
 extern int uart_write(const char *buf, int len, int timeout);
 #define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
 

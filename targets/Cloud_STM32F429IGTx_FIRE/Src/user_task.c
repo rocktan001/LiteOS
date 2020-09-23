@@ -54,7 +54,10 @@ static UINT32 g_fs_tskHandle;
 
 void atiny_task_entry(void)
 {
+#ifdef WITH_MQTT
     extern void agent_tiny_entry(void);
+#endif
+
 #if defined(WITH_LINUX) || defined(WITH_LWIP)
     hieth_hw_init();
     net_init();
@@ -106,10 +109,11 @@ void atiny_task_entry(void)
 #ifdef CONFIG_FEATURE_FOTA
     hal_init_ota();
 #endif
+#ifdef WITH_MQTT
     agent_tiny_entry();
 #endif
+#endif
 }
-
 
 UINT32 creat_agenttiny_task(VOID)
 {
@@ -181,6 +185,7 @@ UINT32 app_init(VOID)
 {
     UINT32 ret = LOS_OK;
 
+    printf("Hello, welcome to liteos!\n");
     ret = creat_agenttiny_task();
     if (ret != LOS_OK)
     {

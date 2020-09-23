@@ -2,6 +2,8 @@
 
 source "arch/arm/Kconfig"
 source "arch/arm64/Kconfig"
+source "arch/xtensa/Kconfig"
+source "arch/riscv/Kconfig"
 
 comment "Extra Configurations"
 

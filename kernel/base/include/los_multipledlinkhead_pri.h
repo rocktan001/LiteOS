@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: Multipledlinkhead Private HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -48,10 +50,6 @@ extern "C" {
 #define OS_MIN_MULTI_DLNK_LOG2  4
 #define OS_MULTI_DLNK_NUM       ((OS_MAX_MULTI_DLNK_LOG2 - OS_MIN_MULTI_DLNK_LOG2) + 1)
 #define OS_DLNK_HEAD_SIZE       OS_MULTI_DLNK_HEAD_SIZE
-#define OS_DLNK_INIT_HEAD       OsDLnkInitMultiHead
-#define OS_DLNK_MULTI_HEAD      OsDLnkMultiHead
-#define OS_DLNK_NEXT_HEAD       OsDLnkNextMultiHead
-#define OS_DLNK_FIRST_HEAD      OsDLnkFirstMultiHead
 #define OS_MULTI_DLNK_HEAD_SIZE sizeof(LosMultipleDlinkHead)
 
 typedef struct {
@@ -63,11 +61,6 @@ STATIC INLINE LOS_DL_LIST *OsDLnkNextMultiHead(VOID *headAddr, LOS_DL_LIST *list
     LosMultipleDlinkHead *head = (LosMultipleDlinkHead *)headAddr;
 
     return (&head->listHead[OS_MULTI_DLNK_NUM - 1] == listNodeHead) ? NULL : (listNodeHead + 1);
-}
-
-STATIC INLINE LOS_DL_LIST *OsDLnkFirstMultiHead(VOID *headAddr)
-{
-    return (LOS_DL_LIST *)headAddr;
 }
 
 extern VOID OsDLnkInitMultiHead(VOID *headAddr);

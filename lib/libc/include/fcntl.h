@@ -67,6 +67,10 @@ struct flock {
 int creat(const char *, mode_t);
 int fcntl(int, int, ...);
 
+#ifdef __LITEOS__
+#define fcntl64 fcntl
+#endif
+
 /**
  * @ingroup fcntl
  *

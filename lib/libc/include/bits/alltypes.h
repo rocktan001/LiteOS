@@ -1,4 +1,4 @@
-#define _REDIR_TIME64 1
+#define _REDIR_TIME64 0
 #if defined(__LP64__)
 #define _Addr long
 #define _Int64 long

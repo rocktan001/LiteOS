@@ -2,9 +2,9 @@ ifeq ($(OS), Linux)
 OBJOUT := $(BUILD)$(dir $(subst $(LITEOSTOPDIR),,$(shell pwd)))$(MODULE_NAME)
 LOCAL_PWD := $(shell pwd)
 else
-TEMPLITEOSTOPDIR:=$(shell cygpath -u $(LITEOSTOPDIR))
-OBJOUT := $(BUILD)$(dir $(subst $(TEMPLITEOSTOPDIR),,$(shell pwd)))$(MODULE_NAME)
-LOCAL_PWD := $(shell cygpath -m $(shell pwd))
+OUT = $(LITEOSTOPDIR)/out/$(LITEOS_PLATFORM)
+BUILD = $(OUT)/obj
+OBJOUT := $(BUILD)$(dir $(subst $(LITEOSTOPDIR),,$(CURDIR)))$(MODULE_NAME)
 endif
 
 ifeq ($(LOCAL_SO), y)
@@ -57,7 +57,7 @@ SUB_MODULE_BUILD: $(MODULE_y)
 
 $(OBJOUT)/%.o: %.c
 	$(HIDE)$(OBJ_MKDIR)
-	$(HIDE)$(CC) $(LOCAL_FLAGS) $(LITEOS_CFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
+	$(HIDE)$(CC) $(LITEOS_CFLAGS) $(LOCAL_FLAGS) $(LOCAL_CFLAGS) -c $< -o $@
 
 $(OBJOUT)/%.o: %.S
 	$(HIDE)$(OBJ_MKDIR)
@@ -81,7 +81,9 @@ $(LOCAL_CGCH): %.h.gch : %.h
 $(LOCAL_CPPGCH): %.h.gch : %.h
 	$(HIDE)$(GPP) $(LITEOS_CXXFLAGS) $(LOCAL_FLAGS) $(LOCAL_CPPFLAGS) -x c++-header $> $^
 
+ifneq ($(LOSCFG_COMPILER_XTENSA_32), y)
 LOCAL_GCH := $(LOCAL_CGCH) $(LOCAL_CPPGCH)
+endif
 
 $(LOCAL_OBJS): $(LOCAL_GCH)
 

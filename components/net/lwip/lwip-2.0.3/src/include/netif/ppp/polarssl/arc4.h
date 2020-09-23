@@ -34,7 +34,7 @@
  */
 
 #include "netif/ppp/ppp_opts.h"
-#if LWIP_INCLUDED_POLARSSL_ARC4/*lint -e553*/
+#if LWIP_INCLUDED_POLARSSL_ARC4
 
 #ifndef LWIP_INCLUDED_POLARSSL_ARC4_H
 #define LWIP_INCLUDED_POLARSSL_ARC4_H

@@ -51,6 +51,7 @@ __LOS_HEAP_ADDR_END__:
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:
+  cpsid i
   ldr   sp, =_estack       /* set stack pointer */
 
 /* Copy the vector_ram segment initializers from flash to SRAM */

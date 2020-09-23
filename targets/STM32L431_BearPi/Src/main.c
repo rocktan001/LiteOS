@@ -51,7 +51,7 @@ extern char __los_heap_addr_end__ [];
 #endif
 
 
-struct phys_mem
+struct phys_mem 
 {
     unsigned long start;
     unsigned long end;

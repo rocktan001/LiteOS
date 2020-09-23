@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2012-2019. All rights reserved.
  * Description: General interrupt controller version 2.0 (GICv2).
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Notes: Reference from arm documents:
  *        https://static.docs.arm.com/ihi0048/bb/IHI0048B_b_gic_architecture_specification.pdf
  * Redistribution and use in source and binary forms, with or without modification,
@@ -36,7 +38,7 @@
 
 #include "gic_common.h"
 #include "los_hwi_pri.h"
-#include "los_mp.h"
+#include "los_mp_pri.h"
 
 STATIC_ASSERT(OS_USER_HWI_MAX <= 1020, "hwi max is too large!");
 

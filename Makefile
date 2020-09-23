@@ -49,10 +49,6 @@ $(LITEOS_LIBS_TARGET): $(__LIBS)
 include tools/menuconfig/Makefile.kconfig
 
 $(LITEOS_MENUCONFIG_H):
-ifneq ($(LITEOS_PLATFORM_MENUCONFIG_H), $(wildcard $(LITEOS_PLATFORM_MENUCONFIG_H)))
-	$(HIDE)+make savemenuconfig
-endif
-
 LITEOS_BUILD: $(LITEOS_MENUCONFIG_H)
 
 LITEOS_BUILD:
@@ -64,8 +60,9 @@ LITEOS_BUILD:
 	done
 
 $(LITEOS_TARGET):
-
+ifeq ($(OS), Linux)
 	$(call update_from_baselib_file)
+endif
 	$(LD) $(LITEOS_LDFLAGS) $(LITEOS_TABLES_LDFLAGS) $(LITEOS_DYNLDFLAGS) -Map=$(OUT)/$@.map -o $(OUT)/$@ --start-group $(LITEOS_BASELIB) --end-group
 	#$(SIZE) -t --common $(OUT)/lib/*.a >$(OUT)/$@.objsize
 	$(OBJCOPY) -O binary $(OUT)/$@ $(OUT)/$@.bin
@@ -78,7 +75,7 @@ clean:
 	$(HIDE)for dir in $(LITEOS_SUBDIRS); \
 		do make -C $$dir clean|| exit 1; \
 	done
-	$(HIDE)$(RM) $(__OBJS) $(LITEOS_TARGET) $(OUT) $(BUILD) $(LITEOS_MENUCONFIG_H) *.bak *~
+	$(HIDE)$(RM) $(__OBJS) $(LITEOS_TARGET) $(OUT) $(BUILD) *.bak *~
 	$(HIDE)echo "clean $(LITEOS_PLATFORM) finish"
 
 cleanall:

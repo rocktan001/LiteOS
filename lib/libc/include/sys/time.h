@@ -11,6 +11,9 @@ extern "C" {
 
 #include <features.h>
 
+#ifdef __LITEOS__
+#include <sys/types.h>
+#endif
 #include <sys/select.h>
 
 /**

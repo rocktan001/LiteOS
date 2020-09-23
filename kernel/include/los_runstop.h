@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: Runstop HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -142,7 +144,7 @@ typedef struct tagRunstopParam {
     UINTPTR uwWowFlashAddr;                     /**< The flash starting address to which the wifi memory mirroring
                                                      is to be stored, the address should be flash write-alignment
                                                      length aligned */
-    UINTPTR uwImageFlashAddr;                  /**< The flash starting address where the whole application image
+    UINTPTR uwImageFlashAddr;                   /**< The flash starting address where the whole application image
                                                      is burned */
 } RUNSTOP_PARAM_S;
 

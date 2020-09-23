@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: MMU Config Implementation
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,7 +34,7 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 #include "los_config.h"
-
+#ifdef LOSCFG_PLATFORM_HI3556V200
 #include "hisoc/mmu_config.h"
 #include "los_hwi.h"
 #include "asm/dma.h"
@@ -42,10 +44,6 @@
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-
-/* This is opration for page table */
-MMU_SET_PAGE_TABLE_PLACE
 
 SENCOND_PAGE g_mmuOsPage = {0};
 SENCOND_PAGE g_mmuAppPage = {0};
@@ -256,15 +254,6 @@ VOID LOS_MMUParamSet(MMU_PARAM *para)
     CleanTLB();
 }
 
-VOID OsSecPageInit(VOID)
-{
-    X_MMU_SECOND_TABLE_OS_PAGE_SET();
-    X_MMU_SECOND_TABLE_APP_PAGE_SET();
-#ifdef LOSCFG_NULL_ADDRESS_PROTECT
-    X_MMU_SECOND_TABLE_EXC_PAGE_SET();
-#endif
-}
-
 VOID OsRemapCached(UINTPTR physAddr, size_t size)
 {
     MMU_PARAM para;
@@ -383,46 +372,10 @@ VOID OsPrintPageItem(const MMU_PARAM *para)
     PRINTK("\n");
 }
 
-VOID OsMmuInit(VOID)
-{
-    UINT32 ttbBase = FIRST_PAGE_DESCRIPTOR_ADDR + 0x0;
-    UINT32 regDACR;
-
-    /* Set the TTB register */
-    __asm volatile ("mcr p15, 0, %0, c2, c0, 0" : : "r"(ttbBase));
-    /* Set the Domain Access Control Register */
-    regDACR = ACCESS_TYPE_MANAGER(DOMAIN0) | ACCESS_TYPE_CLIENT(DOMAIN1); /* D0:manager; D1:client */
-    __asm volatile ("mcr p15, 0, %0, c3, c0, 0" : : "r"(regDACR));
-
-#ifdef LOSCFG_KERNEL_RUNSTOP
-    if (IsImageResume()) return;
-#endif
-
-    /* First clear all TT entries - ie Set them to Faulting */
-    (VOID)memset_s((UINTPTR *)ttbBase, MMU_16K, 0, MMU_16K);
-
-    /*
-     * Set domain of mmu descriptor of (0~1M) D_NA, check the illegal access to NULL pointer in code.
-     * Access to NULL pointer and mem (0 ~ 1M) will trigger exception immediately
-     */
-    X_MMU_SECTION(0, 0, (MMU_1M >> SHIFT_1M), UNCACHEABLE, UNBUFFERABLE,
-                  ACCESS_NA, NON_EXECUTABLE, D_NA);
-
-    /* Set all mem 4G except (0~1M) as uncacheable & rw first */
-    X_MMU_SECTION((MMU_1M >> SHIFT_1M), (MMU_1M >> SHIFT_1M), ((MMU_4G - MMU_1M) >> SHIFT_1M),
-                  UNCACHEABLE, UNBUFFERABLE, ACCESS_RW, NON_EXECUTABLE, D_CLIENT);
-
-    /*
-     * set table as your config
-     * 1: LITEOS_CACHE_ADDR ~ LITEOS_CACHE_ADDR + LITEOS_CACHE_LENGTH ---- set as section(1M) and cacheable & rw
-     */
-    X_MMU_SECTION((LITEOS_CACHE_ADDR >> SHIFT_1M), (SYS_MEM_BASE >> SHIFT_1M), (LITEOS_CACHE_LENGTH >> SHIFT_1M),
-                  CACHEABLE, BUFFERABLE, ACCESS_RW, NON_EXECUTABLE, 0);
-}
-
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#endif

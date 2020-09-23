@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: System Console HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -115,9 +117,9 @@ extern BOOL SetSerialNonBlock(const CONSOLE_CB *consoleCB);
 extern BOOL SetSerialBlock(const CONSOLE_CB *consoleCB);
 extern BOOL SetTelnetNonBlock(const CONSOLE_CB *consoleCB);
 extern BOOL SetTelnetBlock(const CONSOLE_CB *consoleCB);
-extern CONSOLE_CB *OsGetConsoleByID(INT32 consoleID);
-extern CONSOLE_CB *OsGetConsoleByTaskID(UINT32 taskID);
-extern VOID ConsoleTaskReg(INT32 consoleID, UINT32 taskID);
+extern CONSOLE_CB *OsGetConsoleByID(INT32 consoleId);
+extern CONSOLE_CB *OsGetConsoleByTaskID(UINT32 taskId);
+extern VOID ConsoleTaskReg(INT32 consoleId, UINT32 taskId);
 extern INT32 ConsoleUpdateFd(VOID);
 extern BOOL ConsoleEnable(VOID);
 extern BOOL is_nonblock(const CONSOLE_CB *consoleCB);

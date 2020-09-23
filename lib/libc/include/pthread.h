@@ -380,8 +380,10 @@ pthread_t pthread_self(void);
  * @since Huawei LiteOS V100R001C00
  */
 int pthread_equal(pthread_t, pthread_t);
+#ifndef __LITEOS__
 #ifndef __cplusplus
 #define pthread_equal(x,y) ((x)==(y))
+#endif
 #endif
 
 int pthread_setcancelstate(int, int *);
