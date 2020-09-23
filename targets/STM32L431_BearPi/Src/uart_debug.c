@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2020>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description : Uart Module Implementation
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -44,6 +46,7 @@
 
 /* USART1 init function */
 UART_HandleTypeDef uart_debug;
+void BEARPI_UART_MspInit(UART_HandleTypeDef *uartHandle);
 
 void Debug_USART1_UART_Init(void)
 {
@@ -60,12 +63,42 @@ void Debug_USART1_UART_Init(void)
     }
 }
 
+void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
+{
+    BEARPI_UART_MspInit(uartHandle);
+}
+
+void BEARPI_UART_MspInit(UART_HandleTypeDef *uartHandle)
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
+    /* only use usart1 */
+    if (uartHandle->Instance == USART1) {
+    /* USART1 clock enable */
+    __HAL_RCC_USART1_CLK_ENABLE();
+
+    /* USART1 GPIO Configuration
+    PA9     ------> USART1_TX
+    PA10    ------> USART1_RX
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_9 | GPIO_PIN_10;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /* USART1 interrupt Init */
+    HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
+    }
+}
+
 static bool s_uart_init = false;
 
 // ring buffer is used to receive buf in uart
 #ifdef RING_BUFFER
 #define CN_RCV_RING_BUFLEN  128
-static USART_TypeDef*     s_pUSART = USART1;
+static USART_TypeDef      *s_pUSART = USART1;
 static uint32_t           s_uwIRQn = USART1_IRQn;
 static uint32_t           s_uartdebug_rcv_sync;
 static tag_ring_buffer_t  s_uartdebug_rcv_ring;
@@ -75,9 +108,9 @@ static void uart_debug_irq(void)
     unsigned char value;
     if (__HAL_UART_GET_FLAG(&uart_debug, UART_FLAG_RXNE) != RESET) {
         value = (uint8_t)(uart_debug.Instance->RDR & 0x00FF);
-        ring_buffer_write(&s_uartdebug_rcv_ring,&value,1);
+        ring_buffer_write(&s_uartdebug_rcv_ring, &value, 1);
         LOS_SemPost(s_uartdebug_rcv_sync);
-    } else if (__HAL_UART_GET_FLAG(&uart_debug,UART_FLAG_IDLE) != RESET) {
+    } else if (__HAL_UART_GET_FLAG(&uart_debug, UART_FLAG_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&uart_debug);
     }
 }
@@ -97,14 +130,13 @@ void shell_uart_init(int baud)
     }
 
     LOS_HwiCreate(s_uwIRQn, 3, 0, uart_debug_irq, 0);
-    //__HAL_UART_ENABLE_IT(&uart_debug, UART_IT_IDLE);
     __HAL_UART_ENABLE_IT(&uart_debug, UART_IT_RXNE);
 
-    //create the receive buffer and receive sync
-    extern UINT32 osSemCreate (UINT16 usCount, UINT16 usMaxCount, UINT32 *puwSemHandle);
-    osSemCreate(0,CN_RCV_RING_BUFLEN,(UINT32 *)&s_uartdebug_rcv_sync);
+    // create the receive buffer and receive sync
+    extern UINT32 osSemCreate(UINT16 usCount, UINT16 usMaxCount, UINT32 *puwSemHandle);
+    osSemCreate(0, CN_RCV_RING_BUFLEN, (UINT32 *)&s_uartdebug_rcv_sync);
 #ifdef RING_BUFFER
-    ring_buffer_init(&s_uartdebug_rcv_ring,s_uartdebug_rcv_ringmem,CN_RCV_RING_BUFLEN,0,0);
+    ring_buffer_init(&s_uartdebug_rcv_ring, s_uartdebug_rcv_ringmem, CN_RCV_RING_BUFLEN, 0, 0);
 #endif
     s_uart_init = true;
 }
@@ -118,12 +150,13 @@ int fputc(int ch, FILE *f)
     return ch;
 }
 
-int fgetc(FILE *f){
+int fgetc(FILE *f) 
+{
     int ret = 0;
     unsigned char  value;
     do {
-        if (LOS_OK == LOS_SemPend(s_uartdebug_rcv_sync,LOS_WAIT_FOREVER)) {
-            ret = ring_buffer_read(&s_uartdebug_rcv_ring,&value,1);
+        if (LOS_OK == LOS_SemPend(s_uartdebug_rcv_sync, LOS_WAIT_FOREVER)) {
+            ret = ring_buffer_read(&s_uartdebug_rcv_ring,&value, 1);
         }
     } while (ret <= 0);
     ret = value;
@@ -145,8 +178,8 @@ __attribute__((used)) int _read(int fd, char *ptr, int len)
     int ret = 0;
     unsigned char  value;
     do {
-        if(LOS_OK == LOS_SemPend(s_uartdebug_rcv_sync,LOS_WAIT_FOREVER)) {
-            ret = ring_buffer_read(&s_uartdebug_rcv_ring,&value,1);
+        if (LOS_OK == LOS_SemPend(s_uartdebug_rcv_sync, LOS_WAIT_FOREVER)) {
+            ret = ring_buffer_read(&s_uartdebug_rcv_ring, &value, 1);
         }
     } while (ret <= 0);
     *(unsigned char *)ptr = value;

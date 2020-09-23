@@ -8,6 +8,13 @@
 #define _IOR(a,b,c) _IOC(_IOC_READ,(a),(b),sizeof(c))
 #define _IOWR(a,b,c) _IOC(_IOC_READ|_IOC_WRITE,(a),(b),sizeof(c))
 
+#ifdef __LITEOS__
+#define _IOC_NRSHIFT 0
+#define _IOC_NRBITS 8
+#define _IOC_NRMASK ((1 << _IOC_NRBITS) - 1)
+#define _IOC_NR(a) (((a) >> _IOC_NRSHIFT) & _IOC_NRMASK)
+#endif
+
 #define TCGETS		0x5401
 #define TCSETS		0x5402
 #define TCSETSW		0x5403

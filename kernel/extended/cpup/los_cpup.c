@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description : LiteOS Cpu Usage Calculation Module Implementation
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -45,14 +47,14 @@ extern "C" {
 
 #ifdef LOSCFG_KERNEL_CPUP
 
-LITE_OS_SEC_BSS STATIC UINT16 g_swtmrID;
+LITE_OS_SEC_BSS STATIC UINT16 g_swtmrId;
 LITE_OS_SEC_BSS STATIC UINT16 g_cpupInitFlg = 0;
 LITE_OS_SEC_BSS OsCpupCB *g_cpup = NULL;
 LITE_OS_SEC_BSS STATIC UINT16 g_cpupMaxNum;
 LITE_OS_SEC_BSS STATIC UINT16 g_cpupTaskMaxNum;
 LITE_OS_SEC_BSS STATIC UINT16 g_hisPos = 0; /* current Sampling point of historyTime */
-LITE_OS_SEC_DATA_INIT STATIC UINT16 runningTasks[LOSCFG_KERNEL_CORE_NUM] =
-    { [0 ... (LOSCFG_KERNEL_CORE_NUM - 1)] = (UINT16)-1 };
+LITE_OS_SEC_DATA_INIT STATIC UINT32 runningTasks[LOSCFG_KERNEL_CORE_NUM] =
+    { [0 ... (LOSCFG_KERNEL_CORE_NUM - 1)] = (UINT32)-1 };
 LITE_OS_SEC_BSS STATIC UINT64 cpuHistoryTime[OS_CPUP_HISTORY_RECORD_NUM + 1];
 
 LITE_OS_SEC_BSS STATIC UINT64 g_startCycles = 0;
@@ -70,12 +72,14 @@ LITE_OS_SEC_TEXT_INIT VOID OsCpupGuard(VOID)
 {
     UINT16 prevPos;
     UINT16 loop;
-    UINT16 runTaskID;
+    UINT16 runTaskId;
     UINT64 curCycle;
     UINT32 intSave;
 
+    if (g_cpupInitFlg == 0) {
+        return;
+    }
     intSave = LOS_IntLock();
-
     curCycle = OsGetCpuCycle();
     prevPos = g_hisPos;
     g_hisPos = CPUP_POST_POS(g_hisPos);
@@ -86,12 +90,12 @@ LITE_OS_SEC_TEXT_INIT VOID OsCpupGuard(VOID)
     }
 
     for (loop = 0; loop < LOSCFG_KERNEL_CORE_NUM; loop++) {
-        runTaskID = runningTasks[loop];
+        runTaskId = runningTasks[loop];
         /* reacquire the cycle to prevent flip */
         curCycle = OsGetCpuCycle();
-        g_cpup[runTaskID].historyTime[prevPos] += curCycle - g_cpup[runTaskID].startTime;
+        g_cpup[runTaskId].historyTime[prevPos] += curCycle - g_cpup[runTaskId].startTime;
 #ifdef LOSCFG_CPUP_INCLUDE_IRQ
-        g_cpup[runTaskID].historyTime[prevPos] -= g_timeInIrqPerTskSwitch[loop];
+        g_cpup[runTaskId].historyTime[prevPos] -= g_timeInIrqPerTskSwitch[loop];
 #endif
     }
 
@@ -101,15 +105,15 @@ LITE_OS_SEC_TEXT_INIT VOID OsCpupGuard(VOID)
 LITE_OS_SEC_TEXT_INIT VOID OsCpupGuardCreator(VOID)
 {
     (VOID)LOS_SwtmrCreate(LOSCFG_BASE_CORE_TICK_PER_SECOND, LOS_SWTMR_MODE_PERIOD,
-                          (SWTMR_PROC_FUNC)OsCpupGuard, &g_swtmrID, 0);
+                          (SWTMR_PROC_FUNC)OsCpupGuard, &g_swtmrId, 0);
 
-    (VOID)LOS_SwtmrStart(g_swtmrID);
+    (VOID)LOS_SwtmrStart(g_swtmrId);
 }
 
 LITE_OS_SEC_TEXT_INIT VOID OsCpupGuardInit(VOID)
 {
     TSK_INIT_PARAM_S taskInitParam;
-    UINT32 tempID;
+    UINT32 tempId;
 
     (VOID)memset_s((void *)(&taskInitParam), sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     taskInitParam.pfnTaskEntry  = (TSK_ENTRY_FUNC)OsCpupGuardCreator;
@@ -120,7 +124,7 @@ LITE_OS_SEC_TEXT_INIT VOID OsCpupGuardInit(VOID)
 #if (LOSCFG_KERNEL_SMP == YES)
     taskInitParam.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
 #endif
-    (VOID)LOS_TaskCreate(&tempID, &taskInitParam);
+    (VOID)LOS_TaskCreate(&tempId, &taskInitParam);
 }
 
 /*
@@ -166,7 +170,7 @@ LITE_OS_SEC_TEXT_INIT VOID LOS_CpupReset(VOID)
 
     g_cpupInitFlg = 0;
     intSave = LOS_IntLock();
-    (VOID)LOS_SwtmrStop(g_swtmrID);
+    (VOID)LOS_SwtmrStop(g_swtmrId);
     curCycle = OsGetCpuCycle();
 
     for (loop = 0; loop < (OS_CPUP_HISTORY_RECORD_NUM + 1); loop++) {
@@ -187,7 +191,7 @@ LITE_OS_SEC_TEXT_INIT VOID LOS_CpupReset(VOID)
     }
 #endif
 
-    (VOID)LOS_SwtmrStart(g_swtmrID);
+    (VOID)LOS_SwtmrStart(g_swtmrId);
     LOS_IntRestore(intSave);
     g_cpupInitFlg = 1;
 
@@ -226,11 +230,11 @@ LITE_OS_SEC_TEXT_MINOR UINT64 OsGetCpuCycle(VOID)
 }
 
 /*
- * Description: start task to get cycles count in current task begining
+ * Description: start task to get cycles count in current task beginning
  */
 LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleStart(VOID)
 {
-    UINT32 taskID;
+    UINT32 taskId;
     LosTaskCB *runTask = NULL;
 
     if (g_cpupInitFlg == 0) {
@@ -238,10 +242,10 @@ LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleStart(VOID)
     }
 
     runTask = OsCurrTaskGet();
-    taskID = runTask->taskID;
+    taskId = runTask->taskId;
 
-    g_cpup[taskID].id = taskID;
-    g_cpup[taskID].startTime = OsGetCpuCycle();
+    g_cpup[taskId].id = taskId;
+    g_cpup[taskId].startTime = OsGetCpuCycle();
 
     return;
 }
@@ -251,7 +255,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleStart(VOID)
  */
 LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleEnd(VOID)
 {
-    UINT32 taskID;
+    UINT32 taskId;
     UINT64 cpuCycle;
     LosTaskCB *runTask = NULL;
 
@@ -260,21 +264,21 @@ LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleEnd(VOID)
     }
 
     runTask = OsCurrTaskGet();
-    taskID = runTask->taskID;
+    taskId = runTask->taskId;
 
-    if (g_cpup[taskID].startTime == 0) {
+    if (g_cpup[taskId].startTime == 0) {
         return;
     }
 
     cpuCycle = OsGetCpuCycle();
-    g_cpup[taskID].allTime += cpuCycle - g_cpup[taskID].startTime;
+    g_cpup[taskId].allTime += cpuCycle - g_cpup[taskId].startTime;
 
 #ifdef LOSCFG_CPUP_INCLUDE_IRQ
-    UINT32 cpuID = ArchCurrCpuid();
-    g_cpup[taskID].allTime -= g_timeInIrqPerTskSwitch[cpuID];
-    g_timeInIrqPerTskSwitch[cpuID] = 0;
+    UINT32 cpuId = ArchCurrCpuid();
+    g_cpup[taskId].allTime -= g_timeInIrqPerTskSwitch[cpuId];
+    g_timeInIrqPerTskSwitch[cpuId] = 0;
 #endif
-    g_cpup[taskID].startTime = 0;
+    g_cpup[taskId].startTime = 0;
 
     return;
 }
@@ -287,33 +291,33 @@ LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleEndStart(const LosTaskCB *newTask)
     UINT64 cpuCycle;
     LosTaskCB *runTask = NULL;
     OsCpupCB *cpup = NULL;
-    UINT32 cpuID = ArchCurrCpuid();
+    UINT32 cpuId = ArchCurrCpuid();
 
-    if (g_cpupInitFlg == 0) {
+    if (g_cpupInitFlg == 0 || newTask == NULL) {
         return;
     }
 
     runTask = OsCurrTaskGet();
     cpuCycle = OsGetCpuCycle();
 
-    cpup = &g_cpup[runTask->taskID];
+    cpup = &g_cpup[runTask->taskId];
     if (cpup->startTime != 0) {
         cpup->allTime += cpuCycle - cpup->startTime;
 #ifdef LOSCFG_CPUP_INCLUDE_IRQ
-        cpup->allTime -= g_timeInIrqPerTskSwitch[cpuID];
-        g_timeInIrqPerTskSwitch[cpuID] = 0;
+        cpup->allTime -= g_timeInIrqPerTskSwitch[cpuId];
+        g_timeInIrqPerTskSwitch[cpuId] = 0;
 #endif
     }
 
-    cpup = &g_cpup[newTask->taskID];
-    cpup->id = newTask->taskID;
+    cpup = &g_cpup[newTask->taskId];
+    cpup->id = newTask->taskId;
     cpup->startTime = cpuCycle;
-    runningTasks[cpuID] = newTask->taskID;
+    runningTasks[cpuId] = newTask->taskId;
 
     return;
 }
 
-LITE_OS_SEC_TEXT_MINOR STATIC VOID OsCpupGetPos(UINT16 mode, UINT16 *curPosPointer, UINT16 *prePosPointer)
+LITE_OS_SEC_TEXT_MINOR STATIC VOID OsCpupGetPos(UINT32 mode, UINT16 *curPosPointer, UINT16 *prePosPointer)
 {
     UINT16 curPos;
     UINT16 tmpPos;
@@ -323,8 +327,8 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsCpupGetPos(UINT16 mode, UINT16 *curPosPoint
     curPos = CPUP_PRE_POS(tmpPos);
 
     /*
-     * The current postion has nothing to do with the CPUP modes,
-     * however, the previous postion differs.
+     * The current position has nothing to do with the CPUP modes,
+     * however, the previous position differs.
      */
     switch (mode) {
         case CPUP_LAST_ONE_SECONDS:
@@ -346,29 +350,29 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsCpupGetPos(UINT16 mode, UINT16 *curPosPoint
     return;
 }
 
-LITE_OS_SEC_TEXT_MINOR STATIC INLINE UINT32 OsCpuUsageParaCheck(UINT32 taskID)
+LITE_OS_SEC_TEXT_MINOR STATIC INLINE UINT32 OsCpuUsageParaCheck(UINT32 taskId)
 {
     if (g_cpupInitFlg == 0) {
         return LOS_ERRNO_CPUP_NO_INIT;
     }
 
-    if (OS_TSK_GET_INDEX(taskID) >= g_taskMaxNum) {
+    if (OS_TSK_GET_INDEX(taskId) >= g_taskMaxNum) {
         return LOS_ERRNO_CPUP_TSK_ID_INVALID;
     }
 
     /* weather the task is created */
-    if (g_cpup[taskID].id != taskID) {
+    if (g_cpup[taskId].id != taskId) {
         return LOS_ERRNO_CPUP_THREAD_NO_CREATED;
     }
 
-    if ((g_cpup[taskID].status & OS_TASK_STATUS_UNUSED) || (g_cpup[taskID].status == 0)) {
+    if ((g_cpup[taskId].status & OS_TASK_STATUS_UNUSED) || (g_cpup[taskId].status == 0)) {
         return LOS_ERRNO_CPUP_THREAD_NO_CREATED;
     }
 
     return LOS_OK;
 }
 
-LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistorySysCpuUsage(UINT16 mode)
+LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistorySysCpuUsage(UINT32 mode)
 {
     UINT64 cpuCycleAll;
     UINT64 idleCycleAll = 0;
@@ -376,9 +380,9 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistorySysCpuUsage(UINT16 mode)
     UINT16 pos;
     UINT16 prePos;
     UINT32 intSave;
-    UINT32 idleTaskID;
+    UINT32 idleTaskId;
 #if (LOSCFG_KERNEL_SMP == YES)
-    UINT32 cpuID = 0;
+    UINT32 cpuId = 0;
 #endif
 
     if (g_cpupInitFlg == 0) {
@@ -394,15 +398,15 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistorySysCpuUsage(UINT16 mode)
 
 #if (LOSCFG_KERNEL_SMP == YES)
     /* For SMP system, each idle task needs to be accounted */
-    while (cpuID < LOSCFG_KERNEL_CORE_NUM) {
-        idleTaskID = g_percpu[cpuID].idleTaskID;
-        idleCycleAll += g_cpup[idleTaskID].historyTime[pos] - g_cpup[idleTaskID].historyTime[prePos];
-        cpuID++;
+    while (cpuId < LOSCFG_KERNEL_CORE_NUM) {
+        idleTaskId = g_percpu[cpuId].idleTaskId;
+        idleCycleAll += g_cpup[idleTaskId].historyTime[pos] - g_cpup[idleTaskId].historyTime[prePos];
+        cpuId++;
     }
     cpuCycleAll *= LOSCFG_KERNEL_CORE_NUM;
 #else
-    idleTaskID = OsGetIdleTaskId();
-    idleCycleAll = g_cpup[idleTaskID].historyTime[pos] - g_cpup[idleTaskID].historyTime[prePos];
+    idleTaskId = OsGetIdleTaskId();
+    idleCycleAll = g_cpup[idleTaskId].historyTime[pos] - g_cpup[idleTaskId].historyTime[prePos];
 #endif
 
     if (cpuCycleAll) {
@@ -415,7 +419,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistorySysCpuUsage(UINT16 mode)
     return cpup;
 }
 
-LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistoryTaskCpuUsage(UINT32 taskID, UINT16 mode)
+LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistoryTaskCpuUsage(UINT32 taskId, UINT32 mode)
 {
     UINT64 cpuCycleAll;
     UINT64 cpuCycleCurTask;
@@ -424,12 +428,16 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistoryTaskCpuUsage(UINT32 taskID, UINT16 mode
     UINT32 intSave;
     UINT32 cpup = 0;
     UINT32 ret;
-    OsCpupCB *taskCpup = &g_cpup[taskID];
 
-    ret = OsCpuUsageParaCheck(taskID);
+    if (g_cpupInitFlg == 0) {
+        return LOS_ERRNO_CPUP_NO_INIT;
+    }
+
+    ret = OsCpuUsageParaCheck(taskId);
     if (ret != LOS_OK) {
         return ret;
     }
+    OsCpupCB *taskCpup = &g_cpup[taskId];
 
     intSave = LOS_IntLock();
     OsTaskCycleEnd();
@@ -447,7 +455,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistoryTaskCpuUsage(UINT32 taskID, UINT16 mode
     return cpup;
 }
 
-LITE_OS_SEC_TEXT_MINOR UINT32 LOS_AllCpuUsage(UINT16 maxNum, CPUP_INFO_S *cpupInfo, UINT16 mode, UINT16 flag)
+LITE_OS_SEC_TEXT_MINOR UINT32 LOS_AllCpuUsage(UINT16 maxNum, CPUP_INFO_S *cpupInfo, UINT32 mode, UINT16 flag)
 {
     UINT16 loop;
     UINT16 pos;
@@ -524,15 +532,18 @@ LITE_OS_SEC_TEXT_MINOR VOID OsCpupIrqEnd(UINT32 intNum)
     UINT32 high;
     UINT32 low;
     UINT64 intTimeEnd;
-    UINT32 cpuID = ArchCurrCpuid();
+    UINT32 cpuId = ArchCurrCpuid();
 
+    if (g_cpupInitFlg == 0) {
+        return;
+    }
     LOS_GetCpuCycle(&high, &low);
     intTimeEnd = ((UINT64)high << HIGH_BITS) + low;
 
     g_cpup[g_taskMaxNum + intNum].id = intNum;
     g_cpup[g_taskMaxNum + intNum].status = OS_TASK_STATUS_RUNNING;
-    g_timeInIrqPerTskSwitch[cpuID] += (intTimeEnd - intTimeStart[cpuID]);
-    g_cpup[g_taskMaxNum + intNum].allTime += (intTimeEnd - intTimeStart[cpuID]);
+    g_timeInIrqPerTskSwitch[cpuId] += (intTimeEnd - intTimeStart[cpuId]);
+    g_cpup[g_taskMaxNum + intNum].allTime += (intTimeEnd - intTimeStart[cpuId]);
 
     return;
 }

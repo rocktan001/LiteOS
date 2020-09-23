@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: System Config HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -43,6 +45,7 @@
 #include "los_tick.h"
 #include "board.h"
 #include "sys_config.h"
+#include "hisoc/clock.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -123,21 +126,12 @@ extern UINT32 __heap_end;
 #define LOSCFG_BASE_CORE_TICK_HW_TIME NO
 #endif
 
-/****************************** Hardware interrupt module configuration ******************************/
 /**
  * @ingroup los_config
  * Configuration item for hardware interrupt tailoring
  */
 #ifndef LOSCFG_PLATFORM_HWI
 #define LOSCFG_PLATFORM_HWI YES
-#endif
-
-/**
- * @ingroup los_config
- * Maximum number of used hardware interrupts, including Tick timer interrupts.
- */
-#ifndef LOSCFG_PLATFORM_HWI_LIMIT
-#define LOSCFG_PLATFORM_HWI_LIMIT 96
 #endif
 
 /**
@@ -178,14 +172,6 @@ extern UINT32 __heap_end;
 
 /**
  * @ingroup los_config
- * Maximum supported number of tasks except the idle task rather than the number of usable tasks
- */
-#ifndef LOSCFG_BASE_CORE_TSK_LIMIT
-#define LOSCFG_BASE_CORE_TSK_LIMIT LOSCFG_BASE_CORE_TSK_CONFIG
-#endif
-
-/**
- * @ingroup los_config
  * Size of the idle task stack
  */
 #ifndef LOSCFG_BASE_CORE_TSK_IDLE_STACK_SIZE
@@ -198,22 +184,6 @@ extern UINT32 __heap_end;
  */
 #ifndef LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE
 #define LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE SIZE(0x6000)
-#endif
-
-/**
- * @ingroup los_config
- * Configuration item for task Robin tailoring
- */
-#ifndef LOSCFG_BASE_CORE_TIMESLICE
-#define LOSCFG_BASE_CORE_TIMESLICE YES
-#endif
-
-/**
- * @ingroup los_config
- * Longest execution time of tasks with the same priorities
- */
-#ifndef LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT
-#define LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT 2
 #endif
 
 /**
@@ -232,85 +202,7 @@ extern UINT32 __heap_end;
 #define OS_PERF_TSK_FILTER NO
 #endif
 
-/****************************** Semaphore module configuration ******************************/
-/**
- * @ingroup los_config
- * Configuration item for semaphore module tailoring
- */
-#ifndef LOSCFG_BASE_IPC_SEM
-#define LOSCFG_BASE_IPC_SEM YES
-#endif
-
-/**
- * @ingroup los_config
- * Maximum supported number of semaphores
- */
-#ifndef LOSCFG_BASE_IPC_SEM_LIMIT
-#define LOSCFG_BASE_IPC_SEM_LIMIT LOSCFG_BASE_IPC_SEM_CONFIG
-#endif
-
-/**
- * @ingroup los_config
- * Maximum supported number of sortlink
- */
-
-#define OS_TSK_SORTLINK_LEN_CONFIG                  8U
-#define OS_TSK_SORTLINK_LEN                         OS_TSK_SORTLINK_LEN_CONFIG
-
-/****************************** mutex module configuration ******************************/
-/**
- * @ingroup los_config
- * Configuration item for mutex module tailoring
- */
-#ifndef LOSCFG_BASE_IPC_MUX
-#define LOSCFG_BASE_IPC_MUX YES
-#endif
-
-/**
- * @ingroup los_config
- * Maximum supported number of mutexes
- */
-#ifndef LOSCFG_BASE_IPC_MUX_LIMIT
-#define LOSCFG_BASE_IPC_MUX_LIMIT LOSCFG_BASE_IPC_MUX_CONFIG
-#endif
-
-/****************************** Queue module configuration ********************************/
-/**
- * @ingroup los_config
- * Configuration item for queue module tailoring
- */
-#ifndef LOSCFG_BASE_IPC_QUEUE
-#define LOSCFG_BASE_IPC_QUEUE YES
-#endif
-
-/**
- * @ingroup los_config
- * Maximum supported number of queues rather than the number of usable queues
- */
-#ifndef LOSCFG_BASE_IPC_QUEUE_LIMIT
-#define LOSCFG_BASE_IPC_QUEUE_LIMIT LOSCFG_BASE_IPC_QUEUE_CONFIG
-#endif
-
-
-/****************************** Software timer module configuration **************************/
 #if (LOSCFG_BASE_IPC_QUEUE == YES)
-
-/**
- * @ingroup los_config
- * Configuration item for software timer module tailoring
- */
-#ifndef LOSCFG_BASE_CORE_SWTMR
-#define LOSCFG_BASE_CORE_SWTMR YES
-#endif
-
-/**
- * @ingroup los_config
- * Maximum supported number of software timers rather than the number of usable software timers
- */
-#ifndef LOSCFG_BASE_CORE_SWTMR_LIMIT
-#define LOSCFG_BASE_CORE_SWTMR_LIMIT LOSCFG_BASE_CORE_SWTMR_CONFIG
-
-#endif
 /**
  * @ingroup los_config
  * Max number of software timers ID
@@ -327,7 +219,6 @@ extern UINT32 __heap_end;
 #ifndef OS_SWTMR_HANDLE_QUEUE_SIZE
 #define OS_SWTMR_HANDLE_QUEUE_SIZE LOSCFG_BASE_CORE_SWTMR_LIMIT
 #endif
-
 #endif
 
 /****************************** Memory module configuration **************************/
@@ -335,21 +226,6 @@ extern UINT32 __heap_end;
  * @ingroup los_config
  * Starting address of the system memory
  */
-#ifndef LOSCFG_KERNEL_MEM_STATISTICS
-#define LOSCFG_KERNEL_MEM_STATISTICS          YES
-#endif
-
-
-#ifndef OS_EXC_INTERACTMEM_SIZE
-#define OS_EXC_INTERACTMEM_SIZE (g_excInteractMemSize)
-#endif
-
-
-#ifndef OS_SYS_MEM_START
-#define OS_SYS_MEM_START                        __bss_end
-#endif
-
-
 #ifndef OS_SYS_MEM_ADDR
 #define OS_SYS_MEM_ADDR                        (&m_aucSysMem1[0])
 #endif
@@ -363,12 +239,6 @@ extern UINT32 __heap_end;
                          ((g_excInteractMemSize + ((UINTPTR)&__bss_end) + (64 - 1)) & ~(64 - 1)))
 #endif
 
-
-#ifndef OS_SYS_MEM_NUM
-#define OS_SYS_MEM_NUM                            20
-#endif
-
-
 /****************************** fw Interface configuration **************************/
 /**
  * @ingroup los_config
@@ -380,27 +250,6 @@ extern UINT32 __heap_end;
 
 #ifndef LOSCFG_COMPAT_CMSIS
 #define LOSCFG_COMPAT_CMSIS                             NO
-#endif
-
-/****************************** SMP module configuration **************************/
-#ifndef LOSCFG_KERNEL_SMP
-#define LOSCFG_KERNEL_SMP                               NO
-#endif
-
-#ifndef LOSCFG_SCHED_MQ
-#define LOSCFG_SCHED_MQ                                 NO
-#endif
-
-#ifndef LOSCFG_KERNEL_SMP_LOCKDEP
-#define LOSCFG_KERNEL_SMP_LOCKDEP                       NO
-#endif
-
-#ifndef LOSCFG_KERNEL_SMP_TASK_SYNC
-#define LOSCFG_KERNEL_SMP_TASK_SYNC                     NO
-#endif
-
-#ifndef LOSCFG_KERNEL_SCHED_STATISTICS
-#define LOSCFG_KERNEL_SCHED_STATISTICS                  NO
 #endif
 
 #if (LOSCFG_KERNEL_SMP == YES)
@@ -440,16 +289,32 @@ extern UINT32 __heap_end;
  * @ingroup los_config
  * The Version number of Public
  */
-#define MAJ_V                            3
-#define MIN_V                            10
-#define REL_V                            16
+#define MAJ_V                                   5
+#define MIN_V                                   0
+#define REL_V                                   0
 
-#define VERSION_NUM(a, b, c) (((a) << 16) | ((b) << 8) | (c))
-#define HW_LITEOS_OPEN_VERSION_NUM VERSION_NUM(MAJ_V, MIN_V, REL_V)
+/**
+ * @ingroup los_config
+ * The release candidate version number
+ */
+#define EXTRA_V                                 1
+
+#define VERSION_NUM(a, b, c)                    (((a) << 16) | ((b) << 8) | (c))
+#define HW_LITEOS_OPEN_VERSION_NUM              VERSION_NUM(MAJ_V, MIN_V, REL_V)
+
+#define STRINGIFY_1(x)                          #x
+#define STRINGIFY(x)                            STRINGIFY_1(x)
+
+#define HW_LITEOS_OPEN_VERSION_STRING           STRINGIFY(MAJ_V) "." STRINGIFY(MIN_V) "." STRINGIFY(REL_V)
+#if (EXTRA_V != 0)
+#define HW_LITEOS_KERNEL_VERSION_STRING         HW_LITEOS_OPEN_VERSION_STRING "-rc" STRINGIFY(EXTRA_V)
+#else
+#define HW_LITEOS_KERNEL_VERSION_STRING         HW_LITEOS_OPEN_VERSION_STRING
+#endif
 
 /****************************** Dynamic loading module configuration **************************/
 #ifndef OS_AUTOINIT_DYNLOADER
-#define OS_AUTOINIT_DYNLOADER YES
+#define OS_AUTOINIT_DYNLOADER                   YES
 #endif
 
 /****************************** exception information  configuration ******************************/
@@ -458,7 +323,7 @@ extern UINT32 __heap_end;
  * @ingroup los_config
  * the size of space for recording exception information
  */
-#define EXCINFO_RECORD_BUF_SIZE (16 * 1024)
+#define EXCINFO_RECORD_BUF_SIZE                 (16 * 1024)
 
 /**
  * @ingroup los_config
@@ -470,7 +335,7 @@ extern UINT32 __heap_end;
  * </ul>
  *
  */
-#define EXCINFO_RECORD_ADDR (0xffffffff)
+#define EXCINFO_RECORD_ADDR                     (0xffffffff)
 
 /**
  * @ingroup los_config
@@ -529,7 +394,7 @@ VOID LOS_ExcInfoRegHook(UINT32 startAddr, UINT32 space, CHAR *buf, log_read_writ
 #endif
 
 extern VOID OsStart(VOID);
-extern UINT32 OsMain(VOID);
+extern INT32 OsMain(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

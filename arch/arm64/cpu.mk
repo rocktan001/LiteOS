@@ -31,6 +31,8 @@ LITEOS_CXXINCLUDE       += $(ARCH_INCLUDE)
 # expose FPU info to assembly code
 ifeq ($(LOSCFG_ARCH_FPU_DISABLE), y)
     LITEOS_CMACRO       += -DLOSCFG_ARCH_FPU_DISABLE
+else
+    LITEOS_CMACRO       += -DLOSCFG_AARCH64_FPU
 endif
 
 # extra definition for other module

@@ -25,6 +25,13 @@ LITEOS_NODEBUG          += $(LITEOS_CORE_COPTS)
 LITEOS_ASOPTS           += $(LITEOS_CPU_OPTS)
 LITEOS_CXXOPTS_BASE     += $(LITEOS_CORE_COPTS)
 
+LITEOS_COPTS_BASE       += -mno-unaligned-access -mthumb-interwork
+
+ifeq ($(LOSCFG_THUMB), y)
+LITEOS_COPTS_EXTRA_INTERWORK += -mthumb
+LITEOS_CMACRO           += -DLOSCFG_INTERWORK_THUMB
+endif
+
 ARCH_INCLUDE            := -I $(LITEOSTOPDIR)/arch/arm/cortex_a_r/include \
                            -I $(LITEOSTOPDIR)/arch/arm/cortex_a_r/src/include
 

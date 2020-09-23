@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: cache
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,7 +34,7 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#include "asm.h"
+#include "arch/asm.h"
 
     .fpu vfpv4
     .arch armv7a
@@ -45,7 +47,7 @@
 .endm
 
 
-FUNCTION(arm_inv_cache_range)
+FUNCTION(ArmInvCacheRange)
     push    {r2, r3}
     DCACHE_LINE_SIZE r2, r3
     sub    r3, r2, #1
@@ -66,7 +68,7 @@ FUNCTION(arm_inv_cache_range)
     pop    {r2, r3}
     mov    pc, lr
 
-FUNCTION(arm_clean_cache_range)
+FUNCTION(ArmCleanCacheRange)
     push   {r2, r3}
     DCACHE_LINE_SIZE r2, r3
     sub    r3, r2, #1

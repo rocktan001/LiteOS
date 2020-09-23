@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: General interrupt controller version 3.0 (GICv3).
+ * Author: Huawei LiteOS Team
+ * Create: 2018-09-15
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -37,7 +39,7 @@
 
 #include "stdint.h"
 #include "asm/platform.h"
-#include "los_hw_cpu.h"
+#include "arch/cpu.h"
 
 #ifdef  __cplusplus
 #if  __cplusplus
@@ -125,20 +127,20 @@ STATIC INLINE VOID GiccSetCtlr(UINT32 val)
 #else
     __asm__ volatile("msr " ICC_CTLR_EL1 ", %0" ::"r"(val));
 #endif
-    ISB;
+    ISB();
 }
 
 STATIC INLINE VOID GiccSetPmr(UINT32 val)
 {
     __asm__ volatile("msr " ICC_PMR_EL1 ", %0" ::"r"(val));
-    ISB;
-    DSB;
+    ISB();
+    DSB();
 }
 
 STATIC INLINE VOID GiccSetIgrpen0(UINT32 val)
 {
     __asm__ volatile("msr " ICC_IGRPEN0_EL1 ", %0" ::"r"(val));
-    ISB;
+    ISB();
 }
 
 STATIC INLINE VOID GiccSetIgrpen1(UINT32 val)
@@ -148,7 +150,7 @@ STATIC INLINE VOID GiccSetIgrpen1(UINT32 val)
 #else
     __asm__ volatile("msr " ICC_IGRPEN1_EL1 ", %0" ::"r"(val));
 #endif
-    ISB;
+    ISB();
 }
 
 STATIC INLINE UINT32 GiccGetSre(VOID)
@@ -169,7 +171,7 @@ STATIC INLINE VOID GiccSetSre(UINT32 val)
 #else
     __asm__ volatile("msr " ICC_SRE_EL1 ", %0" ::"r"(val));
 #endif
-    ISB;
+    ISB();
 }
 
 STATIC INLINE VOID GiccSetEoir(UINT32 val)
@@ -179,7 +181,7 @@ STATIC INLINE VOID GiccSetEoir(UINT32 val)
 #else
     __asm__ volatile("msr " ICC_EOIR1_EL1 ", %0" ::"r"(val));
 #endif
-    ISB;
+    ISB();
 }
 
 STATIC INLINE UINT32 GiccGetIar(VOID)
@@ -191,7 +193,7 @@ STATIC INLINE UINT32 GiccGetIar(VOID)
 #else
     __asm__ volatile("mrs %0, " ICC_IAR1_EL1 : "=r"(temp));
 #endif
-    DSB;
+    DSB();
 
     return temp;
 }
@@ -199,15 +201,15 @@ STATIC INLINE UINT32 GiccGetIar(VOID)
 STATIC INLINE VOID GiccSetSgi1r(UINT64 val)
 {
     __asm__ volatile("msr " ICC_SGI1R_EL1 ", %0" ::"r"(val));
-    ISB;
-    DSB;
+    ISB();
+    DSB();
 }
 
 STATIC INLINE VOID GiccSetBpr0(UINT32 val)
 {
     __asm__ volatile("msr " ICC_BPR0_EL1 ", %0" ::"r"(val));
-    ISB;
-    DSB;
+    ISB();
+    DSB();
 }
 
 #ifdef __cplusplus

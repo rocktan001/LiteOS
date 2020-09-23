@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2020>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Main Process
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -44,7 +46,7 @@
 UINT32 app_init(VOID)
 {
     UINT32 ret = LOS_OK;
-    printf("Hello, welcome to liteos!");
+    printf("Hello, welcome to liteos!\n");
 #ifdef LOSCFG_GUI_ENABLE
     LvglDemo();
 #endif

@@ -46,9 +46,9 @@ extern "C" {
 
 /**
  * Maximum number of supported hardware devices that generate hardware interrupts.
- * The maximum number of hardware devices that generate hardware interrupts is 128.
+ * The maximum number of exceptions and interrupts is: 240(IRQ) + OS_SYS_VECTOR_CNT.
  */
-#define OS_HWI_MAX_NUM                  240
+#define OS_HWI_MAX_NUM                  LOSCFG_PLATFORM_HWI_LIMIT
 
 /**
  * Maximum interrupt number.
@@ -81,13 +81,6 @@ extern "C" {
 #define HAL_READ_UINT32(addr, data) READ_UINT32(data, addr)
 
 #define HAL_WRITE_UINT32(addr, data) WRITE_UINT32(data, addr)
-
-/* just fix timer compile issue */
-#define TIMER0_BASE_ADDR   0x40002800
-#define PRVTIMER_BASE_ADDR TIMER0_BASE_ADDR
-#define GTIMER_BASE_ADDR   TIMER0_BASE_ADDR
-#define TIMER_FREQ          0x6000000
-#define PRVTIMER_INT_NUM    29
 
 #ifdef __cplusplus
 #if __cplusplus

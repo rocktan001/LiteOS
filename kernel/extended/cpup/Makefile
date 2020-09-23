@@ -1,6 +1,6 @@
 include $(LITEOSTOPDIR)/config.mk
 
-MODULE_NAME := $(notdir $(shell pwd))
+MODULE_NAME := $(notdir $(CURDIR))
 
 LOCAL_SRCS := $(wildcard *.c)
 

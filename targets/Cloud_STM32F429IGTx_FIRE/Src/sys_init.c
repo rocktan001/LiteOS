@@ -92,12 +92,12 @@ void net_init(void)
     /* Initilialize the LwIP stack without RTOS */
     tcpip_init(NULL, NULL);
     printf("lwip test init ok.\n");
-    
+
 
     (void)ethernetif_api_register(&g_eth_api);/*×¢²áÌØ¶¨Íø¿¨µÄAPI*/
     /* add the network interface (IPv4/IPv6) without RTOS */
 #if LWIP_IPV4 && LWIP_IPV6
-    (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);//lint !e546
+    (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
 #elif LWIP_IPV6
 
     (void)netif_add(&gnetif, NULL, ethernetif_init, tcpip_input);
@@ -125,7 +125,7 @@ void net_init(void)
         set_lwip_ipv6_default_gw(&gnetif, &ipv6_gw);
     }
 #else
-    (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);//lint !e546
+    (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
 #endif
 
     /* Registers the default network interface */

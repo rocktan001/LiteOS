@@ -9,6 +9,10 @@ ifeq ($(CROSS_COMPILE),)
         COMPILE_ALIAS := aarch64-linux-android
     else ifeq ($(LOSCFG_COMPILER_HCC_64), y)
         CROSS_COMPILE := aarch64-linux-gnu-
+    else ifeq ($(LOSCFG_COMPILER_RISCV), y)
+        CROSS_COMPILE := riscv32-linux-musl-
+    else ifeq ($(LOSCFG_COMPILER_RISCV_UNKNOWN), y)
+        CROSS_COMPILE := riscv32-unknown-elf-
     else ifeq ($(LOSCFG_COMPILER_ARM_NONE_EABI), y)
         CROSS_COMPILE := arm-none-eabi-
     endif
@@ -16,8 +20,6 @@ endif
 
 COMPILE_NAME   = $(CROSS_COMPILE:%-=%)
 COMPILE_ALIAS ?= $(COMPILE_NAME)
-VERSION_NUM    = $(shell $(CC) -dumpversion)
-
 
 CC       = $(CROSS_COMPILE)gcc
 GPP      = $(CROSS_COMPILE)g++
@@ -29,12 +31,21 @@ OBJDUMP  = $(CROSS_COMPILE)objdump
 SIZE     = $(CROSS_COMPILE)size
 NM       = $(CROSS_COMPILE)nm
 
-# Check if input compiler is availible
-ifeq ($(shell which $(CC)),)
-$(error compiler $(COMPILE_NAME) is not in the ENV)
-endif
+VERSION_NUM = $(shell $(CC) -dumpversion)
 
-LITEOS_COMPILER_PATH := $(shell $(LITEOSTOPDIR)/build/scripts/get_compiler_path.sh $(CC))
+# Check if input compiler is availible and set compiler path
+ifeq ($(OS), Linux)
+    ifeq ($(shell which $(CC)),)
+        $(error compiler $(COMPILE_NAME) is not in the ENV)
+    endif
+    LITEOS_COMPILER_PATH := $(shell $(LITEOSTOPDIR)/build/scripts/get_compiler_path.sh $(CC))
+else
+    ifeq ($(shell where $(CC)),)
+        $(error compiler $(COMPILE_NAME) is not in the ENV)
+    endif
+    LITEOS_COMPILER_EXE_PATH := $(shell where $(CC))
+    LITEOS_COMPILER_PATH := $(subst \bin\arm-none-eabi-gcc.exe,, $(LITEOS_COMPILER_EXE_PATH))
+endif
 
 # Generally 32 bit and 64 bit compilers has different libgcc paths.
 # FOR some history resaons.
@@ -66,7 +77,6 @@ else
     endif
     GCC_GXXLIB_PATH := $(CXXLIB_PATH_64)
 endif
-
 
 ifeq ($(GCC_USE_CPU_OPT), y)
     LITEOS_COMPILER_GCCLIB_PATH := $(GCC_GCCLIB_PATH)/$(LITEOS_GCCLIB)

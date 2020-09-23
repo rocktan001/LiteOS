@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
  * Description: LiteOS adaptor file.
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -31,9 +33,10 @@
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
-#include "los_typedef.h"
-
-VOID OsBackTrace(VOID)
+void uart_init(void)
 {
+}
 
+void OsBackTrace(void)
+{
 }

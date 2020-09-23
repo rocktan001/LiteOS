@@ -158,7 +158,7 @@ osThreadId osThreadGetId(void)
 
 UINT32 osThreadGetPId(osThreadId threadId)
 {
-    return ((LosTaskCB *)threadId)->taskID;
+    return ((LosTaskCB *)threadId)->taskId;
 }
 
 /* Terminate execution of a thread and remove it from ActiveThreads */
@@ -174,7 +174,7 @@ osStatus osThreadTerminate(osThreadId threadId)
         return osErrorISR;
     }
 
-    ret = LOS_TaskDelete(((LosTaskCB *)threadId)->taskID);
+    ret = LOS_TaskDelete(((LosTaskCB *)threadId)->taskId);
     if (ret == LOS_OK) {
         return osOK;
     } else {
@@ -218,7 +218,7 @@ osStatus osThreadSetPriority(osThreadId threadId, osPriority priority)
 
     priorityTemp = (UINT16)(PRIORITY_WIN - priority);
 
-    ret = LOS_TaskPriSet(((LosTaskCB *)threadId)->taskID, priorityTemp);
+    ret = LOS_TaskPriSet(((LosTaskCB *)threadId)->taskId, priorityTemp);
     if (ret == LOS_OK) {
         return osOK;
     } else {
@@ -235,7 +235,7 @@ osPriority osThreadGetPriority(osThreadId threadId)
         return osPriorityError;
     }
 
-    priorityTemp = LOS_TaskPriGet(((LosTaskCB *)threadId)->taskID);
+    priorityTemp = LOS_TaskPriGet(((LosTaskCB *)threadId)->taskId);
 
     priorityRet = (INT16)(PRIORITY_WIN - (INT32)priorityTemp);
     if ((priorityRet < osPriorityIdle) || (priorityRet > osPriorityRealtime)) {
@@ -248,7 +248,7 @@ osPriority osThreadGetPriority(osThreadId threadId)
 #if (LOSCFG_KERNEL_USERSPACE == YES)
 osStatus osThreadSelfSuspend(void)
 {
-    UINT32 taskHandle = ((LosTaskCB *)g_runTask)->taskID;
+    UINT32 taskHandle = ((LosTaskCB *)g_runTask)->taskId;
     if (LOS_TaskSuspend(taskHandle) == LOS_OK) {
         return osOK;
     } else {
@@ -333,7 +333,7 @@ INT32 osSemaphoreWait(osSemaphoreId semaphoreId, UINT32 millisec)
         return -1;
     }
 
-    semId = ((LosSemCB *)semaphoreId)->semID;
+    semId = ((LosSemCB *)semaphoreId)->semId;
 
     ret = LOS_SemPend(semId, LOS_MS2Tick(millisec));
     if (ret == LOS_OK) {
@@ -364,7 +364,7 @@ osStatus osSemaphoreRelease(osSemaphoreId semaphoreId)
         return osErrorParameter;
     }
 
-    semId = ((LosSemCB *)semaphoreId)->semID;
+    semId = ((LosSemCB *)semaphoreId)->semId;
     ret = LOS_SemPost(semId);
     if (ret == LOS_OK) {
         return osOK;
@@ -399,7 +399,7 @@ osStatus osSemaphoreDelete(osSemaphoreId semaphoreId)
         return osErrorISR;
     }
 
-    semId = ((LosSemCB *)semaphoreId)->semID;
+    semId = ((LosSemCB *)semaphoreId)->semId;
     ret = LOS_SemDelete(semId);
     if (ret == LOS_OK) {
         return osOK;
@@ -472,7 +472,7 @@ osStatus osMutexWait(osMutexId mutexId, UINT32 millisec)
         return osErrorISR;
     }
 
-    mutId = ((LosMuxCB*)mutexId)->muxID;
+    mutId = ((LosMuxCB*)mutexId)->muxId;
 
     ret = LOS_MuxPend(mutId, LOS_MS2Tick(millisec));
     if (ret == LOS_OK) {
@@ -517,7 +517,7 @@ osStatus osMutexRelease(osMutexId mutexId)
         return osErrorISR;
     }
 
-    mutId = ((LosMuxCB*)mutexId)->muxID;
+    mutId = ((LosMuxCB*)mutexId)->muxId;
     ret = LOS_MuxPost(mutId);
     if (ret == LOS_OK) {
         return osOK;
@@ -554,7 +554,7 @@ osStatus osMutexDelete(osMutexId mutexId)
         return osErrorISR;
     }
 
-    mutId = ((LosMuxCB*)mutexId)->muxID;
+    mutId = ((LosMuxCB*)mutexId)->muxId;
     ret = LOS_MuxDelete(mutId);
     if (ret == LOS_OK) {
         return osOK;
@@ -1112,7 +1112,7 @@ osEvent osSignalWait(INT32 signals, UINT32 millisec)
 osTimerId osTimerExtCreate(const osTimerDef_t *timerDef, os_timer_type type,
     void *argument, os_timer_rouses_type rouses, os_timer_align_type sensitive)
 {
-    SWTMR_CTRL_S *swTmr = NULL;
+    LosSwtmrCB *swTmr = NULL;
 #if (LOSCFG_BASE_CORE_SWTMR == YES)
     UINT32 ret;
     UINT16 swTmrId;
@@ -1139,13 +1139,13 @@ osTimerId osTimerExtCreate(const osTimerDef_t *timerDef, os_timer_type type,
     (VOID)rouses;
     (VOID)sensitive;
 #endif
-    return swTmr;
+    return (osTimerId)swTmr;
 }
 #endif
 
 osTimerId osTimerCreate(const osTimerDef_t *timerDef, os_timer_type type, void *argument)
 {
-    SWTMR_CTRL_S *swTmr = NULL;
+    LosSwtmrCB *swTmr = NULL;
 #if (LOSCFG_BASE_CORE_SWTMR == YES)
     UINT32 ret;
     UINT16 swTmrId;
@@ -1177,20 +1177,20 @@ osTimerId osTimerCreate(const osTimerDef_t *timerDef, os_timer_type type, void *
     (VOID)type;
     (VOID)argument;
 #endif
-    return swTmr;
+    return (osTimerId)swTmr;
 }
 
 osStatus osTimerStart(osTimerId timerId, UINT32 millisec)
 {
 #if (LOSCFG_BASE_CORE_SWTMR == YES)
-    SWTMR_CTRL_S *swTmr = NULL;
+    LosSwtmrCB *swTmr = NULL;
     UINT32 interval;
 
     if (OS_INT_ACTIVE) {
         return osErrorISR;
     }
 
-    swTmr = (SWTMR_CTRL_S *)timerId;
+    swTmr = (LosSwtmrCB *)timerId;
     if (swTmr == NULL) {
         return osErrorParameter;
     }
@@ -1200,9 +1200,9 @@ osStatus osTimerStart(osTimerId timerId, UINT32 millisec)
         return osErrorValue;
     }
 
-    swTmr->uwInterval = interval;
-    swTmr->uwExpiry = interval;
-    if (LOS_SwtmrStart(swTmr->usTimerID)) {
+    swTmr->interval = interval;
+    swTmr->expiry = interval;
+    if (LOS_SwtmrStart(swTmr->timerId)) {
         return osErrorResource;
     }
 #else
@@ -1215,18 +1215,18 @@ osStatus osTimerStart(osTimerId timerId, UINT32 millisec)
 osStatus osTimerStop(osTimerId timerId)
 {
 #if (LOSCFG_BASE_CORE_SWTMR == YES)
-    SWTMR_CTRL_S *swTmr = NULL;
+    LosSwtmrCB *swTmr = NULL;
 
     if (OS_INT_ACTIVE) {
         return osErrorISR;
     }
 
-    swTmr = (SWTMR_CTRL_S *)timerId;
+    swTmr = (LosSwtmrCB *)timerId;
     if (swTmr == NULL) {
         return osErrorParameter;
     }
 
-    if (LOS_SwtmrStop(swTmr->usTimerID)) {
+    if (LOS_SwtmrStop(swTmr->timerId)) {
         return osErrorResource;
     }
 #else
@@ -1264,18 +1264,18 @@ osStatus osTimerRestart(osTimerId timerId, UINT32 millisec, UINT8 strict)
 osStatus osTimerDelete(osTimerId timerId)
 {
 #if (LOSCFG_BASE_CORE_SWTMR == YES)
-    SWTMR_CTRL_S *swTmr = NULL;
+    LosSwtmrCB *swTmr = NULL;
 
     if (OS_INT_ACTIVE) {
         return osErrorISR;
     }
 
-    swTmr = (SWTMR_CTRL_S *)timerId;
+    swTmr = (LosSwtmrCB *)timerId;
     if (swTmr == NULL) {
         return osErrorParameter;
     }
 
-    if (LOS_SwtmrDelete(swTmr->usTimerID)) {
+    if (LOS_SwtmrDelete(swTmr->timerId)) {
         return osErrorResource;
     }
 #else
@@ -1289,7 +1289,7 @@ osStatus osDelay(UINT32 millisec)
     UINT32   interval;
     UINT32 ret;
     Percpu *perCpu = OsPercpuGet();
-    UINT32 idleTaskID = perCpu->idleTaskID;
+    UINT32 idleTaskId = perCpu->idleTaskId;
 
     if (OS_INT_ACTIVE) {
         return osErrorISR;
@@ -1300,7 +1300,7 @@ osStatus osDelay(UINT32 millisec)
     }
 
     /* check if in idle we use udelay instead */
-    if (idleTaskID == LOS_CurTaskIDGet()) {
+    if (idleTaskId == LOS_CurTaskIDGet()) {
         PRINT_ERR("Idle Task Do Not Support Delay!\n");
         return osOK;
     }

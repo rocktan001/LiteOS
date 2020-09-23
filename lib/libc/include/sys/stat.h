@@ -77,6 +77,10 @@ extern "C" {
 
 #ifdef __LITEOS__
 #define DEFFILEMODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
+#define F_RDO 0x01    /* Read only */
+#define F_HID 0x02    /* Hidden */
+#define F_SYS 0x04    /* System */
+#define F_ARC 0x20    /* Archive */
 #endif
 
 #define UTIME_NOW  0x3fffffff

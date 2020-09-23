@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: CMSIS Interface
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -35,11 +37,11 @@
 #ifndef _CMSIS_OS_H
 #define _CMSIS_OS_H
 
-#include "menuconfig.h"
+#include "los_config.h"
 
-#if (LOSCFG_CMSIS_VERSION == 1)
+#if (CMSIS_OS_VER == 1)
 #include "1.0/cmsis_os1.h"
-#elif (LOSCFG_CMSIS_VERSION == 2)
+#elif (CMSIS_OS_VER == 2)
 #include "2.0/cmsis_os2.h"
 #endif
 

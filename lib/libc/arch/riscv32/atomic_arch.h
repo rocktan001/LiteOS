@@ -1,5 +1,5 @@
 #define a_barrier a_barrier
-static inline void a_barrier()
+static inline void a_barrier(void)
 {
 	__asm__ __volatile__ ("fence rw,rw" : : : "memory");
 }

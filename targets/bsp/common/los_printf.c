@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
  * Description: LiteOS Printf Implementation
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,16 +34,10 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#include "los_base.h"
 #ifdef LOSCFG_LIB_LIBC
-#include "stdlib.h"
 #include "unistd.h"
 #endif
-#ifdef LOSCFG_LIB_LIBCMINI
-#include "stdarg.h"
-#endif
-#include "los_hwi.h"
-#include "los_memory_pri.h"
+#include "los_memory.h"
 #include "uart.h"
 #ifdef LOSCFG_FS_VFS
 #include "console.h"
@@ -167,6 +163,11 @@ VOID UartVprintf(const CHAR *fmt, va_list ap)
     OsVprintf(fmt, ap, UART_OUTPUT);
 }
 
+VOID ConsoleVprintf(const CHAR *fmt, va_list ap)
+{
+    OsVprintf(fmt, ap, CONSOLE_OUTPUT);
+}
+
 __attribute__((noinline)) VOID UartPrintf(const CHAR *fmt, ...)
 {
     va_list ap;
@@ -194,26 +195,6 @@ VOID DmesgPrintf(const CHAR *fmt, va_list ap)
     OsVprintf(fmt, ap, CONSOLE_OUTPUT);
 }
 #endif
-
-#ifdef LOSCFG_PLATFORM_UART_WITHOUT_VFS
-__attribute__ ((noinline)) INT32 printf(const CHAR *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    OsVprintf(fmt, ap, UART_OUTPUT);
-    va_end(ap);
-    return 0;
-}
-#endif
-
-__attribute__((noinline)) VOID syslog(INT32 level, const CHAR *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    OsVprintf(fmt, ap, CONSOLE_OUTPUT);
-    va_end(ap);
-    (VOID)level;
-}
 
 __attribute__((noinline)) VOID ExcPrintf(const CHAR *fmt, ...)
 {

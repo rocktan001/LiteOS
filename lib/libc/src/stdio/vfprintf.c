@@ -608,7 +608,7 @@ static int printf_core(FILE *f, const char *fmt, va_list *ap, union arg *nl_arg,
 			p = i;
 			pad(f, ' ', w, p, fl);
 			ws = arg.p;
-			for (i=0; (int)i<0+p && *ws && (int)i+(l=wctomb(mb, *ws++))<=p; (int)(i+=l))
+			for (i=0; (int)i<0+p && *ws && (int)i+(l=wctomb(mb, *ws++))<=p; i+=l)
 				out(f, mb, l);
 			pad(f, ' ', w, p, fl^LEFT_ADJ);
 			l = w>p ? w : p;

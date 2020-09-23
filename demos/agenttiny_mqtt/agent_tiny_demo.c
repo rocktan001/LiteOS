@@ -293,7 +293,6 @@ EXIT:
 }
 
 
-/*lint -e550*/
 void app_data_report(void)
 {
     int cnt = 0;
@@ -331,7 +330,6 @@ void app_data_report(void)
          cnt++;
     }
 }
-/*lint +e550*/
 
 UINT32 creat_report_task()
 {

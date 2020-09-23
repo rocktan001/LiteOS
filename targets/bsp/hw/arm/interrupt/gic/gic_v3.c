@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: General interrupt controller version 3.0 (GICv3).
+ * Author: Huawei LiteOS Team
+ * Create: 2018-09-15
  * Notes: Reference from arm documents:
  *        https://static.docs.arm.com/ihi0069/d/IHI0069D_gic_architecture_specification.pdf
  * Redistribution and use in source and binary forms, with or without modification,
@@ -38,7 +40,7 @@
 #include "gic_v3.h"
 #include "los_typedef.h"
 #include "los_hwi_pri.h"
-#include "los_mp.h"
+#include "los_mp_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -170,8 +172,8 @@ STATIC INLINE VOID GicdSetGroup(UINT32 irq)
 STATIC INLINE VOID GicrSetWaker(UINT32 cpu)
 {
     GIC_REG_32(GICR_WAKER(cpu)) &= ~GICR_WAKER_PROCESSORSLEEP;
-    DSB;
-    ISB;
+    DSB();
+    ISB();
     while ((GIC_REG_32(GICR_WAKER(cpu)) & 0x4) == GICR_WAKER_CHILDRENASLEEP);
 }
 
@@ -308,7 +310,7 @@ VOID HalIrqPending(UINT32 vector)
 VOID HalIrqClear(UINT32 vector)
 {
     GiccSetEoir(vector);
-    ISB;
+    ISB();
 }
 
 UINT32 HalIrqSetPrio(UINT32 vector, UINT8 priority)
@@ -431,7 +433,7 @@ VOID HalIrqInit(VOID)
     /* disable distributor */
     GIC_REG_32(GICD_CTLR) = 0;
     GicWaitForRwp(GICD_CTLR);
-    ISB;
+    ISB();
 
     /* set external interrupts to be level triggered, active low. */
     for (i = 32; i < OS_HWI_MAX_NUM; i += 16) {
