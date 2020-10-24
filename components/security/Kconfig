@@ -1,0 +1,30 @@
+menu "Security"
+
+config LOSCFG_COMPONENTS_SECURITY
+    bool "Enable Security"
+    default n
+    help
+      Answer Y to enable LiteOS support security
+
+config SECURITY_VERSION
+  string
+  default "mbedtls-2.6.0"  if LOSCFG_COMPONENTS_SECURITY_VERSION_2_6_0
+
+choice
+  prompt "Versio"
+  default LOSCFG_COMPONENTS_SECURITY_VERSION_2_6_0
+  depends on LOSCFG_COMPONENTS_SECURITY
+
+config LOSCFG_COMPONENTS_SECURITY_VERSION_2_6_0
+  bool "mbedtls-2.6.0"
+  depends on LOSCFG_COMPONENTS_SECURITY
+
+endchoice
+
+
+config LOSCFG_COMPONENTS_SECURITY_PORT
+  bool "Enable Mbedtls Port"
+  default y
+  depends on LOSCFG_COMPONENTS_SECURITY
+
+endmenu

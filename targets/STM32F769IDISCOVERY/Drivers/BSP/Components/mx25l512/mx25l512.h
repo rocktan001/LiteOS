@@ -2,8 +2,6 @@
   ******************************************************************************
   * @file    mx25l512.h
   * @author  MCD Application Team
-  * @version V1.0.2
-  * @date    13-December-2016
   * @brief   This file contains all the description of the MX25L51245G QSPI memory.
   ******************************************************************************
   * @attention

@@ -8,39 +8,11 @@ ALL_ASSRCS := $(wildcard board/$(LITEOS_PLATFORM)/*.S)
 ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 
 LOCAL_SRCS += $(ASSRCS)
-# C sources
-HAL_DRIVER_SRC =  \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim_ex.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr_ex.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc_ex.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ex.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c_ex.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_iwdg.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_adc.c
-        C_SOURCES += $(HAL_DRIVER_SRC)
 
 HARDWARE_SRC =  \
         ${wildcard $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Hardware/Src/*.c} \
         ${wildcard $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Hardware/LCD/*.c}
         C_SOURCES += $(HARDWARE_SRC)
-
-HAL_DRIVER_SRC_NO_BOOTLOADER =  \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rng.c
-        C_SOURCES += $(HAL_DRIVER_SRC_NO_BOOTLOADER)
 
 USER_SRC =  \
         $(LITEOSTOPDIR)/targets/STM32L431_BearPi/os_adapt/os_adapt.c \
@@ -60,8 +32,8 @@ USER_SRC =  \
 
 # C includes
 HAL_DRIVER_INC = \
-        -I $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Inc \
-        -I $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Drivers/STM32L4xx_HAL_Driver/Inc/Legacy
+        -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32L4xx_HAL_Driver/Inc \
+        -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32L4xx_HAL_Driver/Inc/Legacy
         BOARD_INCLUDES += $(HAL_DRIVER_INC)
 
 HARDWARE_INC = \

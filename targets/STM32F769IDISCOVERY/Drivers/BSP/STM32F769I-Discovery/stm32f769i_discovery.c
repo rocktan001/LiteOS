@@ -45,7 +45,6 @@ EndDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f769i_discovery.h"
-#include "los_hwi.h"
 
 /** @addtogroup BSP
   * @{
@@ -100,21 +99,9 @@ uint32_t GPIO_PIN[LEDn] = {LED1_PIN,
 GPIO_TypeDef* GPIO_PORT[LEDn] = {LED1_GPIO_PORT,
                                  LED2_GPIO_PORT};
 
-GPIO_TypeDef* BUTTON_PORT[BUTTONn] = {WAKEUP_BUTTON_GPIO_PORT,
-                                      PLAYPAUSE_BUTTON_GPIO_PORT,
-                                      NEXT_BUTTON_GPIO_PORT,
-                                      PRIV_BUTTON_GPIO_PORT,
-                                      VOLUMEUP_BUTTON_GPIO_PORT,
-                                      VOLUMEDOWN_BUTTON_GPIO_PORT,
-                                      MUTE_BUTTON_GPIO_PORT};
+GPIO_TypeDef* BUTTON_PORT[BUTTONn] = {WAKEUP_BUTTON_GPIO_PORT };
 
-const uint16_t BUTTON_PIN[BUTTONn] = {WAKEUP_BUTTON_PIN ,
-                                      PLAYPAUSE_BUTTON_PIN,
-                                      NEXT_BUTTON_PIN,
-                                      PRIV_BUTTON_PIN,
-                                      VOLUMEUP_BUTTON_PIN,
-                                      VOLUMEDOWN_BUTTON_PIN,
-                                      MUTE_BUTTON_PIN};
+const uint16_t BUTTON_PIN[BUTTONn] = {WAKEUP_BUTTON_PIN };
 
 const uint16_t BUTTON_IRQn[BUTTONn] = {WAKEUP_BUTTON_EXTI_IRQn };
 
@@ -267,20 +254,6 @@ void BSP_LED_Toggle(Led_TypeDef Led)
   HAL_GPIO_TogglePin(GPIO_PORT[Led], GPIO_PIN[Led]);
 }
 
-
-/**
-  * @brief  Returns the selected led state.
-  * @param  led: led to be checked
-  *          This parameter can be one of the following values:
-  * @retval The led GPIO pin value
-  */
-
-uint32_t BSP_LED_GetState(Led_TypeDef Led)
-{
-  return HAL_GPIO_ReadPin(GPIO_PORT[Led], GPIO_PIN[Led]);
-}
-
-
 /**
   * @brief  Configures button GPIO and EXTI Line.
   * @param  Button: Button to be configured
@@ -323,13 +296,8 @@ void BSP_PB_Init(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode)
     HAL_GPIO_Init(BUTTON_PORT[Button], &gpio_init_structure);
 
     /* Enable and set Button EXTI Interrupt to the lowest priority */
-    void EXTI0_IRQHandler(void);
-    UINT32 uwRet;
-    uwRet = LOS_HwiCreate((BUTTON_IRQn[Button]), 1, 0, EXTI0_IRQHandler, 0) ;
-    if (uwRet != LOS_OK)
-    {
-        printf("ETH_IRQn create hwi failed\n");
-    }
+    HAL_NVIC_SetPriority((IRQn_Type)(BUTTON_IRQn[Button]), 0x0F, 0x00);
+    HAL_NVIC_EnableIRQ((IRQn_Type)(BUTTON_IRQn[Button]));
   }
 }
 
@@ -384,17 +352,6 @@ uint32_t BSP_PB_GetState(Button_TypeDef Button)
   * @param  i2c_handler : I2C handler
   * @retval None
   */
-#ifndef _USE_FreeRTOS
-__weak void I2C4_EV_IRQHandler(void)
-{
-    while(1);
-}
-
-__weak void I2C4_ER_IRQHandler(void)
-{
-    while(1);
-}
-#endif
 static void I2Cx_MspInit(I2C_HandleTypeDef *i2c_handler)
 {
   GPIO_InitTypeDef  gpio_init_structure;
@@ -427,21 +384,15 @@ static void I2Cx_MspInit(I2C_HandleTypeDef *i2c_handler)
 
   /* Release the I2C peripheral clock reset */
   DISCOVERY_AUDIO_I2Cx_RELEASE_RESET();
+
   /* Enable and set I2C1 Interrupt to a lower priority */
+  HAL_NVIC_SetPriority(DISCOVERY_AUDIO_I2Cx_EV_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(DISCOVERY_AUDIO_I2Cx_EV_IRQn);
 
-    UINT32 uwRet;
-    uwRet = LOS_HwiCreate(DISCOVERY_AUDIO_I2Cx_EV_IRQn, 2, 0, I2C4_EV_IRQHandler, 0) ;
-    if (uwRet != LOS_OK)
-    {
-        printf("I2Cx_EV_IRQn create hwi failed\n");
-    }
-
-    uwRet = LOS_HwiCreate(DISCOVERY_AUDIO_I2Cx_ER_IRQn, 2, 0, I2C4_ER_IRQHandler, 0) ;
-    if (uwRet != LOS_OK)
-    {
-        printf("I2Cx_ER_IRQn create hwi failed\n");
-    }
-
+  /* Enable and set I2C1 Interrupt to a lower priority */
+  HAL_NVIC_SetPriority(DISCOVERY_AUDIO_I2Cx_ER_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(DISCOVERY_AUDIO_I2Cx_ER_IRQn);    
+    
   }
   else
   {

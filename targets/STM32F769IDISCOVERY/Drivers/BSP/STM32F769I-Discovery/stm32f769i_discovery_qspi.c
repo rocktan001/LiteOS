@@ -72,7 +72,6 @@ EndDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f769i_discovery_qspi.h"
-#include "los_hwi.h"
 
 /** @addtogroup BSP
   * @{
@@ -529,12 +528,6 @@ uint8_t BSP_QSPI_EnableMemoryMappedMode(void)
   *           - NVIC configuration for QSPI interrupt
   * @retval None
   */
-#ifndef _USE_FreeRTOS
-__weak void QUADSPI_IRQHandler(void)
-{
-    while(1);
-}
-#endif
 __weak void BSP_QSPI_MspInit(QSPI_HandleTypeDef *hqspi, void *Params)
 {
   GPIO_InitTypeDef gpio_init_structure;
@@ -585,12 +578,8 @@ __weak void BSP_QSPI_MspInit(QSPI_HandleTypeDef *hqspi, void *Params)
 
   /*##-3- Configure the NVIC for QSPI #########################################*/
   /* NVIC configuration for QSPI interrupt */
-    UINT32 uwRet;
-    uwRet = LOS_HwiCreate(QUADSPI_IRQn, 3, 0, QUADSPI_IRQHandler, 0);
-    if (uwRet != LOS_OK)
-    {
-        printf("QUADSPI_IRQn create hwi failed\n");
-    }
+  HAL_NVIC_SetPriority(QUADSPI_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(QUADSPI_IRQn);
 }
 
 /**

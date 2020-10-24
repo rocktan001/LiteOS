@@ -127,8 +127,7 @@
 #define AUDIO_OUT_SAIx_DMAx_PERIPH_DATA_SIZE     DMA_PDATAALIGN_HALFWORD
 #define AUDIO_OUT_SAIx_DMAx_MEM_DATA_SIZE        DMA_MDATAALIGN_HALFWORD
 #define DMA_MAX_SZE                              0xFFFF
-
-extern void DMA2_Stream1_IRQHandler(void);
+   
 #define AUDIO_OUT_SAIx_DMAx_IRQHandler           DMA2_Stream1_IRQHandler
 
 /* Select the interrupt preemption priority and subpriority for the DMA interrupt */
@@ -187,12 +186,10 @@ extern void DMA2_Stream1_IRQHandler(void);
 #define AUDIO_DFSDMx_DMAx_PERIPH_DATA_SIZE              DMA_PDATAALIGN_WORD
 #define AUDIO_DFSDMx_DMAx_MEM_DATA_SIZE                 DMA_MDATAALIGN_WORD
 
-extern void DMA2_Stream0_IRQHandler(void);
 #define AUDIO_DFSDMx_DMAx_TOP_LEFT_STREAM               DMA2_Stream0
 #define AUDIO_DFSDMx_DMAx_TOP_LEFT_IRQ                  DMA2_Stream0_IRQn   
 #define AUDIO_DFSDMx_DMAx_TOP_LEFT_IRQHandler           DMA2_Stream0_IRQHandler
 
-extern void DMA2_Stream5_IRQHandler(void);
 #define AUDIO_DFSDMx_DMAx_TOP_RIGHT_STREAM              DMA2_Stream5
 #define AUDIO_DFSDMx_DMAx_TOP_RIGHT_IRQ                 DMA2_Stream5_IRQn
 #define AUDIO_DFSDMx_DMAx_TOP_RIGHT_IRQHandler          DMA2_Stream5_IRQHandler

@@ -62,9 +62,9 @@
  * @{
  */
 
-/**
+/** 
   * @brief  Define for STM32F769I_DISCOVERY board
-  */
+  */ 
 #if !defined (USE_STM32F769I_DISCO)
  #define USE_STM32F769I_DISCO
 #endif
@@ -86,28 +86,8 @@ typedef enum
 typedef enum
 {
   BUTTON_WAKEUP = 0,
-  BUTTON_PLAYPAUSEFLAG,
-  BUTTON_NEXTFLAG,
-  BUTTON_PRIVFLAG,
-  BUTTON_VOLUMEUPFLAG,
-  BUTTON_VOLUMEDOWNFLAG,
-  BUTTON_MUTEFLAG
 } Button_TypeDef;
 
-#define PLAYPAUSE_BUTTON_PIN              GPIO_PIN_0
-#define PLAYPAUSE_BUTTON_GPIO_PORT        GPIOJ
-#define NEXT_BUTTON_PIN                   GPIO_PIN_1
-#define NEXT_BUTTON_GPIO_PORT             GPIOJ
-#define PRIV_BUTTON_PIN                   GPIO_PIN_3
-#define PRIV_BUTTON_GPIO_PORT             GPIOJ
-#define VOLUMEUP_BUTTON_PIN               GPIO_PIN_4
-#define VOLUMEUP_BUTTON_GPIO_PORT         GPIOJ
-#define VOLUMEDOWN_BUTTON_PIN             GPIO_PIN_6
-#define VOLUMEDOWN_BUTTON_GPIO_PORT       GPIOC
-#define MUTE_BUTTON_PIN                   GPIO_PIN_7
-#define MUTE_BUTTON_GPIO_PORT             GPIOC
-#define KEY_GPIOJ_CLK_ENABLE()            __HAL_RCC_GPIOJ_CLK_ENABLE()
-#define KEY_GPIOC_CLK_ENABLE()            __HAL_RCC_GPIOC_CLK_ENABLE()
 #define BUTTON_USER BUTTON_WAKEUP
 
 /** @brief ButtonMode_TypeDef
@@ -122,10 +102,10 @@ typedef enum
 
 /** @addtogroup Exported_types
   * @{
-  */
-typedef enum
+  */ 
+typedef enum 
 {
-  PB_SET = 0,
+  PB_SET = 0, 
   PB_RESET = !PB_SET
 } ButtonValue_TypeDef;
 
@@ -174,7 +154,7 @@ typedef enum
   * @{
   */
 /* Only one User/Wakeup button */
-#define BUTTONn                             ((uint8_t)7)
+#define BUTTONn                             ((uint8_t)1)
 
 /**
   * @brief Wakeup push-button
@@ -313,7 +293,7 @@ typedef enum
 /* I2C TIMING is calculated from APB1 source clock = 50 MHz */
 /* Due to the big MOFSET capacity for adapting the camera level the rising time is very large (>1us) */
 /* 0x40912732 takes in account the big rising and aims a clock of 100khz */
-#ifndef DISCOVERY_I2Cx_TIMING
+#ifndef DISCOVERY_I2Cx_TIMING  
 #define DISCOVERY_I2Cx_TIMING                      ((uint32_t)0x40912732)
 #endif /* DISCOVERY_I2Cx_TIMING */
 
@@ -341,7 +321,6 @@ void             BSP_LED_Toggle(Led_TypeDef Led);
 void             BSP_PB_Init(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode);
 void             BSP_PB_DeInit(Button_TypeDef Button);
 uint32_t         BSP_PB_GetState(Button_TypeDef Button);
-uint32_t         BSP_LED_GetState(Led_TypeDef Led);
 
 /**
   * @}

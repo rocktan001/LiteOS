@@ -1,4 +1,6 @@
 include $(LITEOSTOPDIR)/config.mk
+include $(LITEOSTOPDIR)/components/components.mk
+include $(LITEOSTOPDIR)/demos/demos.mk
 
 MODULE_NAME := $(LITEOS_PLATFORM)
 
@@ -8,37 +10,10 @@ ALL_ASSRCS := $(wildcard board/$(LITEOS_PLATFORM)/*.S)
 ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 
 LOCAL_SRCS += $(ASSRCS)
-# C sources
-HAL_DRIVER_SRC =  \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
-        C_SOURCES += $(HAL_DRIVER_SRC)
 
 HARDWARE_SRC =  \
         ${wildcard $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Src/*.c}
         C_SOURCES += $(HARDWARE_SRC)
-
-HAL_DRIVER_SRC_NO_BOOTLOADER =  \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_eth.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c
-        C_SOURCES += $(HAL_DRIVER_SRC_NO_BOOTLOADER)
 
 USER_SRC =  \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/os_adapt/os_adapt.c \
@@ -51,10 +26,27 @@ USER_SRC =  \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/user_task.c
         C_SOURCES += $(USER_SRC)
 
+ifeq ($(LOSCFG_DEMOS_FS), y)
+        ifeq ($(LOSCFG_DEMOS_FS_FAT), y)
+        DEMOS_SRC += \
+                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/fatfs_hal.c
+        C_DEFS += -D FS_FATFS
+        endif
+
+        ifeq ($(LOSCFG_DEMOS_FS_SPIF), y)
+        DEMOS_SRC += \
+                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/spiffs_hal.c
+        C_DEFS += -D FS_SPIFFS
+        endif
+C_SOURCES += $(DEMOS_SRC)
+BOARD_INCLUDES += $(COMPONENTS_INCLUDE)
+BOARD_INCLUDES += $(DEMOS_INCLUDE)
+endif
+
 # C includes
 HAL_DRIVER_INC = \
-        -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Inc \
-        -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
+        -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc \
+        -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc/Legacy
         BOARD_INCLUDES += $(HAL_DRIVER_INC)
 
 INCLUDE_INC = \
@@ -78,7 +70,7 @@ USER_INC = \
         BOARD_INCLUDES += $(USER_INC)
 
 # C defines
-C_DEFS =  \
+C_DEFS +=  \
         -DUSE_HAL_DRIVER \
         -DSTM32F429xx \
         -DNDEBUG \

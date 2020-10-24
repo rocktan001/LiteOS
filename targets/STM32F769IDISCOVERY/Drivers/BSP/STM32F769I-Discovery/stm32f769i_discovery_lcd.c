@@ -92,7 +92,6 @@ EndDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f769i_discovery_lcd.h"
-#include "los_hwi.h"
 #include "../../../Utilities/Fonts/fonts.h"
 #include "../../../Utilities/Fonts/font24.c"
 #include "../../../Utilities/Fonts/font20.c"
@@ -1688,13 +1687,6 @@ __weak void BSP_LCD_MspDeInit(void)
   * @brief  Initialize the BSP LCD Msp.
   * Application can surcharge if needed this function implementation
   */
-#ifndef _USE_FreeRTOS
-__weak void DMA2D_IRQHandler(void)
-{
-    while(1);
-}
-#endif
-
 __weak void BSP_LCD_MspInit(void)
 {
   /** @brief Enable the LTDC clock */
@@ -1718,29 +1710,17 @@ __weak void BSP_LCD_MspInit(void)
   __HAL_RCC_DSI_FORCE_RESET();
   __HAL_RCC_DSI_RELEASE_RESET();
 
-    /** @brief NVIC configuration for LTDC interrupt that is now enabled */
-    extern void LTDC_IRQHandler(void);
-    UINT32 uwRet;
-    uwRet = LOS_HwiCreate(LTDC_IRQn, 2, 0, LTDC_IRQHandler, 0);
-    if (uwRet != LOS_OK)
-    {
-        printf("LTDC_IRQn create hwi failed\n");
-    }
+  /** @brief NVIC configuration for LTDC interrupt that is now enabled */
+  //HAL_NVIC_SetPriority(LTDC_IRQn, 3, 0);
+  //HAL_NVIC_EnableIRQ(LTDC_IRQn);
 
-    /** @brief NVIC configuration for DMA2D interrupt that is now enabled */
-    uwRet = LOS_HwiCreate(DMA2D_IRQn, 2, 0, DMA2D_IRQHandler, 0);
-    if (uwRet != LOS_OK)
-    {
-        printf("DMA2D_IRQn create hwi failed\n");
-    }
+  /** @brief NVIC configuration for DMA2D interrupt that is now enabled */
+  //HAL_NVIC_SetPriority(DMA2D_IRQn, 3, 0);
+  //HAL_NVIC_EnableIRQ(DMA2D_IRQn);
 
-    /** @brief NVIC configuration for DSI interrupt that is now enabled */
-    extern void DSI_IRQHandler(void);
-    uwRet = LOS_HwiCreate(DSI_IRQn, 2, 0, DSI_IRQHandler, 0);
-    if (uwRet != LOS_OK)
-    {
-        printf("DSI_IRQn create hwi failed\n");
-    }
+  /** @brief NVIC configuration for DSI interrupt that is now enabled */
+  //HAL_NVIC_SetPriority(DSI_IRQn, 3, 0);
+  //HAL_NVIC_EnableIRQ(DSI_IRQn);
 }
 
 /**

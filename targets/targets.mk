@@ -6,6 +6,7 @@ TIMER_SRC   :=
 HRTIMER_SRC :=
 UART_SRC    :=
 USB_SRC     :=
+HAL_DRIVER_TYPE :=
 
 ############################# HI3556V200 Options##############################
 ifeq ($(LOSCFG_PLATFORM_HI3556V200), y)
@@ -43,16 +44,19 @@ else ifeq ($(LOSCFG_PLATFORM_STM32F769IDISCOVERY), y)
     TIMER_TYPE := arm/timer/arm_cortex_m
     LITEOS_CMACRO_TEST += -DTESTSTM32F769IDISCOVERY
     LITEOS_CMACRO_TEST += -DSTM32F769xx
+    HAL_DRIVER_TYPE := STM32F7xx_HAL_Driver
 ######################### STM32F429IGTX Options###############################
 else ifeq ($(LOSCFG_PLATFORM_STM32F429IGTX), y)
     TIMER_TYPE := arm/timer/arm_cortex_m
     LITEOS_CMACRO_TEST += -DTESTSTM32F429IGTX
     LITEOS_CMACRO_TEST += -DSTM32F429xx
+    HAL_DRIVER_TYPE := STM32F4xx_HAL_Driver
 ######################### STM32L431_BearPi Options############################
 else ifeq ($(LOSCFG_PLATFORM_STM32L431_BearPi), y)
     TIMER_TYPE := arm/timer/arm_cortex_m
     LITEOS_CMACRO_TEST += -DTESTSTM32L431_BearPi
     LITEOS_CMACRO_TEST += -DSTM32L431xx
+    HAL_DRIVER_TYPE := STM32L4xx_HAL_Driver
 endif
 
 HWI_SRC     := bsp/hw/$(HWI_TYPE)
@@ -61,7 +65,7 @@ HRTIMER_SRC := bsp/hw/$(HRTIMER_TYPE)
 NET_SRC     := bsp/net/$(NET_TYPE)
 UART_SRC    := bsp/uart/$(UART_TYPE)
 USB_SRC     := bsp/usb/$(USB_TYPE)
-
+HAL_DRIVER_SRC := drivers/$(HAL_DRIVER_TYPE)
 
 LITEOS_PLATFORM  := $(subst $\",,$(LOSCFG_PLATFORM))
 
@@ -103,9 +107,25 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_KERNEL_CPPSUPPORT), y)
         LITEOS_BASELIB += -lcppsupport
     endif
+    ifeq ($(LOSCFG_COMPONENTS_FS), y)
+        LITEOS_BASELIB += -lfs
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_GUI), y)
+        LITEOS_BASELIB += -lgui
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_SENSORHUB), y)
+        LITEOS_BASELIB += -lsensorhub
+    endif
+    ifeq ($(LOSCFG_DEMOS_FS), y)
+        LITEOS_BASELIB += -lfs_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_GUI), y)
+        LITEOS_BASELIB += -lgui_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_SENSORHUB), y)
+        LITEOS_BASELIB += -lsensorhub_demo
+    endif
 endif
-
-#LITEOS_BASELIB       += -lnnacl
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)
 LITEOS_CXXINCLUDE       += $(PLATFORM_INCLUDE)
