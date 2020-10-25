@@ -45,7 +45,7 @@ void fs_demo(void)
     printf("Huawei LiteOS File System Demo.\n");
 
 #if defined(FS_SPIFFS)
-    extern void spiffs_demo();
+    extern void spiffs_demo(void);
     spiffs_demo();
 #endif
 

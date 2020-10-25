@@ -85,7 +85,7 @@ LITEOS_SCRIPTPATH  ?= $(LITEOSTOPDIR)/tools/scripts
 LITEOS_LIB_BIGODIR  = $(OUT)/lib/obj
 LOSCFG_ENTRY_SRC    = $(LITEOSTOPDIR)/targets/bsp/common/los_config.c
 
-LITEOS_MENUCONFIG_H = $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/menuconfig.h
+LITEOS_MENUCONFIG_H = $(LITEOSTOPDIR)/targets/bsp/common/menuconfig.h
 LITEOS_PLATFORM_MENUCONFIG_H = $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/menuconfig.h
 
 ### include variable
@@ -125,7 +125,7 @@ include $(LITEOSTOPDIR)/lib/api.mk
 include $(LITEOSTOPDIR)/compat/api.mk
 
 
-LIB_SUBDIRS += kernel compat lib
+LIB_SUBDIRS += kernel compat lib components demos
 
 LITEOS_KERNEL_INCLUDE := -I $(LITEOSTOPDIR)/kernel/include
 

@@ -2,8 +2,6 @@
   ******************************************************************************
   * @file    adv7533.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    05-December-2016
   * @brief   This file provides the ADV7533 DSI to HDMI bridge driver 
   ******************************************************************************
   * @attention

@@ -3,8 +3,6 @@
   ******************************************************************************
   * @file    adv7533.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    05-December-2016
   * @brief   This file contains all the constants parameters for the ADV7533
   *          which is the HDMI bridge between DSI and HDMI
   ******************************************************************************

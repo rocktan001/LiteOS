@@ -1,4 +1,6 @@
 include $(LITEOSTOPDIR)/config.mk
+include $(LITEOSTOPDIR)/components/components.mk
+include $(LITEOSTOPDIR)/demos/demos.mk
 
 MODULE_NAME := $(LITEOS_PLATFORM)
 
@@ -10,42 +12,13 @@ ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 LOCAL_SRCS += $(ASSRCS)
 
 # C sources
-HAL_DRIVER_SRC =  \
+BSP_DRIVER_SRC =  \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/ft5336/ft5336.c \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/ft6x06/ft6x06.c \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/otm8009a/otm8009a.c \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/wm8994/wm8994.c \
-        ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/*.c} \
         ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/*.c}
-
-HAL_DRIVER_EXCLUDE = \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_crc.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_usb.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_utils.c
-HAL_DRIVER_SRC := $(filter-out $(HAL_DRIVER_EXCLUDE), $(HAL_DRIVER_SRC))
-
-HAL_DRIVER_SRC_FILTERS = \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_mmc.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_smbus.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_timebase_rtc_alarm_template.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_timebase_rtc_wakeup_template.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_timebase_tim_template.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_dac.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_dma.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_dma2d.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_exti.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_gpio.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_i2c.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_lptim.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_pwr.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_rcc.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_rng.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_rtc.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_spi.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_tim.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_usart.c \
-        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_utils.c
-        C_SOURCES += $(filter-out $(HAL_DRIVER_SRC_FILTERS), $(HAL_DRIVER_SRC))
+        C_SOURCES += $(BSP_DRIVER_SRC)
 
 USER_SRC =  \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/os_adapt/os_adapt.c \
@@ -55,55 +28,13 @@ USER_SRC =  \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/system_stm32f7xx.c
         C_SOURCES += $(USER_SRC)
 
-AI_SRC = \
-        ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/ai/MNIST/*.c}
-        #${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/ai/MOBILENET/*.c} \
-        ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/ai/RESNET/*.c}
-        C_SOURCES += $(AI_SRC)
-
-AI_INC = \
-        -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/ai/include \
-        -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/ai/nnacl
-        BOARD_INCLUDES += $(AI_INC)
-
-ifeq ($(WITH_FILESYSTEM), yes)
-        FS_SRC = \
-                ${wildcard $(LITEOSTOPDIR)/components/fs/vfs/*.c}
-                C_SOURCES += $(FS_SRC)
-
-        FS_DEMO_COMMON_SRC = \
-                ${wildcard $(LITEOSTOPDIR)/demos/fs/fs_common.c}
-                C_SOURCES += $(FS_DEMO_COMMON_SRC)
-
-        FS_SPIFFS_SRC = \
-                ${wildcard $(LITEOSTOPDIR)/components/fs/spiffs/*.c} \
-                ${wildcard $(LITEOSTOPDIR)/components/fs/spiffs/spiffs_git/src/*.c}
-
-        FS_FATFS_SRC = \
-                ${wildcard $(LITEOSTOPDIR)/components/fs/fatfs/*.c} \
-                ${wildcard $(LITEOSTOPDIR)/components/fs/fatfs/ff13b/source/*.c}
-
-        ifeq ($(IS_COMPILE_ALLFS), ALL)
-                C_SOURCES += $(FS_SPIFFS_SRC)
-                C_SOURCES += $(FS_FATFS_SRC)
-                        C_SOURCES += $(LITEOSTOPDIR)/demos/fs/fatfs_demo.c
-                        C_SOURCES += $(LITEOSTOPDIR)/demos/fs/spiffs_demo.c
-        else ifeq ($(FILESYSTEM_TYPE), SPIFFS)
-                C_SOURCES += $(FS_SPIFFS_SRC)
-                        C_SOURCES += $(LITEOSTOPDIR)/demos/fs/spiffs_demo.c
-        else ifeq ($(FILESYSTEM_TYPE), FATFS)
-                C_SOURCES += $(FS_FATFS_SRC)
-                        C_SOURCES += $(LITEOSTOPDIR)/demos/fs/fatfs_demo.c
-        endif
-endif
-
 # C includes
 HAL_DRIVER_INC = \
+	-I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver/Inc \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery \
-        -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Inc \
-        -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/Utilities/Fonts \
-        -I $(LITEOSTOPDIR)/compat/cmsis
+	-I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/Utilities/Fonts \
+	-I $(LITEOSTOPDIR)/compat/cmsis
         BOARD_INCLUDES += $(HAL_DRIVER_INC)
 
 INCLUDE_INC = \
@@ -128,33 +59,13 @@ LITEOS_CMSIS_INC = \
         -I $(LITEOSTOPDIR)/osdepends/liteos/cmsis
         BOARD_INCLUDES += $(LITEOS_CMSIS_INC)
 
-ifeq ($(WITH_FILESYSTEM), yes)
-        FS_SPIFFS_INC = \
-                -I $(LITEOSTOPDIR)/components/fs/spiffs/spiffs_git/src \
-                -I $(LITEOSTOPDIR)/components/fs/spiffs/spiffs_git/src/default
-
-        FS_FATFS_INC = \
-                -I $(LITEOSTOPDIR)/components/fs/fatfs/ff13b/source \
-                -I $(LITEOSTOPDIR)/components/fs/fatfs/ff13b/source/default
-
-        ifeq ($(IS_COMPILE_ALLFS), ALL)
-                BOARD_INCLUDES += $(FS_SPIFFS_INC)
-                BOARD_INCLUDES += $(FS_FATFS_INC)
-        else ifeq ($(FILESYSTEM_TYPE), SPIFFS)
-                BOARD_INCLUDES += $(FS_SPIFFS_INC)
-        else ifeq ($(FILESYSTEM_TYPE), FATFS)
-                BOARD_INCLUDES += $(FS_FATFS_INC)
-        endif
-endif
-
 USER_INC = \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Inc \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/include \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/wm8994 \
-        -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/STM32F7xx_HAL_Driver/Inc \
+        -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver/Inc \
         -I $(LITEOSTOPDIR)/osdepends/liteos/cmsis/1.0 \
-        -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/OS_CONFIG \
-        -I $(LITEOSTOPDIR)/demos/gui
+        -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/OS_CONFIG
         BOARD_INCLUDES += $(USER_INC)
 
 # C defines
@@ -171,34 +82,22 @@ ifeq ($(WITH_FILESYSTEM), yes)
 endif
 
 ###########################################add support for lvgl########################################################
-ifeq ($(WITH_LVGL), yes)
-#LiteGL Build Options
-LVGL_DIR = $(LITEOSTOPDIR)/components/gui/lvgl
-LVGL_DEMO_DIR = $(LITEOSTOPDIR)/demos/gui
-LVGL_SRC_DIR = $(LVGL_DIR)/src
-LVGL_DRIVER_DIR = $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers
+ifeq ($(LOSCFG_GUI_ENABLE), y)
+LITEGL_INCLUDE += $(COMPONENTS_INCLUDE)
+LITEGL_INCLUDE += $(DEMOS_INCLUDE)
+LVGl_GUI_INC = \
+	-I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers
+        LITEGL_INCLUDE += $(LVGl_GUI_INC)
 
 LVGL_DRIVER_SRC =  \
         ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/tft/*.c} \
         ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/touchpad/*.c}
+        C_SOURCES += $(LVGL_DRIVER_SRC)
 
-LVGL_SRC = \
-    $(wildcard $(LVGL_SRC_DIR)/lv_core/*.c) \
-    $(wildcard $(LVGL_SRC_DIR)/lv_draw/*.c) \
-    $(wildcard $(LVGL_SRC_DIR)/lv_font/*.c) \
-    $(wildcard $(LVGL_SRC_DIR)/lv_gpu/*.c) \
-    $(wildcard $(LVGL_SRC_DIR)/lv_hal/*.c) \
-    $(wildcard $(LVGL_SRC_DIR)/lv_misc/*.c) \
-    $(wildcard $(LVGL_SRC_DIR)/lv_themes/*.c) \
-    $(wildcard $(LVGL_SRC_DIR)/lv_widgets/*.c)
 
-LVGL_DEMO_SRC = \
-    $(wildcard $(LVGL_DEMO_DIR)/*.c) \
-    $(wildcard $(LVGL_DEMO_DIR)/widgets/*.c)
-LITEGL_INCLUDE = -I$(LVGL_DIR) -I$(LVGL_SRC_DIR) -I$(LVGL_DEMO_DIR) -I$(LVGL_DRIVER_DIR)
 LITEGL_LIB = -Xlinker -no-enum-size-warning
 
-C_SOURCES += $(LVGL_SRC) $(LVGL_DEMO_SRC) $(LVGL_DRIVER_SRC)
+
 BOARD_INCLUDES += $(LITEGL_INCLUDE) $(LIBSEC_INCLUDE) $(HAL_DRIVER_INC) $(USER_INC) $(CMSIS_INC) $(KERNEL_INC) $(ARCH_INC)
 C_DEFS += -DLV_CONF_INCLUDE_SIMPLE
 endif

@@ -1,0 +1,9 @@
+menu "Network"
+
+config LOSCFG_COMPONENTS_NETWORK
+bool "Enable Network"
+default n
+help
+    Answer Y enable LiteOS support Network
+
+endmenu

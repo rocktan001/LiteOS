@@ -2,8 +2,6 @@
   ******************************************************************************
   * @file    ft6x06.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    03-May-2016
   * @brief   This file contains all the functions prototypes for the
   *          ft6x06.c IO expander driver.
   ******************************************************************************

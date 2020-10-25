@@ -24,6 +24,14 @@ config LOSCFG_ARCH_ARM_CORTEX_M
 #
 # Architecture Versions
 #
+config LOSCFG_ARCH_ARM_V6M
+    bool
+    select LOSCFG_ARCH_ARM_CORTEX_M
+
+config LOSCFG_ARCH_ARM_V7M
+    bool
+    select LOSCFG_ARCH_ARM_CORTEX_M
+
 config LOSCFG_ARCH_ARM_V7A
     bool
     select LOSCFG_ARCH_ARM_CORTEX_A

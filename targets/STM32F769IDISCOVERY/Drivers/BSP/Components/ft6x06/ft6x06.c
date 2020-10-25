@@ -2,8 +2,6 @@
   ******************************************************************************
   * @file    ft6x06.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    03-May-2016
   * @brief   This file provides a set of functions needed to manage the FT6X06
   *          IO Expander devices.
   ******************************************************************************

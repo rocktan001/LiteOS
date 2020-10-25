@@ -343,9 +343,9 @@ __weak void LCD_WaitVSync(void)
 void KeyWord_Button_init(void)
 {
     GPIO_InitTypeDef gpio_init_structure;
-    KEY_GPIOJ_CLK_ENABLE();
-    KEY_GPIOC_CLK_ENABLE();
-  /* Configure PJ0 pin as input */
+    __HAL_RCC_GPIOJ_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+   /* Configure PJ0 pin as input */
     gpio_init_structure.Pin = GPIO_PIN_0;
     gpio_init_structure.Mode = GPIO_MODE_INPUT;
     gpio_init_structure.Pull = GPIO_PULLDOWN;

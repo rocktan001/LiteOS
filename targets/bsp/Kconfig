@@ -2,7 +2,7 @@ source "targets/Kconfig"
 
 choice
     prompt "IRQCHIP"
-    default LOSCFG_PLATFORM_BSP_GIC_V2
+    default LOSCFG_PLATFORM_BSP_NVIC
     help
       Interrupt Controller.
 

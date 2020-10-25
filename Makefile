@@ -49,27 +49,38 @@ $(LITEOS_LIBS_TARGET): $(__LIBS)
 include tools/menuconfig/Makefile.kconfig
 
 $(LITEOS_MENUCONFIG_H):
+ifneq ($(LITEOS_PLATFORM_MENUCONFIG_H), $(wildcard $(LITEOS_PLATFORM_MENUCONFIG_H)))
+	$(HIDE)+make savemenuconfig
+endif
+
 LITEOS_BUILD: $(LITEOS_MENUCONFIG_H)
 
 LITEOS_BUILD:
 	$(HIDE)echo $(LOSCFG_ENTRY_SRC)
 
-
 	$(HIDE)for dir in $(LITEOS_SUBDIRS); \
-	do $(MAKE) -C $$dir all || exit 1; \
+	do $(MAKE) -C $$dir all || \
+	if [ "$$?" != "0" ]; then \
+	echo "########################################################################################################"; \
+	echo "########                      LiteOS build failed!                                              ########"; \
+	echo "########################################################################################################"; \
+	exit 1; \
+	fi;\
 	done
 
 $(LITEOS_TARGET):
 ifeq ($(OS), Linux)
 	$(call update_from_baselib_file)
 endif
-	$(LD) $(LITEOS_LDFLAGS) $(LITEOS_TABLES_LDFLAGS) $(LITEOS_DYNLDFLAGS) -Map=$(OUT)/$@.map -o $(OUT)/$@ --start-group $(LITEOS_BASELIB) --end-group
-	#$(SIZE) -t --common $(OUT)/lib/*.a >$(OUT)/$@.objsize
-	$(OBJCOPY) -O binary $(OUT)/$@ $(OUT)/$@.bin
-	$(OBJDUMP) -t $(OUT)/$@ |sort >$(OUT)/$@.sym.sorted
-	$(OBJDUMP) -Mreg-names-raw -d $(OUT)/$@ |$(LITEOSTOPDIR)/tools/stackusage/stackusage |sort -n -k 1 -r >$(OUT)/$@.stack
-	$(OBJDUMP) -d $(OUT)/$@ >$(OUT)/$@.asm
-	#$(NM) -S --size-sort $(OUT)/$@ >$(OUT)/$@.size
+	$(LD) $(LITEOS_LDFLAGS) $(LITEOS_TABLES_LDFLAGS) $(LITEOS_DYNLDFLAGS) -Map=$(OUT)/$@.map -o $(OUT)/$@.elf --start-group $(LITEOS_BASELIB) --end-group
+	$(OBJCOPY) -O binary $(OUT)/$@.elf $(OUT)/$@.bin
+	$(OBJDUMP) -t $(OUT)/$@.elf |sort >$(OUT)/$@.sym.sorted
+	$(OBJDUMP) -Mreg-names-raw -d $(OUT)/$@.elf |$(LITEOSTOPDIR)/tools/stackusage/stackusage |sort -n -k 1 -r >$(OUT)/$@.stack
+	$(OBJDUMP) -d $(OUT)/$@.elf >$(OUT)/$@.asm
+	$(SIZE) $(OUT)/$@.elf
+	$(HIDE)echo "########################################################################################################"
+	$(HIDE)echo "########                      LiteOS build successfully!                                        ########"
+	$(HIDE)echo "########################################################################################################"
 
 clean:
 	$(HIDE)for dir in $(LITEOS_SUBDIRS); \

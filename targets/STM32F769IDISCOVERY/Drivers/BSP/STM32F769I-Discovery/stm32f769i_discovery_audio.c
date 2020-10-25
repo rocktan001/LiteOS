@@ -138,7 +138,6 @@ EndDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f769i_discovery_audio.h"
-#include "los_hwi.h"
 
 /** @addtogroup BSP
   * @{
@@ -702,14 +701,10 @@ __weak void BSP_AUDIO_OUT_MspInit(SAI_HandleTypeDef *hsai, void *Params)
     /* Configure the DMA Stream */
     HAL_DMA_Init(&hdma_sai_tx);
   }
-
-    /* SAI DMA IRQ Channel configuration */
-    UINT32 uwRet;
-    uwRet = LOS_HwiCreate(AUDIO_OUT_SAIx_DMAx_IRQ, 1, 0, AUDIO_OUT_SAIx_DMAx_IRQHandler, 0) ;
-    if (uwRet != LOS_OK)
-    {
-        printf("AUDIO_OUT_SAIx_DMAx_IRQ create hwi failed\n");
-    }
+  
+  /* SAI DMA IRQ Channel configuration */
+  HAL_NVIC_SetPriority(AUDIO_OUT_SAIx_DMAx_IRQ, AUDIO_OUT_IRQ_PREPRIO, 0);
+  HAL_NVIC_EnableIRQ(AUDIO_OUT_SAIx_DMAx_IRQ);
 }
 
 /**
@@ -2098,16 +2093,13 @@ static void DFSDMx_FilterMspInit(void)
   __HAL_DMA_RESET_HANDLE_STATE(&hDmaTopLeft);
   
   /* Configure the DMA Channel */
-  HAL_DMA_Init(&hDmaTopLeft);
-
-    /* DMA IRQ Channel configuration */
-    UINT32 uwRet;
-    uwRet = LOS_HwiCreate(AUDIO_DFSDMx_DMAx_TOP_LEFT_IRQ, 3, 0, AUDIO_DFSDMx_DMAx_TOP_LEFT_IRQHandler, 0) ;
-    if (uwRet != LOS_OK)
-    {
-        printf("AUDIO_DFSDMx_DMAx_TOP_LEFT_IRQ create hwi failed\n");
-    }
-
+  HAL_DMA_Init(&hDmaTopLeft);      
+  
+  /* DMA IRQ Channel configuration */
+  HAL_NVIC_SetPriority(AUDIO_DFSDMx_DMAx_TOP_LEFT_IRQ, AUDIO_OUT_IRQ_PREPRIO, 0);
+  HAL_NVIC_EnableIRQ(AUDIO_DFSDMx_DMAx_TOP_LEFT_IRQ);
+  
+  
   /*********** Configure DMA stream for TOP RIGHT microphone ******************/
   hDmaTopRight.Init.Direction           = DMA_PERIPH_TO_MEMORY;
   hDmaTopRight.Init.PeriphInc           = DMA_PINC_DISABLE;
@@ -2118,7 +2110,7 @@ static void DFSDMx_FilterMspInit(void)
   hDmaTopRight.Init.Priority            = DMA_PRIORITY_HIGH;  
   hDmaTopRight.Instance                 = AUDIO_DFSDMx_DMAx_TOP_RIGHT_STREAM;
   hDmaTopRight.Init.Channel             = AUDIO_DFSDMx_DMAx_CHANNEL;
-
+  
   /* Associate the DMA handle */
   __HAL_LINKDMA(&hAudioInTopRightFilter, hdmaReg, hDmaTopRight);
   
@@ -2126,15 +2118,12 @@ static void DFSDMx_FilterMspInit(void)
   __HAL_DMA_RESET_HANDLE_STATE(&hDmaTopRight);
   
   /* Configure the DMA Channel */
-  HAL_DMA_Init(&hDmaTopRight);
-
-    /* DMA IRQ Channel configuration */
-    uwRet = LOS_HwiCreate(AUDIO_DFSDMx_DMAx_TOP_RIGHT_IRQ, 3, 0, AUDIO_DFSDMx_DMAx_TOP_RIGHT_IRQHandler, 0) ;
-    if (uwRet != LOS_OK)
-    {
-        printf("AUDIO_DFSDMx_DMAx_TOP_RIGHT_IRQ create hwi failed\n");
-    }
-
+  HAL_DMA_Init(&hDmaTopRight);      
+  
+  /* DMA IRQ Channel configuration */
+  HAL_NVIC_SetPriority(AUDIO_DFSDMx_DMAx_TOP_RIGHT_IRQ, AUDIO_OUT_IRQ_PREPRIO, 0);
+  HAL_NVIC_EnableIRQ(AUDIO_DFSDMx_DMAx_TOP_RIGHT_IRQ);
+  
   if(AudioIn_ChannelNumber > 2)
   {  
     /*********** Configure DMA stream for BUTTOM LEFT microphone ****************/

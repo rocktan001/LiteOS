@@ -71,6 +71,41 @@
   *
   ******************************************************************************
   */
+/*----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: LCD BSP update
+ * Author: Huawei LiteOS Team
+ * Create: 2020-09-04
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list
+ * of conditions and the following disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used
+ * to endorse or promote products derived from this software without specific prior written
+ * permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------
+ * Notice of Export Control Law
+ * ===============================================
+ * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
+ * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
+ * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
+ * applicable export control laws and regulations.
+ *---------------------------------------------------------------------------*/
 
 /* Dependencies
 - stm32f7xx_hal_sdram.c
@@ -83,7 +118,7 @@ EndDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f769i_discovery_sdram.h"
-#include "los_hwi.h"
+
 /** @addtogroup BSP
   * @{
   */
@@ -234,13 +269,13 @@ void BSP_SDRAM_Initialization_sequence(uint32_t RefreshCount)
   /* Inserted delay is equal to 1 ms due to systick time base unit (ms) */
   #ifdef _USE_FreeRTOS
   HAL_Delay(1);
-  #else
+ #else
   /*now kernel not init, so tick didn't start*/
-  tmpmrd = 0xFFFF;
+ tmpmrd = 0xFFFF;
   while(tmpmrd--);
-  #endif
-
-  /* Step 3: Configure a PALL (precharge all) command */
+#endif
+    
+  /* Step 3: Configure a PALL (precharge all) command */ 
   Command.CommandMode            = FMC_SDRAM_CMD_PALL;
   Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK1;
   Command.AutoRefreshNumber      = 1;
@@ -462,19 +497,13 @@ __weak void BSP_SDRAM_MspInit(SDRAM_HandleTypeDef  *hsdram, void *Params)
   HAL_DMA_DeInit(&dma_handle);
   
   /* Configure the DMA stream */
-  HAL_DMA_Init(&dma_handle);
+  HAL_DMA_Init(&dma_handle); 
+  
+  /* NVIC configuration for DMA transfer complete interrupt */
+  HAL_NVIC_SetPriority(SDRAM_DMAx_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(SDRAM_DMAx_IRQn);
 }
 
-void BSP_SDRAM_HwiCreate(void)
-{
-    /* NVIC configuration for DMA transfer complete interrupt */
-    UINT32 uwRet;
-    uwRet = LOS_HwiCreate(SDRAM_DMAx_IRQn, 3, 0, BSP_SDRAM_DMA_IRQHandler, 0) ;
-    if (uwRet != LOS_OK)
-    {
-        printf("sdram create hwi failed\n");
-    }
-}
 /**
   * @brief  DeInitializes SDRAM MSP.
   * @param  hsdram: SDRAM handle

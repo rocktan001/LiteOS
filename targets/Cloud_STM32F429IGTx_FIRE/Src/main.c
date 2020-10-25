@@ -41,17 +41,22 @@
 VOID HardwareInit(VOID)
 {
     SystemClock_Config();
-    Debug_USART1_UART_Init();
+    MX_USART1_UART_Init();
     hal_rng_config();
     dwt_delay_init(SystemCoreClock);
 }
 
 INT32 main(VOID)
 {
-    UINT32 ret = LOS_OK;
     HardwareInit();
 
-    ret = OsMain();
+    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
+                  "\nLiteOS Kernel Version : %s\n"
+                  "build data : %s %s\n\n"
+                  "**********************************\n",
+                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
+
+    UINT32 ret = OsMain();
     if (ret != LOS_OK) {
         return LOS_NOK;
     }

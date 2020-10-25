@@ -86,7 +86,6 @@
 #define SDRAM_TIMEOUT                    ((uint32_t)0xFFFF)
 
 /* DMA definitions for SDRAM DMA transfer */
-extern void DMA2_Stream0_IRQHandler(void);
 #define __DMAx_CLK_ENABLE                 __HAL_RCC_DMA2_CLK_ENABLE
 #define __DMAx_CLK_DISABLE                __HAL_RCC_DMA2_CLK_DISABLE
 #define SDRAM_DMAx_CHANNEL                DMA_CHANNEL_0
