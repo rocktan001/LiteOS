@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: uart config HeadFile
+ * Description: LiteOS Shell Exception Information Implementation File
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -34,20 +34,44 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#include "los_memory.h"
+#include "shcmd.h"
+#ifdef LOSCFG_SHELL_EXCINFO
+#include "los_excinfo_pri.h"
 
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define UART_BUF           128
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-extern VOID   uart_init(VOID);
-extern UINT8  uart_getc(VOID);
-extern UINT32 uart_wait_adapt(VOID);
-extern INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-extern INT32  uart_read(UINT8 *buf, INT32 len, INT32 timeout);
-#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
+INT32 OsShellCmdReadExcInfo(INT32 argc, const CHAR **argv)
+{
+    log_read_write_fn hook = NULL;
+    UINT32 recordSpace = GetRecordSpace();
 
-#endif /* _UART_H */
+    (VOID)argc;
+    (VOID)argv;
+
+    CHAR *buf = (CHAR*)LOS_MemAlloc((void *)OS_SYS_MEM_ADDR, recordSpace + 1);
+    if (buf == NULL) {
+        return LOS_NOK;
+    }
+    (void)memset_s(buf, recordSpace + 1, 0, recordSpace + 1);
+
+    hook = GetExcInfoRW();
+    if (hook != NULL) {
+        hook(GetRecordAddr(), recordSpace, 1, buf);
+    }
+    PRINTK("%s\n", buf);
+    (VOID)LOS_MemFree((void *)OS_SYS_MEM_ADDR, buf);
+    buf = NULL;
+    return LOS_OK;
+}
+SHELLCMD_ENTRY(readExcInfo_shellcmd, CMD_TYPE_EX, "excInfo", 0, (CmdCallBackFunc)OsShellCmdReadExcInfo);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif

@@ -33,10 +33,12 @@
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
-void uart_init(void)
+#include "los_typedef.h"
+
+VOID uart_init(VOID)
 {
 }
 
-void OsBackTrace(void)
+VOID OsBackTrace(VOID)
 {
 }

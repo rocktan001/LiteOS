@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: uart config HeadFile
+ * Description: LiteOS Shell Command Module Implementation Headfile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -34,20 +34,80 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#ifndef _HWLITEOS_SHELL_SHCMD_H
+#define _HWLITEOS_SHELL_SHCMD_H
 
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define UART_BUF           128
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
+#include "string.h"
+#include "stdlib.h"
+#include "los_base.h"
+#include "los_list.h"
+#include "los_tables.h"
+#include "console.h"
+#include "shcmdparse.h"
+#include "show.h"
 
-extern VOID   uart_init(VOID);
-extern UINT8  uart_getc(VOID);
-extern UINT32 uart_wait_adapt(VOID);
-extern INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-extern INT32  uart_read(UINT8 *buf, INT32 len, INT32 timeout);
-#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
+#ifdef  __cplusplus
+#if  __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif /* _UART_H */
+typedef BOOL (*CmdVerifyTransID)(UINT32 transId);
+
+typedef struct {
+    CmdType cmdType;
+    CHAR *cmdKey;
+    UINT32 paraNum;
+    CmdCallBackFunc cmdHook;
+} CmdItem;
+
+typedef struct {
+    LOS_DL_LIST list;
+    CmdItem *cmd;
+} CmdItemNode;
+
+/* global info for shell module */
+typedef struct {
+    CmdItemNode cmdList;
+    UINT32 listNum;
+    UINT32 initMagicFlag;
+    UINT32 muxLock;
+    CmdVerifyTransID transIdHook;
+} CmdModInfo;
+
+typedef struct {
+    UINT32 count;
+    LOS_DL_LIST list;
+    CHAR cmdString[0];
+} CmdKeyLink;
+
+#define SHELLCMD_ENTRY(l, cmdType, cmdKey, paraNum, cmdHook)    \
+    CmdItem l LOS_HAL_TABLE_ENTRY(shellcmd) = {                 \
+        cmdType,                                                \
+        cmdKey,                                                 \
+        paraNum,                                                \
+        cmdHook                                                 \
+    }
+
+#define NEED_NEW_LINE(timesPrint, lineCap) ((timesPrint) % (lineCap) == 0)
+#define SCREEN_IS_FULL(timesPrint, lineCap) ((timesPrint) >= ((lineCap) * DEFAULT_SCREEN_HEIGHT))
+
+extern UINT32 OsCmdInit(VOID);
+extern CmdModInfo *OsCmdInfoGet(VOID);
+extern UINT32 OsCmdExec(CmdParsed *cmdParsed, CHAR *cmdStr);
+extern UINT32 OsCmdKeyShift(const CHAR *cmdKey, CHAR *cmdOut, UINT32 size);
+extern INT32 OsTabCompletion(CHAR *cmdKey, UINT32 *len);
+extern VOID OsShellCmdPush(const CHAR *string, CmdKeyLink *cmdKeyLink);
+extern VOID OsShellHistoryShow(UINT32 value, ShellCB *shellCB);
+extern UINT32 OsShellKeyInit(ShellCB *shellCB);
+extern VOID OsShellKeyDeInit(ShellCB *shellCB);
+extern VOID OsShellKeyLinkDeInit(CmdKeyLink *cmdKeyLink);
+extern UINT32 OsShellSysCmdRegister(VOID);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
+
+#endif /* _HWLITEOS_SHELL_SHCMD_H */

@@ -101,6 +101,11 @@
 #include "shell_pri.h"
 #endif
 
+#ifdef LOSCFG_SHELL
+#include "shell.h"
+#include "shcmd.h"
+#endif
+
 #ifndef LOSCFG_PLATFORM_OSAPPINIT
 #include "los_test_pri.h"
 #endif
@@ -232,6 +237,7 @@ LITE_OS_SEC_TEXT_INIT INT32 OsMain(VOID)
 #ifdef LOSCFG_PLATFORM_UART_WITHOUT_VFS
     uart_init();
 #ifdef LOSCFG_SHELL
+    extern int uart_hwiCreate(void);
     uart_hwiCreate();
 #endif //LOSCFG_SHELL
 #endif //LOSCFG_PLATFORM_UART_WITHOUT_VFS
@@ -322,6 +328,12 @@ LITE_OS_SEC_TEXT_INIT INT32 OsMain(VOID)
         return ret;
     }
 
+#ifdef LOSCFG_SHELL
+    if (OsShellInit(0) != LOS_OK) {
+        PRINT_ERR("shell init failed\n");
+    }
+#endif
+
     return LOS_OK;
 }
 
@@ -365,6 +377,7 @@ UINT32 osAppInit(VOID)
 #ifdef LOSCFG_PLATFORM_OSAPPINIT
     UINT32 ret;
 #ifdef LOSCFG_FS_VFS
+    extern void los_vfs_init(void);
     los_vfs_init();
 #endif
 #ifdef LOSCFG_COMPAT_LINUX

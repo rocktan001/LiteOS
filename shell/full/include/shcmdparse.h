@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: uart config HeadFile
+ * Description: LiteOS Shell Command Parse Implementation Headfile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -34,20 +34,45 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#ifndef _HWLITEOS_SHELL_SHCMDPARSE_H
+#define _HWLITEOS_SHELL_SHCMDPARSE_H
 
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define UART_BUF           128
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
+#include "string.h"
+#include "show.h"
+#include "los_base.h"
 
-extern VOID   uart_init(VOID);
-extern UINT8  uart_getc(VOID);
-extern UINT32 uart_wait_adapt(VOID);
-extern INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-extern INT32  uart_read(UINT8 *buf, INT32 len, INT32 timeout);
-#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
+#ifdef  __cplusplus
+#if  __cplusplus
+extern "C" {
+#endif
+#endif
 
-#endif /* _UART_H */
+#define CMD_PARSED_RETCODE_BASE            LOS_OK
+#define CMD_PARSED_RETCODE_TYPE_INVALID    (CMD_PARSED_RETCODE_BASE + 1)
+#define CMD_PARSED_RETCODE_PARAM_OVERTOP   (CMD_PARSED_RETCODE_BASE + 3)
+#define CMD_PARSED_RETCODE_CMDKEY_NOTFOUND (CMD_PARSED_RETCODE_BASE + 4)
+
+typedef UINT32 (*FUNC_ONE_TOKEN)(VOID *ctx, UINT32 index, CHAR *token);
+
+/*
+ * Description: the info struct after cmd parser
+ */
+typedef struct {
+    UINT32 paramCnt;                /* count of para */
+    CmdType cmdType;                /* cmd type, judge cmd keyword */
+    CHAR cmdKeyword[CMD_KEY_LEN];   /* cmd keyword str */
+    CHAR *paramArray[CMD_MAX_PARAS];
+} CmdParsed;
+
+extern UINT32 OsCmdParse(CHAR *cmdStr, CmdParsed *cmdParsed);
+extern CHAR *OsCmdParseStrdup(const CHAR *str);
+extern UINT32 OsCmdParseOneToken(CmdParsed *cmdParsed, UINT32 index, const CHAR *token);
+extern UINT32 OsCmdTokenSplit(CHAR *cmdStr, CHAR split, CmdParsed *cmdParsed);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
+
+#endif /* _HWLITEOS_SHELL_SHCMDPARSE_H */

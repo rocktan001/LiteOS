@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: uart config HeadFile
+ * Description: LiteOS Shell Help Implementation File
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -34,20 +34,33 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#include "shcmd.h"
+#include "shell_pri.h"
 
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define UART_BUF           128
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
+UINT32 OsShellCmdHelp(UINT32 argc, const CHAR **argv)
+{
+    UINT32 loop = 0;
+    CmdItemNode *curCmdItem = NULL;
+    CmdModInfo *cmdInfo = OsCmdInfoGet();
 
-extern VOID   uart_init(VOID);
-extern UINT8  uart_getc(VOID);
-extern UINT32 uart_wait_adapt(VOID);
-extern INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-extern INT32  uart_read(UINT8 *buf, INT32 len, INT32 timeout);
-#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
+    (VOID)argv;
+    if (argc > 0) {
+        PRINTK("\nUsage: help\n");
+        return OS_ERROR;
+    }
 
-#endif /* _UART_H */
+    PRINTK("*******************shell commands:*************************\n");
+    LOS_DL_LIST_FOR_EACH_ENTRY(curCmdItem, &cmdInfo->cmdList.list, CmdItemNode, list) {
+        if ((loop & (8 - 1)) == 0) { /* 8 - 1:just align print */
+            PRINTK("\n");
+        }
+        PRINTK("%-12s  ", curCmdItem->cmd->cmdKey);
+
+        loop++;
+    }
+
+    PRINTK("\n");
+    return 0;
+}
+
+SHELLCMD_ENTRY(help_shellcmd, CMD_TYPE_EX, "help", 0, (CmdCallBackFunc)OsShellCmdHelp);

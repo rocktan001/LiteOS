@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: uart config HeadFile
+ * Description: LiteOS Shell Dmesg Module Private Headfile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -34,20 +34,41 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#ifndef _HWLITEOS_SHELL_DMESG_PRI_H
+#define _HWLITEOS_SHELL_DMESG_PRI_H
 
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define UART_BUF           128
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
+#include "sys_config.h"
+#ifdef LOSCFG_SHELL_DMESG
+#include "dmesg.h"
 
-extern VOID   uart_init(VOID);
-extern UINT8  uart_getc(VOID);
-extern UINT32 uart_wait_adapt(VOID);
-extern INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-extern INT32  uart_read(UINT8 *buf, INT32 len, INT32 timeout);
-#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif /* _UART_H */
+/*
+ * The dmesg buffer is start with this info structure, then the log.
+ */
+typedef struct {
+    UINT32 logSize; /* The size of log in buffer */
+    UINT32 logHead; /* The index of the first log data. Data_out_flag */
+    UINT32 logTail; /* The index where to write, write in and plus one. Data_it_flag */
+    CHAR   *logBuf; /* The log buffer addr */
+} DmesgInfo;
+
+extern UINT32 OsDmesgInit(VOID);
+extern UINT32 OsDmesgLvGet(VOID);
+extern UINT32 OsCheckConsoleLock(VOID);
+extern UINT32 OsCheckUartLock(VOID);
+extern VOID OsLogShow(VOID);
+extern UINT32 OsLogRecordStr(const CHAR *str, UINT32 len);
+extern INT32 OsLogMemcpyRecord(const CHAR *buf, UINT32 logLen);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif
+#endif /* _HWLITEOS_SHELL_DMESG_PRI_H */

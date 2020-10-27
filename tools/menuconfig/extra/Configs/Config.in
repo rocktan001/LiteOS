@@ -19,7 +19,7 @@ config LOSCFG_COMPILER_CLANG
       or work based on Clang/LLVM.
 
 choice
-    prompt "Compilers"
+    prompt "Compiler"
     default LOSCFG_COMPILER_ARM_NONE_EABI
     help
       Enable arm-himix100 or aarch64-himix100 or compiler.
@@ -236,7 +236,7 @@ config LOSCFG_DEBUG_SEMAPHORE
     help
       Answer Y to enable debug semaphore.
 
-# source "shell/Kconfig"
+source "shell/Kconfig"
 config LOSCFG_NET_LWIP_SACK_TFTP
     bool "Enable Tftp"
     default y

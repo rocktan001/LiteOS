@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: uart config HeadFile
+ * Description: LiteOS Shell lk Parse Implementation Headfile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -34,20 +34,95 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#ifndef _HWLITEOS_SHELL_LK_H
+#define _HWLITEOS_SHELL_LK_H
 
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define UART_BUF           128
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
+/**
+ * @defgroup shell_lk lk
+ * @ingroup shell
+ */
+#include "stdarg.h"
+#include "los_typedef.h"
 
-extern VOID   uart_init(VOID);
-extern UINT8  uart_getc(VOID);
-extern UINT32 uart_wait_adapt(VOID);
-extern INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-extern INT32  uart_read(UINT8 *buf, INT32 len, INT32 timeout);
-#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif /* _UART_H */
+/**
+ * @ingroup shell_lk
+ * define sys default print level
+ * 0: TRACE_EMG 1: TRACE_COMMOM 2: TRACE_ERROR 3: TRACE_WARN 4: TRACE_INFO 5: TRACE_DEBUG
+ */
+#define TRACE_DEFAULT TRACE_ERROR
+
+/**
+ * @ingroup shell_lk
+ * @brief Define an printf handling function hook.
+ *
+ * @par Description:
+ * This API is used to define the printf handling function hook.
+ * @attention None.
+ *
+ * @param  level    [IN] print level.
+ * @param  func     [IN] means which func calls print func.
+ * @param  line     [IN] means which line calls print func.
+ * @param  fmt      [IN] other information by user define.
+ * @param  ap       [IN] the para list.
+ *
+ * @retval None.
+ *
+ * @par Dependency:
+ * shell_lk.h: the header file that contains the API declaration.
+ * @see None.
+ * @since Huawei LiteOS V200R001C00
+ */
+typedef VOID (*LK_FUNC)(INT32 level, const CHAR *func, INT32 line, const CHAR *fmt, va_list ap);
+
+/**
+ * @ingroup shell_lk
+ * @brief print log.
+ *
+ * @par Description:
+ * <ul>
+ * <li>This API is used to LK print function.</li>
+ * </ul>
+ *
+ * @param  level    [IN] print level.
+ * @param  func     [IN] means which func calls print func.
+ * @param  line     [IN] means which line calls print func.
+ * @param  fmt      [IN] other information by user define
+ *
+ * @retval NONE
+ * @par Dependency:
+ * <ul><li>shell_lk.h: the header file that contains the API declaration.</li></ul>
+ * @since Huawei LiteOS V200R001C00
+ */
+extern VOID LOS_LkPrint(INT32 level, const CHAR *func, INT32 line, const CHAR *fmt, ...);
+
+/**
+ * @ingroup shell_lk
+ * @brief register print func.
+ *
+ * @par Description:
+ * <ul>
+ * <li>This API is used to registe a hook function to LK.</li>
+ * </ul>
+ *
+ * @param  LK_FUNC  [IN] the print func.
+ *
+ * @retval NONE
+ * @par Dependency:
+ * <ul><li>shell_lk.h: the header file that contains the API declaration.</li></ul>
+ * @since Huawei LiteOS V200R001C00
+ */
+extern VOID LOS_LkRegHook(LK_FUNC hook);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif /* _HWLITEOS_SHELL_LK_H */
