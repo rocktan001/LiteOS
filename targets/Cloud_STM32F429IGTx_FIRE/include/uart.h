@@ -37,11 +37,17 @@
 #ifndef _UART_H
 #define _UART_H
 
-#define UART_WITH_LOCK    1
-#define UART_WITHOUT_LOCK 0
-#define DEFAULT_TIMEOUT 0xFFFF
-extern void uart_init(void);
-extern int uart_write(const char *buf, int len, int timeout);
+#define UART_WITH_LOCK     1
+#define UART_WITHOUT_LOCK  0
+#define UART_BUF           128
+#define DEFAULT_TIMEOUT    0xFFFF
+#define DEFAULT_UART_IRQN  USART1_IRQn
+
+extern VOID   uart_init(VOID);
+extern UINT8  uart_getc(VOID);
+extern UINT32 uart_wait_adapt(VOID);
+extern INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
+extern INT32  uart_read(UINT8 *buf, INT32 len, INT32 timeout);
 #define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
 
 #endif /* _UART_H */

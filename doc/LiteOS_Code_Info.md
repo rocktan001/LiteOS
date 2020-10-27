@@ -100,4 +100,4 @@ int main(void)
 |            | menuconfig               |                      | LiteOS编译所需的menuconfig脚本                               |
 |            | stackusage               |                      | LiteOS栈使用估计工具                                         |
 | Makefile   |                          |                      | LiteOS Makefile                                             |
-| .config    |                          |                      | 开发板的配置文件，如果用户不重新选择开发板，默认为STM32F769IDISCOVERY开发板的配置文件 |
+| .config    |                          |                      | 开发板的配置文件，如果用户不重新选择开发板，默认为野火挑战者STM32F429开发板的配置文件 |

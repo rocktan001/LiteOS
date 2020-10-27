@@ -98,6 +98,10 @@ LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/lib/libc/stdio \
                  -I $(LITEOSTOPDIR)/targets/bsp/$(HAL_DRIVER_SRC)/Inc/Legacy \
                  -I $(LITEOSTOPDIR)/compat/cmsis
 
+ifeq ($(findstring $(LOSCFG_SHELL)$(LOSCFG_SHELL_LK)$(LOSCFG_SHELL_DMESG), y y y),)
+LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/shell/full/include
+endif
+
 ifeq ($(LOSCFG_PLATFORM_DVFS), y)
 LOCAL_SRCS += $(wildcard board/$(LITEOS_PLATFORM)/dvfs/*.c)
 endif
@@ -121,6 +125,7 @@ endif
 else
 LOCAL_SRCS += $(wildcard common/los_config.c)
 LOCAL_SRCS += $(wildcard common/los_printf.c)
+LOCAL_SRCS += $(wildcard common/los_excinfo.c)
 endif
 
 BSP_HWI_SRC = \

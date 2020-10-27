@@ -123,9 +123,9 @@ include $(LITEOSTOPDIR)/targets/targets.mk
 # Export APIs from these module.
 include $(LITEOSTOPDIR)/lib/api.mk
 include $(LITEOSTOPDIR)/compat/api.mk
+include $(LITEOSTOPDIR)/shell/api.mk
 
-
-LIB_SUBDIRS += kernel compat lib components demos
+LIB_SUBDIRS += kernel compat lib components demos shell
 
 LITEOS_KERNEL_INCLUDE := -I $(LITEOSTOPDIR)/kernel/include
 

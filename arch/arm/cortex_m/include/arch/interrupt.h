@@ -54,6 +54,19 @@ extern VOID OsIntRestore(UINT32 uvIntSave);
 #define ArchIntUnlock()           OsIntUnLock()
 #define ArchIntRestore(intSave)   OsIntRestore(intSave)
 
+STATIC INLINE UINT32 OsIntLocked(VOID)
+{
+    UINT32 intSave;
+
+    asm volatile(
+        "mrs    %0, primask        "
+        : "=r" (intSave)
+        :
+        : "memory");
+
+    return intSave;
+}
+
 #ifdef __cplusplus
 #if __cplusplus
 #endif /* __cplusplus */
