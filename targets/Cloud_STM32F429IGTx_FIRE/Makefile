@@ -1,6 +1,4 @@
 include $(LITEOSTOPDIR)/config.mk
-include $(LITEOSTOPDIR)/components/components.mk
-include $(LITEOSTOPDIR)/demos/demos.mk
 
 MODULE_NAME := $(LITEOS_PLATFORM)
 
@@ -40,8 +38,6 @@ ifeq ($(LOSCFG_DEMOS_FS), y)
         C_DEFS += -D FS_SPIFFS
         endif
 C_SOURCES += $(DEMOS_SRC)
-BOARD_INCLUDES += $(COMPONENTS_INCLUDE)
-BOARD_INCLUDES += $(DEMOS_INCLUDE)
 endif
 
 # C includes
@@ -78,7 +74,6 @@ C_DEFS +=  \
         -D__LITEOS__ \
         -D_ALL_SOURCE
 
-
 ASM_SOURCES =  \
         ${wildcard $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/los_startup_gcc.S}
 
@@ -88,8 +83,8 @@ BOARD_SRCS += $(C_SOURCES)
 LOCAL_SRCS := $(subst $(CURDIR)/,, $(BOARD_SRCS))
 
 BOARD_DEF += $(C_DEFS)
-LOCAL_INCLUDE += $(BOARD_INCLUDES)
+LOCAL_INCLUDE += $(BOARD_INCLUDES) 
 
-LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_FLAGS := $(LITEOS_CFLAGS_INTERWORK) $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 
 include $(MODULE)

@@ -125,6 +125,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_SENSORHUB), y)
         LITEOS_BASELIB += -lsensorhub_demo
     endif
+    ifeq ($(LOSCFG_COMPONENTS_NET_LWIP), y)
+        LITEOS_BASELIB += -llwip
+    endif
 endif
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)

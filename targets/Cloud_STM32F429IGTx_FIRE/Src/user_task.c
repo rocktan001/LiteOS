@@ -58,7 +58,7 @@ void atiny_task_entry(void)
     extern void agent_tiny_entry(void);
 #endif
 
-#if defined(WITH_LINUX) || defined(WITH_LWIP)
+#if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     hieth_hw_init();
     net_init();
 #elif defined(WITH_AT_FRAMEWORK)
@@ -185,7 +185,6 @@ UINT32 app_init(VOID)
 {
     UINT32 ret = LOS_OK;
 
-    printf("Hello, welcome to liteos!\n");
     ret = creat_agenttiny_task();
     if (ret != LOS_OK)
     {

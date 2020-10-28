@@ -26,7 +26,7 @@ WITH_MQTT  := no
 #######################################
 # use ethernet
 #######################################
-WITH_LWIP  := no
+LOSCFG_COMPONENTS_NET_LWIP  := no
 
 #######################################
 # Sensorhub

@@ -183,9 +183,86 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Software: lwip 2.0.3
+Software: lwip 2.1.2
 Copyright notice:
 Copyright (c) 2001, 2002 Swedish Institute of Computer Science.
+Copyright (c) 2016 Elias Oenal.
+Copyright (c) 2016 Elias Oenal and Dirk Ziegelmeier.
+Copyright (c) 2006 Axon Digital Design B.V., The Netherlands.
+Copyright (c) 2001-2004 Swedish Institute of Computer Science.
+Copyright (c) 2007 Dominik Spies <kontakt@dspies.de>
+Copyright (c) 2001-2004 Leon Woestenberg <leon.woestenberg@gmx.net>
+Copyright (c) 2001-2004 Axon Digital Design B.V., The Netherlands.
+Copyright (c) 2017 Simon Goldschmidt <goldsimon@gmx.de>
+uIP version Copyright (c) 2002-2003, Adam Dunkels.
+Copyright (c) 2017 Dirk Ziegelmeier.
+Copyright (c) 2015 Verisure Innovation AB
+Copyright (c) 2018 Simon Goldschmidt
+Copyright (c) 2001-2003 Swedish Institute of Computer Science.
+Copyright (c) 2018 Simon Goldschmidt <goldsimon@gmx.de>
+Copyright (c) 1994-2002 Paul Mackerras. All rights reserved.
+Copyright (c) 2003 Paul Mackerras. All rights reserved.
+Copyright (c) 1995 Eric Rosenquist.  All rights reserved.
+Copyright (c) 2001 by Sun Microsystems, Inc.
+Copyright (c) 2002 Google, Inc.
+Copyright (c) 1999 Tommi Komulainen.  All rights reserved.
+Copyright (c) 1984-2000 Carnegie Mellon University. All rights reserved.
+Copyright (c) 1995, 1996, 1997 Francis.Dupont@inria.fr, INRIA Rocquencourt,
+Alain.Durand@imag.fr, IMAG,
+Jean-Luc.Richier@imag.fr, IMAG-LSR.
+Copyright (c) 1998, 1999 Francis.Dupont@inria.fr, GIE DYADE,
+Copyright (c) 2003 by Marc Boucher, Services Informatiques (MBSI) inc.
+Copyright (c) 1998 Global Election Systems Inc.
+Copyright (c) 2008 Paul Mackerras. All rights reserved.
+portions Copyright (c) 1997 Global Election Systems Inc.
+portions Copyright (c) 1998 Global Election Systems Inc.
+portions Copyright (c) 2001 by Cognizant Pty Ltd.
+Copyright (c) 2006 by Marc Boucher, Services Informatiques (MBSI) inc.
+Copyright (c) 2002 The NetBSD Foundation, Inc.
+Copyright (c) 1989 Regents of the University of California.
+Copyright (c) Deltatee Enterprises Ltd. 2013
+Copyright (c) 1993-2002 Paul Mackerras. All rights reserved.
+Copyright (c) 2002 Google, Inc.  All rights reserved.
+Copyright (c) 1996-2002 Paul Mackerras. All rights reserved.
+Copyright (c) 1998 by Global Election Systems Inc.
+Copyright (c) 2002,2003,2004 Google, Inc.
+Copyright (c) 2000-2002 Paul Mackerras. All rights reserved.
+portions Copyright (c) 1997 by Global Election Systems Inc.
+Copyright (c) 1994 The Australian National University.
+Copyright (c) 1989 Carnegie Mellon University.
+Copyright (c) 1999-2002 Paul Mackerras. All rights reserved.
+Copyright (c) 2017 Simon Goldschmidt.
+Copyright (c) 2003-2004 Leon Woestenberg <leon.woestenberg@axon.tv>
+Copyright (c) 2003-2004 Axon Digital Design B.V., The Netherlands.
+Copyright (c) 2015 Inico Technologies Ltd.
+Copyright (c) 2017 Benjamin Aigner
+Copyright (c) 2015 Inico Technologies Ltd. , Author: Ivan Delamer <delamer@inicotech.com>
+Copyright (c) 2007-2009 Frédéric Bernon, Simon Goldschmidt
+Copyright (c) 2017 Simon Goldschmidt
+Copyright (c) 2013-2017, tinydir authors:
+- Cong Xu
+- Lautis Sun
+- Baudouin Feildel
+- Andargor <andargor@yahoo.com>
+All rights reserved.
+Copyright (c) 2014 Simon Goldschmidt
+Copyright (c) 2016 Erik Andersson <erian747@gmail.com>
+Copyright (c) 2017 Joel Cunningham, Garmin International, Inc. <joel.cunningham@garmin.com>
+Copyright (c) 2016 Erik Andersson
+Copyright (c) 2001, 2002 Leon Woestenberg <leon.woestenberg@axon.tv>
+Copyright (c) 2001, 2002 Axon Digital Design B.V., The Netherlands.
+Copyright (c) 2015 Dirk Ziegelmeier
+ported from uIP resolv.c Copyright (c) 2002-2003, Adam Dunkels.
+Copyright (c) 2010 Inico Technologies Ltd.
+Copyright (c) 2002 CITEL Technologies Ltd.
+Copyright (c) 2017 The MINIX 3 Project.
+Copyright (c) 2018 Swedish Institute of Computer Science.
+Copyright (c) 2018 Simon Goldschmidt.
+Based on XySSL: Copyright (C) 2006-2008  Christophe Devine
+Copyright (C) 2009  Paul Bakker <polarsslmaintainer at polarssl dot org>
+Copyright (c) 2001, Swedish Institute of Computer Science.
+Copyright (c) 2001, 2002 Swedish Institute of Computer Science.
+
 License: BSD licence
 
 Copyright (c) 2001, 2002 Swedish Institute of Computer Science.

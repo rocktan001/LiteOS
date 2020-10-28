@@ -53,7 +53,7 @@
 #include "hal_rng.h"
 #include "usart.h"
 #include "dwt.h"
-#ifdef WITH_LWIP
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
 
 #include "lwip/netif.h"
 #if defined ( __CC_ARM )  /* MDK ARM Compiler */
@@ -86,7 +86,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifdef WITH_LWIP
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
 void net_init(void);
 #endif
 uint32_t HAL_GetTick(void);

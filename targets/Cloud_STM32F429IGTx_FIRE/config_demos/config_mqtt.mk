@@ -26,7 +26,7 @@ WITH_MQTT  := yes
 #######################################
 # use ethernet
 #######################################
-WITH_LWIP  := yes
+LOSCFG_COMPONENTS_NET_LWIP  := yes
 
 #######################################
 # use usart AT command
