@@ -124,6 +124,8 @@ include $(LITEOSTOPDIR)/targets/targets.mk
 include $(LITEOSTOPDIR)/lib/api.mk
 include $(LITEOSTOPDIR)/compat/api.mk
 include $(LITEOSTOPDIR)/shell/api.mk
+include $(LITEOSTOPDIR)/components/components.mk
+include $(LITEOSTOPDIR)/demos/demos.mk
 
 LIB_SUBDIRS += kernel compat lib components demos shell
 
@@ -291,7 +293,8 @@ LITEOS_BASE_INCLUDE     := $(LITEOS_KERNEL_INCLUDE) $(LITEOS_PLATFORM_INCLUDE) \
                            $(LITEOS_LIB_INCLUDE) $(LITEOS_FS_INCLUDE) \
                            $(LITEOS_EXTKERNEL_INCLUDE) \
                            $(LITEOS_COMPAT_INCLUDE) $(LITEOS_DRIVERS_INCLUDE) \
-                           $(LOSCFG_TOOLS_DEBUG_INCLUDE) $(LITEOS_NET_INCLUDE)
+                           $(LOSCFG_TOOLS_DEBUG_INCLUDE) $(LITEOS_NET_INCLUDE) \
+                           $(COMPONENTS_INCLUDE) $(DEMOS_INCLUDE)
 LITEOS_CFLAGS_INTERWORK := $(LITEOS_COPTS_INTERWORK) $(LITEOS_CMACRO) \
                            $(LITEOS_CMACRO_TEST)     $(LITEOS_IMAGE_MACRO) \
                            $(LITEOS_BASE_INCLUDE)

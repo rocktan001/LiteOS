@@ -31,7 +31,8 @@
  * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
-#ifdef WITH_LWIP
+#include "menuconfig.h"
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
 #include "eth.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_eth.h"

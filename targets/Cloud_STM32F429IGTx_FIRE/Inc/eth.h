@@ -35,7 +35,7 @@
 #ifndef _STM32F429_ETH_H
 #define _STM32F429_ETH_H
 
-#ifdef WITH_LWIP
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
 #include "ethernetif.h"
 
 extern struct ethernet_api g_eth_api;

@@ -38,15 +38,13 @@
 #include "los_typedef.h"
 #include "los_memory.h"
 
-typedef struct los_sem
-{
+typedef struct los_sem {
     LosSemCB* sem;        /**< Semaphore attribute structure*/
 } sem_t;
 
 typedef struct los_sem sys_sem_t;
 
-struct sys_mbox
-{
+struct sys_mbox {
     int first, last;
     void** msgs;
     int mbox_size;
@@ -59,8 +57,7 @@ struct sys_mbox
 
 typedef struct sys_mbox* sys_mbox_t;
 
-struct sys_thread
-{
+struct sys_thread {
     struct sys_thread* next;
     UINT32 pthread;
 };
