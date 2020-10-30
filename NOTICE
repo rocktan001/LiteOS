@@ -147,12 +147,15 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License
 
-Software: mbedtls-2.6.0
+Software: mbedtls-2.16.8
 Copyright notice:
-Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
-License: Apache 2.0 license
+Copyright The Mbed TLS Contributors
+License: Apache-2.0 OR GPL-2.0-or-late
 
-Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+Unless specifically indicated otherwise in a file, Mbed TLS files are provided
+under the Apache License 2.0, or the GNU General Public License v2.0 or later
+(SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later).
+
 SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -168,6 +171,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 This file is part of mbed TLS (https://tls.mbed.org)
+
+License:GPL-2.0-or-later-with-exception
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 Software: LVGL v7.0.0
 Copyright notice:
