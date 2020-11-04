@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: LiteOS Kernel Demo Entry HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,24 +34,19 @@
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
 
-/**@defgroup los_demo_entry System configuration items
- * @ingroup kernel
- */
-
 #ifndef _LOS_DEMO_DEBUG_H
 #define _LOS_DEMO_DEBUG_H
 
 #include "los_typedef.h"
 #include <string.h>
 
-//#define LOS_KERNEL_TEST_KEIL_SWSIMU
-//#define LOS_KERNEL_DEBUG_OUT
+#define LOS_KERNEL_DEBUG_OUT
 
 #ifdef LOS_KERNEL_DEBUG_OUT
     #define dprintf (VOID)printf
 #else
-    extern INT32 dprintf_none(const CHAR *format,...);
+    extern INT32 dprintf_none(const CHAR *format, ...);
     #define dprintf (VOID)dprintf_none
 #endif
 
-#endif
+#endif /* _LOS_DEMO_DEBUG_H */

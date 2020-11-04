@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: LiteOS Kernel Demo Inspect Entry HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,10 +34,6 @@
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
 
-/**@defgroup los_inspect_entry configuration items
- * @ingroup example
- */
-
 #ifndef _LOS_INSPECT_ENTRY_H
 #define _LOS_INSPECT_ENTRY_H
 
@@ -51,28 +49,28 @@ typedef enum {
 /* LiteOS Inspect result. */
 typedef enum {
     LOS_INSPECT_TASK = 0,
-    LOS_INSPECT_EVENT,
+    LOS_INSPECT_DMEM,
+    LOS_INSPECT_SMEM,
+    LOS_INSPECT_INTERRUPT,
     LOS_INSPECT_MSG,
-    LOS_INSPECT_SEM,
+    LOS_INSPECT_EVENT,
     LOS_INSPECT_MUTEX,
+    LOS_INSPECT_SEM,
     LOS_INSPECT_SYSTIC,
     LOS_INSPECT_TIMER,
     LOS_INSPECT_LIST,
-    LOS_INSPECT_SMEM,
-    LOS_INSPECT_DMEM,
-    //LOS_INSPECT_INTERRUPT,
     LOS_INSPECT_BUFF
-}enInspectID;
+}enInspectId;
 
 typedef struct os_Inspect_def {
-    enInspectID InspectID;
+    enInspectId InspectId;
     enInspectStu Status;
     UINT32 (*Inspectfunc)(VOID);
-    CHAR name[6];
+    CHAR name[20];
 }osInspect_Def;
 
-extern UINT32 LOS_Inspect_Entry(VOID);
-extern UINT32 LOS_InspectByID(enInspectID InspectID);
-extern UINT32 LOS_InspectStatusSetByID(enInspectID InspectID,enInspectStu InspectStu);
+extern UINT32 KernelDemoInspectEntry(VOID);
+extern UINT32 LOS_InspectByID(enInspectId InspectId);
+extern UINT32 LOS_InspectStatusSetById(enInspectId InspectId, enInspectStu InspectStu);
 
-#endif //_LOS_INSPECT_ENTRY_H
+#endif /* _LOS_INSPECT_ENTRY_H */
