@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: LiteOS Kernel Systick Demo HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,12 +34,8 @@
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
 
-/**@defgroup los_config System configuration items
- * @ingroup kernel
- */
-
-#ifndef _LOS_API_TIMER_MANAGE_H
-#define _LOS_API_TIMER_MANAGE_H
+#ifndef _LOS_API_SYSTICK_H
+#define _LOS_API_SYSTICK_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -56,4 +54,4 @@ extern UINT32 Example_GetTick(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _LOS_API_TIMER_MANAGE_H */
+#endif /* _LOS_API_SYSTICK_H */

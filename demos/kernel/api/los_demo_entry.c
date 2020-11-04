@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: LiteOS Kernel Demo Entry
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -41,15 +43,15 @@ extern "C" {
 #include "los_task.h"
 #include <string.h>
 
-static UINT32 g_uwDemoTaskID;
+static UINT32 g_DemoTaskId;
 
 #ifdef LOS_KERNEL_DEBUG_OUT
 /* print via SWO */
-#ifdef LOS_KERNEL_TEST_KEIL_SWSIMU
+#ifdef LOS_KERNEL_DEMO_KEIL_SWSIMU
 
-#define ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000+4*n)))
-#define ITM_Port16(n)   (*((volatile unsigned short*)(0xE0000000+4*n)))
-#define ITM_Port32(n)   (*((volatile unsigned long *)(0xE0000000+4*n)))
+#define ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000 + 4 * n)))
+#define ITM_Port16(n)   (*((volatile unsigned short*)(0xE0000000 + 4 * n)))
+#define ITM_Port32(n)   (*((volatile unsigned long *)(0xE0000000 + 4 * n)))
 #define DEMCR           (*((volatile unsigned long *)(0xE000EDFC)))
 #define TRCENA          0x01000000
 
@@ -64,8 +66,7 @@ FILE __stdin;
 #if defined ( __ARMCC_VERSION ) || defined ( __ICCARM__ )  /* KEIL and IAR: printf will call fputc to print */
 INT32 fputc(INT32 ch, FILE *f)
 {
-    if (DEMCR & TRCENA)
-    {
+    if (DEMCR & TRCENA) {
         while (ITM_Port32(0) == 0);
         ITM_Port8(0) = ch;
     }
@@ -75,10 +76,8 @@ INT32 fputc(INT32 ch, FILE *f)
 __attribute__((used)) INT32 _write(INT32 fd, CHAR *ptr, INT32 len)
 {
     INT32 i;
-    for (i = 0; i < len; i++)
-    {
-        if (DEMCR & TRCENA)
-        {
+    for (i = 0; i < len; i++) {
+        if (DEMCR & TRCENA) {
             while (ITM_Port32(0) == 0);
             ITM_Port8(0) = ptr[i];
         }
@@ -90,7 +89,7 @@ __attribute__((used)) INT32 _write(INT32 fd, CHAR *ptr, INT32 len)
 
 #else
 
-INT32 dprintf_none(const CHAR *format,...)
+INT32printf_none(const CHAR *format, ...)
 {
     return 0;
 }
@@ -98,66 +97,74 @@ INT32 dprintf_none(const CHAR *format,...)
 
 static LITE_OS_SEC_TEXT VOID LOS_Demo_Tskfunc(VOID)
 {
-#ifdef LOS_KERNEL_TEST_ALL
-#else /* LOS_KERNEL_TEST_ALL */
+#ifdef LOS_KERNEL_DEMO_ALL
+#else /* LOS_KERNEL_DEMO_ALL */
 
 /* only test some function */
-#ifdef LOS_KERNEL_TEST_TASK
+#ifdef LOS_KERNEL_DEMO_TASK
     Example_TskCaseEntry();
+    printf("Kernel task demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_MEM_DYNAMIC
-     Example_Dyn_Mem();
+#ifdef LOS_KERNEL_DEMO_MEM_DYNAMIC
+    Example_Dyn_Mem();
+    printf("Kernel dynamic memory demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_MEM_STATIC
+#ifdef LOS_KERNEL_DEMO_MEM_STATIC
     Example_StaticMem();
+    printf("Kernel static memory demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_INTRRUPT
+#ifdef LOS_KERNEL_DEMO_INTERRUPT
     Example_Interrupt();
+    printf("Kernel interrupt demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_QUEUE
+#ifdef LOS_KERNEL_DEMO_QUEUE
     Example_MsgQueue();
+    printf("Kernel message queue demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_EVENT
+#ifdef LOS_KERNEL_DEMO_EVENT
     Example_SndRcvEvent();
+    printf("Kernel event demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_MUTEX
+#ifdef LOS_KERNEL_DEMO_MUTEX
     Example_MutexLock();
+    printf("Kernel mutex demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_SEMPHORE
+#ifdef LOS_KERNEL_DEMO_SEMPHORE
     Example_Semphore();
+    printf("Kernel semaphore demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_SYSTICK
+#ifdef LOS_KERNEL_DEMO_SYSTICK
     Example_GetTick();
+    printf("Kernel systick demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_SWTIMER
+#ifdef LOS_KERNEL_DEMO_SWTIMER
     Example_swTimer();
+    printf("Kernel swtimer demo ok.\n\n");
 #endif
-#ifdef LOS_KERNEL_TEST_LIST
+#ifdef LOS_KERNEL_DEMO_LIST
     Example_list();
+    printf("Kernel list demo ok.\n\n");
 #endif
-#endif/* LOS_KERNEL_TEST_ALL */
+#endif /* LOS_KERNEL_DEMO_ALL */
 
-    while (1)
-    {
+    while (1) {
         (VOID)LOS_TaskDelay(100);
     }
 }
 
-VOID LOS_Demo_Entry(VOID)
+VOID KernelDemoEntry(VOID)
 {
-    UINT32 uwRet;
+    UINT32 ret;
     TSK_INIT_PARAM_S stTaskInitParam;
 
     (VOID)memset((VOID *)(&stTaskInitParam), 0, sizeof(TSK_INIT_PARAM_S));
     stTaskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LOS_Demo_Tskfunc;
     stTaskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    stTaskInitParam.pcName = "ApiDemo";
+    stTaskInitParam.pcName = "KernelApiDemo";
     stTaskInitParam.usTaskPrio = 30;
-    uwRet = LOS_TaskCreate(&g_uwDemoTaskID, &stTaskInitParam);
-
-    if (uwRet != LOS_OK)
-    {
-        dprintf("Api demo test task create failed \r\n");
+    ret = LOS_TaskCreate(&g_DemoTaskId, &stTaskInitParam);
+    if (ret != LOS_OK) {
+        printf("Api demo test task create failed.\n");
         return;
     }
     return;

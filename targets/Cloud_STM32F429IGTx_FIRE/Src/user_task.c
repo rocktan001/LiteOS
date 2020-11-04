@@ -48,6 +48,10 @@
 #ifdef WITH_SENSORHUB
 #include "sensorhub_demo.h"
 #endif
+#ifdef LOSCFG_DEMOS_KERNEL
+#include "los_inspect_entry.h"
+#include "los_demo_entry.h"
+#endif
 
 static UINT32 g_atiny_tskHandle;
 static UINT32 g_fs_tskHandle;
@@ -190,6 +194,15 @@ UINT32 app_init(VOID)
     {
         return LOS_NOK;
     }
+
+#ifdef LOSCFG_DEMOS_KERNEL
+#ifdef LOSCFG_DEMOS_KERNEL_ENTRY
+    KernelDemoEntry();
+#endif
+#ifdef LOSCFG_DEMOS_KERNEL_INSPECT_ENTRY
+    KernelDemoInspectEntry();
+#endif
+#endif
 
 #if defined(FS_SPIFFS) || defined(FS_FATFS)
     ret = creat_fs_task();

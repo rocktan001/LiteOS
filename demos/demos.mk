@@ -14,3 +14,8 @@ ifeq ($(LOSCFG_DEMOS_SENSORHUB), y)
 include $(LITEOSTOPDIR)/demos/sensorhub/sensorhub.mk
 DEMOS_INCLUDE += $(DEMOS_SENSORHUB_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_KERNEL), y)
+include $(LITEOSTOPDIR)/demos/kernel/kernel.mk
+DEMOS_INCLUDE += $(DEMOS_KERNEL_INCLUDE)
+endif

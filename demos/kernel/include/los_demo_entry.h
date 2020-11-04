@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: LiteOS Kernel Demo Entry HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,14 +34,11 @@
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
 
-/**@defgroup los_demo_entry System configuration items
- * @ingroup kernel
- */
-
 #ifndef _LOS_DEMO_ENTRY_H
 #define _LOS_DEMO_ENTRY_H
 
 #include "los_typedef.h"
+#include "los_task.h"
 #include "los_demo_debug.h"
 
 /* task schedule */
@@ -65,6 +64,6 @@
 /* dlist */
 #include "los_api_list.h"
 
-extern VOID LOS_Demo_Entry(VOID);
+extern VOID KernelDemoEntry(VOID);
 
-#endif
+#endif /* _LOS_DEMO_ENTRY_H */
