@@ -24,15 +24,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
- /*----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- *---------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------- */
 
 #include "math.h"
 #include "time.h"
