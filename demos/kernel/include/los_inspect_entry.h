@@ -24,15 +24,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- *---------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------- */
 
 #ifndef _LOS_INSPECT_ENTRY_H
 #define _LOS_INSPECT_ENTRY_H
@@ -44,7 +36,7 @@ typedef enum {
     LOS_INSPECT_STU_START         =  0xFF,
     LOS_INSPECT_STU_ERROR         =  0x01,
     LOS_INSPECT_STU_SUCCESS       =  0x00,
-}enInspectStu;
+} enInspectStu;
 
 /* LiteOS Inspect result. */
 typedef enum {
@@ -60,14 +52,14 @@ typedef enum {
     LOS_INSPECT_TIMER,
     LOS_INSPECT_LIST,
     LOS_INSPECT_BUFF
-}enInspectId;
+} enInspectId;
 
 typedef struct os_Inspect_def {
     enInspectId InspectId;
     enInspectStu Status;
     UINT32 (*Inspectfunc)(VOID);
     CHAR name[20];
-}osInspect_Def;
+} osInspect_Def;
 
 extern UINT32 KernelDemoInspectEntry(VOID);
 extern UINT32 LOS_InspectByID(enInspectId InspectId);

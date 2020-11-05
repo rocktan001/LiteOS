@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: User Task
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,15 +24,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- *---------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------- */
 
 #include "sys_init.h"
 #ifdef CONFIG_FEATURE_FOTA
@@ -39,11 +33,12 @@
 #include "nb_iot/los_nb_api.h"
 #include "at_frame/at_api.h"
 #include "at_device/bc95.h"
-#ifdef WITH_MQTT
+#ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
 #include "flash_adaptor.h"
-#include "agenttiny_mqtt/agent_tiny_demo.h"
-#else
-//#include "agenttiny_lwm2m/agent_tiny_demo.h"
+#include "agent_tiny_mqtt_demo.h"
+#endif
+#ifdef LOSCFG_DEMOS_AGENTTINY_LWM2M
+#include "agent_tiny_lwm2m_demo.h"
 #endif
 #ifdef WITH_SENSORHUB
 #include "sensorhub_demo.h"
@@ -58,8 +53,10 @@ static UINT32 g_fs_tskHandle;
 
 void atiny_task_entry(void)
 {
-#ifdef WITH_MQTT
-    extern void agent_tiny_entry(void);
+#if defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
+    extern void agent_tiny_mqtt_entry(void);
+#elif defined(LOSCFG_COMPONENTS_CONNECTIVITY_LWM2M)
+    extern void agent_tiny_lwm2m_entry(void);
 #endif
 
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
@@ -85,8 +82,8 @@ void atiny_task_entry(void)
     #elif defined(USE_NB_NEUL95)
     extern at_adaptor_api bc95_interface;
     printf("\r\n=============agent_tiny_entry  USE_NB_NEUL95============================\n");
-    los_nb_init((const int8_t *)"172.25.233.98",(const int8_t *)"5600",NULL);
-    los_nb_notify("\r\n+NSONMI:",strlen("\r\n+NSONMI:"),NULL,nb_cmd_match);
+    los_nb_init((const int8_t *)"172.25.233.98", (const int8_t *)"5600", NULL);
+    los_nb_notify("\r\n+NSONMI:", strlen("\r\n+NSONMI:"), NULL, nb_cmd_match);
     at_api_register(&bc95_interface);
 
     #elif defined(USE_NB_NEUL95_NO_ATINY)
@@ -97,10 +94,9 @@ void atiny_task_entry(void)
 #else
 #endif
 
-#ifdef WITH_MQTT
+#ifdef LOSCFG_COMPONENTS_CONNECTIVITY_MQTT
     flash_adaptor_init();
     {
-
         demo_param_s demo_param = {.init = NULL,
                                    .write_flash_info = flash_adaptor_write_mqtt_info,
                                    .read_flash_info = flash_adaptor_read_mqtt_info};
@@ -113,8 +109,12 @@ void atiny_task_entry(void)
 #ifdef CONFIG_FEATURE_FOTA
     hal_init_ota();
 #endif
-#ifdef WITH_MQTT
-    agent_tiny_entry();
+#ifdef LOSCFG_COMPONENTS_CONNECTIVITY_MQTT
+    agent_tiny_mqtt_entry();
+#endif
+
+#ifdef LOSCFG_COMPONENTS_CONNECTIVITY_LWM2M
+    agent_tiny_lwm2m_entry();
 #endif
 #endif
 }
@@ -128,14 +128,14 @@ UINT32 creat_agenttiny_task(VOID)
     task_init_param.pcName = "agenttiny_task";
     task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)atiny_task_entry;
 
-#if defined(CONFIG_FEATURE_FOTA) || defined(WITH_MQTT)
-    task_init_param.uwStackSize = 0x2000; /* fota use mbedtls bignum to verify signature  consuming more stack  */
+#if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
+    task_init_param.uwStackSize = 0x2000; /* fota use mbedtls bignum to verify signature consuming more stack */
 #else
     task_init_param.uwStackSize = 0x1000;
 #endif
 
     ret = LOS_TaskCreate(&g_atiny_tskHandle, &task_init_param);
-    if(LOS_OK != ret) {
+    if (ret != LOS_OK) {
         return ret;
     }
 
@@ -162,7 +162,7 @@ UINT32 creat_fs_task(void)
     return ret;
 }
 
-#if defined(WITH_DTLS) && defined(SUPPORT_DTLS_SRV)
+#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(SUPPORT_DTLS_SRV)
 static UINT32 g_dtls_server_tskHandle;
 uint32_t create_dtls_server_task()
 {
@@ -190,8 +190,7 @@ UINT32 app_init(VOID)
     UINT32 ret = LOS_OK;
 
     ret = creat_agenttiny_task();
-    if (ret != LOS_OK)
-    {
+    if (ret != LOS_OK) {
         return LOS_NOK;
     }
 
@@ -213,13 +212,13 @@ UINT32 app_init(VOID)
 
 #if defined(USE_PPPOS)
     #include "osport.h"
-    extern void uart_init(void);  //this uart used for the pppos interface
+    extern void uart_init(void); // this uart used for the pppos interface
     uart_init();
     extern VOID *main_ppp(UINT32  args);
     task_create("main_ppp", main_ppp, 0x1500, NULL, NULL, 2);
 #endif
 
-#if defined(WITH_DTLS) && defined(SUPPORT_DTLS_SRV)
+#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(SUPPORT_DTLS_SRV)
     ret = create_dtls_server_task();
     if (ret != LOS_OK) {
         return LOS_NOK;

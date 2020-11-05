@@ -24,15 +24,8 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- *---------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------- */
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -44,56 +37,6 @@ extern "C" {
 #include <string.h>
 
 static UINT32 g_DemoTaskId;
-
-#ifdef LOS_KERNEL_DEBUG_OUT
-/* print via SWO */
-#ifdef LOS_KERNEL_DEMO_KEIL_SWSIMU
-
-#define ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000 + 4 * n)))
-#define ITM_Port16(n)   (*((volatile unsigned short*)(0xE0000000 + 4 * n)))
-#define ITM_Port32(n)   (*((volatile unsigned long *)(0xE0000000 + 4 * n)))
-#define DEMCR           (*((volatile unsigned long *)(0xE000EDFC)))
-#define TRCENA          0x01000000
-
-struct __FILE
-{
-    INT32 handle; /* Add whatever needed */
-};
-
-FILE __stdout;
-FILE __stdin;
-
-#if defined ( __ARMCC_VERSION ) || defined ( __ICCARM__ )  /* KEIL and IAR: printf will call fputc to print */
-INT32 fputc(INT32 ch, FILE *f)
-{
-    if (DEMCR & TRCENA) {
-        while (ITM_Port32(0) == 0);
-        ITM_Port8(0) = ch;
-    }
-    return(ch);
-}
-#elif defined ( __GNUC__ )  /* GCC: printf will call _write to print */
-__attribute__((used)) INT32 _write(INT32 fd, CHAR *ptr, INT32 len)
-{
-    INT32 i;
-    for (i = 0; i < len; i++) {
-        if (DEMCR & TRCENA) {
-            while (ITM_Port32(0) == 0);
-            ITM_Port8(0) = ptr[i];
-        }
-    }
-    return len;
-}
-#endif
-#endif
-
-#else
-
-INT32printf_none(const CHAR *format, ...)
-{
-    return 0;
-}
-#endif /* #ifdef LOS_KERNEL_DEBUG_OUT */
 
 static LITE_OS_SEC_TEXT VOID LOS_Demo_Tskfunc(VOID)
 {

@@ -75,7 +75,6 @@ endif
 	$(LD) $(LITEOS_LDFLAGS) $(LITEOS_TABLES_LDFLAGS) $(LITEOS_DYNLDFLAGS) -Map=$(OUT)/$@.map -o $(OUT)/$@.elf --start-group $(LITEOS_BASELIB) --end-group
 	$(OBJCOPY) -O binary $(OUT)/$@.elf $(OUT)/$@.bin
 	$(OBJDUMP) -t $(OUT)/$@.elf |sort >$(OUT)/$@.sym.sorted
-	$(OBJDUMP) -Mreg-names-raw -d $(OUT)/$@.elf |$(LITEOSTOPDIR)/tools/stackusage/stackusage |sort -n -k 1 -r >$(OUT)/$@.stack
 	$(OBJDUMP) -d $(OUT)/$@.elf >$(OUT)/$@.asm
 	$(SIZE) $(OUT)/$@.elf
 	$(HIDE)echo "########################################################################################################"
