@@ -1,10 +1,10 @@
 # LiteOS移植指南
 -   [概述](#概述)
-    -   [什么是移植，为什么要移植](#什么是移植为什么要移植)
+    -   [什么是移植，为什么要移植](#什么是移植-为什么要移植)
     -   [指南适用范围](#指南适用范围)
     -   [移植目录结构](#移植目录结构)
 -   [环境准备](#环境准备)
-    -   [获取LiteOS源代码](#获取liteos源代码)
+    -   [获取LiteOS源代码](#获取LiteOS源代码)
     -   [硬件环境](#硬件环境)
     -   [软件环境](#软件环境)
 -   [创建裸机工程](#创建裸机工程)
@@ -17,21 +17,21 @@
 -   [移植适配](#移植适配)
     -   [移植步骤](#移植步骤)
     -   [增加新开发板的目录](#增加新开发板的目录)
-    -   [适配外设驱动和HAL库配置文件](#适配外设驱动和hal库配置文件)
+    -   [适配外设驱动和HAL库配置文件](#适配外设驱动和HAL库配置文件)
     -   [配置系统时钟](#配置系统时钟)
     -   [适配串口初始化文件](#适配串口初始化文件)
     -   [修改链接脚本](#修改链接脚本)
     -   [适配编译配置](#适配编译配置)
-    -   [在LiteOS Studio上验证](#在liteos-studio上验证)
+    -   [在LiteOS Studio上验证](#在LiteOS-Studio上验证)
 -   [任务创建示例](#任务创建示例)
     -   [任务处理函数简介](#任务处理函数简介)
     -   [创建任务](#创建任务)
 -   [常见问题](#常见问题)
-    -   [如何进行GDB调试](#如何进行gdb调试)
-    -   [如何联系LiteOS官方开发人员](#如何联系liteos官方开发人员)
+    -   [如何进行GDB调试](#如何进行GDB调试)
+    -   [如何联系LiteOS官方开发人员](#如何联系LiteOS官方开发人员)
 <h2 id="概述">概述</h2>
 
--   **[什么是移植，为什么要移植](#什么是移植为什么要移植)**
+-   **[什么是移植，为什么要移植](#什么是移植-为什么要移植)**
 
 -   **[指南适用范围](#指南适用范围)**
 
@@ -53,155 +53,31 @@
 表格列出了LiteOS源码的目录，其中蓝色字体的目录/文件在移植过程中需要修改。
 
 **表 1**  LiteOS源码目录
-
-<a name="table82889451213"></a>
-<table><thead align="left"><tr id="row20288945132110"><th class="cellrowborder" valign="top" width="17.741774177417742%" id="mcps1.2.4.1.1"><p id="p1179115410228"><a name="p1179115410228"></a><a name="p1179115410228"></a>一级目录</p>
-</th>
-<th class="cellrowborder" valign="top" width="18.971897189718973%" id="mcps1.2.4.1.2"><p id="p979134162213"><a name="p979134162213"></a><a name="p979134162213"></a>二级目录/文件</p>
-</th>
-<th class="cellrowborder" valign="top" width="63.28632863286329%" id="mcps1.2.4.1.3"><p id="p779110419229"><a name="p779110419229"></a><a name="p779110419229"></a>说明</p>
-</th>
-</tr>
-</thead>
-<tbody><tr id="row128884532117"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p117911944225"><a name="p117911944225"></a><a name="p117911944225"></a>arch</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p079144152213"><a name="p079144152213"></a><a name="p079144152213"></a>芯片架构支持</p>
-</td>
-</tr>
-<tr id="row18288204522115"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p87911348226"><a name="p87911348226"></a><a name="p87911348226"></a>build</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p47918418222"><a name="p47918418222"></a><a name="p47918418222"></a>LiteOS编译系统需要的配置及脚本</p>
-</td>
-</tr>
-<tr id="row12882045132117"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p479194112211"><a name="p479194112211"></a><a name="p479194112211"></a>compat</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p1479154172219"><a name="p1479154172219"></a><a name="p1479154172219"></a>liteos提供的CMSIS-RTOS 1.0和2.0接口</p>
-</td>
-</tr>
-<tr id="row17289445132111"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p1579119411222"><a name="p1579119411222"></a><a name="p1579119411222"></a>components</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p57912492219"><a name="p57912492219"></a><a name="p57912492219"></a>组件代码</p>
-</td>
-</tr>
-<tr id="row172891545152114"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p127914410228"><a name="p127914410228"></a><a name="p127914410228"></a>demos</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p47913419221"><a name="p47913419221"></a><a name="p47913419221"></a>组件和内核的demo</p>
-</td>
-</tr>
-<tr id="row62891045152117"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p137915422218"><a name="p137915422218"></a><a name="p137915422218"></a>doc</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p3791184142220"><a name="p3791184142220"></a><a name="p3791184142220"></a>LiteOS使用文档</p>
-</td>
-</tr>
-<tr id="row228994552114"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p1879164192218"><a name="p1879164192218"></a><a name="p1879164192218"></a>include</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p7791340229"><a name="p7791340229"></a><a name="p7791340229"></a>components中各模块的头文件</p>
-</td>
-</tr>
-<tr id="row5289445172116"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p167919462215"><a name="p167919462215"></a><a name="p167919462215"></a>kernel</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p479113411224"><a name="p479113411224"></a><a name="p479113411224"></a>内核代码</p>
-</td>
-</tr>
-<tr id="row828984512214"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p117913410228"><a name="p117913410228"></a><a name="p117913410228"></a>lib</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p9791845228"><a name="p9791845228"></a><a name="p9791845228"></a>libc/zlib/posix接口</p>
-</td>
-</tr>
-<tr id="row0289645142113"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p679118412225"><a name="p679118412225"></a><a name="p679118412225"></a>osdepends</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p207923402215"><a name="p207923402215"></a><a name="p207923402215"></a>LiteOS提供的部分OS适配接口</p>
-</td>
-</tr>
-<tr id="row1289144562116"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p147921546227"><a name="p147921546227"></a><a name="p147921546227"></a>targets</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p97923412228"><a name="p97923412228"></a><a name="p97923412228"></a>bsp</p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p5792148229"><a name="p5792148229"></a><a name="p5792148229"></a>通用板级支持包</p>
-</td>
-</tr>
-<tr id="row11289184518218"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p1979294152216"><a name="p1979294152216"></a><a name="p1979294152216"></a>Cloud_STM32F429IGTx_FIRE</p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p1679217412224"><a name="p1679217412224"></a><a name="p1679217412224"></a>野火STM32F429（ARM Cortex M4）开发板的开发工程源码包</p>
-</td>
-</tr>
-<tr id="row1428917451219"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p27929414222"><a name="p27929414222"></a><a name="p27929414222"></a>STM32F769IDISCOVERY</p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p1679211472218"><a name="p1679211472218"></a><a name="p1679211472218"></a>STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包</p>
-</td>
-</tr>
-<tr id="row4289545152113"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p579216472213"><a name="p579216472213"></a><a name="p579216472213"></a>STM32L431_BearPi</p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p197921248224"><a name="p197921248224"></a><a name="p197921248224"></a>小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包</p>
-</td>
-</tr>
-<tr id="row1128954552110"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p107927418225"><a name="p107927418225"></a><a name="p107927418225"></a>Kconfig</p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 ">&nbsp;&nbsp;</td>
-</tr>
-<tr id="row8289445192115"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p579210442213"><a name="p579210442213"></a><a name="p579210442213"></a>Makefile</p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 ">&nbsp;&nbsp;</td>
-</tr>
-<tr id="row10289845112111"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p479213422211"><a name="p479213422211"></a><a name="p479213422211"></a><strong id="b19561725152314"><a name="b19561725152314"></a><a name="b19561725152314"></a>targets.mk</strong></p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 ">&nbsp;&nbsp;</td>
-</tr>
-<tr id="row228984512118"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p47925417223"><a name="p47925417223"></a><a name="p47925417223"></a>tests</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p179213472214"><a name="p179213472214"></a><a name="p179213472214"></a>内核及系统库的参考测试代码</p>
-</td>
-</tr>
-<tr id="row92892045192113"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p10792043220"><a name="p10792043220"></a><a name="p10792043220"></a>tools</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p1179218412224"><a name="p1179218412224"></a><a name="p1179218412224"></a><strong id="b167211359237"><a name="b167211359237"></a><a name="b167211359237"></a>build/config</strong></p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p10792194112219"><a name="p10792194112219"></a><a name="p10792194112219"></a>LiteOS支持的各开发板的编译配置文件，移植新的开发板时，需要在这个目录下增加这个新开发板的编译配置文件</p>
-</td>
-</tr>
-<tr id="row828915455218"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p10792104152216"><a name="p10792104152216"></a><a name="p10792104152216"></a>menuconfig</p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p979220492217"><a name="p979220492217"></a><a name="p979220492217"></a>LiteOS编译所需的menuconfig脚本</p>
-</td>
-</tr>
-<tr id="row1829064582112"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 "><p id="p579210412228"><a name="p579210412228"></a><a name="p579210412228"></a>stackusage</p>
-</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p1479294152214"><a name="p1479294152214"></a><a name="p1479294152214"></a>LiteOS栈使用估算工具</p>
-</td>
-</tr>
-<tr id="row122905457212"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p57921245222"><a name="p57921245222"></a><a name="p57921245222"></a>Makefile</p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p17792194182215"><a name="p17792194182215"></a><a name="p17792194182215"></a>整个LiteOS的Makefile</p>
-</td>
-</tr>
-<tr id="row1929074515214"><td class="cellrowborder" valign="top" width="17.741774177417742%" headers="mcps1.2.4.1.1 "><p id="p197925422216"><a name="p197925422216"></a><a name="p197925422216"></a><strong id="b721613419238"><a name="b721613419238"></a><a name="b721613419238"></a>.config</strong></p>
-</td>
-<td class="cellrowborder" valign="top" width="18.971897189718973%" headers="mcps1.2.4.1.2 ">&nbsp;&nbsp;</td>
-<td class="cellrowborder" valign="top" width="63.28632863286329%" headers="mcps1.2.4.1.3 "><p id="p1879219411225"><a name="p1879219411225"></a><a name="p1879219411225"></a>开发板的编译配置文件，默认为Cloud_STM32F429IGTx_FIRE开发板的配置文件，移植时需要替换成新开发板的编译配置文件</p>
-</td>
-</tr>
-</tbody>
-</table>
+| 一级目录                    | 二级目录/文件            | 说明                                                          |
+| ----------                  | ----------------------   |  -----------------------------------------------------------  |
+| arch                        |                          |  芯片架构支持                                                 |
+| build                       |                          |  LiteOS编译系统需要的配置及脚本                               |
+| compat                      |                          |  LiteOS提供的CMSIS-RTOS 1.0和2.0接口                          |
+| components                  |                          |  组件代码                                                     |
+| demos                       |                          |  组件和内核的demo                                             |
+| doc                         |                          |  LiteOS使用文档                                               |
+| include                     |                          |  components中各模块的头文件                                   |
+| kernel                      |                          |  内核代码                                                     |
+| lib                         |                          |  libc/zlib/posix接口                                          |
+| osdepends                   |                          |  LiteOS提供的部分OS适配接口                                   |
+| targets                     | bsp                      |  通用板级支持包                                               |
+|                             | Cloud_STM32F429IGTx_FIRE |  野火STM32F429（ARM Cortex M4）开发板的开发工程源码包         |
+|                             | STM32F769IDISCOVERY      |  STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包   |
+|                             | STM32L431_BearPi         |  小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包       |
+|                             | Kconfig                  |                                                               |
+|                             | Makefile                 |                                                               |
+|                             | **<font color="blue">targets.mk</font>** |                                               |
+| tests                       |                          |  内核及系统库的参考测试代码                                   |
+| tools                       | **<font color="blue">build/config</font>** |  LiteOS支持的各开发板的编译配置文件，移植新的开发板时，需要在这个目录下增加这个新开发板的编译配置文件 |
+|                             |  menuconfig              |  LiteOS编译所需的menuconfig脚本                               |
+|                             |  stackusage              |  LiteOS栈使用估算工具                                         |
+| Makefile                    |                          |  整个LiteOS的Makefile                                         |
+| **<font color="blue">.config</font>** |                |  开发板的编译配置文件，默认为Cloud_STM32F429IGTx_FIRE开发板的配置文件，移植时需要替换成新开发板的编译配置文件 |
 
 target目录下保存了当前已经支持的开发板工程源码。当移植新开发板时，应该在target目录下增加该开发板的目录，目录结构和代码可以参考当前已支持的开发板的目录。例如：
 
@@ -211,7 +87,7 @@ target目录下保存了当前已经支持的开发板工程源码。当移植�
 
 <h2 id="环境准备">环境准备</h2>
 
--   **[获取LiteOS源代码](#获取liteos源代码)**
+-   **[获取LiteOS源代码](#获取LiteOS源代码)**
 
 -   **[硬件环境](#硬件环境)**
 
@@ -220,13 +96,13 @@ target目录下保存了当前已经支持的开发板工程源码。当移植�
 
 <h3 id="获取LiteOS源代码">获取LiteOS源代码</h3>
 
-[LiteOS源码仓](https://gitee.com/LiteOS/LiteOS)在码云上，使用master分支。
+<a href="https://gitee.com/LiteOS/LiteOS" target="_blank">LiteOS源码仓</a>在码云上，使用master分支。
 
 <h3 id="硬件环境">硬件环境</h3>
 
 <h4 id="开发板">开发板</h4>
 
-本指南以国内主流STM32学习板-正点原子STM32F407开发板为例进行移植。该开发板的介绍可参考官方网站：[探索者STM32F407开发板](http://www.alientek.com/productinfo/714608.html)。
+本指南以国内主流STM32学习板-正点原子STM32F407开发板为例进行移植。该开发板的介绍可参考官方网站：<a href="http://www.alientek.com/productinfo/714608.html" target="_blank">探索者STM32F407开发板</a>。
 
 <h4 id="烧录仿真器">烧录仿真器</h4>
 
@@ -240,20 +116,20 @@ JLink。
 
 <h4 id="安装STM32CubeMX">安装STM32CubeMX</h4>
 
-[STM32CubeMX下载](https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-configurators-and-code-generators/stm32cubemx.html)，本指南使用的是6.0.1版本。
+<a href="https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-configurators-and-code-generators/stm32cubemx.html" target="_blank">STM32CubeMX下载</a>，本指南使用的是6.0.1版本。
 
 <h4 id="安装LiteOS-Studio">安装LiteOS Studio</h4>
 
-除了LiteOS Studio，同时还需要安装git工具、arm-none-eabi软件、make构建软件、C/C++扩展、JLink烧录软件，这些软件的安装均可参考[LiteOS Studio安装指南](https://liteos.gitee.io/liteos_studio/#/install)。
+除了LiteOS Studio，同时还需要安装git工具、arm-none-eabi软件、make构建软件、C/C++扩展、JLink烧录软件，这些软件的安装均可参考<a href="https://liteos.gitee.io/liteos_studio/#/install" target="_blank">LiteOS Studio安装指南</a>。
 
 所有软件安装完毕后，需要重启计算机。
 
 >![](public_sys-resources/icon-notice.gif) **须知：**
->对于板载STLink仿真器的STM32开发板，需要先把STLink仿真器刷成JLink仿真器，再按照JLink的方式烧写。可以参考LiteOS Studio官方文档的“STM32工程示例”中的“[ST-Link仿真器单步调测](https://liteos.gitee.io/liteos_studio/#/project_stm32?id=st-link仿真器单步调测)”。
+>对于板载STLink仿真器的STM32开发板，需要先把STLink仿真器刷成JLink仿真器，再按照JLink的方式烧写。可以参考LiteOS Studio官方文档的“STM32工程示例”中的<a href="https://liteos.gitee.io/liteos_studio/#/project_stm32?id=st-link仿真器单步调测" target="_blank">“ST-Link仿真器单步调测”</a>。
 
 <h4 id="验证LiteOS-Studio集成开发环境">验证LiteOS Studio集成开发环境</h4>
 
-在正式开始移植前，可以先验证当前开发环境是否能成功编译LiteOS代码并完成烧录。目前[开源LiteOS](https://gitee.com/LiteOS/LiteOS)支持了若干开发板，如：Cloud\_STM32F429IGTx\_FIRE、STM32F769IDISCOVERY、STM32L431\_BearPi等。可以视情况验证环境：
+在正式开始移植前，可以先验证当前开发环境是否能成功编译LiteOS代码并完成烧录。目前<a href="https://gitee.com/LiteOS/LiteOS" target="_blank">开源LiteOS</a>支持了若干开发板，如：Cloud\_STM32F429IGTx\_FIRE、STM32F769IDISCOVERY、STM32L431\_BearPi等。可以视情况验证环境：
 
 -   没有官方已适配的开发板，可以先使用LiteOS已支持的开发板工程验证编译功能。暂时不验证烧录功能，在下一章节“[测试裸机工程](#测试裸机工程)”中再验证。
 -   有官方已适配的开发板，使用开发板对应的工程验证编译和烧录功能。即：
@@ -262,7 +138,7 @@ JLink。
     -   对于STM32L431\_BearPi 开发板，在LiteOS Studio中配置目标板信息时，选择STM32L431RC。
 
 
-验证方法可以参考LiteOS Studio官方文档的“STM32工程示例”中的“[使用入门](https://liteos.gitee.io/liteos_studio/#/project_stm32?id=使用入门)”（只需关注其中的“打开工程”、“目标板配置”、“编译配置-编译代码”和“烧录配置-烧录”）。
+验证方法可以参考LiteOS Studio官方文档的“STM32工程示例”中的<a href="https://liteos.gitee.io/liteos_studio/#/project_stm32?id=使用入门" target="_blank">“使用入门”</a>（只需关注其中的“打开工程”、“目标板配置”、“编译配置-编译代码”和“烧录配置-烧录”）。
 
 <h2 id="创建裸机工程">创建裸机工程</h2>
 
@@ -446,13 +322,13 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
     ![](figures/编译裸机工程.png "编译裸机工程")
 
 3.  烧录。
-    1.  配置烧录器。
+    1)  配置烧录器。
 
         在“工程配置”界面中点击“烧录器”，参照下图进行配置，要烧录的二进制镜像文件就是上一步编译生成的bin文件，配置项中的“连接速率”、“加载地址”保持默认即可。
 
         ![](figures/烧录器配置.png)
 
-    2.  点击“工具栏”上的“烧录”按钮，进行烧录。
+    2)  点击“工具栏”上的“烧录”按钮，进行烧录。
 
         ![](figures/烧录按钮.png)
 
@@ -460,7 +336,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
         ![](figures/烧录成功的输出.png)
 
-    3.  查看串口输出。
+    3)  查看串口输出。
 
         点击“工具栏”上“串口终端”图标![](figures/串口终端按钮.png)，打开串口终端界面。如下图，只需设置与开发板连接的实际端口号，并打开串口开关。开发板按下复位RESET按钮后，即可在“串口终端”界面中看到不断输出hello，同时也可以观察到开发板的LED灯闪烁。
 
@@ -469,7 +345,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 
 >![](public_sys-resources/icon-note.gif) **说明：**
->如果想更详细的了解LiteOS Studio的使用，可以参考LiteOS Studio官方文档的“[STM32工程示例](https://liteos.gitee.io/liteos_studio/#/project_stm32)”。
+>如果想更详细的了解LiteOS Studio的使用，可以参考LiteOS Studio官方文档的<a href="https://liteos.gitee.io/liteos_studio/#/project_stm32" target="_blank">“STM32工程示例”</a>。
 
 <h2 id="移植适配">移植适配</h2>
 
@@ -477,7 +353,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 -   **[增加新开发板的目录](#增加新开发板的目录)**
 
--   **[适配外设驱动和HAL库配置文件](#适配外设驱动和hal库配置文件)**
+-   **[适配外设驱动和HAL库配置文件](#适配外设驱动和HAL库配置文件)**
 
 -   **[配置系统时钟](#配置系统时钟)**
 
@@ -487,7 +363,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 -   **[适配编译配置](#适配编译配置)**
 
--   **[在LiteOS Studio上验证](#在liteos-studio上验证)**
+-   **[在LiteOS Studio上验证](#在LiteOS-Studio上验证)**
 
 
 <h3 id="移植步骤">移植步骤</h3>
@@ -745,7 +621,7 @@ STM32F407\_OpenEdv\\liteos.ld是新开发板的链接脚本，需要根据开发
 
 <h3 id="在LiteOS-Studio上验证">在LiteOS Studio上验证</h3>
 
-通过编译和烧录，验证移植后的LiteOS源码，验证方法可以参考“[使用LiteOS Studio测试裸机工程](#使用liteos-studio测试裸机工程)”。
+通过编译和烧录，验证移植后的LiteOS源码，验证方法可以参考“[使用LiteOS Studio测试裸机工程](#使用LiteOS-Studio测试裸机工程)”。
 
 >![](public_sys-resources/icon-note.gif) **说明：**
 >对于移植后的LiteOS源码，其**Makefile**文件在源码根目录下，编译生成的镜像文件**Huawei\_LiteOS.bin**在根目录的**out**目录下。
@@ -862,17 +738,17 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
 
 <h2 id="常见问题">常见问题</h2>
 
--   **[如何进行GDB调试](#如何进行gdb调试)**
+-   **[如何进行GDB调试](#如何进行GDB调试)**
 
--   **[如何联系LiteOS官方开发人员](#如何联系liteos官方开发人员)**
+-   **[如何联系LiteOS官方开发人员](#如何联系LiteOS官方开发人员)**
 
 
 <h3 id="如何进行GDB调试">如何进行GDB调试</h3>
 
-参考LiteOS Studio官方文档的“STM32工程示例”中的“使用入门”，其中有“[调试器](https://liteos.gitee.io/liteos_studio/#/project_stm32?id=调试器-执行调试)”相关介绍。
+参考LiteOS Studio官方文档的“STM32工程示例”中的“使用入门”，其中有<a href="https://liteos.gitee.io/liteos_studio/#/project_stm32?id=调试器-执行调试" target="_blank">“调试器”</a>相关介绍。
 
 <h3 id="如何联系LiteOS官方开发人员">如何联系LiteOS官方开发人员</h3>
 
-1.  在gitee网站上的[LiteOS项目](https://gitee.com/LiteOS/LiteOS/issues)中提出issue。
-2.  在[Huawei LiteOS官方论坛](https://bbs.huaweicloud.com/forum/forum-729-1.html)上提问。
+1.  在gitee网站上的<a href="https://gitee.com/LiteOS/LiteOS/issues" target="_blank">LiteOS项目</a>中提出issue。
+2.  在<a href="https://bbs.huaweicloud.com/forum/forum-729-1.html" target="_blank">Huawei LiteOS官方论坛</a>上提问。
 
