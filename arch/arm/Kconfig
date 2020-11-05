@@ -109,7 +109,7 @@ config LOSCFG_ARCH_FPU
     default "vfpv3-d16"   if LOSCFG_ARCH_FPU_VFP_V3 && LOSCFG_ARCH_FPU_VFP_D16
     default "neon-vfpv4"  if LOSCFG_ARCH_FPU_VFP_V4 && LOSCFG_ARCH_FPU_VFP_D32 && LOSCFG_ARCH_FPU_VFP_NEON
     default "vfpv4"       if LOSCFG_ARCH_FPU_VFP_V4 && LOSCFG_ARCH_FPU_VFP_D32
-    default "vfpv4-d16"   if LOSCFG_ARCH_FPU_VFP_V4 && LOSCFG_ARCH_FPU_VFP_D16
+    default "fpv4-sp-d16" if LOSCFG_ARCH_FPU_VFP_V4 && LOSCFG_ARCH_FPU_VFP_D16
     default "fpv5-sp-d16" if LOSCFG_ARCH_FPU_VFP_V5 && LOSCFG_ARCH_FPU_VFP_D16
 
 #

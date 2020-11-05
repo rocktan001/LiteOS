@@ -22,6 +22,7 @@ USER_SRC =  \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/dwt.c \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/eth.c \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c \
+        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/flash_adaptor.c \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/user_task.c
         C_SOURCES += $(USER_SRC)
 

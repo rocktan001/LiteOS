@@ -84,13 +84,12 @@ ifeq ($(LITEOS_PLATFORM), hi3556v200)
     PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/platform/bsp/board/$(LITEOS_PLATFORM)/include/hisoc
 endif
 
-
 LIB_SUBDIRS += targets/bsp
 LIB_SUBDIRS += targets/$(LITEOS_PLATFORM)
 
 #determin libs to link for windows
 ifneq ($(OS), Linux)
-    LITEOS_BASELIB += -l$(LITEOS_PLATFORM) -lsec -lbase -lbsp -lc -lm
+    LITEOS_BASELIB += -l$(LITEOS_PLATFORM) -lsec -lbase -lbsp -lc -lm -losdepends
 
     ifeq ($(LOSCFG_COMPAT_CMSIS), y)
         LITEOS_BASELIB += -lcmsis
@@ -130,6 +129,33 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_SECURITY_MBEDTLS), y)
+        LITEOS_BASELIB += -lmbedtls
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_LIB_CJSON), Y)
+        LITEOS_BASELIB += -lcjson
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_LOG), Y)
+        LITEOS_BASELIB += -llog
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT), y)
+        LITEOS_BASELIB += -lmqtt
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_LWM2M), y)
+        LITEOS_BASELIB += -lwm2m
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_ATINY_MQTT), y)
+        LITEOS_BASELIB += -latiny_mqtt
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_ATINY_LWM2M), y)
+        LITEOS_BASELIB += -latiny_lwm2m
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_NET_SAL), y)
+        LITEOS_BASELIB += -lsal
+    endif
+    ifeq ($(LOSCFG_DEMOS_AGENT_TINY_MQTT), y)
+        LITEOS_BASELIB += -lagenttiny_mqtt
     endif
 endif
 

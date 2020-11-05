@@ -1,0 +1,11 @@
+config LOSCFG_COMPONENTS_CONNECTIVITY_ATINY_MQTT
+    bool "Enable Agenttiny Mqtt"
+    depends on LOSCFG_COMPONENTS_CONNECTIVITY
+    select LOSCFG_COMPONENTS_CONNECTIVITY_AGENTTINY
+    select LOSCFG_COMPONENTS_CONNECTIVITY_MQTT
+    default n
+    help
+      Answer y to enable angettiny mqtt.
+
+config LOSCFG_COMPONENTS_CONNECTIVITY_AGENTTINY
+    bool

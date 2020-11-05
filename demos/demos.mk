@@ -19,3 +19,8 @@ ifeq ($(LOSCFG_DEMOS_KERNEL), y)
 include $(LITEOSTOPDIR)/demos/kernel/kernel.mk
 DEMOS_INCLUDE += $(DEMOS_KERNEL_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_AGENT_TINY_MQTT), y)
+include $(LITEOSTOPDIR)/demos/agenttiny_mqtt/agenttiny_mqtt.mk
+DEMOS_INCLUDE += $(DEMOS_AGENTTINY_MQTT_INCLUDE)
+endif

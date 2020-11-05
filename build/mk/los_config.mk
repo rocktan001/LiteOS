@@ -127,7 +127,7 @@ include $(LITEOSTOPDIR)/shell/api.mk
 include $(LITEOSTOPDIR)/components/components.mk
 include $(LITEOSTOPDIR)/demos/demos.mk
 
-LIB_SUBDIRS += kernel compat lib components demos shell
+LIB_SUBDIRS += kernel compat lib osdepends components demos shell 
 
 LITEOS_KERNEL_INCLUDE := -I $(LITEOSTOPDIR)/kernel/include
 
