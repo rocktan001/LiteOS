@@ -413,33 +413,11 @@ Kernel list demo ok.
 
 <h2 id="3">3.运行实例</h2>
 
-在target文件夹下的main.c或者user_task.c中找到app_init函数。LiteOS系统完成初始化后，会创建用户任务，其任务处理函数就是app_init()。所以用户可以直接在这个函数中执行运行实例的代码，实现demos/kernel下各个实例的执行。
+在target文件夹下的main.c或者user_task.c中找到app_init函数。LiteOS系统完成初始化后，会创建用户任务，其任务处理函数就是app_init(), 用户可以直接在该函数中运行demos/kernel下各个实例。
 
-这里共有两种方式来运行[2.实例介绍](#2)中的各个实例。
+这里提供两种方式来运行[2.实例介绍](#2)中的各个实例。
 
-### 实例1：los_demo_entry.c/.h
-
-通过宏开关来判断是否调用各内核实例，以实现对[2.实例介绍](#2)中某个或多个实例的执行。
-
-**开发流程**
-
-1.使用make menuconfig打开需要测试功能的宏开关，例如要测试task实例，则选择“DemoEntry”, 并选择实例：
-
-`Demos --> Kernel Demo --> Enable Kernel Demo --> Kernel Demo Entry --> DemoEntry --> Select --> Run Kernel Task Demo`
-
-2.在实现app_init()的源文件中添加头文件引用：
-
-```
-#include "los_demo_entry.h" // 调用测试函数头文件
-```
-
-3.在app_init()中调用KernelDemoEntry()函数，该函数通过宏开关来判断是否调用某内核实例：
-
-```
-KernelDemoEntry();   // 调用测试任务
-```
-
-### 实例2：los_inspect_entry.c/.h
+### 实例1：los_inspect_entry.c/.h
 
 测试[2.实例介绍](#2)中所有实例。
 
@@ -456,6 +434,28 @@ KernelDemoEntry();   // 调用测试任务
 3.在app_init()中调用KernelDemoInspectEntry()函数，该函数会执行所有内核实例：
 ```
 KernelDemoInspectEntry();    // 调用测试任务测试所有实例
+```
+
+### 实例2：los_demo_entry.c/.h
+
+通过宏开关来判断是否调用各内核实例，以实现对[2.实例介绍](#2)中某个或多个实例的执行。
+
+**开发流程**
+
+1.使用make menuconfig打开需要测试功能的宏开关，例如要测试task实例，则选择“DemoEntry”, 并选择实例：
+
+`Demos --> Kernel Demo --> Enable Kernel Demo --> Kernel Demo Entry --> DemoEntry --> Run Kernel Task Demo`
+
+2.在实现app_init()的源文件中添加头文件引用：
+
+```
+#include "los_demo_entry.h" // 调用测试函数头文件
+```
+
+3.在app_init()中调用KernelDemoEntry()函数，该函数通过宏开关来判断是否调用某内核实例：
+
+```
+KernelDemoEntry();   // 调用测试任务
 ```
 
 **测试流程**
