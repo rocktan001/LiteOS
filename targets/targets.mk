@@ -157,6 +157,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_AGENT_TINY_MQTT), y)
         LITEOS_BASELIB += -lagenttiny_mqtt
     endif
+    ifeq ($(LOSCFG_SHELL), y)
+        LITEOS_BASELIB += -lshell
+    endif
 endif
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)
