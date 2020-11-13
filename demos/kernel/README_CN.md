@@ -14,7 +14,7 @@ KERNEL DEMOS使用指南
 
 
 >![](public_sys-resources/icon-notice.gif) **须知：**
->如果想更详细了解LiteOS各内核模块，可以访问<a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/Huawei_LiteOS_Developer_Guide_zh.md" arget="_blank">LiteOS开发指南</a>。
+>如果想更详细了解LiteOS各内核模块，可以访问<a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/Huawei_LiteOS_Developer_Guide_zh.md" target="_blank">LiteOS开发指南</a>。
 <h2 id="1">1.前言</h2>
 
 **使用方法**
