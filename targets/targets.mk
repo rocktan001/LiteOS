@@ -160,6 +160,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_SHELL), y)
         LITEOS_BASELIB += -lshell
     endif
+    ifeq ($(LOSCFG_DEMOS_DTLS_SERVER), y)
+        LITEOS_BASELIB += -ldtls_server
+    endif
 endif
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)

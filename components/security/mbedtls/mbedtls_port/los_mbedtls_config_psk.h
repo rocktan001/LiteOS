@@ -79,7 +79,7 @@
 //#define MBEDTLS_NET_C
 #define MBEDTLS_SHA256_C
 #define MBEDTLS_SSL_CLI_C
-//#define MBEDTLS_SSL_SRV_C
+#define MBEDTLS_SSL_SRV_C
 #define MBEDTLS_SSL_TLS_C
 #if !defined ( __GNUC__ )  /* GCC*/
 #define MBEDTLS_DEBUG_C

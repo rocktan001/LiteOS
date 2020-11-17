@@ -65,22 +65,19 @@
 void *atiny_net_bind(const char *host, const char *port, int proto)
 {
 #if defined (LOSCFG_COMPONENTS_NET_LWIP) || defined (WITH_LINUX)
-    (void)host;
-    (void)port;
-    (void)proto;
-    return NULL;
-/*
+
     struct sockaddr_in sock_addr;
     int port_i;
     int ret = ATINY_NET_ERR;
+    atiny_net_context *ctx;
 
-    if (NULL == port || (proto != ATINY_PROTO_UDP && proto != ATINY_PROTO_TCP)) {
+    if ((NULL == port) || ((proto != ATINY_PROTO_UDP) && (proto != ATINY_PROTO_TCP))) {
         return NULL;
     }
 
     ctx = atiny_malloc(sizeof(atiny_net_context));
 
-    sscanf(port , "%d", &port_i);
+    sscanf(port, "%d", &port_i);
     sock_addr.sin_family = AF_INET;
     sock_addr.sin_port = lwip_htons(port_i);
     sock_addr.sin_addr.s_addr = (host == NULL ? IPADDR_ANY : inet_addr(host));
@@ -97,16 +94,15 @@ void *atiny_net_bind(const char *host, const char *port, int proto)
     }
 
     int n = 1;
-    if ((ret = setsockopt(ctx->fd, SOL_SOCKET, SO_REUSEADDR,
-                          (const char *) &n, sizeof( n )) ) != 0) {
+    if ((ret = setsockopt(ctx->fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&n, sizeof(n))) != 0) {
         ret = ATINY_NET_SOCKET_FAILED;
         goto exit_failed;
     }
 
     ret = bind(ctx->fd, (struct sockaddr*)&sock_addr, sizeof(struct sockaddr));
     if (ret < 0) {
-       ret = ATINY_NET_BIND_FAILED;
-       goto exit_failed;
+        ret = ATINY_NET_BIND_FAILED;
+        goto exit_failed;
     }
 
     if (proto == ATINY_PROTO_TCP) {
@@ -119,10 +115,10 @@ void *atiny_net_bind(const char *host, const char *port, int proto)
     return ctx;
 
 exit_failed:
-       close(ctx->fd);
-       atiny_free(ctx);
-       return NULL;
-       */
+        close(ctx->fd);
+        atiny_free(ctx);
+        return NULL;
+
 #elif defined(WITH_AT_FRAMEWORK)
     atiny_net_context *ctx;
     ctx = atiny_malloc(sizeof(atiny_net_context));
