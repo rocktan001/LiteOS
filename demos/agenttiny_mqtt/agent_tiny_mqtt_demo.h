@@ -1,6 +1,8 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Agent Tiny Mqtt Demo HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,26 +24,33 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- *---------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------- */
 
-#ifndef __AGENT_TINY_DEMO_H_
-#define __AGENT_TINY_DEMO_H_
+#ifndef _AGENT_TINY_MQTT_DEMO_H
+#define _AGENT_TINY_MQTT_DEMO_H
 
-#include "los_base.h"
-#include "los_task.h"
-#include "los_typedef.h"
-#include "los_sys.h"
-#include "atiny_lwm2m/agenttiny.h"
-#include "osdepends/atiny_osdep.h"
+#include <stdbool.h>
+#include <stdint.h>
 
-void agent_tiny_entry(void);
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif 
+typedef struct {
+    void (*init)(void);
+    int (*write_flash_info)(const void *buffer, uint32_t len);
+    int (*read_flash_info)(void *buffer, uint32_t len);
+} demo_param_s;
+
+void agent_tiny_demo_init(const demo_param_s *param);
+void agent_tiny_mqtt_entry(void);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif /* _AGENT_TINY_MQTT_DEMO_H */

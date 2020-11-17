@@ -69,7 +69,7 @@ static int flash_manager_parse(const char *buf, uint32_t len, flash_info_s *flas
     }
 
     if ((i != MAX_DATA_ITEM) || (len != 0)) {
-        ATINY_LOG(LOG_FATAL, "data info err item num %ld,left len %ld", i, len);
+        ATINY_LOG(LOG_FATAL, "data info err item num %ld, left len %ld", i, len);
         ret = ATINY_ERR;
         goto EXIT_ERR;
     }
@@ -83,15 +83,15 @@ EXIT_ERR:
 
 static int flash_manager_get_need_len(const flash_info_s *flash_info, uint32_t *len)
 {
-   uint32_t i;
+    uint32_t i;
 
-   *len = DATA_POS;
-   for (i = 0; i < MAX_DATA_ITEM; i++) {
-       uint32_t tmp_len = strnlen(flash_info->items[i], MAX_FLASH_INFO);
-       *len += (tmp_len + 1);
-       if (*len > MAX_FLASH_INFO) {
-           ATINY_LOG(LOG_ERR, "write info exceed max");
-           return ATINY_ERR;
+    *len = DATA_POS;
+    for (i = 0; i < MAX_DATA_ITEM; i++) {
+        uint32_t tmp_len = strnlen(flash_info->items[i], MAX_FLASH_INFO);
+        *len += (tmp_len + 1);
+        if (*len > MAX_FLASH_INFO) {
+            ATINY_LOG(LOG_ERR, "write info exceed max");
+            return ATINY_ERR;
        }
    }
    return ATINY_OK;
@@ -99,22 +99,22 @@ static int flash_manager_get_need_len(const flash_info_s *flash_info, uint32_t *
 
 static void flash_manager_write_buffer(const flash_info_s *flash_info, char *buf, uint32_t len)
 {
-   uint32_t i;
-   *((uint32_t *)buf) = FLASH_MAGIC_NUM;
-   *((uint32_t *)&buf[TOTAL_LEN_POS]) = len;
+    uint32_t i;
+    *((uint32_t *)buf) = FLASH_MAGIC_NUM;
+    *((uint32_t *)&buf[TOTAL_LEN_POS]) = len;
 
-   buf += DATA_POS;
-   len -= DATA_POS;
-   for (i = 0; i < MAX_DATA_ITEM; i++) {
-     int32_t tmp_len;
-     tmp_len = snprintf(buf, len, "%s", flash_info->items[i]);
-     if ((tmp_len >= len) || (tmp_len < 0)) {
-        ATINY_LOG(LOG_FATAL, "snprintf err,tmp_len %ld, len %d", tmp_len, len);
-        return;
-     }
-     buf += (tmp_len + 1);
-     len -= (tmp_len + 1);
-   }
+    buf += DATA_POS;
+    len -= DATA_POS;
+    for (i = 0; i < MAX_DATA_ITEM; i++) {
+        int32_t tmp_len;
+        tmp_len = snprintf(buf, len, "%s", flash_info->items[i]);
+        if ((tmp_len >= len) || (tmp_len < 0)) {
+            ATINY_LOG(LOG_FATAL, "snprintf err, tmp_len %ld, len %d", tmp_len, len);
+            return;
+    }
+    buf += (tmp_len + 1);
+    len -= (tmp_len + 1);
+    }
 }
 
 void flash_manager_init(int (*cmd_ioctl)(mqtt_cmd_e cmd, void *arg, int32_t len))
@@ -184,13 +184,14 @@ int flash_manager_write(const flash_info_s *flash_info)
     }
     return ret;
 }
+
 void flash_manager_destroy_flash_info(flash_info_s *flash_info)
 {
-   uint32_t i;
+    uint32_t i;
 
-   for (i = 0; i < MAX_DATA_ITEM; i++) {
-       TRY_FREE_MEM(flash_info->items[i]);
-   }
+    for (i = 0; i < MAX_DATA_ITEM; i++) {
+        TRY_FREE_MEM(flash_info->items[i]);
+    }
 }
 
 #ifdef __cplusplus

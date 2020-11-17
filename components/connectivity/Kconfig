@@ -7,6 +7,7 @@ config LOSCFG_COMPONENTS_CONNECTIVITY
       Answer y to enable connectivity.
 
 source "components/connectivity/mqtt/Kconfig"
+source "components/connectivity/lwm2m/Kconfig"
 source "components/connectivity/agent_tiny/Kconfig"
 
 endmenu

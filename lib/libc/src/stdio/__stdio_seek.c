@@ -1,5 +1,6 @@
 #include "stdio_impl.h"
 #include <unistd.h>
+#include "fs/los_vfs.h"
 
 off_t __stdio_seek(FILE *f, off_t off, int whence)
 {

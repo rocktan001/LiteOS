@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2016-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: LiteOS Mqtt Client HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -73,7 +73,7 @@ typedef struct mqtt_context {
     int fd;
 } mqtt_context_t;
 
-typedef struct Network{
+typedef struct Network {
     void *ctx;
     int (*mqttread) (struct Network*, unsigned char*, int, int);
     int (*mqttwrite) (struct Network*, unsigned char*, int, int);

@@ -1,5 +1,6 @@
 #include "unistd.h"
 #include "stdio_impl.h"
+#include "fs/los_vfs.h"
 
 static int dummy(int fd)
 {

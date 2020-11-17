@@ -46,7 +46,7 @@ extern "C" {
 #define TRY_FREE_MEM(mem) \
 do\
 {\
-    if(NULL != (mem))\
+    if ((mem) != NULL)\
     {\
        atiny_free(mem);\
        (mem) = NULL;\

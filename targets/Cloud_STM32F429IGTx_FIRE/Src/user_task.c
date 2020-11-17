@@ -37,7 +37,7 @@
 #include "flash_adaptor.h"
 #include "agent_tiny_mqtt_demo.h"
 #endif
-#ifdef LOSCFG_DEMOS_AGENTTINY_LWM2M
+#ifdef LOSCFG_DEMOS_AGENT_TINY_LWM2M
 #include "agent_tiny_lwm2m_demo.h"
 #endif
 #ifdef WITH_SENSORHUB
@@ -47,18 +47,15 @@
 #include "los_inspect_entry.h"
 #include "los_demo_entry.h"
 #endif
+#ifdef LOSCFG_DEMOS_DTLS_SERVER
+#include "test_dtls_server.h"
+#endif
 
 static UINT32 g_atiny_tskHandle;
 static UINT32 g_fs_tskHandle;
 
 void atiny_task_entry(void)
 {
-#if defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
-    extern void agent_tiny_mqtt_entry(void);
-#elif defined(LOSCFG_COMPONENTS_CONNECTIVITY_LWM2M)
-    extern void agent_tiny_lwm2m_entry(void);
-#endif
-
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     hieth_hw_init();
     net_init();
@@ -94,7 +91,7 @@ void atiny_task_entry(void)
 #else
 #endif
 
-#ifdef LOSCFG_COMPONENTS_CONNECTIVITY_MQTT
+#ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
     flash_adaptor_init();
     {
         demo_param_s demo_param = {.init = NULL,
@@ -109,11 +106,11 @@ void atiny_task_entry(void)
 #ifdef CONFIG_FEATURE_FOTA
     hal_init_ota();
 #endif
-#ifdef LOSCFG_COMPONENTS_CONNECTIVITY_MQTT
+#ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
     agent_tiny_mqtt_entry();
 #endif
 
-#ifdef LOSCFG_COMPONENTS_CONNECTIVITY_LWM2M
+#ifdef LOSCFG_DEMOS_AGENT_TINY_LWM2M
     agent_tiny_lwm2m_entry();
 #endif
 #endif
@@ -162,9 +159,9 @@ UINT32 creat_fs_task(void)
     return ret;
 }
 
-#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(SUPPORT_DTLS_SRV)
+#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(LOSCFG_DEMOS_DTLS_SERVER)
 static UINT32 g_dtls_server_tskHandle;
-uint32_t create_dtls_server_task()
+uint32_t create_dtls_server_task(void)
 {
     uint32_t ret = LOS_OK;
     TSK_INIT_PARAM_S task_init_param;
@@ -218,7 +215,7 @@ UINT32 app_init(VOID)
     task_create("main_ppp", main_ppp, 0x1500, NULL, NULL, 2);
 #endif
 
-#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(SUPPORT_DTLS_SRV)
+#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(LOSCFG_DEMOS_DTLS_SERVER)
     ret = create_dtls_server_task();
     if (ret != LOS_OK) {
         return LOS_NOK;

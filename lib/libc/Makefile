@@ -44,6 +44,7 @@ LOCAL_INCLUDE := -I $(LITEOSTOPDIR)/lib/libc/arch/generic \
     -I $(LITEOSTOPDIR)/compat/linux/include \
     -I $(LITEOSTOPDIR)/lib/huawei_libc/pthread \
     -I $(LITEOSTOPDIR)/lib/huawei_libc/tzdst \
+    -I $(LITEOSTOPDIR)/include
 
 ifeq ($(LOSCFG_LLTSER), y)
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/tools/gcov_ser

@@ -15,7 +15,7 @@ config LOSCFG_DEMOS_KERNEL_SELECT
 choice
    prompt "Kernel Demo Entry"
    depends on LOSCFG_DEMOS_KERNEL
-   default InspectEntry
+   default LOSCFG_DEMOS_KERNEL_INSPECT_ENTRY
    help
       support entry:
       DemoEntry
