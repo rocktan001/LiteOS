@@ -24,3 +24,14 @@ ifeq ($(LOSCFG_DEMOS_AGENT_TINY_MQTT), y)
 include $(LITEOSTOPDIR)/demos/agenttiny_mqtt/agenttiny_mqtt.mk
 DEMOS_INCLUDE += $(DEMOS_AGENTTINY_MQTT_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_AGENT_TINY_LWM2M), y)
+include $(LITEOSTOPDIR)/demos/agenttiny_lwm2m/agenttiny_lwm2m.mk
+DEMOS_INCLUDE += $(DEMOS_AGENTTINY_LWM2M_INCLUDE)
+endif
+
+ifeq ($(LOSCFG_DEMOS_DTLS_SERVER), y)
+include $(LITEOSTOPDIR)/demos/dtls_server/dtls_server.mk
+DEMOS_INCLUDE += $(DEMOS_DTLS_SERVER_INCLUDE)
+endif
+

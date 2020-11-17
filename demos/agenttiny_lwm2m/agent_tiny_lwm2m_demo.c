@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Agent Tiny Mqtt Demo
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,17 +24,9 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- *---------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------- */
 
-#include "agent_tiny_demo.h"
+#include "agent_tiny_lwm2m_demo.h"
 
 #if defined WITH_AT_FRAMEWORK
 #include "at_frame/at_api.h"
@@ -40,34 +34,32 @@
 
 //#define DEFAULT_SERVER_IP "180.101.147.115" /*dianxin*/
 //#define DEFAULT_SERVER_IP "2000::1"
-#define DEFAULT_SERVER_IP "192.168.1.104" /*local ipv4*/
-
+#define DEFAULT_SERVER_IP "192.168.3.98" /* local ipv4 */
 
 #define LWM2M_LIFE_TIME     50000
 
 char *g_endpoint_name = "44440003";
-#ifdef WITH_DTLS
-
-char *g_endpoint_name_s = "20181214";
-char *g_endpoint_name_iots = "20181214";
-char *g_endpoint_name_bs = "20181214";
-unsigned char g_psk_iot_value[] = {0x68,0xda,0x7a,0xea,0xf6,0x12,0xfd,0x95,0xbb,0xe0,0x91,0x5a,0x67,0xca,0x56,0xb3}; //0x33 -> 0x32
+#ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
+#define ENDPOINT_NAME_S "20201112_client"
+#define ENDPOINT_NAME_IOT "20201112"
+#define ENDPOINT_NAME_BS "20201112"
+char *g_endpoint_name_s = ENDPOINT_NAME_S;
+char *g_endpoint_name_iots = ENDPOINT_NAME_IOT;
+char *g_endpoint_name_bs = ENDPOINT_NAME_BS;
+unsigned char g_psk_iot_value[] = {0x68,0xda,0x7a,0xea,0xf6,0x12,0xfd,0x95,0xbb,0xe0,0x91,0x5a,0x67,0xca,0x56,0xb3}; // 0x33 -> 0x32
 unsigned char g_psk_bs_value[] = {0x68,0xda,0x7a,0xea,0xf6,0x12,0xfd,0x95,0xbb,0xe0,0x91,0x5a,0x67,0xca,0x56,0xb3};
-//unsigned char g_psk_value[16] = {0x58,0xea,0xfd,0xab,0x2f,0x38,0x4d,0x39,0x80,0x69,0x4d,0x1c,0xda,0x69,0xb0,0x43};
-
-
 #endif
 
 static void *g_phandle = NULL;
 static atiny_device_info_t g_device_info;
 static atiny_param_t g_atiny_params;
 
-
 void ack_callback(atiny_report_type_e type, int cookie, data_send_status_e status)
 {
     ATINY_LOG(LOG_DEBUG, "type:%d cookie:%d status:%d\n", type, cookie, status);
 }
-void app_data_report(void)
+
+static void app_data_report(void)
 {
     uint8_t buf[5] = {0, 1, 6, 5, 9};
     data_report_t report_data;
@@ -79,8 +71,7 @@ void app_data_report(void)
     report_data.len = sizeof(buf);
     report_data.type = APP_DATA;
     (void)ret;
-    while(1)
-    {
+    while (1) {
         report_data.cookie = cnt;
         cnt++;
         ret = atiny_data_report(g_phandle, &report_data);
@@ -91,38 +82,34 @@ void app_data_report(void)
     }
 }
 
-UINT32 creat_report_task(void)
+static UINT32 creat_report_task(void)
 {
-    UINT32 uwRet = LOS_OK;
+    UINT32 ret = LOS_OK;
     TSK_INIT_PARAM_S task_init_param;
-    UINT32 TskHandle;
+    UINT32 taskHandle;
 
     task_init_param.usTaskPrio = 1;
     task_init_param.pcName = "app_data_report";
     task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)app_data_report;
     task_init_param.uwStackSize = 0x1000;
 
-    uwRet = LOS_TaskCreate(&TskHandle, &task_init_param);
-    if(LOS_OK != uwRet)
-    {
-        return uwRet;
+    ret = LOS_TaskCreate(&taskHandle, &task_init_param);
+    if (ret != LOS_OK) {
+        return ret;
     }
-    return uwRet;
 
+    return ret;
 }
 
-
-void agent_tiny_entry(void)
+void agent_tiny_lwm2m_entry(void)
 {
-    UINT32 uwRet = LOS_OK;
+    UINT32 ret = LOS_OK;
     atiny_param_t *atiny_params;
-    atiny_security_param_t  *iot_security_param = NULL;
-    atiny_security_param_t  *bs_security_param = NULL;
-
+    atiny_security_param_t *iot_security_param = NULL;
+    atiny_security_param_t *bs_security_param = NULL;
     atiny_device_info_t *device_info = &g_device_info;
 
-
-#ifdef WITH_DTLS
+#ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
     device_info->endpoint_name = g_endpoint_name_s;
 #else
     device_info->endpoint_name = g_endpoint_name;
@@ -135,23 +122,21 @@ void agent_tiny_entry(void)
 #endif
     atiny_params = &g_atiny_params;
     atiny_params->server_params.binding = "UQ";
-    //atiny_params->server_params.life_time = LWM2M_LIFE_TIME;
+    // atiny_params->server_params.life_time = LWM2M_LIFE_TIME;
     atiny_params->server_params.life_time = 20;
     atiny_params->server_params.storing_cnt = 0;
 
     atiny_params->server_params.bootstrap_mode = BOOTSTRAP_FACTORY;
     atiny_params->server_params.hold_off_time = 10;
 
-    //pay attention: index 0 for iot server, index 1 for bootstrap server.
+    // pay attention: index 0 for iot server, index 1 for bootstrap server.
     iot_security_param = &(atiny_params->security_params[0]);
     bs_security_param = &(atiny_params->security_params[1]);
-
 
     iot_security_param->server_ip = DEFAULT_SERVER_IP;
     bs_security_param->server_ip  = DEFAULT_SERVER_IP;
 
-
-#ifdef WITH_DTLS
+#ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
     iot_security_param->server_port = "5684";
     bs_security_param->server_port = "5684";
 
@@ -175,21 +160,14 @@ void agent_tiny_entry(void)
     bs_security_param->psk_len = 0;
 #endif
 
-    if(ATINY_OK != atiny_init(atiny_params, &g_phandle))
-    {
+    if (atiny_init(atiny_params, &g_phandle) != ATINY_OK) {
         return;
     }
 
-    uwRet = creat_report_task();
-    if(LOS_OK != uwRet)
-    {
+    ret = creat_report_task();
+    if (ret != LOS_OK) {
         return;
     }
 
     (void)atiny_bind(device_info, g_phandle);
 }
-
-
-
-
-

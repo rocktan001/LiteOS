@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Util Timer HeadFile
+ * Description: Agent Tiny Lwm2m Demo HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,50 +26,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#ifndef _AGENT_TINY_LWM2M_DEMO_H
+#define _AGENT_TINY_LWM2M_DEMO_H
 
-/**@defgroup agent AgentTiny
- * @defgroup agenttiny Agenttiny Definition
- * @ingroup agent
- */
+#include "los_base.h"
+#include "los_task.h"
+#include "los_typedef.h"
+#include "los_sys.h"
+#include "atiny_lwm2m/agenttiny.h"
+#include "osdepends/atiny_osdep.h"
 
-#ifndef _UTIL_TIMER_H
-#define _UTIL_TIMER_H
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
-#include <time.h>
+void agent_tiny_lwm2m_entry(void);
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#ifdef LWM2M_BOOTSTRAP
-#ifdef LWM2M_CLIENT_MODE
-
-// time uint is second, and max value 0xffffffff is hundreds of years.so ignore the turn to 0 problem
-typedef struct {
-    time_t expireTime;
-    time_t interval;
-    void(*callback)(void *param);
-    void *param;
-    bool startFlag;
-} util_timer_t;
-
-void timer_init(util_timer_t *timer, time_t interval, void(*callback)(void *param), void *param);
-void timer_start(util_timer_t *timer);
-void timer_stop(util_timer_t *timer);
-void timer_step(util_timer_t *timer);
-
-
-#endif // LWM2M_CLIENT_MODE
-#endif // LWM2M_BOOTSTRAP
-
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif /* _UTIL_TIMER_H */
+#endif /* _AGENT_TINY_LWM2M_DEMO_H */

@@ -89,11 +89,12 @@
 #ifndef _LWM2M_CLIENT_H_
 #define _LWM2M_CLIENT_H_
 
-#include "liblwm2m_api.h"
 
 #ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #include <stdint.h>
 #include <stddef.h>
@@ -102,6 +103,8 @@ extern "C" {
 
 #include "er-coap-13/er-coap-13.h"
 #include "osdepends/atiny_osdep.h"
+
+#include "liblwm2m_api.h"
 
 #ifdef LWM2M_SERVER_MODE
 #ifndef LWM2M_SUPPORT_JSON
@@ -744,6 +747,7 @@ typedef int (*lwm2m_bootstrap_callback_t) (void* sessionH, uint8_t status, lwm2m
 #endif
 
 #ifdef LWM2M_CLIENT_MODE
+
 /* use to control the bootstrap, factory bootstrap, client initiated bootstrap, server initiated bootstrap.
 factory bootstrap is used security object to register.
 */

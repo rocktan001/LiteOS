@@ -222,7 +222,7 @@ static void mqtt_free_dynamic_info(mqtt_client_s *handle)
 }
 static int mqtt_check_device_info(const mqtt_device_info_s *info)
 {
-    if((info->connection_type >= MQTT_MAX_CONNECTION_TYPE)
+    if ((info->connection_type >= MQTT_MAX_CONNECTION_TYPE)
         || (info->codec_mode >= MQTT_MAX_CODEC_MODE)
         || (info->sign_type >= MQTT_MAX_SIGN_TYPE)
         || (info->password == NULL)
@@ -264,7 +264,7 @@ static int mqtt_dup_device_info(mqtt_device_info_s *dest, const mqtt_device_info
         return ATINY_MALLOC_FAILED;
     }
 
-    if(MQTT_STATIC_CONNECT == src->connection_type) {
+    if (MQTT_STATIC_CONNECT == src->connection_type) {
         dest->u.s_info.deviceid = atiny_strdup(src->u.s_info.deviceid);
         if (dest->u.s_info.deviceid == NULL) {
             ATINY_LOG(LOG_FATAL, "atiny_strdup fail");
@@ -340,7 +340,7 @@ static void mqtt_bin_to_str(const uint8_t *bin_buf, char *str_buf, uint32_t bin_
 {
     uint32_t i;
 
-    for(i = 0; i < bin_len; i++) {
+    for (i = 0; i < bin_len; i++) {
         (void)snprintf(str_buf + i * 2, 3, "%02x", bin_buf[i]);
     }
 }
@@ -479,7 +479,7 @@ static int mqtt_parse_secret_topic(mqtt_client_s *handle, const char *payload, u
     root = cJSON_Parse(payload);
     if (root == NULL) {
         ATINY_LOG(LOG_ERR, "err secret notify, len %d, msg %s", len, payload);
-         goto EXIT;
+        goto EXIT;
     }
 
     msg_type = cJSON_GetObjectItem(root, MQTT_MSG_TYPE);
@@ -532,7 +532,7 @@ static void mqtt_send_secret_ack(mqtt_client_s *handle)
     MQTTMessage message;
     int rc;
 
-    char* topic = mqtt_get_secret_topic(handle, SECRET_ACK_TOPIC_FMT, sizeof(SECRET_ACK_TOPIC_FMT) - VARIABLE_SIZE);
+    char *topic = mqtt_get_secret_topic(handle, SECRET_ACK_TOPIC_FMT, sizeof(SECRET_ACK_TOPIC_FMT) - VARIABLE_SIZE);
     if (topic == NULL) {
         return;
     }
@@ -750,7 +750,7 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *handle
     if ((device_info == NULL) || (mqtt_check_device_info(device_info) != ATINY_OK)) {
         ATINY_LOG(LOG_FATAL, "parameter invalid");
         result = ATINY_ARG_INVALID;
-        goto  atiny_bind_quit;
+        goto atiny_bind_quit;
     }
 
     dtls_init();
@@ -760,7 +760,7 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *handle
 
     rc = mqtt_dup_device_info(&(handle->device_info), device_info);
     if (rc != ATINY_OK) {
-        goto  atiny_bind_quit;
+        goto atiny_bind_quit;
     }
 
     mqtt_read_flash_info(handle);
@@ -770,7 +770,7 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *handle
     rc = MQTTClientInit(client, &n, MQTT_COMMAND_TIMEOUT_MS, g_mqtt_sendbuf, MQTT_SENDBUF_SIZE, g_mqtt_readbuf, MQTT_READBUF_SIZE);
     if (rc != MQTT_SUCCESS) {
         ATINY_LOG(LOG_FATAL, "MQTTClientInit fail,rc %d", rc);
-        goto  atiny_bind_quit;
+        goto atiny_bind_quit;
     }
 
     data.willFlag = 0;
@@ -799,7 +799,7 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *handle
         rc = MQTTConnect(client, &data);
         mqtt_destroy_data_connection_info(&data);
         ATINY_LOG(LOG_DEBUG, "CONNACK : %d", rc);
-        if (MQTT_SUCCESS != rc) {
+        if (rc != MQTT_SUCCESS) {
             /* receive connection nack value */
             if (rc != MQTT_SUCCESS) {
                 mqtt_proc_connect_nack(handle);
@@ -809,7 +809,7 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *handle
             continue;
         }
 
-        if(ATINY_OK != mqtt_subscribe_topic(handle)) {
+        if (ATINY_OK != mqtt_subscribe_topic(handle)) {
             ATINY_LOG(LOG_ERR, "mqtt_subscribe_topic failed");
             mqtt_proc_connect_err(client, &n, &conn_failed_cnt);
             continue;
@@ -858,7 +858,7 @@ int atiny_mqtt_data_send(mqtt_client_s *phandle, const char *msg,  uint32_t msg_
 {
     MQTTMessage message;
     int rc;
-    char* topic;
+    char *topic;
     size_t payloadlen;
 
     if ((phandle == NULL) || (qos >= MQTT_QOS_MAX)) {
