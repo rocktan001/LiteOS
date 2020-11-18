@@ -481,26 +481,24 @@ Huawei LiteOS 系统中的任务管理模块为用户提供下面几种功能。
 
 以创建任务为例，讲解开发流程。
 
-1.  在los\_config.h中配置任务模块。
+1.  执行make menuconfig配置任务模块。
 
     配置LOSCFG\_BASE\_CORE\_TSK\_LIMIT系统支持最大任务数，这个可以根据需求自己配置。
-
-    配置LOSCFG\_BASE\_CORE\_TSK\_IDLE\_STACK\_SIZE 空闲（IDLE）任务栈大小，这个默认即可。
-
-    配置LOSCFG\_BASE\_CORE\_TSK\_DEFAULT\_STACK\_SIZE默认任务栈大小，用户根据自己的需求进行配置，在用户创建任务时，可以进行针对性设置。
 
     配置LOSCFG\_BASE\_CORE\_TIMESLICE时间片开关为YES。
 
     配置LOSCFG\_BASE\_CORE\_TIMESLICE\_TIMEOUT时间片，根据实际情况自己配置。
+2.  在los_config.h中配置任务栈大小。
 
-    配置LOSCFG\_BASE\_CORE\_TSK\_MONITOR任务监测模块裁剪开关，可选择是否打开。
+    配置LOSCFG\_BASE\_CORE\_TSK\_IDLE\_STACK\_SIZE 空闲（IDLE）任务栈大小，这个默认即可。
 
-2.  锁任务LOS\_TaskLock，锁住任务，防止高优先级任务调度。
-3.  创建任务LOS\_TaskCreate。
-4.  解锁任务LOS\_TaskUnlock，让任务按照优先级进行调度。
-5.  延时任务LOS\_TaskDelay，任务延时等待。
-6.  挂起指定的任务LOS\_TaskSuspend，任务挂起等待恢复操作。
-7.  恢复挂起的任务LOS\_TaskResume。
+    配置LOSCFG\_BASE\_CORE\_TSK\_DEFAULT\_STACK\_SIZE默认任务栈大小，用户根据自己的需求进行配置，在用户创建任务时，可以进行针对性设置。
+3.  锁任务LOS\_TaskLock，锁住任务，防止高优先级任务调度。
+4.  创建任务LOS\_TaskCreate。
+5.  解锁任务LOS\_TaskUnlock，让任务按照优先级进行调度。
+6.  延时任务LOS\_TaskDelay，任务延时等待。
+7.  挂起指定的任务LOS\_TaskSuspend，任务挂起等待恢复操作。
+8.  恢复挂起的任务LOS\_TaskResume。
 
 #### TASK状态
 
@@ -994,135 +992,127 @@ LOS_ERRNO_TSK_NO_MEMORY  LOS_ERRNO_OS_FATAL(LOS_MOD_TSK, 0x00)
 
 #### 编程示例  
 
-
 ```
-UINT32 g_uwTskLoID;
-UINT32 g_uwTskHiID;
-#define TSK_PRIOR_HI 4 
-#define TSK_PRIOR_LO 5 
- 
-UINT32 Example_TaskHi(VOID) 
-{ 
-    UINT32 uwRet; 
-    UINT32 uwCurrentID; 
-    TSK_INFO_S stTaskInfo; 
-   
-     printf("Enter TaskHi Handler.\r\n"); 
- 
-    /*延时2个Tick，延时后该任务会挂起，执行剩余任务中最高优先级的任务(g_uwTskLoID任务)*/ 
-    uwRet = LOS_TaskDelay(2); 
-    if (uwRet != LOS_OK) 
-    { 
-        printf("Delay Task Failed.\r\n"); 
-        return LOS_NOK; 
-    } 
- 
-    /*2个Tick时间到了后，该任务恢复，继续执行*/ 
-    printf("TaskHi LOS_TaskDelay Done.\r\n"); 
- 
-    /*挂起自身任务*/ 
-    uwRet = LOS_TaskSuspend(g_uwTskHiID); 
-    if (uwRet != LOS_OK) 
-    { 
-        printf("Suspend TaskHi Failed.\r\n"); 
-        return LOS_NOK; 
-    } 
-    printf("TaskHi LOS_TaskResume Success.\r\n"); 
-} 
- 
-/*低优先级任务入口函数*/ 
-UINT32 Example_TaskLo(VOID) 
-{ 
-    UINT32 uwRet; 
-    UINT32 uwCurrentID; 
-    TSK_INFO_S stTaskInfo; 
- 
-    printf("Enter TaskLo Handler.\r\n"); 
- 
-    /*延时2个Tick，延时后该任务会挂起，执行剩余任务中就高优先级的任务(背景任务)*/ 
-    uwRet = LOS_TaskDelay(2); 
-    if (uwRet != LOS_OK) 
-    { 
-        printf("Delay TaskLo Failed.\r\n"); 
-        return LOS_NOK; 
-    } 
- 
-    printf("TaskHi LOS_TaskSuspend Success.\r\n"); 
- 
-    /*恢复被挂起的任务g_uwTskHiID*/ 
-    uwRet = LOS_TaskResume(g_uwTskHiID); 
-    if (uwRet != LOS_OK) 
-    { 
-        printf("Resume TaskHi Failed.\r\n"); 
-        return LOS_NOK; 
-    } 
- 
-    printf("TaskHi LOS_TaskDelete Success.\r\n"); 
-} 
- 
-/*任务测试入口函数，在里面创建优先级不一样的两个任务*/ 
-UINT32 Example_TskCaseEntry(VOID) 
-{ 
-    UINT32 uwRet; 
-    TSK_INIT_PARAM_S stInitParam; 
- 
-    /*锁任务调度*/ 
-    LOS_TaskLock(); 
- 
-    printf("LOS_TaskLock() Success!\r\n"); 
- 
-    stInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)Example_TaskHi; 
-    stInitParam.usTaskPrio = TSK_PRIOR_HI; 
-    stInitParam.pcName = "HIGH_NAME"; 
-    stInitParam.uwStackSize = 0x700; 
-    stInitParam.uwResved   = LOS_TASK_STATUS_DETACHED; 
-    /*创建高优先级任务，由于锁任务调度，任务创建成功后不会马上执行*/ 
-    uwRet = LOS_TaskCreate(&g_uwTskHiID, &stInitParam); 
-    if (uwRet != LOS_OK) 
-    { 
-        LOS_TaskUnlock(); 
-  
-        printf("Example_TaskHi create Failed!\r\n"); 
-        return LOS_NOK; 
-    } 
- 
-    printf("Example_TaskHi create Success!\r\n"); 
- 
-    stInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)Example_TaskLo; 
-    stInitParam.usTaskPrio = TSK_PRIOR_LO; 
-    stInitParam.pcName = "LOW_NAME"; 
-    stInitParam.uwStackSize = 0x700; 
-    stInitParam.uwResved   = LOS_TASK_STATUS_DETACHED; 
-    /*创建低优先级任务，由于锁任务调度，任务创建成功后不会马上执行*/ 
-    uwRet = LOS_TaskCreate(&g_uwTskLoID, &stInitParam); 
-    if (uwRet != LOS_OK) 
-    { 
-        LOS_TaskUnlock(); 
- 
-        printf("Example_TaskLo create Failed!\r\n"); 
-        return LOS_NOK; 
-    } 
- 
-    printf("Example_TaskLo create Success!\r\n"); 
- 
-    /*解锁任务调度，此时会发生任务调度，执行就绪列表中最高优先级任务*/ 
-    LOS_TaskUnlock(); 
- 
-    while(1){}; 
- 
-    return LOS_OK; 
-} 
+UINT32 g_taskHiId;
+UINT32 g_taskLoId;
+#define TSK_PRIOR_HI 4
+#define TSK_PRIOR_LO 5
+
+UINT32 Example_TaskHi(VOID)
+{
+    UINT32 ret;
+
+    printf("Enter TaskHi Handler.\r\n");
+
+    /* 延时2个Tick，延时后该任务会挂起，执行剩余任务中最高优先级的任务(g_taskLoId任务) */
+    ret = LOS_TaskDelay(2);
+    if (ret != LOS_OK) {
+        printf("Delay Task Failed.\r\n");
+        return LOS_NOK;
+    }
+
+    /* 2个Tick时间到了后，该任务恢复，继续执行 */
+    printf("TaskHi LOS_TaskDelay Done.\r\n");
+
+    /* 挂起自身任务 */
+    ret = LOS_TaskSuspend(g_taskHiId);
+    if (ret != LOS_OK) {
+        printf("Suspend TaskHi Failed.\r\n");
+        return LOS_NOK;
+    }
+    printf("TaskHi LOS_TaskResume Success.\r\n");
+
+    return ret;
+}
+
+/* 低优先级任务入口函数 */
+UINT32 Example_TaskLo(VOID)
+{
+    UINT32 ret;
+
+    printf("Enter TaskLo Handler.\r\n");
+
+    /* 延时2个Tick，延时后该任务会挂起，执行剩余任务中最高优先级的任务(背景任务) */
+    ret = LOS_TaskDelay(2);
+    if (ret != LOS_OK) {
+        printf("Delay TaskLo Failed.\r\n");
+        return LOS_NOK;
+    }
+
+    printf("TaskHi LOS_TaskSuspend Success.\r\n");
+
+    /* 恢复被挂起的任务g_taskHiId */
+    ret = LOS_TaskResume(g_taskHiId);
+    if (ret != LOS_OK) {
+        printf("Resume TaskHi Failed.\r\n");
+        return LOS_NOK;
+    }
+
+    printf("TaskHi LOS_TaskDelete Success.\r\n");
+
+    return ret;
+}
+
+/* 任务测试入口函数，创建两个不同优先级的任务 */
+UINT32 Example_TskCaseEntry(VOID)
+{
+    UINT32 ret;
+    TSK_INIT_PARAM_S initParam;
+
+    /* 锁任务调度，防止新创建的任务比本任务高而发生调度 */
+    LOS_TaskLock();
+
+    printf("LOS_TaskLock() Success!\r\n");
+
+    initParam.pfnTaskEntry = (TSK_ENTRY_FUNC)Example_TaskHi;
+    initParam.usTaskPrio = TSK_PRIOR_HI;
+    initParam.pcName = "TaskHi";
+    initParam.uwStackSize = 0x700;
+    initParam.uwResved   = LOS_TASK_STATUS_DETACHED;
+    /* 创建高优先级任务，由于锁任务调度，任务创建成功后不会马上执行 */
+    ret = LOS_TaskCreate(&g_taskHiId, &initParam);
+    if (ret != LOS_OK) {
+        LOS_TaskUnlock();
+
+        printf("Example_TaskHi create Failed!\r\n");
+        return LOS_NOK;
+    }
+
+    printf("Example_TaskHi create Success!\r\n");
+
+    initParam.pfnTaskEntry = (TSK_ENTRY_FUNC)Example_TaskLo;
+    initParam.usTaskPrio = TSK_PRIOR_LO;
+    initParam.pcName = "TaskLo";
+    initParam.uwStackSize = 0x700;
+    initParam.uwResved   = LOS_TASK_STATUS_DETACHED;
+
+    /* 创建低优先级任务，由于锁任务调度，任务创建成功后不会马上执行 */
+    ret = LOS_TaskCreate(&g_taskLoId, &initParam);
+    if (ret != LOS_OK) {
+        LOS_TaskUnlock();
+
+        printf("Example_TaskLo create Failed!\r\n");
+        return LOS_NOK;
+    }
+
+    printf("Example_TaskLo create Success!\r\n");
+
+    /* 解锁任务调度，此时会发生任务调度，执行就绪队列中最高优先级任务 */
+    LOS_TaskUnlock();
+
+    return LOS_OK;
+}
 ```
 
 #### 结果验证
 
 编译运行得到的结果为：
 
-![](figures/zh-cn_image_0238585887.jpg)
+![](figures/zh-cn_image_0238585887.png)
 
 #### 完整实例代码
 
-[sample\_task\_smp.c](resource/sample_task_smp.c)
+[sample\_task.c](resource/sample_task.c)
 
 <h3 id="6">4.2 内存</h3>
 
@@ -4809,4 +4799,3 @@ Tail insert DLlistNode02 success
 Head insert DLlistNode03 success 
 Delete success
 ```
-
