@@ -1,6 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) <2016-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Nb Demo Implementation
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,16 +24,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- *---------------------------------------------------------------------------*/
- 
+ * --------------------------------------------------------------------------- */
 
 #include <stdio.h>
 #include "nb_iot/los_nb_api.h"
@@ -45,7 +38,7 @@
 
 void demo_nbiot_only(void)
 {
-#if defined(WITH_AT_FRAMEWORK) && defined(USE_NB_NEUL95_NO_ATINY)
+#if defined(LOSCFG_COMPONNETS_NET_AT) && defined(USE_NB_NEUL95_NO_ATINY)
     #define AT_DTLS 0
     #if AT_DTLS
     sec_param_s sec;
@@ -81,9 +74,6 @@ void demo_nbiot_only(void)
     //los_nb_report("23", 1);
 
 #else
-    printf("Please checkout if open WITH_AT_FRAMEWORK and USE_NB_NEUL95_NO_ATINY\n");
+    printf("Please checkout if open LOSCFG_COMPONNETS_NET_AT and USE_NB_NEUL95_NO_ATINY\n");
 #endif
-
 }
-
-
