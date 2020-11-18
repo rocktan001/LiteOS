@@ -2,5 +2,6 @@ include $(LITEOSTOPDIR)/config.mk
 
 MODULE_$(LOSCFG_COMPONENTS_NET_LWIP) += lwip
 MODULE_$(LOSCFG_COMPONENTS_NET_SAL) += sal
+MODULE_$(LOSCFG_COMPONNETS_NET_AT) += at_device
 
 include $(MODULE)

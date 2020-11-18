@@ -43,7 +43,7 @@
 #include "lwip/sockets.h"
 #include "lwip/netdb.h"
 #include "lwip/errno.h"
-#elif defined(WITH_AT_FRAMEWORK)
+#elif defined(LOSCFG_COMPONNETS_NET_AT)
 #include "at_frame/at_api.h"
 
 #else
@@ -71,7 +71,7 @@ void *atiny_net_bind(const char *host, const char *port, int proto)
     int ret = ATINY_NET_ERR;
     atiny_net_context *ctx;
 
-    if ((NULL == port) || ((proto != ATINY_PROTO_UDP) && (proto != ATINY_PROTO_TCP))) {
+    if ((port == NULL) || ((proto != ATINY_PROTO_UDP) && (proto != ATINY_PROTO_TCP))) {
         return NULL;
     }
 
@@ -119,7 +119,7 @@ exit_failed:
         atiny_free(ctx);
         return NULL;
 
-#elif defined(WITH_AT_FRAMEWORK)
+#elif defined(LOSCFG_COMPONNETS_NET_AT)
     atiny_net_context *ctx;
     ctx = atiny_malloc(sizeof(atiny_net_context));
     if (ctx == NULL) {
@@ -138,7 +138,7 @@ exit_failed:
     return NULL;
 }
 
-int atiny_net_accept( void *bind_ctx, void *client_ctx, void *client_ip, size_t buf_size, size_t *ip_len )
+int atiny_net_accept(void *bind_ctx, void *client_ctx, void *client_ip, size_t buf_size, size_t *ip_lenret)
 {
 #if defined (LOSCFG_COMPONENTS_NET_LWIP) || defined (WITH_LINUX)
     int bind_fd = ((atiny_net_context*)bind_ctx)->fd;
@@ -203,7 +203,7 @@ int atiny_net_accept( void *bind_ctx, void *client_ctx, void *client_ip, size_t 
         snprintf(port_s, sizeof(port_s), "%d", ntohs(local_addr.sin_port));
         ((atiny_net_context*)bind_ctx)->fd = socket(local_addr.sin_family, SOCK_DGRAM, IPPROTO_UDP);
 #endif
-        if ((ret = setsockopt( ((atiny_net_context*)bind_ctx)->fd, SOL_SOCKET, SO_REUSEADDR,
+        if ((ret = setsockopt((atiny_net_context*)bind_ctx)->fd, SOL_SOCKET, SO_REUSEADDR,
            (const char *)&one, sizeof(one))) != 0) {
             ret = ATINY_NET_SOCKET_FAILED;
         }
@@ -220,23 +220,23 @@ int atiny_net_accept( void *bind_ctx, void *client_ctx, void *client_ip, size_t 
             struct sockaddr_in6 *addr = (struct sockaddr_in6 *) &client_addr;
             *ip_len = sizeof(addr->sin6_addr.s6_addr);
 
-            if ( buf_size < *ip_len ) {
-                return( ATINY_NET_BUF_SMALL_FAILED );
+            if (buf_size < *ip_lenret) {
+                return(ATINY_NET_BUF_SMALL_FAILEDret;
             }
 
 
-            memcpy( client_ip, &addr->sin6_addr.s6_addr, *ip_len );
+            memcpy(client_ip, &addr->sin6_addr.s6_addr, *ip_lenret);
         }
 #else
-        if( client_addr.sin_family == AF_INET )
-        {
+        if (client_addr.sin_family == AF_INET) {
             struct sockaddr_in *addr = (struct sockaddr_in *) &client_addr;
-            *ip_len = sizeof( addr->sin_addr.s_addr );
+            *ip_len = sizeof(addr->sin_addr.s_addr);
 
-            if( buf_size < *ip_len )
-                return( ATINY_NET_BUF_SMALL_FAILED );
+            if (buf_size < *ip_len) {
+                return(ATINY_NET_BUF_SMALL_FAILED);
+            }
 
-            memcpy( client_ip, &addr->sin_addr.s_addr, *ip_len );
+            memcpy(client_ip, &addr->sin_addr.s_addr, *ip_len);
         }
 #endif
     }
@@ -323,7 +323,7 @@ int atiny_net_connect(atiny_net_context *ctx, const char *host, const char *port
     } else { /* proto == ATINY_PROTO_TCP */
         SOCKET_LOG("TCP connect to server succeed");
     }
-#elif defined(WITH_AT_FRAMEWORK)
+#elif defined(LOSCFG_COMPONNETS_NET_AT)
     if (ctx == NULL) {
         SOCKET_LOG("malloc failed for socket context");
         return -1;
@@ -358,7 +358,7 @@ int atiny_net_recv(void *ctx, unsigned char *buf, size_t len)
     int fd = ((atiny_net_context *)ctx)->fd;
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     ret = recv(fd, buf, len, 0);
-#elif defined(WITH_AT_FRAMEWORK)
+#elif defined(LOSCFG_COMPONNETS_NET_AT)
     ret = at_api_recv(fd, buf, len);
 #elif defined(WITH_WIZNET)
     ret = wiznet_recv(fd, buf, len);
@@ -410,14 +410,14 @@ int atiny_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t t
        // SOCKET_LOG("recv timeout");
         return ATINY_NET_TIMEOUT;
     }
-    if(ret < 0) {
+    if (ret < 0) {
         SOCKET_LOG("select error ret=%d,err 0x%x", ret, errno);
         return ATINY_NET_ERR;
     }
 
     ret = atiny_net_recv(ctx, buf, len);
 
-#elif defined(WITH_AT_FRAMEWORK)
+#elif defined(LOSCFG_COMPONNETS_NET_AT)
     ret = at_api_recv_timeout(fd, buf, len, NULL,NULL,timeout);
 #elif defined(WITH_WIZNET)
     ret = wiznet_recv_timeout(fd, buf, len, timeout);
@@ -439,7 +439,7 @@ int atiny_net_send(void *ctx, const unsigned char *buf, size_t len)
 
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     ret = send(fd, buf, len, 0);
-#elif defined(WITH_AT_FRAMEWORK)
+#elif defined(LOSCFG_COMPONNETS_NET_AT)
     ret = at_api_send(fd, buf, len);
 #elif defined(WITH_WIZNET)
     ret = wiznet_send(fd, buf, len);
@@ -467,7 +467,7 @@ void atiny_net_close(void *ctx)
     if (fd >= 0) {
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
         close(fd);
-#elif defined(WITH_AT_FRAMEWORK)
+#elif defined(LOSCFG_COMPONNETS_NET_AT)
         at_api_close(fd);
 #elif defined(WITH_WIZNET)
         wiznet_close(fd);
@@ -497,10 +497,10 @@ int atiny_net_send_timeout(void *ctx, const unsigned char *buf, size_t len, uint
 {
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     return atiny_net_write_sock(ctx, buf, len, timeout);
-#elif defined(WITH_AT_FRAMEWORK)
+#elif defined(LOSCFG_COMPONNETS_NET_AT)
         int fd;
         fd = ((atiny_net_context *)ctx)->fd;
-        return at_api_send(fd , buf, (uint32_t)len);
+        return at_api_send(fd, buf, (uint32_t)len);
 #endif
    return 0;
 }

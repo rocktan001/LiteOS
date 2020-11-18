@@ -26,11 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#if defined(WITH_AT_FRAMEWORK)
 #include "nb_iot/los_nb_api.h"
 #include "at_frame/at_api.h"
-//#include "atiny_socket.h"
-#include "at_device/bc95.h"
+#ifdef LOSCFG_COMPONENTS_NET_AT_BC95
+#include "bc95.h"
+#endif
 
 int los_nb_init(const int8_t *host, const int8_t *port, sec_param_s *psk)
 {
@@ -54,37 +54,31 @@ int los_nb_init(const int8_t *host, const int8_t *port, sec_param_s *psk)
     at.init(&at_user_conf);
 
     nb_reboot();
-    // LOS_TaskDelay(2000);
-    if(psk != NULL) { // encryption v1.9
-        if(psk->setpsk) {
+    if (psk != NULL) {
+        if (psk->setpsk) {
             nb_send_psk(psk->pskid, psk->psk);
         } else {
             nb_set_no_encrypt();
         }
     }
 
-    while(1) {
+    while (1) {
         ret = nb_hw_detect();
-        printf("call nb_hw_detect,ret is %d\n",ret);
-        if(ret == AT_OK) {
+        printf("call nb_hw_detect,ret is %d\n", ret);
+        if (ret == AT_OK) {
             break;
         }
-        // LOS_TaskDelay(1000);
     }
-    // nb_get_auto_connect();
-    // nb_connect(NULL, NULL, NULL);
-
-    while(timecnt < 120) {
+    while (timecnt < 120) {
         ret = nb_get_netstat();
         nb_check_csq();
-        if(ret != AT_FAILED) {
+        if (ret != AT_FAILED) {
             ret = nb_query_ip();
             break;
         }
-        // LOS_TaskDelay(1000);
         timecnt++;
     }
-    if(ret != AT_FAILED) {
+    if (ret != AT_FAILED) {
         nb_query_ip();
     }
     ret = nb_set_cdpserver((char *)host, (char *)port);
@@ -93,7 +87,7 @@ int los_nb_init(const int8_t *host, const int8_t *port, sec_param_s *psk)
 
 int los_nb_report(const char *buf, int len)
 {
-    if((buf == NULL) || (len <= 0)) {
+    if ((buf == NULL) || (len <= 0)) {
         return -1;
     }
     return nb_send_payload(buf, len);
@@ -101,10 +95,10 @@ int los_nb_report(const char *buf, int len)
 
 int los_nb_notify(char *featurestr, int cmdlen, oob_callback callback, oob_cmd_match cmd_match)
 {
-    if((featurestr == NULL) || (cmdlen <= 0) || (cmdlen >= OOB_CMD_LEN - 1)) {
+    if ((featurestr == NULL) || (cmdlen <= 0) || (cmdlen >= OOB_CMD_LEN - 1)) {
         return -1;
     }
-    return at.oob_register(featurestr,cmdlen, callback,cmd_match);
+    return at.oob_register(featurestr, cmdlen, callback, cmd_match);
 }
 
 int los_nb_deinit(void)
@@ -113,5 +107,3 @@ int los_nb_deinit(void)
     at.deinit();
     return 0;
 }
-
-#endif
