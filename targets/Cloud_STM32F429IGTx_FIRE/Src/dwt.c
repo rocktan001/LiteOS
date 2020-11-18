@@ -45,7 +45,6 @@ void dwt_delay_init(uint32_t clk)
 }
 
 void delayus(uint32_t usec)
-
 {
     uint32_t startts, endts, ts;
     UINT32 uwIntSave;

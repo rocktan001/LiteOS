@@ -163,6 +163,12 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_DTLS_SERVER), y)
         LITEOS_BASELIB += -ldtls_server
     endif
+    ifeq ($(LOSCFG_COMPONNETS_NET_AT), y)
+        LITEOS_BASELIB += -lat_device
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT), y)
+        LITEOS_BASELIB += -lnb_iot
+    endif
 endif
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)
