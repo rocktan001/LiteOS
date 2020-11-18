@@ -20,4 +20,41 @@ config LOSCFG_COMPONENTS_NET_SAL
     help
       Answer y to enable sal support.
 
+config LOSCFG_COMPONNETS_NET_AT
+depends on LOSCFG_COMPONENTS_NETWORK
+bool "Enable AT"
+default n
+help
+    Answer y to enable AT support.
+
+choice
+    prompt "Choose AT Device"
+    default LOSCFG_COMPONENTS_NET_AT_ESP8266
+    depends on LOSCFG_COMPONNETS_NET_AT
+
+    config LOSCFG_COMPONENTS_NET_AT_ESP8266
+    bool "Enable esp8266"
+
+    config LOSCFG_COMPONENTS_NET_AT_BC95
+    bool "Enable bc95"
+    select LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT
+
+    config LOSCFG_COMPONENTS_NET_AT_SIM900A
+    bool "Enable sim900a"
+
+    config LOSCFG_COMPONENTS_NET_AT_BG36
+    bool "Enable bg36"
+
+endchoice
+
+config LOSCFG_COMPONNETS_NET_AT_INFO
+bool "Enable AT INFO"
+depends on LOSCFG_COMPONNETS_NET_AT
+default y
+
+config LOSCFG_COMPONNETS_NET_AT_DEBUG
+bool "Enable AT DEBUG"
+depends on LOSCFG_COMPONNETS_NET_AT
+default y
+
 endmenu

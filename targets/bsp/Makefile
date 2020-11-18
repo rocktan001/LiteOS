@@ -134,8 +134,13 @@ BSP_HWI_SRC = \
 
 #just a stub interface
 BSP_TIMER_SRC = \
-        ${wildcard  hw/arm/timer/arm_cortex_m/*.c}
+        ${wildcard hw/arm/timer/arm_cortex_m/*.c}
         LOCAL_SRCS += $(BSP_TIMER_SRC)
+
+ifeq ($(LOSCFG_COMPONNETS_NET_AT), y)
+LOCAL_SRCS += $(wildcard drivers/uart/at_hal.c)
+LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/include
+endif
 
 ifeq ($(LOSCFG_DRIVERS_NETDEV), y)
 LOCAL_SRCS += $(wildcard $(NET_SRC)/*.c)

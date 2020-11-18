@@ -26,8 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _NB_NEUL_BC95_H
-#define _NB_NEUL_BC95_H
+#ifndef _BC95_H
+#define _BC95_H
 
 #include "at_frame/at_main.h"
 
@@ -88,4 +88,4 @@ int32_t nb_cmd_match(const char *buf, char *featurestr, int len);
 void nb_step(void);
 void nb_reattach(void);
 
-#endif /* _NB_NEUL_BC95_H */
+#endif /* _BC95_H */

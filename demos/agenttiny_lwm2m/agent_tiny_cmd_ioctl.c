@@ -34,8 +34,8 @@
 #include "ota_port.h"
 #endif
 
-#if defined(WITH_AT_FRAMEWORK) && defined(USE_NB_NEUL95)
-#include "at_device/bc95.h"
+#ifdef LOSCFG_COMPONENTS_NET_AT_BC95
+#include "bc95.h"
 #endif
 
 #define ATINY_POWER_VOLTAGE     3800
@@ -444,7 +444,7 @@ int atiny_cmd_ioctl(atiny_cmd_e cmd, char *arg, int len)
     }
 #endif
 
-#if defined(WITH_AT_FRAMEWORK) && defined(USE_NB_NEUL95)
+#if defined(LOSCFG_COMPONNETS_NET_AT) && defined(USE_NB_NEUL95)
     case ATINY_TRIGER_SERVER_INITIATED_BS:
         nb_reattach();
         result = ATINY_OK;

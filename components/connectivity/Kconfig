@@ -9,5 +9,6 @@ config LOSCFG_COMPONENTS_CONNECTIVITY
 source "components/connectivity/mqtt/Kconfig"
 source "components/connectivity/lwm2m/Kconfig"
 source "components/connectivity/agent_tiny/Kconfig"
+source "components/connectivity/nb_iot/Kconfig"
 
 endmenu

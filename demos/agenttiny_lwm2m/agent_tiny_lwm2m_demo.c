@@ -28,7 +28,7 @@
 
 #include "agent_tiny_lwm2m_demo.h"
 
-#if defined WITH_AT_FRAMEWORK
+#if defined LOSCFG_COMPONNETS_NET_AT
 #include "at_frame/at_api.h"
 #endif
 

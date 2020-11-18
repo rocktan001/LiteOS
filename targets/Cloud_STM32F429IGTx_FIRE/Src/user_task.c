@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: User Task
+ * Description: User Task Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -29,10 +29,14 @@
 #include "sys_init.h"
 #ifdef CONFIG_FEATURE_FOTA
 #include "ota_port.h"
-#endif
+#endif 
 #include "nb_iot/los_nb_api.h"
 #include "at_frame/at_api.h"
-#include "at_device/bc95.h"
+
+#ifdef LOSCFG_COMPONENTS_NET_AT_BC95
+#include "bc95.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
 #include "flash_adaptor.h"
 #include "agent_tiny_mqtt_demo.h"
@@ -59,28 +63,29 @@ void atiny_task_entry(void)
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     hieth_hw_init();
     net_init();
-#elif defined(WITH_AT_FRAMEWORK)
+#endif
+#if defined(LOSCFG_COMPONNETS_NET_AT)
 
-    #if defined(USE_ESP8266)
+    #if defined(LOSCFG_COMPONENTS_NET_AT_ESP8266)
     extern at_adaptor_api esp8266_interface;
-    printf("\r\n=============agent_tiny_entry  USE_ESP8266============================\n");
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_ESP8266============================\n");
     at_api_register(&esp8266_interface);
 
-    #elif defined(USE_EMTC_BG36)
+    #elif defined(LOSCFG_COMPONENTS_NET_AT_BG36)
     extern at_adaptor_api emtc_bg36_interface;
-    printf("\r\n=============agent_tiny_entry  USE_EMTC_BG36============================\n");
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BG36============================\n");
     at_api_register(&emtc_bg36_interface);
 
-    #elif defined(USE_SIM900A)
+    #elif defined(LOSCFG_COMPONENTS_NET_AT_SIM900A)
     extern at_adaptor_api sim900a_interface;
-    printf("\r\n=============agent_tiny_entry  USE_SIM900A============================\n");
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_SIM900A============================\n");
     at_api_register(&sim900a_interface);
 
-    #elif defined(USE_NB_NEUL95)
+    #elif defined(LOSCFG_COMPONENTS_NET_AT_BC95)
     extern at_adaptor_api bc95_interface;
-    printf("\r\n=============agent_tiny_entry  USE_NB_NEUL95============================\n");
-    los_nb_init((const int8_t *)"172.25.233.98", (const int8_t *)"5600", NULL);
-    los_nb_notify("\r\n+NSONMI:", strlen("\r\n+NSONMI:"), NULL, nb_cmd_match);
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BC95============================\n");
+    los_nb_init((const int8_t *)"172.25.233.98",(const int8_t *)"5600",NULL);
+    los_nb_notify("\r\n+NSONMI:",strlen("\r\n+NSONMI:"),NULL,nb_cmd_match);
     at_api_register(&bc95_interface);
 
     #elif defined(USE_NB_NEUL95_NO_ATINY)
@@ -88,7 +93,6 @@ void atiny_task_entry(void)
     #else
 
     #endif
-#else
 #endif
 
 #ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
