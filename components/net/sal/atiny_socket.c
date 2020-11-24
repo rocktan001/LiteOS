@@ -138,7 +138,7 @@ exit_failed:
     return NULL;
 }
 
-int atiny_net_accept(void *bind_ctx, void *client_ctx, void *client_ip, size_t buf_size, size_t *ip_lenret)
+int atiny_net_accept(void *bind_ctx, void *client_ctx, void *client_ip, size_t buf_size, size_t *ip_len)
 {
 #if defined (LOSCFG_COMPONENTS_NET_LWIP) || defined (WITH_LINUX)
     int bind_fd = ((atiny_net_context*)bind_ctx)->fd;
@@ -203,7 +203,7 @@ int atiny_net_accept(void *bind_ctx, void *client_ctx, void *client_ip, size_t b
         snprintf(port_s, sizeof(port_s), "%d", ntohs(local_addr.sin_port));
         ((atiny_net_context*)bind_ctx)->fd = socket(local_addr.sin_family, SOCK_DGRAM, IPPROTO_UDP);
 #endif
-        if ((ret = setsockopt((atiny_net_context*)bind_ctx)->fd, SOL_SOCKET, SO_REUSEADDR,
+        if ((ret = setsockopt(((atiny_net_context*)bind_ctx)->fd, SOL_SOCKET, SO_REUSEADDR,
            (const char *)&one, sizeof(one))) != 0) {
             ret = ATINY_NET_SOCKET_FAILED;
         }
