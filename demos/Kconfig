@@ -7,5 +7,6 @@ source "demos/fs/Kconfig"
 source "demos/gui/Kconfig"
 source "demos/sensorhub/Kconfig"
 source "demos/kernel/Kconfig"
+source "demos/nbiot_without_atiny/Kconfig"
 
 endmenu

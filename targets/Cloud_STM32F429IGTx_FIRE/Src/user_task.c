@@ -54,6 +54,9 @@
 #ifdef LOSCFG_DEMOS_DTLS_SERVER
 #include "test_dtls_server.h"
 #endif
+#if LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
+#include "nb_demo.h"
+#endif
 
 static UINT32 g_atiny_tskHandle;
 static UINT32 g_fs_tskHandle;
@@ -84,14 +87,11 @@ void atiny_task_entry(void)
     #elif defined(LOSCFG_COMPONENTS_NET_AT_BC95)
     extern at_adaptor_api bc95_interface;
     printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BC95============================\n");
-    los_nb_init((const int8_t *)"172.25.233.98",(const int8_t *)"5600",NULL);
-    los_nb_notify("\r\n+NSONMI:",strlen("\r\n+NSONMI:"),NULL,nb_cmd_match);
     at_api_register(&bc95_interface);
+    #endif
 
-    #elif defined(USE_NB_NEUL95_NO_ATINY)
+    #if defined(LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY)
     demo_nbiot_only();
-    #else
-
     #endif
 #endif
 
@@ -106,7 +106,7 @@ void atiny_task_entry(void)
 #endif
 
 
-#if !defined(USE_NB_NEUL95_NO_ATINY)
+#if !defined(LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY)
 #ifdef CONFIG_FEATURE_FOTA
     hal_init_ota();
 #endif

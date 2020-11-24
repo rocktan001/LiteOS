@@ -35,3 +35,7 @@ include $(LITEOSTOPDIR)/demos/dtls_server/dtls_server.mk
 DEMOS_INCLUDE += $(DEMOS_DTLS_SERVER_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY), y)
+include $(LITEOSTOPDIR)/demos/nbiot_without_atiny/nbiot.mk
+DEMOS_INCLUDE += $(DEMOS_NBIOT_INCLUDE)
+endif
