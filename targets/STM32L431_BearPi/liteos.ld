@@ -152,12 +152,12 @@ SECTIONS
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .data :
   {
-    . = ALIGN(8);
+    . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
 
-    . = ALIGN(8);
+    . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 

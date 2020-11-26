@@ -26,19 +26,22 @@ USER_SRC =  \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/user_task.c
         C_SOURCES += $(USER_SRC)
 
-ifeq ($(LOSCFG_DEMOS_FS), y)
-        ifeq ($(LOSCFG_DEMOS_FS_FAT), y)
-        DEMOS_SRC += \
-                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/fatfs_hal.c
-        C_DEFS += -D FS_FATFS
+ifeq ($(LOSCFG_COMPONENTS_FS), y)
+        ifeq ($(LOSCFG_FATFS_USE_SD_CARD), y)
+        FS_SRC += \
+                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/fatfs_sd_hal.c \
+                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/stm324x9i_eval_sd.c \
+                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/sd_diskio.c
         endif
-
-        ifeq ($(LOSCFG_DEMOS_FS_SPIF), y)
-        DEMOS_SRC += \
+        ifeq ($(LOSCFG_FATFS_USE_SPI_FLASH), y)
+        FS_SRC += \
+                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/fatfs_spi_hal.c
+        endif
+        ifeq ($(LOSCFG_COMPONENTS_FS_SPIFFS), y)
+        FS_SRC += \
                 $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/spiffs_hal.c
-        C_DEFS += -D FS_SPIFFS
         endif
-C_SOURCES += $(DEMOS_SRC)
+        C_SOURCES += $(FS_SRC)
 endif
 
 # C includes
@@ -56,6 +59,7 @@ BSP_INC = \
         -I $(LITEOSTOPDIR)/targets/bsp/include \
         -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
         -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/include \
+        -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/BSP/STM324x9I_EVAL \
         -I $(LITEOSTOPDIR)/kernel/extended/include
         BOARD_INCLUDES += $(BSP_INC)
 

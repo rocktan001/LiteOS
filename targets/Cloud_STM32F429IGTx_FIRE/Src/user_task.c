@@ -58,6 +58,8 @@
 #include "nb_demo.h"
 #endif
 
+#define USER_TASK_PRIORITY 2
+#define DTLS_TASK_PRIORITY 3
 static UINT32 g_atiny_tskHandle;
 static UINT32 g_fs_tskHandle;
 
@@ -125,7 +127,8 @@ UINT32 creat_agenttiny_task(VOID)
     UINT32 ret = LOS_OK;
     TSK_INIT_PARAM_S task_init_param;
 
-    task_init_param.usTaskPrio = 2;
+    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
+    task_init_param.usTaskPrio = USER_TASK_PRIORITY;
     task_init_param.pcName = "agenttiny_task";
     task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)atiny_task_entry;
 
@@ -144,12 +147,13 @@ UINT32 creat_agenttiny_task(VOID)
 }
 
 
-UINT32 creat_fs_task(void)
+UINT32 create_fs_task(void)
 {
     UINT32 ret = LOS_OK;
     TSK_INIT_PARAM_S task_init_param;
 
-    task_init_param.usTaskPrio = 2;
+    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
+    task_init_param.usTaskPrio = USER_TASK_PRIORITY;
     task_init_param.pcName = "main_task";
     extern void fs_demo(void);
     task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)fs_demo;
@@ -170,7 +174,8 @@ uint32_t create_dtls_server_task(void)
     uint32_t ret = LOS_OK;
     TSK_INIT_PARAM_S task_init_param;
 
-    task_init_param.usTaskPrio = 3;
+    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
+    task_init_param.usTaskPrio = DTLS_TASK_PRIORITY;
     task_init_param.pcName = "dtls_server_task";
     extern void dtls_server_task(void);
     task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)dtls_server_task;
@@ -204,8 +209,8 @@ UINT32 app_init(VOID)
 #endif
 #endif
 
-#if defined(FS_SPIFFS) || defined(FS_FATFS)
-    ret = creat_fs_task();
+#ifdef LOSCFG_DEMOS_FS
+    ret = create_fs_task();
     if (ret != LOS_OK) {
         return LOS_NOK;
     }

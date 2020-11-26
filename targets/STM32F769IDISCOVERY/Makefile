@@ -12,6 +12,17 @@ ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 LOCAL_SRCS += $(ASSRCS)
 
 # C sources
+
+ifeq ($(LOSCFG_COMPONENTS_FS), y)
+        ifeq ($(LOSCFG_FATFS_USE_SD_CARD), y)
+        FS_SRC += \
+                $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/fatfs_sd_hal.c \
+                $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/sd_diskio.c
+        endif
+
+C_SOURCES += $(FS_SRC)
+endif
+
 BSP_DRIVER_SRC =  \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/ft5336/ft5336.c \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/ft6x06/ft6x06.c \
@@ -23,6 +34,7 @@ BSP_DRIVER_SRC =  \
 USER_SRC =  \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/os_adapt/os_adapt.c \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/main.c \
+        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/user_task.c \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/platform_init.c \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/stm32f7xx_it.c \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/system_stm32f7xx.c
@@ -30,11 +42,11 @@ USER_SRC =  \
 
 # C includes
 HAL_DRIVER_INC = \
-	-I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver/Inc \
+        -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver/Inc \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery \
-	-I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/Utilities/Fonts \
-	-I $(LITEOSTOPDIR)/compat/cmsis
+        -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/Utilities/Fonts \
+        -I $(LITEOSTOPDIR)/compat/cmsis
         BOARD_INCLUDES += $(HAL_DRIVER_INC)
 
 INCLUDE_INC = \

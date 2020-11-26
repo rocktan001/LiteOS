@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Main
+ * Description: Fat Fs Hal HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,29 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_base.h"
-#include "los_task_pri.h"
-#include "los_typedef.h"
-#include "los_sys.h"
-#include "platform_init.h"
+#ifndef _FATFS_HAL_H
+#define _FATFS_HAL_H
 
+int hal_fatfs_init(int need_erase);
 
-INT32 main(VOID)
-{
-    HardwareInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-
-    return 0;
-}
+#endif /* _FATFS_HAL__H */
