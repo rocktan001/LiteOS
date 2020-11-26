@@ -1,6 +1,8 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) <2013-2018>, <Huawei Technologies Co., Ltd>
- * All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Fat Fs Hal HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,34 +24,11 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- *---------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------- */
 
-#ifndef _FCNTL_H
-#define _FCNTL_H
+#ifndef _FATFS_HAL_H
+#define _FATFS_HAL_H
 
-#define O_RDONLY                0
-#define O_WRONLY                1
-#define O_RDWR                  2
-#define O_APPEND                0x0008
-#define O_CREAT                 0x0200
-#define O_TRUNC                 0x0400
-#define O_EXCL                  0x0800
-#define O_SYNC                  0x2000
-#define O_NONBLOCK              0x4000
-#define O_NOCTTY                0x8000
+int hal_fatfs_init(int need_erase);
 
-#define O_ACCMODE               (O_RDONLY | O_WRONLY | O_RDWR)
-
-//extern int open (const char *, int, ...);
-extern int open (const char * path, int flags,...);
-
-#endif
-
+#endif /* _FATFS_HAL__H */

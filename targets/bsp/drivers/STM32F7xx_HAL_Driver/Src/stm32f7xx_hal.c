@@ -68,8 +68,11 @@
  *---------------------------------------------------------------------------*/
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f7xx_hal.h"
+
+#ifdef __LITEOS__
 #include "los_sys.h"
 #include "cmsis_os.h"
+#endif
 
 /** @addtogroup STM32F7xx_HAL_Driver
   * @{
@@ -336,11 +339,10 @@ __weak void HAL_IncTick(void)
   */
 __weak uint32_t HAL_GetTick(void)
 {
-#ifdef _USE_FreeRTOS
-  return uwTick;
-#else
+#ifdef __LITEOS__
   return LOS_TickCountGet();
-  return 0;
+#else
+  return uwTick;
 #endif
 }
 

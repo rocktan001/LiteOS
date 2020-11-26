@@ -52,7 +52,10 @@ STM32F429IGTX_HAL_SRC = \
         drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c \
         drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c \
         drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_eth.c \
-        drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c
+        drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c \
+        drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sd.c \
+        drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_sdmmc.c \
+        drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sdram.c
         LOCAL_SRCS = $(STM32F429IGTX_HAL_SRC)
 else ifeq ($(LOSCFG_PLATFORM_STM32L431_BearPi), y)
 STM32L431_BearPi_HAL_SRC = \

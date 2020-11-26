@@ -65,7 +65,6 @@ extern UINT32 __LOS_HEAP_ADDR_END__;
 #define LOSCFG_COMPAT_CMSIS_FW                     YES
 #define LOSCFG_NO_SHARED_IRQ
 
-
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -169,6 +169,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT), y)
         LITEOS_BASELIB += -lnb_iot
     endif
+    ifeq ($(LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY), y)
+        LITEOS_BASELIB += -lnbiot_without_atiny
+    endif
 endif
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)
