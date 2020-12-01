@@ -57,6 +57,9 @@
 #if LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
 #include "nb_demo.h"
 #endif
+#ifdef LOSCFG_DEMOS_LMS
+#include "lms_demo.h"
+#endif
 #ifdef LOSCFG_SHELL
 #include "shell.h"
 #include "shcmd.h"
@@ -197,6 +200,9 @@ uint32_t create_dtls_server_task(void)
 
 UINT32 app_init(VOID)
 {
+#ifdef LOSCFG_DEMOS_LMS
+    Example_LMSEntry();
+#endif
     UINT32 ret = LOS_OK;
 
     ret = creat_agenttiny_task();
