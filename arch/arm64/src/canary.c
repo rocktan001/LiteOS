@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Spinlock Low Level Impelmentations Headfile
+ * Description: Aarch64 Canary
  * Author: Huawei LiteOS Team
- * Create: 2020-01-14
+ * Create: 2020-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ARCH_SPINLOCK_H
-#define _ARCH_SPINLOCK_H
-
-#include "los_typedef.h"
+#include "arch/canary.h"
+#include "arch/regs.h"
+#include "stdlib.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,14 +36,39 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern VOID ArchSpinLock(size_t *lock);
-extern VOID ArchSpinUnlock(size_t *lock);
-extern INT32 ArchSpinTrylock(size_t *lock);
+#ifdef __GNUC__
+/* stack protector */
+UINTPTR __stack_chk_guard = 0x000a0dff000a0dff;
+
+STATIC UINT64 ArchGetTimerCnt(VOID)
+{
+    UINT64 cntpct;
+    cntpct = AARCH64_SYSREG_READ(cntpct_el0);
+    return cntpct;
+}
+
+/*
+ * If the SP compiling options:-fstack-protector-strong or -fstack-protector-all is enabled,
+ * We recommend to implement true random number generator function for __stack_chk_guard
+ * value to replace the function implementation template shown as below.
+ */
+#pragma GCC push_options
+#pragma GCC optimize ("-fno-stack-protector")
+LITE_OS_SEC_TEXT_INIT WEAK VOID ArchStackGuardInit(VOID)
+{
+    int rnd;
+    UINT64 seed;
+
+    seed = ArchGetTimerCnt();
+    srand(seed);
+    rnd = rand();
+    __stack_chk_guard = ((UINT64)rnd << 32) | (UINT64)rnd; /* combined two 32-bit values into a 64-bit value. */
+}
+#pragma GCC pop_options
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#endif /* _ARCH_SPINLOCK_H */
