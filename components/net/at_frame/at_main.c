@@ -32,7 +32,7 @@
 #ifdef WITH_SOTA
 #include "sota/sota.h"
 #endif
-#include "los_sys_pri.h"
+#include "los_sys.h"
 #include "los_tick.h"
 
 static at_config at_user_conf;
