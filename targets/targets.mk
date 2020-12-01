@@ -131,6 +131,12 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
     endif
+    ifeq ($(LOSCFG_DEMOS_LMS), y)
+        LITEOS_BASELIB += -llms_demo
+    endif
+    ifeq ($(LOSCFG_KERNEL_LMS), y)
+        LITEOS_BASELIB += -llms
+    endif
     ifeq ($(LOSCFG_COMPONENTS_SECURITY_MBEDTLS), y)
         LITEOS_BASELIB += -lmbedtls
     endif

@@ -270,6 +270,10 @@ LITEOS_LD_PATH +=  -L$(OUT)/lib/rdk \
                    -L$(OUT)/lib/main_server
 endif
 
+ifeq ($(LOSCFG_KERNEL_LMS), y)
+LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/kernel/extended/lms
+endif
+
 ifeq ($(LOSCFG_USING_BOARD_LD), y)
 LITEOS_LD_SCRIPT := -T$(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/liteos.ld
 else
