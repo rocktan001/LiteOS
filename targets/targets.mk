@@ -179,6 +179,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY), y)
         LITEOS_BASELIB += -lnbiot_without_atiny
     endif
+    ifeq ($(LOSCFG_DEMOS_IPV6_CLIENT), y)
+        LITEOS_BASELIB += -lipv6_client
+    endif
 endif
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)
