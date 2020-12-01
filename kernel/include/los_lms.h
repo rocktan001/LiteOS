@@ -33,7 +33,6 @@
 #include "stddef.h"
 #include "los_typedef.h"
 #include "securec.h"
-#include "menuconfig.h"
 
 #ifdef __cplusplus
 #if __cplusplus
