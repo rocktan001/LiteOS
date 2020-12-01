@@ -57,6 +57,10 @@
 #if LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
 #include "nb_demo.h"
 #endif
+#ifdef LOSCFG_SHELL
+#include "shell.h"
+#include "shcmd.h"
+#endif
 
 #define USER_TASK_PRIORITY 2
 #define DTLS_TASK_PRIORITY 3
@@ -183,7 +187,7 @@ uint32_t create_dtls_server_task(void)
     task_init_param.uwStackSize = 0x1000;
 
     ret = LOS_TaskCreate(&g_dtls_server_tskHandle, &task_init_param);
-    if (LOS_OK != ret) {
+    if (ret != LOS_OK) {
         return ret;
     }
 
@@ -233,6 +237,12 @@ UINT32 app_init(VOID)
 
 #if defined(WITH_SENSORHUB)
     MiscInit();
+#endif
+
+#ifdef LOSCFG_SHELL
+    if (OsShellInit(0) != LOS_OK) {
+        PRINT_ERR("shell init failed\n");
+    }
 #endif
 
     return ret;

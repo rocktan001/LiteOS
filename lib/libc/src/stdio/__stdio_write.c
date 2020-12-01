@@ -12,9 +12,9 @@ size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
 	int iovcnt = 2;
 	ssize_t cnt;
 	for (;;) {
-	// attention: need vfs support, it is just a stub interface
+		cnt = writev(f->fd, iov, iovcnt);
 #ifdef __LITEOS__
-		if (1) {
+		if ((rem != 0) && (cnt == 0)) {
 			errno = EINVAL;
 			return -1;
 		}

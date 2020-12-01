@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Cortex-M Dispatch Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -25,14 +25,6 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
 
 .syntax unified
 .arch armv7e-m
@@ -44,11 +36,11 @@
 .equ OS_NVIC_PENDSVSET,          0x10000000
 .equ OS_TASK_STATUS_RUNNING,     0x0010
 
-    .section .text
-    .thumb
+.section .text
+.thumb
 
-    .type OsStartToRun, %function
-    .global OsStartToRun
+.type OsStartToRun, %function
+.global OsStartToRun
 OsStartToRun:
     .fnstart
     .cantunwind
@@ -65,10 +57,9 @@ OsStartToRun:
     mov     r1, #2
     msr     CONTROL, r1
 
-
     ldrh    r7, [r0 , #4]
     mov     r8,  #OS_TASK_STATUS_RUNNING
-    orr     r7,  r7,  r8
+    orr     r7,  r7, r8
     strh    r7,  [r0 , #4]
 
     ldr     r12, [r0]
@@ -79,17 +70,15 @@ OsStartToRun:
     msr     psp, r12
     vpush   {s0};
     vpop    {s0};
-
     mov     lr, r5
-   ;msr     xPSR, R7
 
     cpsie   I
     bx      r6
     .fnend
 
-    .type OsIntLock, %function
-    .global OsIntLock
-OsIntLock:
+.type ArchIntLock, %function
+.global ArchIntLock
+ArchIntLock:
     .fnstart
     .cantunwind
     mrs     r0, PRIMASK
@@ -97,9 +86,9 @@ OsIntLock:
     bx      lr
     .fnend
 
-    .type OsIntUnLock, %function
-    .global OsIntUnLock
-OsIntUnLock:
+.type ArchIntUnlock, %function
+.global ArchIntUnlock
+ArchIntUnlock:
     .fnstart
     .cantunwind
     mrs     r0, PRIMASK
@@ -107,17 +96,17 @@ OsIntUnLock:
     bx      lr
     .fnend
 
-    .type OsIntRestore, %function
-    .global OsIntRestore
-OsIntRestore:
+.type ArchIntRestore, %function
+.global ArchIntRestore
+ArchIntRestore:
     .fnstart
     .cantunwind
     msr     PRIMASK, r0
     bx      lr
     .fnend
 
-    .type OsTaskSchedule, %function
-    .global OsTaskSchedule
+.type OsTaskSchedule, %function
+.global OsTaskSchedule
 OsTaskSchedule:
     .fnstart
     .cantunwind
@@ -127,14 +116,13 @@ OsTaskSchedule:
     bx      lr
     .fnend
 
-    .type osPendSV, %function
-    .global osPendSV
+.type osPendSV, %function
+.global osPendSV
 osPendSV:
     .fnstart
     .cantunwind
     mrs     r12, PRIMASK
     cpsid   I
-
 
 TaskSwitch:
     mrs     r0, psp
@@ -158,5 +146,4 @@ TaskSwitch:
 
     msr     PRIMASK, r12
     bx      lr
-
     .fnend

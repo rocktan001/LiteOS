@@ -35,7 +35,6 @@
 #ifndef _ASM_PLATFORM_H
 #define _ASM_PLATFORM_H
 
-#include "menuconfig.h"
 #include "asm/hal_platform_ints.h"
 
 #endif /* _ASM_PLATFORM_H */

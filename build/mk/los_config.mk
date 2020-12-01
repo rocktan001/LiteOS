@@ -83,7 +83,7 @@ BUILD  = $(OUT)/obj
 MK_PATH  = $(LITEOSTOPDIR)/build/mk
 LITEOS_SCRIPTPATH  ?= $(LITEOSTOPDIR)/tools/scripts
 LITEOS_LIB_BIGODIR  = $(OUT)/lib/obj
-LOSCFG_ENTRY_SRC    = $(LITEOSTOPDIR)/targets/bsp/common/los_config.c
+LOSCFG_ENTRY_SRC    = $(LITEOSTOPDIR)/kernel/init/los_init.c
 
 LITEOS_MENUCONFIG_H = $(LITEOSTOPDIR)/targets/bsp/common/menuconfig.h
 LITEOS_PLATFORM_MENUCONFIG_H = $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/menuconfig.h
@@ -127,9 +127,13 @@ include $(LITEOSTOPDIR)/shell/api.mk
 include $(LITEOSTOPDIR)/components/components.mk
 include $(LITEOSTOPDIR)/demos/demos.mk
 
-LIB_SUBDIRS += kernel compat lib osdepends components demos shell 
+LIB_SUBDIRS += kernel compat lib osdepends components demos shell
 
 LITEOS_KERNEL_INCLUDE := -I $(LITEOSTOPDIR)/kernel/include
+
+# auto added the header file LITEOS_PLATFORM_MENUCONFIG_H in all files
+LITEOS_PLATFORM_INCLUDE += -include $(LITEOS_PLATFORM_MENUCONFIG_H)
+LITEOS_CXXINCLUDE       += -include $(LITEOS_PLATFORM_MENUCONFIG_H)
 
 ############################# Tools && Debug Option Begin ##############################
 

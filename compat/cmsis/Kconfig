@@ -8,10 +8,11 @@ config  LOSCFG_COMPAT_CMSIS
 menu "Cmsis Options"
     depends on LOSCFG_COMPAT_CMSIS
 
-config LOSCFG_CMSIS_VERSION
+config CMSIS_OS_VER
     int "Cmsis Api Version"
     default 1
     help
       The Cmsis Version Only Support 1 or 2.
 
 endmenu
+

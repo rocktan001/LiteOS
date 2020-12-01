@@ -28,7 +28,7 @@
 
 #include "osdepends/atiny_osdep.h"
 #include "los_memory.h"
-#include "los_sys_pri.h"
+#include "los_sys.h"
 #include "los_sem_pri.h"
 #include "los_tick_pri.h"
 #include <stdbool.h>

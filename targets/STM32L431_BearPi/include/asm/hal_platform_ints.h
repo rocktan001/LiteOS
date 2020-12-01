@@ -1,6 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
  * Description: hal platform header
+ * Author: Huawei LiteOS Team
+ * Create: 2018-07-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -23,14 +25,6 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
 
 #ifndef _HAL_PLATFORM_INTS_H
 #define _HAL_PLATFORM_INTS_H
@@ -46,7 +40,7 @@ extern "C" {
 
 /**
  * Maximum number of supported hardware devices that generate hardware interrupts.
- * The maximum number of exceptions and interrupts is: 240(IRQ) + OS_SYS_VECTOR_CNT.
+ * The maximum number of exceptions and interrupts is: 240(IRQ) + 16.
  */
 #define OS_HWI_MAX_NUM                  LOSCFG_PLATFORM_HWI_LIMIT
 
@@ -70,7 +64,7 @@ extern "C" {
  */
 #define OS_USER_HWI_MIN                 OS_HWI_MIN
 
-#define OS_TICK_INT_NUM     (SysTick_IRQn + OS_SYS_VECTOR_CNT)
+#define OS_TICK_INT_NUM     (SysTick_IRQn + 16) // 16: cortem-m irq sh
 
 #define IO_ADDRESS(x)       (x)
 

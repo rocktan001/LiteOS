@@ -15,6 +15,9 @@ extern "C" {
 #define __NEED_FILE
 #define __NEED___isoc_va_list
 #define __NEED_size_t
+#ifdef __LITEOS__
+#define __NEED_ldouble_t
+#endif
 
 #if __STDC_VERSION__ < 201112L
 #define __NEED_struct__IO_FILE
@@ -37,9 +40,7 @@ extern "C" {
 #ifdef __cplusplus
 #define NULL 0L
 #else
-#ifndef NULL
 #define NULL ((void*)0)
-#endif
 #endif
 
 #undef EOF
@@ -1441,7 +1442,6 @@ FILE *fopen64(const char *, const char *);
 FILE *freopen64(const char *, const char *, FILE *);
 int fseeko64(FILE *, off64_t, int);
 off64_t ftello64(FILE *);
-int fsetpos64(FILE *, const fpos64_t *);
 int fsetpos64(FILE *, const fpos64_t *);
 #else
 #define tmpfile64 tmpfile

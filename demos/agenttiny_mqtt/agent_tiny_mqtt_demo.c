@@ -36,7 +36,6 @@
 #include "cJSON.h"
 
 #include "agent_tiny_mqtt_demo.h"
-#include "menuconfig.h"
 
 #ifdef __cplusplus
 #if __cplusplus

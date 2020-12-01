@@ -78,7 +78,8 @@ PLATFORM_INCLUDE := -I $(LITEOSTOPDIR)/targets/bsp/common \
                     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
                     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \
                     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/asm \
-                    -I $(LITEOSTOPDIR)/arch/arm/cortex_m/cmsis
+                    -I $(LITEOSTOPDIR)/arch/arm/cortex_m/cmsis \
+		    -I $(LITEOSTOPDIR)/lib/huawei_libc/time
 
 ifeq ($(LITEOS_PLATFORM), hi3556v200)
     PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/platform/bsp/board/$(LITEOS_PLATFORM)/include/hisoc
@@ -89,7 +90,7 @@ LIB_SUBDIRS += targets/$(LITEOS_PLATFORM)
 
 #determin libs to link for windows
 ifneq ($(OS), Linux)
-    LITEOS_BASELIB += -l$(LITEOS_PLATFORM) -lsec -lbase -lbsp -lc -lm -losdepends
+    LITEOS_BASELIB += -l$(LITEOS_PLATFORM) -lsec -lbase -linit -lbsp -lc -lm -losdepends
 
     ifeq ($(LOSCFG_COMPAT_CMSIS), y)
         LITEOS_BASELIB += -lcmsis

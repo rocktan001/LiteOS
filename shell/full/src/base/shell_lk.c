@@ -34,7 +34,6 @@
  * applicable export control laws and regulations.
  * --------------------------------------------------------------------------- */
 
-#include "sys_config.h"
 #include "shell_lk.h"
 #include "stdlib.h"
 #include "stdio.h"

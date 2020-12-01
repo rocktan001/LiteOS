@@ -25,16 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
 
-#include "sys_config.h"
 #include "stdlib.h"
 #include "sys/stat.h"
 #include "securec.h"
@@ -93,7 +84,7 @@ STATIC VOID OsCmdUsageDate(INT32 order)
     if (order) {
         PRINTK("date: invalid option or parameter.\n");
         PRINTK("Try 'date --help' for more information.\n");
-        return ;
+        return;
     }
     PRINTK("\nUsage: date [+FORMAT]\n");
     PRINTK("   or: date [-s] [YY/MM/DD] [hh:mm:ss]\n");
@@ -156,7 +147,7 @@ STATIC INT32 OsStrToTm(const CHAR *str, struct tm *tm)
         } else if (str[2] == '/') { /* 2:Index of Eigenvalues */
             ret = strptime(str, "%m/%d", tm);
         }
-    } else if(strLen == 7) { /* 7:Time format string length,such as yyyy/mm */
+    } else if (strLen == 7) { /* 7:Time format string length,such as yyyy/mm */
         if (str[4] == '/') { /* 4:Index of Eigenvalues */
             ret = strptime(str, "%Y/%m", tm);
         }

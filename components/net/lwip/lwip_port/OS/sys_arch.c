@@ -29,7 +29,7 @@
 #include "los_config.h"
 #include "arch/sys_arch.h"
 
-#include "los_sys_pri.h"
+#include "los_sys.h"
 #include "los_sem_pri.h"
 #include "string.h"
 
@@ -37,7 +37,7 @@
 /* ---------------------------------------------------------------------------*
  * Routine:  sys_mbox_new
  * ---------------------------------------------------------------------------*
- * @Description: 
+ * @Description:
  * Creates a new mailbox
  * @Inputs:
  * sys_mbox_t mbox         -- Handle of mailbox
