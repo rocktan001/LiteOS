@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: Tick Private HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Exception internal HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-06-24
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,12 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_TICK_PRI_H
-#define _LOS_TICK_PRI_H
+#ifndef _LOS_EXC_PRI_H
+#define _LOS_EXC_PRI_H
 
-#include "los_base.h"
-#include "los_tick.h"
-#include "los_spinlock.h"
+#include "los_exc.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -39,57 +37,26 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/* spinlock for tick */
-extern SPIN_LOCK_S g_tickSpin;
-#define TICK_LOCK(state)                       LOS_SpinLockSave(&g_tickSpin, &(state))
-#define TICK_UNLOCK(state)                     LOS_SpinUnlockRestore(&g_tickSpin, (state))
+#ifdef LOSCFG_SHELL_EXCINFO_DUMP
+extern VOID OsSetExcInfoRW(LogReadWriteFunc func);
+extern LogReadWriteFunc OsGetExcInfoRW(VOID);
+extern VOID OsSetExcInfoBuf(CHAR *buf);
+extern CHAR *OsGetExcInfoBuf(VOID);
+extern VOID OsSetExcInfoOffset(UINT32 offset);
+extern UINT32 OsGetExcInfoOffset(VOID);
+extern VOID OsSetExcInfoDumpAddr(UINTPTR addr);
+extern UINTPTR OsGetExcInfoDumpAddr(VOID);
+extern VOID OsSetExcInfoLen(UINT32 len);
+extern UINT32 OsGetExcInfoLen(VOID);
+extern VOID OsRecordExcInfoTime(VOID);
+extern VOID WriteExcBufVa(const CHAR *format, va_list arg);
+extern VOID WriteExcInfoToBuf(const CHAR *format, ...);
+#endif
 
-/**
- * @ingroup los_tick
- * Count of Ticks
- */
-extern volatile UINT64 g_tickCount[];
-
-/**
- * @ingroup los_tick
- * Cycle to nanosecond scale
- */
-extern DOUBLE g_cycle2NsScale;
-
-/**
-* @ingroup  los_tick
-* @brief Handle the system tick timeout.
-*
-* @par Description:
-* This API is called when the system tick timeout and triggers the interrupt.
-*
-* @attention
-* <ul>
-* <li>None.</li>
-* </ul>
-*
-* @param none.
-*
-* @retval None.
-* @par Dependency:
-* <ul><li>los_tick.h: the header file that contains the API declaration.</li></ul>
-* @see None.
-* @since Huawei LiteOS V100R001C00
-*/
-extern VOID OsTickHandler(VOID);
-
-extern UINT32 OsTickInit(UINT32 systemClock, UINT32 tickPerSecond);
-extern VOID OsTickStart(VOID);
-/**
- * @ingroup los_tick
- * Convert from the cycle count to nanosecond.
- */
-#define CYCLE_TO_NS(cycles) ((cycles) * g_cycle2NsScale)
-
-/**
- * Current system timer register is 32 bit, therefore TIMER_MAXLOAD define just in order to avoid ambiguity.
- */
-#define TIMER_MAXLOAD 0xffffffff
+#ifdef LOSCFG_EXC_INTERACTION
+extern UINT32 OsCheckExcInteractionTask(const TSK_INIT_PARAM_S *initParam);
+extern VOID OsKeepExcInteractionTask(VOID);
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -97,4 +64,4 @@ extern VOID OsTickStart(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _LOS_TICK_PRI_H */
+#endif /* _LOS_EXC_H */

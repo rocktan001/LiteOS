@@ -25,14 +25,6 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -48,8 +40,8 @@
 #ifdef LOSCFG_KERNEL_CPUP
 #include "los_cpup_pri.h"
 #endif
-#ifdef LOSCFG_SHELL_EXCINFO
-#include "los_excinfo_pri.h"
+#ifdef LOSCFG_SHELL_EXCINFO_DUMP
+#include "los_exc_pri.h"
 #endif
 
 #ifdef __cplusplus
@@ -93,9 +85,9 @@ LITE_OS_SEC_TEXT_MINOR UINT8 *OsShellCmdConvertTskStatus(UINT16 taskStatus)
     return (UINT8 *)"Invalid";
 }
 
-STATIC VOID OsShellCmdTaskWaterLineGet(LosTaskCB *allTaskArray)
+STATIC VOID OsShellCmdTaskWaterLineGet(const LosTaskCB *allTaskArray)
 {
-    LosTaskCB *taskCB = NULL;
+    const LosTaskCB *taskCB = NULL;
     UINT32 loop;
 
     for (loop = 0; loop < g_taskMaxNum; ++loop) {
@@ -109,11 +101,11 @@ STATIC VOID OsShellCmdTaskWaterLineGet(LosTaskCB *allTaskArray)
     }
 }
 
-#ifdef LOSCFG_SHELL_EXCINFO
+#ifdef LOSCFG_SHELL_EXCINFO_DUMP
 LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoTitleExc(VOID)
 {
     WriteExcInfoToBuf("\r\nName                   TaskEntryAddr       TID    ");
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
     WriteExcInfoToBuf("Affi    CPU    ");
 #endif
     WriteExcInfoToBuf("Priority   Status       "
@@ -127,7 +119,7 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoTitleExc(VOID)
 #endif
     WriteExcInfoToBuf("\n");
     WriteExcInfoToBuf("----                   -------------       ---    ");
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
     WriteExcInfoToBuf("-----   ----   ");
 #endif
     WriteExcInfoToBuf("--------   --------     "
@@ -172,7 +164,7 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoTitle(VOID)
 #endif
     PRINTK("\n");
 
-#ifdef LOSCFG_SHELL_EXCINFO
+#ifdef LOSCFG_SHELL_EXCINFO_DUMP
     OsShellCmdTskInfoTitleExc();
 #endif
 }
@@ -188,10 +180,10 @@ LITE_OS_SEC_TEXT_MINOR STATIC INLINE UINT32 OsGetSemID(const LosTaskCB *taskCB)
     return semId;
 }
 
-#ifdef LOSCFG_SHELL_EXCINFO
-LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoDataExc(LosTaskCB *allTaskArray)
+#ifdef LOSCFG_SHELL_EXCINFO_DUMP
+LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoDataExc(const LosTaskCB *allTaskArray)
 {
-    LosTaskCB *taskCB = NULL;
+    const LosTaskCB *taskCB = NULL;
     UINT32 loop;
     UINT32 semId;
 
@@ -205,7 +197,7 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoDataExc(LosTaskCB *allTaskAr
 
         WriteExcInfoToBuf("%-23s%-20p0x%-5x", taskCB->taskName, taskCB->taskEntry, taskCB->taskId);
 
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
         WriteExcInfoToBuf("0x%04x  %4d   ", taskCB->cpuAffiMask, (INT16)(taskCB->currCpu));
 #endif
         WriteExcInfoToBuf("%-11u%-13s0x%-11x0x%-11x%p   0x%-8x   0x%-9x0x%-10x", taskCB->priority,
@@ -230,9 +222,9 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoDataExc(LosTaskCB *allTaskAr
 }
 #endif
 
-LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoData(LosTaskCB *allTaskArray)
+LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoData(const LosTaskCB *allTaskArray)
 {
-    LosTaskCB *taskCB = NULL;
+    const LosTaskCB *taskCB = NULL;
     UINT32 loop;
     UINT32 semId;
 
@@ -269,7 +261,7 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoData(LosTaskCB *allTaskArray
         PRINTK("\n");
     }
 
-#ifdef LOSCFG_SHELL_EXCINFO
+#ifdef LOSCFG_SHELL_EXCINFO_DUMP
     OsShellCmdTskInfoDataExc(allTaskArray);
 #endif
 }
