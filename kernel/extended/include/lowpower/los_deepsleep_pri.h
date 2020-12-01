@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: Cpp Support HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Low-power Framework.
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-10-27
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,28 +26,49 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_CPPSUPPORT_PRI_H
-#define _LOS_CPPSUPPORT_PRI_H
+#ifndef _LOS_DEEPSLEEP_H
+#define _LOS_DEEPSLEEP_H
 
-#include "los_cppsupport.h"
+#include "los_task_pri.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+typedef enum {
+    LOS_COLD_RESET = 0,
+    LOS_RUN_STOP_RESET,
+    LOS_DEEP_SLEEP_RESET,
+    LOS_INTERMIT_STANDBY_RESET,
+} LosResetMode;
 
-extern CHAR __fast_end;
+#if defined(LOSCFG_KERNEL_RUNSTOP) || defined(LOSCFG_KERNEL_DEEPSLEEP)
+/* Is system is up from the memory image, then this flag should be 1; else 0 */
+extern INT32 g_resumeFromImg;
+extern INTPTR g_otherCoreResume;
 
-#ifdef LOSCFG_AARCH64
-extern UINT8 __EH_FRAME_BEGIN__[];
-VOID __register_frame(VOID *begin);
+extern VOID OsSRSaveRegister(VOID);
+extern VOID OsSRRestoreRegister(VOID);
+
+#if (LOSCFG_KERNEL_SMP == YES)
+extern VOID release_secondary_cores(VOID);
 #endif
 
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif /* _LOS_CPPSUPPORT_PRI_H */
+#ifdef LOSCFG_AARCH64
+/*
+ * 34: The number of task context registers(X0~X30, SP, DAIF, NZCV)
+ * 3: The number of available universal registers(X0, X1, X2) temporarily saved
+ */
+#define OS_TASK_REG_NUM 34
+#define OS_UNI_REG_NUM 3
+extern UINT64 g_saveSRContext[OS_TASK_REG_NUM];
+extern UINT64 g_saveAR[OS_UNI_REG_NUM];
+#else
+/*
+ * 18: The number of task context registers(R0~R15, SPSR, CPSR)
+ * 2: The number of available universal registers(R0, R1) temporarily saved
+ */
+#define OS_TASK_REG_NUM 18
+#define OS_UNI_REG_NUM 2
+extern UINT32 g_saveSRContext[LOSCFG_KERNEL_CORE_NUM][OS_TASK_REG_NUM];
+extern UINT32 g_saveAR[OS_UNI_REG_NUM];
+extern LosTaskCB *g_saveTsk[LOSCFG_KERNEL_CORE_NUM];
+#endif
+#endif
+#endif // _LOS_DEEPSLEEP_H

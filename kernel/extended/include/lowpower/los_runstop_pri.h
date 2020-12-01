@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: Cpp Support HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: RunStop HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,10 +26,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_CPPSUPPORT_PRI_H
-#define _LOS_CPPSUPPORT_PRI_H
+#ifndef _LOS_RUNSTOP_PRI_H
+#define _LOS_RUNSTOP_PRI_H
 
-#include "los_cppsupport.h"
+#include "los_runstop.h"
+#include "los_memory_pri.h"
+#include "los_deepsleep_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,12 +39,28 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern CHAR __fast_end;
+enum {
+    OS_NO_STORE_SYSTEM, /* Do not store the system. */
+    OS_STORE_SYSTEM,    /* Start the storage system. */
+};
 
-#ifdef LOSCFG_AARCH64
-extern UINT8 __EH_FRAME_BEGIN__[];
-VOID __register_frame(VOID *begin);
-#endif
+/* The following four variables and two functions are defined in the assembly file */
+extern CHAR __wow_end;
+extern CHAR __ram_vectors_vma;
+extern CHAR __bss_start;
+extern CHAR __bss_end;
+
+extern BOOL IsImageResume(VOID);
+
+extern VOID OsCarryLeftScatter(VOID);
+extern UINT32 OsWaitImagingDone(UINTPTR wowFlashAddr, size_t *wowImgSize);
+extern VOID OsSystemWakeup(VOID);
+extern VOID OsStoreSystemInfoBeforeSuspend(VOID);
+extern VOID OsWriteWow2Flash(VOID);
+extern UINT32 OsWowWriteFlashTaskCreate(VOID);
+extern size_t OsWowImageSizeGet(VOID);
+extern  VOID OsWowOtherCoreResume(UINT32 cpuid);
+extern UINT32 OsWowSysDoneFlagGet(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -50,4 +68,4 @@ VOID __register_frame(VOID *begin);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _LOS_CPPSUPPORT_PRI_H */
+#endif /* _LOS_RUNSTOP_PRI_H */

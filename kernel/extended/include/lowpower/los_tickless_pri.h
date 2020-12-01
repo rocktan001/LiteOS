@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: Cpp Support HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Tickless HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,10 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_CPPSUPPORT_PRI_H
-#define _LOS_CPPSUPPORT_PRI_H
+#ifndef _LOS_TICKLESS_PRI_H
+#define _LOS_TICKLESS_PRI_H
 
-#include "los_cppsupport.h"
+#include "los_tickless.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,12 +37,17 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern CHAR __fast_end;
-
-#ifdef LOSCFG_AARCH64
-extern UINT8 __EH_FRAME_BEGIN__[];
-VOID __register_frame(VOID *begin);
-#endif
+extern VOID OsTickTimerReload(UINT32 period);
+extern VOID OsSysTimeUpdate(UINT32 sleepTicks);
+extern VOID OsTicklessStart(VOID);
+extern BOOL OsTickIrqFlagGet(VOID);
+extern VOID OsTickIrqFlagSet(BOOL tickIrqFlag);
+extern BOOL OsTicklessFlagGet(VOID);
+extern UINT32 OsTicklessSleepTickGet(VOID);
+extern VOID OsTicklessSleepTickSet(UINT32 sleeptick);
+extern VOID OsTicklessUpdate(UINT32 irqNum);
+extern UINT32 OsSleepTicksGet(VOID);
+extern VOID OsTicklessOpen(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -50,4 +55,4 @@ VOID __register_frame(VOID *begin);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _LOS_CPPSUPPORT_PRI_H */
+#endif /* _LOS_TICKLESS_PRI_H */

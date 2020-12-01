@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: Cpp Support HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Low-power Framework.
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-09-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,21 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_CPPSUPPORT_PRI_H
-#define _LOS_CPPSUPPORT_PRI_H
+#ifndef _LOS_LOWPOWER_IMPL_PRI_H
+#define _LOS_LOWPOWER_IMPL_PRI_H
 
-#include "los_cppsupport.h"
+#include "los_lowpower_pri.h"
+#include "los_lowpower_impl.h"
+
+#ifdef LOSCFG_KERNEL_RUNSTOP
+#include "los_runstop_pri.h"
+#endif
+#ifdef LOSCFG_KERNEL_TICKLESS
+#include "los_tickless_pri.h"
+#endif
+#ifdef LOSCFG_KERNEL_DEEPSLEEP
+#include "los_deepsleep_pri.h"
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,17 +48,10 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern CHAR __fast_end;
-
-#ifdef LOSCFG_AARCH64
-extern UINT8 __EH_FRAME_BEGIN__[];
-VOID __register_frame(VOID *begin);
-#endif
-
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _LOS_CPPSUPPORT_PRI_H */
+#endif  // _LOS_LOWPOWER_IMPL_PRI_H
