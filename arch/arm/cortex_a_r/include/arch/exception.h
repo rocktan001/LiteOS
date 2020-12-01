@@ -25,14 +25,6 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
 
 #ifndef _ARCH_EXCEPTION_H
 #define _ARCH_EXCEPTION_H
@@ -122,14 +114,11 @@ typedef struct {
     ExcContext *context; /**< Hardware context when an exception occurs */
 } ExcInfo;
 
-STATIC INLINE UINTPTR ArchGetFp(VOID)
-{
-    UINTPTR regFp;
-
-    __asm__ __volatile__("mov %0, fp" : "=r"(regFp));
-
-    return regFp;
-}
+#define ArchGetFp() ({ \
+    UINTPTR _regFp; \
+    __asm__ __volatile__("mov %0, fp" : "=r"(_regFp)); \
+    _regFp; \
+})
 
 typedef VOID (*EXC_PROC_FUNC)(UINT32, ExcContext *);
 
@@ -141,9 +130,10 @@ STATIC INLINE VOID ArchHaltCpu(VOID)
     __asm__ __volatile__("swi 0");
 }
 
-VOID ArchBackTraceWithSp(VOID *stackPointer);
+VOID ArchBackTraceWithSp(const VOID *stackPointer);
 VOID ArchBackTrace(VOID);
 VOID ArchExcInit(VOID);
+UINT32 ArchBackTraceGet(UINTPTR fp, UINTPTR *callChain, UINT32 maxDepth);
 
 STATIC INLINE UINT32 OsGetDFSR(VOID)
 {

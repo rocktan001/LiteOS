@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Task Low Level Impelmentations Headfile
+ * Description: Canary Defines Headfile
  * Author: Huawei LiteOS Team
- * Create: 2020-01-14
+ * Create: 2020-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,12 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ARCH_TASK_H
-#define _ARCH_TASK_H
+#ifndef _ARCH_CANARY_H
+#define _ARCH_CANARY_H
 
 #include "los_typedef.h"
-#include "arch/cpu.h"
-#include "arch/regs.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -39,51 +37,33 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define LOSCFG_STACK_POINT_ALIGN_SIZE (sizeof(UINTPTR) * 2)
+#ifdef __GNUC__
+extern UINTPTR __stack_chk_guard;
 
-#if defined(LOSCFG_ARCH_FPU_VFP_D16)
-#define FP_REGS_NUM     16
-#elif defined (LOSCFG_ARCH_FPU_VFP_D32)
-#define FP_REGS_NUM     32
-#endif
-#define GEN_REGS_NUM    13
-
-/* The size of this structure must be smaller than or equal to the size specified by OS_TSK_STACK_ALIGN (16 bytes). */
-typedef struct {
-#if !defined(LOSCFG_ARCH_FPU_DISABLE)
-    UINT64 D[FP_REGS_NUM];  /* D0-D31 */
-    UINT32 regFPSCR;        /* FPSCR */
-    UINT32 regFPEXC;        /* FPEXC */
-#endif
-    UINT32 R[GEN_REGS_NUM]; /* R0-R12 */
-    UINT32 LR;              /* R14 */
-    UINT32 PC;              /* R15 */
-    UINT32 regPSR;
-} TaskContext;
-
-STATIC INLINE VOID *ArchCurrTaskGet(VOID)
-{
-    return (VOID *)(UINTPTR)ARM_SYSREG_READ(TPIDRPRW);
-}
-
-STATIC INLINE VOID ArchCurrTaskSet(VOID *val)
-{
-    ARM_SYSREG_WRITE(TPIDRPRW, (UINT32)(UINTPTR)val);
-}
-
-STATIC INLINE UINTPTR ArchGetTaskFp(const VOID *stackPointer)
-{
-    return ((TaskContext *)(stackPointer))->R[11]; /* R11: FP */
-}
-
-/*
- * Description : task stack initialization
- * Input       : taskId    -- task ID
- *               stackSize -- task stack size
- *               topStack  -- stack top of task (low address)
- * Return      : pointer to the task context
+/**
+ * @ingroup  arch sp
+ * @brief Stack protector canaries value init.
+ *
+ * @par Description:
+ * This API is used to init canaries value __stack_chk_guard if the SP compiling options:
+ * -fstack-protector-strong or -fstack-protector-all is enabled.
+ *
+ * @attention
+ * <ul>
+ * <li>This API is a weak function, We recommend to implement true random number generator
+ * function for __stack_chk_guard value to replace it.</li>
+ * </ul>
+ *
+ * @param  None.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>arch/sp.h: the header file that contains the API declaration.</li></ul>
+ * @see none
+ * @since Huawei LiteOS V200R005C00
  */
-extern VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOID *topStack);
+extern VOID ArchStackGuardInit(VOID);
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -91,4 +71,4 @@ extern VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOID *topStack);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ARCH_TASK_H */
+#endif /* _ARCH_CANARY_H */
