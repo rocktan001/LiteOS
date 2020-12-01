@@ -56,7 +56,9 @@
 #include "securec.h"
 #include "los_task.h"
 #include "uart.h"
-
+#ifdef LOSCFG_FS_VFS
+#include "inode/inode.h"
+#endif
 #include "show.h"
 #include "shcmd.h"
 
@@ -639,12 +641,69 @@ INT32 OsDmesgWrite2File(const CHAR *fullpath, const CHAR *buf, UINT32 logSize)
     return ret;
 }
 
+#ifdef LOSCFG_FS_VFS
+INT32 LOS_DmesgToFile(CHAR *filename)
+{
+    CHAR *fullpath = NULL;
+    CHAR *buf = NULL;
+    INT32 ret;
+    CHAR *shellWorkingDirectory = OsShellGetWorkingDirectory();
+    UINT32 logSize, bufSize, head, tail, intSave;
+    CHAR *logBuf = NULL;
+
+    LOS_SpinLockSave(&g_dmesgSpin, &intSave);
+    if (OsCheckError()) {
+        LOS_SpinUnlockRestore(&g_dmesgSpin, intSave);
+        return -1;
+    }
+    logSize = g_dmesgInfo->logSize;
+    bufSize = g_logBufSize;
+    head = g_dmesgInfo->logHead;
+    tail = g_dmesgInfo->logTail;
+    logBuf = g_dmesgInfo->logBuf;
+    LOS_SpinUnlockRestore(&g_dmesgSpin, intSave);
+
+    ret = vfs_normalize_path(shellWorkingDirectory, filename, &fullpath);
+    if (ret != 0) {
+        return -1;
+    }
+
+    buf = (CHAR *)malloc(logSize);
+    if (buf == NULL) {
+        goto ERR_OUT2;
+    }
+
+    if (head < tail) {
+        ret = memcpy_s(buf, logSize, logBuf + head, logSize);
+        if (ret != EOK) {
+            goto ERR_OUT3;
+        }
+    } else {
+        ret = memcpy_s(buf, logSize, logBuf + head, bufSize - head);
+        if (ret != EOK) {
+            goto ERR_OUT3;
+        }
+        ret = memcpy_s(buf + bufSize - head, logSize - (bufSize - head), logBuf, tail);
+        if (ret != EOK) {
+            goto ERR_OUT3;
+        }
+    }
+
+    ret = OsDmesgWrite2File(fullpath, buf, logSize);
+ERR_OUT3:
+    free(buf);
+ERR_OUT2:
+    free(fullpath);
+    return ret;
+}
+#else
 INT32 LOS_DmesgToFile(CHAR *filename)
 {
     (VOID)filename;
     PRINTK("File operation need VFS\n");
     return -1;
 }
+#endif
 
 INT32 OsShellCmdDmesg(INT32 argc, const CHAR **argv)
 {

@@ -89,7 +89,32 @@ Debug --> Enable a Debug Version --> Enable Shell --> Functionality of Shell -->
     -  命令名必须是唯一的，两个不同的命令处理函数不能有相同的命令名，否则只会执行其中一个。
 
 ### 执行Shell命令
-通过串口发送shell命令时，因为系统以换行符作为串口接收结束标志，所以需要在命令末尾添加回车后点击发送(回车会自动在命令末尾追加"\r\n")。
+
+通过串口终端工具（比如xShell），连接串口。
+
+选择SERIAL协议，然后配置SERIAL：选择对应的串口号，设置波特率为115200。
+
+连接后重启开发板。
+```
+********Hello Huawei LiteOS********
+
+LiteOS Kernel Version : 5.0.0-rc1
+build data : Nov 25 2020 01:24:06
+
+**********************************
+osAppInit
+cpu 0 entering scheduler
+
+Huawei LiteOS #
+```
+
+这时可以输入命令，按`回车键`执行命令。
+
+按`Tab键`可自动补全。
+
+按`退格键`可删除一个字符。
+
+按`方向键上下`可选择历史命令。
 
 ## 内置命令
 

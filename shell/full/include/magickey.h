@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: LiteOS Shell Dmesg Module Private Headfile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+ * Description: MagicKey Headfile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2019-02-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,11 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _HWLITEOS_SHELL_DMESG_PRI_H
-#define _HWLITEOS_SHELL_DMESG_PRI_H
+#ifndef _MAGICKEY_H
+#define _MAGICKEY_H
 
-#ifdef LOSCFG_SHELL_DMESG
-#include "dmesg.h"
+#include "los_exc.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -38,28 +37,18 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/*
- * The dmesg buffer is start with this info structure, then the log.
- */
 typedef struct {
-    UINT32 logSize; /* The size of log in buffer */
-    UINT32 logHead; /* The index of the first log data. Data_out_flag */
-    UINT32 logTail; /* The index where to write, write in and plus one. Data_it_flag */
-    CHAR   *logBuf; /* The log buffer addr */
-} DmesgInfo;
+    VOID (*opHandler)(VOID);
+    CHAR *helpMsg;
+    CHAR magicKey;
+} MagicKeyOp;
 
-extern UINT32 OsDmesgInit(VOID);
-extern UINT32 OsDmesgLvGet(VOID);
-extern UINT32 OsCheckConsoleLock(VOID);
-extern UINT32 OsCheckUartLock(VOID);
-extern VOID OsLogShow(VOID);
-extern UINT32 OsLogRecordStr(const CHAR *str, UINT32 len);
-extern INT32 OsLogMemcpyRecord(const CHAR *buf, UINT32 logLen);
+extern INT32 CheckMagicKey(CHAR key);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
 #endif
-#endif /* _HWLITEOS_SHELL_DMESG_PRI_H */
