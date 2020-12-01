@@ -818,6 +818,12 @@ char *basename();
 char *basename(char *);
 #endif
 #endif
+
+#ifdef __LITEOS__
+char *strnchr(const char *, size_t, int);
+char* strnstr(const char *, const char *, size_t);
+#endif
+
 #endif
 
 #ifdef __cplusplus
