@@ -48,7 +48,7 @@ UINT32 create_fs_task(void)
     task_init_param.uwStackSize = 0x1000;
 
     ret = LOS_TaskCreate(&g_fs_tskHandle, &task_init_param);
-    if (LOS_OK != ret) {
+    if (ret != LOS_OK) {
         return ret;
     }
 
@@ -58,8 +58,6 @@ UINT32 create_fs_task(void)
 UINT32 app_init(VOID)
 {
     UINT32 ret = LOS_OK;
-
-    printf("Hello, welcome to liteos!\n");
 
 #ifdef LOSCFG_DEMOS_FS
     ret = create_fs_task();

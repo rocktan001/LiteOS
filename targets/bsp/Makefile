@@ -105,32 +105,6 @@ ifeq ($(findstring $(LOSCFG_SHELL)$(LOSCFG_SHELL_LK)$(LOSCFG_SHELL_DMESG), y y y
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/shell/full/include
 endif
 
-ifeq ($(LOSCFG_PLATFORM_DVFS), y)
-LOCAL_SRCS += $(wildcard board/$(LITEOS_PLATFORM)/dvfs/*.c)
-endif
-
-ifeq ($(LOSCFG_SHELL_FULL_CAP), y)
-LOCAL_SRCS += $(wildcard board/$(LITEOS_PLATFORM)/extcmd/*.c)
-endif
-
-ifeq ($(LOSCFG_DRIVERS_MMC), y)
-LOCAL_SRCS += $(wildcard board/$(LITEOS_PLATFORM)/mmc/*.c)
-MMC_INCLUDE += -I $(LITEOSTOPDIR)/drivers/mmc/host/$(MMC_HOST_DIR)
-LOCAL_INCLUDE += $(MMC_INCLUDE)
-endif
-
-LOCAL_SRCS += $(wildcard board/$(LITEOS_PLATFORM)/drivers/*.c)
-ifeq ($(findstring y, $(LOSCFG_PLATFORM_HI3516DV300)$(LOSCFG_PLATFORM_HI3556V200)), y)
-LOCAL_SRCS += $(wildcard common/*.c)
-ifneq ($(LOSCFG_FS_VFS), y)
-LOCAL_SRCS := $(filter-out common/console.c common/virtual_serial.c, $(LOCAL_SRCS))
-endif
-else
-LOCAL_SRCS += $(wildcard common/los_config.c)
-LOCAL_SRCS += $(wildcard common/los_printf.c)
-LOCAL_SRCS += $(wildcard common/los_excinfo.c)
-endif
-
 BSP_HWI_SRC = \
         ${wildcard  hw/arm/interrupt/nvic/*.c}
         LOCAL_SRCS += $(BSP_HWI_SRC)
