@@ -25,14 +25,6 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
 
 /*
  *  +-------------------------------------------------------+
@@ -54,9 +46,8 @@
  *             |                                    |
  *             Tail                                 Head
  */
-#include "los_config.h"
+
 #ifdef LOSCFG_SHELL_DMESG
-#include "sys_config.h"
 #include "dmesg_pri.h"
 #include "unistd.h"
 #include "stdlib.h"
@@ -204,7 +195,7 @@ STATIC INT32 OsCopyToNew(VOID *addr, UINT32 size)
     (VOID)memset_s(temp, g_dmesgInfo->logSize, 0, g_dmesgInfo->logSize);
     copyLen = ((bufSize < g_dmesgInfo->logSize) ? bufSize : g_dmesgInfo->logSize);
     if (bufSize < g_dmesgInfo->logSize) {
-        copyStart = g_dmesgInfo->logSize - bufSize ;
+        copyStart = g_dmesgInfo->logSize - bufSize;
     }
 
     ret = OsDmesgRead(temp, g_dmesgInfo->logSize);
@@ -369,7 +360,7 @@ STATIC VOID OsBufFullWrite(const CHAR *dst, UINT32 logLen)
     CHAR *buf = g_dmesgInfo->logBuf;
     errno_t ret;
 
-    if (!logLen || (dst == NULL)) {
+    if ((logLen == 0) || (dst == NULL)) {
         return;
     }
     if (logLen > bufSize) { /* full re-write */
@@ -424,8 +415,8 @@ STATIC VOID OsWriteTailToHead(const CHAR *dst, UINT32 logLen)
     CHAR *buf = g_dmesgInfo->logBuf;
     errno_t ret;
 
-    if ((!logLen) || (dst == NULL)) {
-        return ;
+    if ((logLen == 0) || (dst == NULL)) {
+        return;
     }
     if (logLen > (bufSize - logSize)) { /* space-need > space-remain */
         writeLen = bufSize - logSize;
@@ -458,8 +449,8 @@ STATIC VOID OsWriteTailToEnd(const CHAR *dst, UINT32 logLen)
     CHAR *buf = g_dmesgInfo->logBuf;
     errno_t ret;
 
-    if ((!logLen) || (dst == NULL)) {
-        return ;
+    if ((logLen == 0) || (dst == NULL)) {
+        return;
     }
     if (logLen >= (bufSize - tail)) { /* need cycle to start ,then became B */
         writeLen = bufSize - tail;
