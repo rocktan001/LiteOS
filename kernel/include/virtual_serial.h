@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: Tickless
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Virtual Serial HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,15 +26,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-/**
- * @defgroup los_tickless Tickless
- * @ingroup kernel
- */
+#ifndef _VIRTUAL_SERIAL_H
+#define _VIRTUAL_SERIAL_H
 
-#ifndef _LOS_TICKLESS_H
-#define _LOS_TICKLESS_H
-
-#include "los_typedef.h"
+#include "los_config.h"
+#ifdef LOSCFG_FS_VFS
+#include "fs/fs.h"
+#endif
+#if defined(LOSCFG_DRIVERS_USB_SERIAL_GADGET) || defined(LOSCFG_DRIVERS_USB_ETH_SER_GADGET)
+#include "implementation/usb_api_pri.h"
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -42,47 +43,25 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/**
- * @ingroup  los_tickless
- * @brief enable the tickless mode.
- *
- * @par Description:
- * This API is used to enable the tickless mode. In the mode, system changes from
- * periodic clock mode to dynamic clock mode.
- *
- * @attention
- * None.
- *
- * @param  None.
- *
- * @retval None.
- * @par Dependency:
- * <ul><li>los_tickless.h: the header file that contains the API declaration.</li></ul>
- * @see LOS_TicklessDisable
- * @since Huawei LiteOS V200R001C00
- */
-extern VOID LOS_TicklessEnable(VOID);
+#ifdef LOSCFG_FS_VFS
+#define SERIAL         "/dev/serial"
+#define SERIAL_TTYGS0  "/dev/ttyGS0"
+#define SERIAL_UARTDEV "/dev/uartdev"
 
-/**
- * @ingroup  los_tickless
- * @brief disable the tickless mode.
- *
- * @par Description:
- * This API is used to disable the tickless mode. System will not change from
- * periodic clock mode to dynamic clock mode.
- *
- * @attention
- * None.
- *
- * @param  None.
- *
- * @retval None.
- * @par Dependency:
- * <ul><li>los_tickless.h: the header file that contains the API declaration.</li></ul>
- * @see LOS_TicklessEnable
- * @since Huawei LiteOS V200R001C00
- */
-extern VOID LOS_TicklessDisable(VOID);
+#define SERIAL_TYPE_UART_DEV   1
+#define SERIAL_TYPE_USBTTY_DEV 2
+
+extern INT32 virtual_serial_init(const CHAR *deviceName);
+extern INT32 virtual_serial_deinit(VOID);
+
+extern UINT32 SerialTypeGet(VOID);
+
+typedef struct {
+    struct file *filep;
+    UINT32 mask;
+} LOS_VIRSERIAL_CB;
+
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -90,4 +69,4 @@ extern VOID LOS_TicklessDisable(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif /* _VIRTUAL_SERIAL_H */

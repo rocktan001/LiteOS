@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: Tickless
+ * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+ * Description: Low-power Framework.
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-09-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,15 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-/**
- * @defgroup los_tickless Tickless
- * @ingroup kernel
- */
+#ifndef _LOS_LOWPOWER_IMPL_H
+#define _LOS_LOWPOWER_IMPL_H
 
-#ifndef _LOS_TICKLESS_H
-#define _LOS_TICKLESS_H
-
-#include "los_typedef.h"
+#include "los_lowpower.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -42,47 +37,49 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/**
- * @ingroup  los_tickless
- * @brief enable the tickless mode.
- *
- * @par Description:
- * This API is used to enable the tickless mode. In the mode, system changes from
- * periodic clock mode to dynamic clock mode.
- *
- * @attention
- * None.
- *
- * @param  None.
- *
- * @retval None.
- * @par Dependency:
- * <ul><li>los_tickless.h: the header file that contains the API declaration.</li></ul>
- * @see LOS_TicklessDisable
- * @since Huawei LiteOS V200R001C00
- */
-extern VOID LOS_TicklessEnable(VOID);
+typedef struct {
+    VOID (*changeFreq)(UINT8 freq);
+    VOID (*enterLightSleep)(VOID);
+    VOID (*enterDeepSleep)(VOID);
+    VOID (*setWakeUpTimer)(UINT32 timeout);
+    VOID (*withdrawWakeUpTimer)(VOID);
+    UINT32 (*getSleepTime)(VOID);
+    UINT32 (*selectSleepMode)(UINT32);
+    UINT32 (*preConfig)(VOID);
+    VOID (*postConfig)(VOID);
+    VOID (*contextSave)(VOID);
+    VOID (*contextRestore)(VOID);
+    UINT32 (*getDeepSleepVoteCount)(VOID);
+    UINT32 (*getSleepMode)(VOID);
+    VOID (*setSleepMode)(UINT32 mode);
+} PowerMgrRunOps;
 
-/**
- * @ingroup  los_tickless
- * @brief disable the tickless mode.
- *
- * @par Description:
- * This API is used to disable the tickless mode. System will not change from
- * periodic clock mode to dynamic clock mode.
- *
- * @attention
- * None.
- *
- * @param  None.
- *
- * @retval None.
- * @par Dependency:
- * <ul><li>los_tickless.h: the header file that contains the API declaration.</li></ul>
- * @see LOS_TicklessEnable
- * @since Huawei LiteOS V200R001C00
- */
-extern VOID LOS_TicklessDisable(VOID);
+typedef struct {
+    UINT32 minLightSleepTicks;
+    UINT32 minDeepSleepTicks;
+    UINT32 maxDeepSleepTicks;
+} PowerMgrConfig;
+
+typedef struct {
+    BOOL (*couldDeepSleep)(VOID);
+    VOID (*systemWakeup)(VOID);
+    BOOL (*suspendPreConfig)(VOID);
+    VOID (*suspendDevice)(VOID);
+    VOID (*rollback)(VOID);
+    VOID (*resumeDevice)(VOID);
+    VOID (*resumePostConfig)(VOID);
+    VOID (*resumeCallBack)(VOID);
+    VOID (*otherCoreResume)(VOID);
+    VOID (*resumeFromReset)(VOID);
+} PowerMgrDeepSleepOps;
+
+typedef struct {
+    PowerMgrRunOps runOps;
+    PowerMgrDeepSleepOps deepSleepOps;
+    PowerMgrConfig config;
+} PowerMgrParameter;
+
+extern VOID LOS_PowerMgrInit(const PowerMgrParameter *para);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -90,4 +87,4 @@ extern VOID LOS_TicklessDisable(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif  // _LOS_LOWPOWER_IMPL_H
