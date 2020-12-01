@@ -121,40 +121,55 @@ config LOSCFG_PLATFORM_ADAPT
 
     help
       Answer Y to add os_adapt.c to LiteOS.
-config LOSCFG_COREDUMP
-    bool "Enable Coredump"
+
+#config LOSCFG_COREDUMP
+#    bool "Enable Coredump"
+#    default n
+#
+#    help
+#      Answer Y to enable Coredump for LiteOS.
+#
+#config COREDUMP_COMPRESS_MEM_SIZE
+#    int "set the compress-packet size(K)"
+#    default 64
+#    depends on LOSCFG_COREDUMP
+#    help
+#      Its uint is K and the default size is 64K(Raise the size of compressing the packet of dumpinfo to reduce the time of using,if you have enough memory space.)
+
+config LOSCFG_BACKTRACE
+    bool "Enable Backtrace"
     default n
 
     help
-      Answer Y to enable Coredump for LiteOS.
+      Answer Y to enable backtrace for LiteOS.
 
-config COREDUMP_COMPRESS_MEM_SIZE
-    int "set the compress-packet size(K)"
-    default 64
-    depends on LOSCFG_COREDUMP
-    help
-      Its uint is K and the default size is 64K(Raise the size of compressing the packet of dumpinfo to reduce the time of using,if you have enough memory space.)
-
-config LOSCFG_GDB
-    bool "Enable GDB"
-    default n
-
-choice
-    prompt "GDB Debug"
-    depends on LOSCFG_GDB
-    default  LOSCFG_GDB_DEBUG
+config LOSCFG_BACKTRACE_WITH_FP
+    bool "Backtrace with frame pointer"
+    default y
+    depends on LOSCFG_BACKTRACE && !LOSCFG_COMPILER_XTENSA_32
 
     help
-        LOSCFG_GDB_DEBUG
-        LOSCFG_GDB_ABNORMAL
+      Answer Y to enable frame-pointer for backtrace.
 
-config LOSCFG_GDB_DEBUG
-    bool "GDB adds breakpoint to debug code"
-
-config LOSCFG_GDB_ABNORMAL
-    bool "When it's abnormal , invoking gdb to check backtrace"
-
-endchoice
+#config LOSCFG_GDB
+#    bool "Enable GDB"
+#    default n
+#
+#choice
+#    prompt "GDB Debug"
+#    depends on LOSCFG_GDB
+#    default  LOSCFG_GDB_DEBUG
+#    help
+#        LOSCFG_GDB_DEBUG
+#        LOSCFG_GDB_ABNORMAL
+#
+#config LOSCFG_GDB_DEBUG
+#    bool "GDB adds breakpoint to debug code"
+#
+#config LOSCFG_GDB_ABNORMAL
+#    bool "When it's abnormal , invoking gdb to check backtrace"
+#
+#endchoice
 
 config LOSCFG_DO_ALIGN
     bool "Enable do align for hi3518e"
@@ -166,6 +181,7 @@ config LOSCFG_DO_ALIGN
 config LOSCFG_ENABLE_MAGICKEY
     bool "Enable MAGIC KEY"
     default y
+    depends on LOSCFG_SHELL
     help
       Answer Y to enable LiteOS Magic key.
         ctrl + r : Magic key check switch;
@@ -211,30 +227,37 @@ config LOSCFG_DEBUG_KERNEL
 config LOSCFG_DEBUG_QUEUE
     bool "Enable Queue Debugging"
     default n
-    depends on LOSCFG_DEBUG_KERNEL
+    depends on LOSCFG_DEBUG_KERNEL && LOSCFG_BASE_IPC_QUEUE
     help
       Answer Y to enable debug queue.
 
 config LOSCFG_DEBUG_MUTEX
     bool "Enable Mutex Debugging"
     default n
-    depends on LOSCFG_DEBUG_KERNEL
+    depends on LOSCFG_DEBUG_KERNEL && LOSCFG_BASE_IPC_MUX
     help
       Answer Y to enable debug mutex.
 
-config LOSCFG_DEBUG_DEADLOCK
+config LOSCFG_DEBUG_MUTEX_DEADLOCK
     bool "Enable Mutex Deadlock Debugging"
     default n
-    depends on LOSCFG_DEBUG_KERNEL
+    depends on LOSCFG_DEBUG_KERNEL && LOSCFG_BASE_IPC_MUX
     help
       Answer Y to enable debug mutex deadlock.
 
 config LOSCFG_DEBUG_SEMAPHORE
     bool "Enable Semaphore Debugging"
     default n
-    depends on LOSCFG_DEBUG_KERNEL
+    depends on LOSCFG_DEBUG_KERNEL && LOSCFG_BASE_IPC_SEM
     help
       Answer Y to enable debug semaphore.
+
+config LOSCFG_DEBUG_SCHED_STATISTICS
+    bool "Enable Scheduler Statistics Debugging"
+    depends on LOSCFG_DEBUG_KERNEL
+    default n
+    help
+      Answer Y to enable debug schedulder statistics.
 
 source "shell/Kconfig"
 config LOSCFG_NET_LWIP_SACK_TFTP
@@ -247,7 +270,7 @@ config LOSCFG_NET_LWIP_SACK_TFTP
 config LOSCFG_EXC_INTERACTION
     bool "Enable exc interaction"
     default n
-    depends on LOSCFG_SHELL
+    depends on LOSCFG_SHELL && LOSCFG_KERNEL_CONSOLE
     help
       Answer Y to enable exception interaction for LiteOS, when the system enter exception, user can also interact with system by shell
       command like readreg, writereg,task,hwi.
