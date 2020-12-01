@@ -9,5 +9,6 @@ source "demos/sensorhub/Kconfig"
 source "demos/kernel/Kconfig"
 source "demos/nbiot_without_atiny/Kconfig"
 source "demos/lms/Kconfig"
+source "demos/ipv6_client/Kconfig"
 
 endmenu

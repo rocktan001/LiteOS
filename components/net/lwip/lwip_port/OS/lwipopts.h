@@ -80,6 +80,17 @@
 #define ARP_QUEUEING             0
 #define TCP_LISTEN_BACKLOG       1
 
+#if defined(LOSCFG_LWIP_IPV6)
+#define LWIP_IPV6 1
+#else
+#define LWIP_IPV6 0
+#endif
+#if defined(LOSCFG_LWIP_IPV4)
+#define LWIP_IPV4 1
+#else
+#define LWIP_IPV4 0
+#endif
+
 /* *
  * SYS_LIGHTWEIGHT_PROT==1: if you want inter-task protection for certain
  * critical regions during buffer allocation, deallocation and memory
@@ -288,12 +299,6 @@ The STM32F4xx allows computing and verifying the IP, UDP, TCP and ICMP checksums
 */
 #define SO_REUSE                         1
 
-/*
-   ----------------------------------------
-   ----------- Lwip Ipv6 options ----------
-   ----------------------------------------
-*/
-#define LWIP_HOOK_ND6_GET_GW get_lwip_ipv6_default_gw
 
 /*
    ---------------------------------
@@ -314,8 +319,8 @@ The STM32F4xx allows computing and verifying the IP, UDP, TCP and ICMP checksums
 #define LWIP_COMPAT_MUTEX               1
 
 #define LWIP_DEBUG
-#define NETIF_DEBUG LWIP_DBG_ON
-#define INET_DEBUG  LWIP_DBG_ON
+#define NETIF_DEBUG LWIP_DBG_OFF
+#define INET_DEBUG  LWIP_DBG_OFF
 #define DHCP_DEBUG  LWIP_DBG_OFF
 #define IGMP_DEBUG  LWIP_DBG_ON
 #define MDNS_DEBUG  LWIP_DBG_ON

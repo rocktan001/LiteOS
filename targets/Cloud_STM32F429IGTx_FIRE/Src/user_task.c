@@ -64,9 +64,13 @@
 #include "shell.h"
 #include "shcmd.h"
 #endif
+#ifdef LOSCFG_DEMOS_IPV6_CLIENT
+#include "client_demo.h"
+#endif
 
 #define USER_TASK_PRIORITY 2
 #define DTLS_TASK_PRIORITY 3
+#define IPV6_TASK_PRIORITY 4
 static UINT32 g_atiny_tskHandle;
 static UINT32 g_fs_tskHandle;
 
@@ -190,6 +194,35 @@ uint32_t create_dtls_server_task(void)
     task_init_param.uwStackSize = 0x1000;
 
     ret = LOS_TaskCreate(&g_dtls_server_tskHandle, &task_init_param);
+    if (LOS_OK != ret) {
+        return ret;
+    }
+
+    return ret;
+}
+#endif
+
+#ifdef LOSCFG_DEMOS_IPV6_CLIENT
+static UINT32 g_ipv6_Handle;
+uint32_t ipv6_tasks(void)
+{
+    uint32_t ret = LOS_OK;
+    TSK_INIT_PARAM_S task_init_param;
+
+    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
+    task_init_param.usTaskPrio = IPV6_TASK_PRIORITY;
+    task_init_param.pcName = "ipv6_task";
+
+#ifdef LOSCFG_DEMOS_IPV6_TCP_CLIENT
+    extern void ipv6_tcp_test(void);
+    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)ipv6_tcp_test;
+#else
+    extern void ipv6_udp_test(void);
+    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)ipv6_udp_test;
+#endif
+
+    task_init_param.uwStackSize = 0x1000;
+    ret = LOS_TaskCreate(&g_ipv6_Handle, &task_init_param);
     if (ret != LOS_OK) {
         return ret;
     }
@@ -209,6 +242,10 @@ UINT32 app_init(VOID)
     if (ret != LOS_OK) {
         return LOS_NOK;
     }
+
+#ifdef LOSCFG_DEMOS_IPV6_CLIENT
+    (void)ipv6_tasks();
+#endif
 
 #ifdef LOSCFG_DEMOS_KERNEL
 #ifdef LOSCFG_DEMOS_KERNEL_ENTRY

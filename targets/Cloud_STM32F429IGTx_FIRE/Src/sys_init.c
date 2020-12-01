@@ -64,7 +64,7 @@ void net_init(void)
 #if LWIP_IPV4 && LWIP_IPV6
     IP_ADDR4(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
     IP_ADDR4(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
-    IP_ADDR4(&gw,     GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
+    IP_ADDR4(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
 #elif LWIP_IPV6
 #else
     /* IP addresses initialization without DHCP (IPv4) */
@@ -82,7 +82,6 @@ void net_init(void)
 #if LWIP_IPV4 && LWIP_IPV6
     (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
 #elif LWIP_IPV6
-
     (void)netif_add(&gnetif, NULL, ethernetif_init, tcpip_input);
     netif_create_ip6_linklocal_address(&gnetif, 1);
     {
