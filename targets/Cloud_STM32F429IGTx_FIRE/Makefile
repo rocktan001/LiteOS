@@ -18,7 +18,6 @@ USER_SRC =  \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/main.c \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/system_stm32f4xx.c \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/usart.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/uart_debug.c \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/dwt.c \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/eth.c \
         $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c \

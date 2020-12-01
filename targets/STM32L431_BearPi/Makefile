@@ -27,12 +27,12 @@ USER_SRC =  \
         $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/sys_init.c \
         $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/system_stm32l4xx.c \
         $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/usart.c \
-        $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/uart_debug.c \
         $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/user_task.c
         C_SOURCES += $(USER_SRC)
 
 # C includes
 HAL_DRIVER_INC = \
+        -I $(LITEOSTOPDIR)/targets/bsp/include \
         -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32L4xx_HAL_Driver/Inc \
         -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32L4xx_HAL_Driver/Inc/Legacy
         BOARD_INCLUDES += $(HAL_DRIVER_INC)
@@ -89,6 +89,6 @@ LOCAL_SRCS := $(subst $(CURDIR)/,, $(BOARD_SRCS))
 BOARD_DEF += $(C_DEFS)
 LOCAL_INCLUDE += $(BOARD_INCLUDES)
 
-LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS) $(LITEOS_CFLAGS_INTERWORK)
 
 include $(MODULE)

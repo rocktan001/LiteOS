@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: LiteOS Shell Dmesg Module Private Headfile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: uart config HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,40 +26,20 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _HWLITEOS_SHELL_DMESG_PRI_H
-#define _HWLITEOS_SHELL_DMESG_PRI_H
+#ifndef _UART_H
+#define _UART_H
 
-#ifdef LOSCFG_SHELL_DMESG
-#include "dmesg.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+#define UART_WITH_LOCK     1
+#define UART_WITHOUT_LOCK  0
+#define DEFAULT_TIMEOUT    0xFFFF
+#define DEFAULT_UART_IRQN  USART1_IRQn
 
-/*
- * The dmesg buffer is start with this info structure, then the log.
- */
-typedef struct {
-    UINT32 logSize; /* The size of log in buffer */
-    UINT32 logHead; /* The index of the first log data. Data_out_flag */
-    UINT32 logTail; /* The index where to write, write in and plus one. Data_it_flag */
-    CHAR   *logBuf; /* The log buffer addr */
-} DmesgInfo;
+VOID   uart_init(VOID);
+UINT8  uart_getc(VOID);
+UINT32 uart_wait_adapt(VOID);
+INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
+UINT8  uart_read(VOID);
+#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
 
-extern UINT32 OsDmesgInit(VOID);
-extern UINT32 OsDmesgLvGet(VOID);
-extern UINT32 OsCheckConsoleLock(VOID);
-extern UINT32 OsCheckUartLock(VOID);
-extern VOID OsLogShow(VOID);
-extern UINT32 OsLogRecordStr(const CHAR *str, UINT32 len);
-extern INT32 OsLogMemcpyRecord(const CHAR *buf, UINT32 logLen);
-
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif
-#endif /* _HWLITEOS_SHELL_DMESG_PRI_H */
+#endif /* _UART_H */

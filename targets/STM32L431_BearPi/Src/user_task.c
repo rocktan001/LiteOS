@@ -32,8 +32,21 @@
 #include "los_sys.h"
 #include "platform_config.h"
 
+#ifdef LOSCFG_COMPONNETS_NET_AT
+#include "sys_init.h"
+#include "nb_iot/los_nb_api.h"
+#include "at_frame/at_api.h"
+#include "bc95.h"
+#endif
+#ifdef LOSCFG_SHELL
+#include "shell.h"
+#include "shcmd.h"
+#endif
+
 #define USER_TASK_PRIORITY 2
+
 static UINT32 g_fs_tskHandle;
+static UINT32 g_atiny_tskHandle;
 
 UINT32 create_fs_task(void)
 {
@@ -55,14 +68,79 @@ UINT32 create_fs_task(void)
     return ret;
 }
 
+
+void atiny_task_entry(void)
+{
+#if defined(LOSCFG_COMPONNETS_NET_AT)
+
+    #if defined(LOSCFG_COMPONENTS_NET_AT_ESP8266)
+    extern at_adaptor_api esp8266_interface;
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_ESP8266============================\n");
+    at_api_register(&esp8266_interface);
+
+    #elif defined(LOSCFG_COMPONENTS_NET_AT_BG36)
+    extern at_adaptor_api emtc_bg36_interface;
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BG36============================\n");
+    at_api_register(&emtc_bg36_interface);
+
+    #elif defined(LOSCFG_COMPONENTS_NET_AT_SIM900A)
+    extern at_adaptor_api sim900a_interface;
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_SIM900A============================\n");
+    at_api_register(&sim900a_interface);
+
+    #elif defined(LOSCFG_COMPONENTS_NET_AT_BC95)
+    extern at_adaptor_api bc95_interface;
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BC95============================\n");
+    los_nb_init((const int8_t *)"172.25.233.98",(const int8_t *)"5600",NULL);
+    los_nb_notify("\r\n+NSONMI:",strlen("\r\n+NSONMI:"),NULL,nb_cmd_match);
+    at_api_register(&bc95_interface);
+
+    #elif defined(USE_NB_NEUL95_NO_ATINY)
+    demo_nbiot_only();
+    #else
+
+    #endif
+#endif
+}
+
+UINT32 creat_agenttiny_task(VOID)
+{
+    UINT32 ret = LOS_OK;
+    TSK_INIT_PARAM_S task_init_param;
+
+    task_init_param.usTaskPrio = 2;
+    task_init_param.pcName = "agenttiny_task";
+    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)atiny_task_entry;
+    task_init_param.uwStackSize = 0x1000;
+
+    ret = LOS_TaskCreate(&g_atiny_tskHandle, &task_init_param);
+    if (ret != LOS_OK) {
+        return ret;
+    }
+
+    return ret;
+}
+
 UINT32 app_init(VOID)
 {
     UINT32 ret = LOS_OK;
+#ifdef LOSCFG_COMPONNETS_NET_AT
+    ret = creat_agenttiny_task();
+    if (ret != LOS_OK) {
+        return LOS_NOK;
+    }
+#endif
 
 #ifdef LOSCFG_DEMOS_FS
     ret = create_fs_task();
     if (ret != LOS_OK) {
         return LOS_NOK;
+    }
+#endif
+
+#ifdef LOSCFG_SHELL
+    if (OsShellInit(0) != LOS_OK) {
+        PRINT_ERR("shell init failed\n");
     }
 #endif
 

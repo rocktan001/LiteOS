@@ -60,7 +60,7 @@
 #if defined STM32F103xE
 #define MAX_AT_USERDATA_LEN     (1024 * 2)
 #else
-#define MAX_AT_USERDATA_LEN     (1024 * 5)
+#define MAX_AT_USERDATA_LEN     (1024)
 #endif
 
 #define IP_LEN                  16

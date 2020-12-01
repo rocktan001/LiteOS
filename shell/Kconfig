@@ -1,6 +1,3 @@
-comment "only support Cloud_STM32F429IGTx_FIRE"
-depends on LOSCFG_DEBUG_VERSION
-
 config LOSCFG_SHELL
     bool "Enable Shell"
     default n

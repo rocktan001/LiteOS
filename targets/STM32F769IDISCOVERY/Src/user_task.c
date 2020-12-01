@@ -36,6 +36,10 @@
 #ifdef LOSCFG_GUI_ENABLE
 #include "lvgl_demo.h"
 #endif
+#ifdef LOSCFG_SHELL
+#include "shell.h"
+#include "shcmd.h"
+#endif
 
 #define USER_TASK_PRIORITY 2
 static UINT32 g_fs_tskHandle;
@@ -72,6 +76,12 @@ UINT32 app_init(VOID)
     ret = create_fs_task();
     if (ret != LOS_OK) {
         return LOS_NOK;
+    }
+#endif
+
+#ifdef LOSCFG_SHELL
+    if (OsShellInit(0) != LOS_OK) {
+        PRINT_ERR("shell init failed\n");
     }
 #endif
 

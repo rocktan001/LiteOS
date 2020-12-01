@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
- * Description: uart config HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+ * Description: MagicKey Headfile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2019-02-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -25,29 +25,30 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#ifndef _MAGICKEY_H
+#define _MAGICKEY_H
 
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define UART_BUF           128
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
+#include "los_exc.h"
 
-extern VOID   uart_init(VOID);
-extern UINT8  uart_getc(VOID);
-extern UINT32 uart_wait_adapt(VOID);
-extern INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-extern INT32  uart_read(UINT8 *buf, INT32 len, INT32 timeout);
-#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif /* _UART_H */
+typedef struct {
+    VOID (*opHandler)(VOID);
+    CHAR *helpMsg;
+    CHAR magicKey;
+} MagicKeyOp;
+
+extern INT32 CheckMagicKey(CHAR key);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif

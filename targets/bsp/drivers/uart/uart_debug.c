@@ -26,14 +26,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "usart.h"
-
+#include <ctype.h>
 #include <los_hwi.h>
 #include <los_sem.h>
+#include "usart.h"
 
 #define UART_EVENT_MASK 0x1
-#define UART_READ_MASK 0xFF
-STATIC UINT8 g_uart_buf[UART_BUF];
+#define UART_READ_MASK  0xFF
+
+STATIC UINT8 g_rec = 0;
 EVENT_CB_S g_uartEvent;
 
 INT32 uart_putc(CHAR c)
@@ -45,7 +46,7 @@ UINT8 uart_getc(VOID)
 {
     UINT8 ch = 0;
     LOS_IntLock();
-    ch = (UINT8)(huart1.Instance->DR & UART_READ_MASK);
+    HAL_UART_Receive(&huart1, &ch, 1, 0);
     LOS_IntUnLock();
     return ch;
 }
@@ -67,35 +68,10 @@ UINT32 uart_wait_adapt(VOID)
     return LOS_NOK;
 }
 
-VOID uart_get_raw(VOID)
-{
-    UINT8 c;
-    STATIC INT32 g_inputIdx = 0;
-    if (g_inputIdx == 0) {
-        (VOID)memset_s(g_uart_buf, UART_BUF, 0, UART_BUF);
-    }
-
-    c = uart_getc();
-    switch (c)
-    {
-        case '\n':
-            g_uart_buf[g_inputIdx++] = '\0';
-            uart_notice_adapt();
-            g_inputIdx = 0;
-            break;
-        default:
-            if (g_inputIdx < UART_BUF - 1) {
-                g_uart_buf[g_inputIdx++] = c;
-            } else {
-                g_inputIdx = 0;
-            }
-            break;
-    }
-}
-
 STATIC VOID uart_irqhandle(VOID)
 {
-    uart_get_raw();
+    g_rec = uart_getc();
+    uart_notice_adapt();
 }
 
 INT32 uart_hwiCreate(VOID)
@@ -108,14 +84,14 @@ INT32 uart_hwiCreate(VOID)
     return LOS_OK;
 }
 
-INT32 uart_read(UINT8 *buf, INT32 len, INT32 timeout)
+UINT8 uart_read(VOID)
 {
-    (VOID)timeout;
-    if (memcpy_s(buf, len, g_uart_buf, len) != EOK) {
-        return LOS_NOK;
+    UINT8 c = 0;
+    if (uart_wait_adapt() == LOS_OK) {
+        c = g_rec;
+        return c;
     }
-
-    return LOS_OK;
+    return c;
 }
 
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
