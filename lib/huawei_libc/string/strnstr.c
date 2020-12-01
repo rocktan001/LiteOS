@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: CDEFS HEAD FILE
+ * Description: Strnchr Implementation
  * Author: Huawei LiteOS Team
- * Create: 2020-05-15
+ * Create: 2020-09-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,24 +26,29 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _HW_CDEFS_H_
-#define _HW_CDEFS_H_
+#include "string.h"
 
-#if defined(__cplusplus)
-#define __BEGIN_DECLS extern "C" {
-#define __END_DECLS }
-#else
-#define __BEGIN_DECLS
-#define __END_DECLS
-#endif
+char *strnstr(const char *s, const char *find, size_t slen)
+{
+    size_t len1, len2, slenTmp;
 
-#define __packed __attribute__((__packed__))
-#define __aligned(x) __attribute__((__aligned__(x)))
+    len2 = strlen(find);
+    if (len2 == 0) {
+        return (char *)s;
+    }
+    if (slen < len2) {
+        return NULL;
+    }
+    len1 = strlen(s);
+    slenTmp = slen > len1 ? len1 : slen;
 
-#define __LIBC_HIDDEN__ __attribute__((visibility("hidden")))
+    for (; slenTmp >= len2; slenTmp--) {
+        if (!strncmp(s, find, len2)) {
+            return (char *)s;
+        }
+        s++;
+    }
 
-#define __FBSDID(_s)
+    return NULL;
+}
 
-#define __min_size(x) static (x)
-
-#endif

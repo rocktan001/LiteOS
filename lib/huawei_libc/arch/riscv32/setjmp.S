@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: CDEFS HEAD FILE
+ * Description: setjmp/longjmp
  * Author: Huawei LiteOS Team
- * Create: 2020-05-15
+ * Create: 2020-10-13
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,24 +26,38 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _HW_CDEFS_H_
-#define _HW_CDEFS_H_
-
-#if defined(__cplusplus)
-#define __BEGIN_DECLS extern "C" {
-#define __END_DECLS }
+  .globl  setjmp
+  .type   setjmp, @function
+setjmp:
+#ifdef LOS_COMPILE_LDM
+    stmia {ra, sp, s0-s1}, (a0) /* store value in a0 address to registers. */
 #else
-#define __BEGIN_DECLS
-#define __END_DECLS
+    sw ra,  0(a0)
+    sw s0,  4(a0)
+    sw s1,  8(a0)
+    sw sp,  12(a0)
 #endif
 
-#define __packed __attribute__((__packed__))
-#define __aligned(x) __attribute__((__aligned__(x)))
+    li      a0, 0
+    ret
+    .size   setjmp, .-setjmp
 
-#define __LIBC_HIDDEN__ __attribute__((visibility("hidden")))
-
-#define __FBSDID(_s)
-
-#define __min_size(x) static (x)
-
+  .globl  longjmp
+  .type   longjmp, @function
+longjmp:
+#ifdef LOS_COMPILE_LDM
+    ldmia {ra, sp, s0-s1}, (a0)
+#else
+    lw ra,  0(a0)
+    lw s0,  4(a0)
+    lw s1,  8(a0)
+    lw sp,  12(a0)
 #endif
+
+    beqz a1, 1f /* if a1 is equal to 0, go to 1f and return 1. */
+    move a0, a1 /* return a1. */
+    ret
+1:
+    li   a0, 1
+    ret
+    .size   longjmp, .-longjmp
