@@ -64,7 +64,7 @@
 
 void *atiny_net_bind(const char *host, const char *port, int proto)
 {
-#if defined (LOSCFG_COMPONENTS_NET_LWIP) || defined (WITH_LINUX)
+#if defined (LOSCFG_LWIP_IPV4) || defined (WITH_LINUX)
 
     struct sockaddr_in sock_addr;
     int port_i;
@@ -220,12 +220,11 @@ int atiny_net_accept(void *bind_ctx, void *client_ctx, void *client_ip, size_t b
             struct sockaddr_in6 *addr = (struct sockaddr_in6 *) &client_addr;
             *ip_len = sizeof(addr->sin6_addr.s6_addr);
 
-            if (buf_size < *ip_lenret) {
-                return(ATINY_NET_BUF_SMALL_FAILEDret;
+            if (buf_size < *ip_len) {
+                return(ATINY_NET_BUF_SMALL_FAILED);
             }
 
-
-            memcpy(client_ip, &addr->sin6_addr.s6_addr, *ip_lenret);
+            memcpy(client_ip, &addr->sin6_addr.s6_addr, *ip_len);
         }
 #else
         if (client_addr.sin_family == AF_INET) {

@@ -54,6 +54,13 @@ void ethernetif_input(void *pvParameters);
 #if LWIP_IPV6
 ip6_addr_t *get_lwip_ipv6_default_gw(const struct netif *netif, const ip6_addr_t *ip6addr);
 void set_lwip_ipv6_default_gw(struct netif *netif, const ip6_addr_t *gw);
+
+/*
+   ----------------------------------------
+   ----------- Lwip Ipv6 options ----------
+   ----------------------------------------
+*/
+#define LWIP_HOOK_ND6_GET_GW get_lwip_ipv6_default_gw
 #endif
 
 #ifdef __cplusplus
