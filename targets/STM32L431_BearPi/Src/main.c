@@ -81,7 +81,7 @@ VOID HardwareInit(VOID)
     LCD_ShowString(20, 130, 240, 16, 16, "Powerd by Huawei LiteOS!");
     LCD_ShowString(10, 170, 240, 16, 16, "This is LiteOS kernel demo.");
 
-    Debug_USART1_UART_Init();
+    MX_USART1_UART_Init();
 }
 
 INT32 main(VOID)

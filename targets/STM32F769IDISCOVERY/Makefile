@@ -56,6 +56,7 @@ INCLUDE_INC = \
 BSP_INC = \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Inc \
         -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/include\asm \
+        -I $(LITEOSTOPDIR)/targets/bsp/include \
         -I $(LITEOSTOPDIR)/arch/arm/cortex_m/cmsis \
         -I $(LITEOSTOPDIR)/arch/arm/include \
         -I $(LITEOSTOPDIR)/arch/arm/cortex_m/include \

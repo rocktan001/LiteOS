@@ -1,6 +1,6 @@
-/* ----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: At Hal
+ * Description: At Hal Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -28,33 +28,39 @@
 
 #include "at_hal.h"
 #include "usart.h"
+#include "main.h"
 
 UART_HandleTypeDef at_usart;
 
-static USART_TypeDef *g_pUSART = USART2;
-static uint32_t g_uartIRQn = USART2_IRQn;
+static USART_TypeDef *g_atUSART = USART2;
+static uint32_t g_atIRQn = USART2_IRQn;
 
 uint8_t buff_full = 0;
 static uint32_t g_disscard_cnt = 0;
 
-uint32_t wi       = 0;
-uint32_t pre_ri   = 0; /* only save cur msg start */
-uint32_t ri       = 0;
+uint32_t wi = 0;
+uint32_t pre_ri = 0; /* only save cur msg start */
+uint32_t ri = 0;
 
 static void at_usart_adapter(uint32_t port)
 {
+#ifdef LOSCFG_PLATFORM_STM32L431_BearPi
+    g_atUSART = LPUART1;
+    g_atIRQn = LPUART1_IRQn;
+    return;
+#endif
     switch (port) {
         case 1: // 1: usart1
-            g_pUSART = USART1;
-            g_uartIRQn = USART1_IRQn;
+            g_atUSART = USART1;
+            g_atIRQn = USART1_IRQn;
             break;
         case 2: // 2: usart2
-            g_pUSART = USART2;
-            g_uartIRQn = USART2_IRQn;
+            g_atUSART = USART2;
+            g_atIRQn = USART2_IRQn;
             break;
         case 3: // 3: usart3
-            g_pUSART = USART3;
-            g_uartIRQn = USART3_IRQn;
+            g_atUSART = USART3;
+            g_atIRQn = USART3_IRQn;
             break;
         default:
             break;
@@ -107,7 +113,7 @@ int32_t at_usart_init(void)
 
     at_usart_adapter(at_user_conf->usart_port);
 
-    usart->Instance = g_pUSART;
+    usart->Instance = g_atUSART;
     usart->Init.BaudRate = at_user_conf->buardrate;
 
     usart->Init.WordLength = UART_WORDLENGTH_8B;
@@ -118,9 +124,9 @@ int32_t at_usart_init(void)
     if (HAL_UART_Init(usart) != HAL_OK) {
         _Error_Handler(__FILE__, __LINE__);
     }
-    HAL_NVIC_EnableIRQ(g_uartIRQn);
+    HAL_NVIC_EnableIRQ(g_atIRQn);
     __HAL_UART_CLEAR_FLAG(usart, UART_FLAG_TC);
-    LOS_HwiCreate(g_uartIRQn + 16, 0, 0, at_irq_handler, 0);
+    LOS_HwiCreate(g_atIRQn + 16, 0, 0, at_irq_handler, 0);
     __HAL_UART_ENABLE_IT(usart, UART_IT_IDLE);
     __HAL_UART_ENABLE_IT(usart, UART_IT_RXNE);
 
@@ -187,7 +193,7 @@ void write_at_task_msg(at_msg_type_e type)
     recv_buff recv_buf;
     int ret;
 
-    (void)memset_s(&recv_buf,  sizeof(recv_buf), 0, sizeof(recv_buf));
+    (void)memset_s(&recv_buf, sizeof(recv_buf), 0, sizeof(recv_buf));
     recv_buf.msg_type = type;
 
     ret = LOS_QueueWriteCopy(at.rid, &recv_buf, sizeof(recv_buff), 0);

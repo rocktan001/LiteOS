@@ -96,6 +96,7 @@ LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/lib/libc/stdio \
                  -I $(LITEOSTOPDIR)/targets/bsp/common \
                  -I $(LITEOSTOPDIR)/targets/bsp/include \
                  -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
+                 -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \
                  -I $(LITEOSTOPDIR)/targets/bsp/$(LITEOS_PLATFORM)/include \
                  -I $(LITEOSTOPDIR)/targets/bsp/$(HAL_DRIVER_SRC)/Inc \
                  -I $(LITEOSTOPDIR)/targets/bsp/$(HAL_DRIVER_SRC)/Inc/Legacy \
@@ -114,9 +115,11 @@ BSP_TIMER_SRC = \
         ${wildcard hw/arm/timer/arm_cortex_m/*.c}
         LOCAL_SRCS += $(BSP_TIMER_SRC)
 
+LOCAL_SRCS += $(wildcard drivers/uart/uart_debug.c)
+LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/include
+
 ifeq ($(LOSCFG_COMPONNETS_NET_AT), y)
 LOCAL_SRCS += $(wildcard drivers/uart/at_hal.c)
-LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/include
 endif
 
 ifeq ($(LOSCFG_DRIVERS_NETDEV), y)

@@ -1,6 +1,6 @@
-/* ----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: User Task
+ * Description: Uart Module Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,64 +26,76 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_base.h"
-#include "los_task_pri.h"
-#include "los_typedef.h"
-#include "los_sys.h"
-#include "platform_init.h"
-#include "platform_config.h"
+#include <ctype.h>
+#include <los_hwi.h>
+#include <los_sem.h>
+#include "usart.h"
 
-#ifdef LOSCFG_GUI_ENABLE
-#include "lvgl_demo.h"
-#endif
-#ifdef LOSCFG_SHELL
-#include "shell.h"
-#include "shcmd.h"
-#endif
+#define UART_EVENT_MASK 0x1
+#define UART_READ_MASK  0xFF
 
-#define USER_TASK_PRIORITY 2
-static UINT32 g_fs_tskHandle;
+STATIC UINT8 g_rec = 0;
+EVENT_CB_S g_uartEvent;
 
-UINT32 create_fs_task(void)
+INT32 uart_putc(CHAR c)
 {
-    UINT32 ret = LOS_OK;
-    TSK_INIT_PARAM_S task_init_param;
-
-    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
-    task_init_param.usTaskPrio = USER_TASK_PRIORITY;
-    task_init_param.pcName = "fs_task";
-    extern void fs_demo(void);
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)fs_demo;
-    task_init_param.uwStackSize = 0x1000;
-
-    ret = LOS_TaskCreate(&g_fs_tskHandle, &task_init_param);
-    if (ret != LOS_OK) {
-        return ret;
-    }
-
-    return ret;
+    return uart_write(&c, 1, 0);
 }
 
-UINT32 app_init(VOID)
+UINT8 uart_getc(VOID)
 {
-    UINT32 ret = LOS_OK;
+    UINT8 ch = 0;
+    LOS_IntLock();
+    HAL_UART_Receive(&huart1, &ch, 1, 0);
+    LOS_IntUnLock();
+    return ch;
+}
 
-#ifdef LOSCFG_GUI_ENABLE
-    LvglDemo();
-#endif
+STATIC VOID uart_notice_adapt(VOID)
+{
+    LOS_EventWrite(&g_uartEvent, UART_EVENT_MASK);
+}
 
-#ifdef LOSCFG_DEMOS_FS
-    ret = create_fs_task();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
+UINT32 uart_wait_adapt(VOID)
+{
+    UINT32 ret;
+    ret = LOS_EventRead(&g_uartEvent, UART_EVENT_MASK,
+                        LOS_WAITMODE_AND | LOS_WAITMODE_CLR, LOS_WAIT_FOREVER);
+    if (ret == UART_EVENT_MASK) {
+        return LOS_OK;
     }
-#endif
 
-#ifdef LOSCFG_SHELL
-    if (OsShellInit(0) != LOS_OK) {
-        PRINT_ERR("shell init failed\n");
+    return LOS_NOK;
+}
+
+STATIC VOID uart_irqhandle(VOID)
+{
+    g_rec = uart_getc();
+    uart_notice_adapt();
+}
+
+INT32 uart_hwiCreate(VOID)
+{
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+    (VOID)LOS_HwiCreate(USART1_IRQn + 16, 0, 0, uart_irqhandle, NULL); // 16: cortex-m irq number shift
+    (VOID)LOS_EventInit(&g_uartEvent);
+
+    return LOS_OK;
+}
+
+UINT8 uart_read(VOID)
+{
+    UINT8 c = 0;
+    if (uart_wait_adapt() == LOS_OK) {
+        c = g_rec;
+        return c;
     }
-#endif
+    return c;
+}
 
-    return ret;
+INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
+{
+    (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)buf, len, DEFAULT_TIMEOUT);
+    return len;
 }
