@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2018. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Cortex-M Exception Handler
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -25,27 +25,20 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
 
 #include "arch/exception.h"
-
-#include "los_exc_pri.h"
 #ifdef LOSCFG_LIB_LIBC
 #include "string.h"
 #endif
 #include "los_task_pri.h"
 #include "los_hwi_pri.h"
-#include "los_tick_pri.h"
 #include "securec.h"
 #include "los_printf_pri.h"
 #include "nvic.h"
+
+#ifdef LOSCFG_KERNEL_TRACE
+#include "los_trace_pri.h"
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -61,7 +54,7 @@ extern "C" {
 #define MASK_16_BIT 16
 
 UINT32 g_curNestCount = 0;
-EXC_INFO_S g_excInfo;
+ExcInfo g_excInfo;
 UINT8 g_excTbl[FAULT_STATUS_REG_BIT] = {
     0, 0, 0, 0, 0, 0, OS_EXC_UF_DIVBYZERO, OS_EXC_UF_UNALIGNED,
     0, 0, 0, 0, OS_EXC_UF_NOCP, OS_EXC_UF_INVPC, OS_EXC_UF_INVSTATE, OS_EXC_UF_UNDEFINSTR,
@@ -75,12 +68,12 @@ STATIC const CHAR *g_phaseName[] = {
     "fault in interrupt",
 };
 
-LITE_OS_SEC_TEXT_INIT VOID OsExcInfoDisplay(const EXC_INFO_S *exc)
+LITE_OS_SEC_TEXT_INIT VOID OsExcInfoDisplay(const ExcInfo *exc)
 {
     PrintExcInfo("Phase      = %s\n"
                  "Type       = 0x%x\n"
                  "FaultAddr  = 0x%x\n"
-                 "ThrdPid    = 0x%x\n"
+                 "intNumOrTaskId    = 0x%x\n"
                  "R0         = 0x%x\n"
                  "R1         = 0x%x\n"
                  "R2         = 0x%x\n"
@@ -99,20 +92,19 @@ LITE_OS_SEC_TEXT_INIT VOID OsExcInfoDisplay(const EXC_INFO_S *exc)
                  "LR         = 0x%x\n"
                  "PC         = 0x%x\n"
                  "xPSR       = 0x%x\n",
-                 g_phaseName[exc->phase], exc->type, exc->faultAddr, exc->thrdPid, exc->context->uwR0,
-                 exc->context->uwR1, exc->context->uwR2, exc->context->uwR3, exc->context->uwR4, exc->context->uwR5,
-                 exc->context->uwR6, exc->context->uwR7, exc->context->uwR8, exc->context->uwR9,
-                 exc->context->uwR10, exc->context->uwR11, exc->context->uwR12, exc->context->uwPriMask,
-                 exc->context->uwSP, exc->context->uwLR, exc->context->uwPC, exc->context->uwxPSR);
+                 g_phaseName[exc->phase], exc->type, exc->faultAddr, exc->intNumOrTaskId, exc->context->R0,
+                 exc->context->R1, exc->context->R2, exc->context->R3, exc->context->R4, exc->context->R5,
+                 exc->context->R6, exc->context->R7, exc->context->R8, exc->context->R9,
+                 exc->context->R10, exc->context->R11, exc->context->R12, exc->context->PriMask,
+                 exc->context->SP, exc->context->LR, exc->context->PC, exc->context->xPSR);
     return;
 }
 
 LITE_OS_SEC_TEXT_INIT VOID OsExcHandleEntry(UINT32 excType, UINT32 faultAddr, UINT32 pid,
-                                            const EXC_CONTEXT_S *excBufAddr)
+                                            const ExcContext *excBufAddr)
 {
     UINT16 tmpFlag = (excType >> MASK_16_BIT) & OS_NULL_SHORT; /* 2:in intrrupt,1:faul addr valid */
     g_curNestCount++;
-    g_tickCount[ArchCurrCpuid()]++;
     g_excInfo.nestCnt = (UINT16)g_curNestCount;
 
     g_excInfo.type = excType & OS_NULL_SHORT;
@@ -126,24 +118,26 @@ LITE_OS_SEC_TEXT_INIT VOID OsExcHandleEntry(UINT32 excType, UINT32 faultAddr, UI
     if (ArchCurrTaskGet() != NULL) {
         if (tmpFlag & OS_EXC_FLAG_IN_HWI) {
             g_excInfo.phase = OS_EXC_IN_HWI;
-            g_excInfo.thrdPid = pid;
+            g_excInfo.intNumOrTaskId = pid;
         } else {
             g_excInfo.phase = OS_EXC_IN_TASK;
-            g_excInfo.thrdPid = ((LosTaskCB *)ArchCurrTaskGet())->taskId;
+            g_excInfo.intNumOrTaskId = ((LosTaskCB *)ArchCurrTaskGet())->taskId;
         }
     } else {
         g_excInfo.phase = OS_EXC_IN_INIT;
-        g_excInfo.thrdPid = OS_NULL_INT;
+        g_excInfo.intNumOrTaskId = OS_NULL_INT;
     }
 
     if (excType & OS_EXC_FLAG_NO_FLOAT) {
-        g_excInfo.context = (EXC_CONTEXT_S *)((CHAR *)excBufAddr - LOS_OFF_SET_OF(EXC_CONTEXT_S, uwR4));
+        g_excInfo.context = (ExcContext *)((CHAR *)excBufAddr - LOS_OFF_SET_OF(ExcContext, R4));
     } else {
-        g_excInfo.context = (EXC_CONTEXT_S *)excBufAddr;
+        g_excInfo.context = (ExcContext *)excBufAddr;
     }
 
-    OsExcInfoDisplay((const EXC_INFO_S *)&g_excInfo);
-
+    OsExcInfoDisplay((const ExcInfo *)&g_excInfo);
+#ifdef LOSCFG_KERNEL_TRACE
+    OsTraceRecordDump(FALSE);
+#endif
     while (1) { }
 }
 
@@ -161,15 +155,12 @@ LITE_OS_SEC_TEXT_INIT VOID ArchExcInit(VOID)
     *(volatile UINT32 *)OS_NVIC_CCR |= DIV0FAULT;
 }
 
-/* stack protector */
-UINT32 __stack_chk_guard = 0xd00a0dff;
-
 VOID ArchBackTrace(VOID)
 {
     return;
 }
 
-VOID ArchBackTraceWithSp(VOID *stackPointer)
+VOID ArchBackTraceWithSp(const VOID *stackPointer)
 {
     (VOID)stackPointer;
     return;

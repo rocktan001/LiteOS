@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: CPU Register Defines Headfile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Aach32 Canary
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -24,9 +24,36 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * ---------------------------------------------------------------------------- */
+ * --------------------------------------------------------------------------- */
 
-#ifndef _ARCH_REGS_H
-#define _ARCH_REGS_H
+#include "arch/canary.h"
+#include "stdlib.h"
 
-#endif /* _ARCH_REGS_H */
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#ifdef __GNUC__
+/* stack protector */
+UINTPTR __stack_chk_guard = 0x000a0dff;
+
+/*
+ * If the SP compiling options:-fstack-protector-strong or -fstack-protector-all is enabled,
+ * We recommend to implement true random number generator function for __stack_chk_guard
+ * value to replace the function implementation template shown as below.
+ */
+#pragma GCC push_options
+#pragma GCC optimize ("-fno-stack-protector")
+LITE_OS_SEC_TEXT_INIT WEAK VOID ArchStackGuardInit(VOID)
+{
+}
+#pragma GCC pop_options
+#endif
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
