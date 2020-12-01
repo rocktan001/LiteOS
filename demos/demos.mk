@@ -44,3 +44,8 @@ ifeq ($(LOSCFG_DEMOS_LMS), y)
 include $(LITEOSTOPDIR)/demos/lms/lms.mk
 DEMOS_INCLUDE += $(DEMOS_LMS_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_IPV6_CLIENT), y)
+include $(LITEOSTOPDIR)/demos/ipv6_client/ipv6_client.mk
+DEMOS_INCLUDE += $(DEMOS_IPV6_CLIENT_INCLUDE)
+endif
