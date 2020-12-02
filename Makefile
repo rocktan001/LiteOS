@@ -91,6 +91,4 @@ clean:
 
 cleanall:
 	$(HIDE)rm -rf $(LITEOSTOPDIR)/out
-	$(HIDE)find platform/bsp/board/ -name board.ld -exec rm -rf {} \;
-	$(HIDE)cd sample/sample_osdrv;make clean;cd ../..;
 	$(HIDE)echo "clean all"

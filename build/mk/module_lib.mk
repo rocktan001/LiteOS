@@ -14,11 +14,14 @@ LIB := $(LIBA)
 
 LOCAL_CSRCS    := $(filter %.c,   $(LOCAL_SRCS))
 LOCAL_ASMSRCS  := $(filter %.s,   $(LOCAL_SRCS))
+LOCAL_ASMSRCS2 := $(filter %.S,   $(LOCAL_SRCS))
 
 LOCAL_COBJS    := $(patsubst %.c,   $(OBJOUT)/%.o, $(LOCAL_CSRCS))
 LOCAL_ASMOBJS  := $(patsubst %.s,   $(OBJOUT)/%.o, $(LOCAL_ASMSRCS))
+LOCAL_ASMOBJS2 := $(patsubst %.S,   $(OBJOUT)/%.o, $(LOCAL_ASMSRCS2))
 
-LOCAL_OBJS := $(LOCAL_COBJS) $(LOCAL_ASMOBJS)
+
+LOCAL_OBJS := $(LOCAL_COBJS) $(LOCAL_ASMOBJS) $(LOCAL_ASMOBJS2)
 
 LOCAL_CGCH := $(patsubst %.h,%.h.gch,$(LOCAL_CHS))
 
@@ -34,6 +37,10 @@ $(OBJOUT)/%.o: %.c
 	$(HIDE)$(CC) $(LOCAL_FLAGS) $(LITEOS_CFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
 
 $(OBJOUT)/%.o: %.s
+	$(HIDE)$(OBJ_MKDIR)
+	$(HIDE)$(CC) $(LOCAL_FLAGS) $(LITEOS_ASFLAGS) $(LOCAL_ASFLAGS) -c $< -o $@
+
+$(OBJOUT)/%.o: %.S
 	$(HIDE)$(OBJ_MKDIR)
 	$(HIDE)$(CC) $(LOCAL_FLAGS) $(LITEOS_ASFLAGS) $(LOCAL_ASFLAGS) -c $< -o $@
 
