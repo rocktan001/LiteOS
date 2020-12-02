@@ -38,6 +38,9 @@
 #include "at_frame/at_api.h"
 #include "bc95.h"
 #endif
+#ifdef LOSCFG_DEMOS_LMS
+#include "lms_demo.h"
+#endif
 #ifdef LOSCFG_SHELL
 #include "shell.h"
 #include "shcmd.h"
@@ -142,6 +145,9 @@ UINT32 app_init(VOID)
     if (OsShellInit(0) != LOS_OK) {
         PRINT_ERR("shell init failed\n");
     }
+#endif
+#ifdef LOSCFG_DEMOS_LMS
+    Example_LMSEntry();
 #endif
 
     return ret;
