@@ -106,17 +106,30 @@ ifeq ($(findstring $(LOSCFG_SHELL)$(LOSCFG_SHELL_LK)$(LOSCFG_SHELL_DMESG), y y y
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/shell/full/include
 endif
 
+ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M), y)
 BSP_HWI_SRC = \
         ${wildcard  hw/arm/interrupt/nvic/*.c}
         LOCAL_SRCS += $(BSP_HWI_SRC)
 
-#just a stub interface
 BSP_TIMER_SRC = \
         ${wildcard hw/arm/timer/arm_cortex_m/*.c}
         LOCAL_SRCS += $(BSP_TIMER_SRC)
 
 LOCAL_SRCS += $(wildcard drivers/uart/uart_debug.c)
+endif
+
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/include
+
+ifeq ($(LOSCFG_ARCH_ARM_CORTEX_A), y)
+BSP_HWI_SRC = \
+        ${wildcard  hw/arm/interrupt/gic/*.c}
+        LOCAL_SRCS += $(BSP_HWI_SRC)
+
+#just for qemu
+BSP_TIMER_SRC = \
+        ${wildcard  hw/arm/timer/arm_private/*.c}
+        LOCAL_SRCS += $(BSP_TIMER_SRC)
+endif
 
 ifeq ($(LOSCFG_COMPONNETS_NET_AT), y)
 LOCAL_SRCS += $(wildcard drivers/uart/at_hal.c)
