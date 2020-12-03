@@ -12,10 +12,10 @@ menu "Smp Options"
     depends on LOSCFG_KERNEL_SMP
 
 config LOSCFG_KERNEL_SMP_CORE_NUM
-    int "Muti-processing Core Numbers"
+    int "Multi-processing Core Numbers"
     default 2
     help
-      This represents the number of muti-processing cores.
+      This represents the number of multi-processing cores.
 
 config LOSCFG_KERNEL_SMP_LOCKDEP
     bool "Enable Spinlock Lockdep Check"
@@ -51,7 +51,7 @@ config LOSCFG_SCHED_SQ
       The scheduler uses a single ready queue.
 
 #config LOSCFG_SCHED_MQ
-#    bool "Mutiple Ready Queue"
+#    bool "Multiple Ready Queue"
 #    help
 #      The scheduler uses multiple ready queues.
 endchoice
@@ -146,7 +146,7 @@ choice
 config LOSCFG_BASE_CORE_USE_MULTI_LIST
     bool "Use Multi List"
     help
-      The scheduler uses a single ready queue.
+      Use Multi List for Task & Swtmr.
 
 config LOSCFG_BASE_CORE_USE_SINGLE_LIST
     bool "Use Single List"
@@ -201,10 +201,10 @@ menu "Software Timer Options"
     depends on LOSCFG_BASE_CORE_SWTMR
 
 config LOSCFG_BASE_CORE_SWTMR_LIMIT
-    int "Max Swmtmr Number"
+    int "Max Swtmr Number"
     default 1024
     help
-      This represents the maximum number of soft-timers.
+      This represents the maximum number of software timers.
 
 config LOSCFG_BASE_CORE_SWTMR_IN_ISR
     bool "Software Timer callback in interrupt"
