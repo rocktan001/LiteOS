@@ -86,8 +86,8 @@ typedef struct {
  * struct to store the event infomation
  */
 typedef struct {
-    UINT32 cmd;     /**< trace start or stop cmd */
-    UINT32 param;   /**< magic numb stand for notify msg */
+    UINT32 cmd;     /* trace start or stop cmd */
+    UINT32 param;   /* magic numb stand for notify msg */
 } TraceNotifyFrame;
 
 /**
@@ -96,12 +96,12 @@ typedef struct {
  */
 typedef struct {
     struct WriteCtrl {
-        UINT16 curIndex;            /**< The current record index */
-        UINT16 maxRecordCount;      /**< The max num of track items */
-        UINT16 curObjIndex;         /**< The current obj index */
-        UINT16 maxObjCount;         /**< The max num of obj index */
-        ObjData *objBuf;            /**< Pointer to obj info data */
-        TraceEventFrame *frameBuf;  /**< Pointer to the track items */
+        UINT16 curIndex;            /* The current record index */
+        UINT16 maxRecordCount;      /* The max num of track items */
+        UINT16 curObjIndex;         /* The current obj index */
+        UINT16 maxObjCount;         /* The max num of obj index */
+        ObjData *objBuf;            /* Pointer to obj info data */
+        TraceEventFrame *frameBuf;  /* Pointer to the track items */
     } ctrl;
     OfflineHead *head;
 } TraceOfflineHeaderInfo;

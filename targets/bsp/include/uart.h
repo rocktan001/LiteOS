@@ -35,6 +35,8 @@
 #define DEFAULT_TIMEOUT    0xFFFF
 #define DEFAULT_UART_IRQN  USART1_IRQn
 
+#define NUM_HAL_INTERRUPT_UART  (16 + USART1_IRQn)
+
 VOID   uart_init(VOID);
 UINT8  uart_getc(VOID);
 UINT32 uart_wait_adapt(VOID);
