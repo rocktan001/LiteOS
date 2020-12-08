@@ -211,7 +211,7 @@ INT32 uart_hwiCreate(VOID)
     UINT32 ret;
     LOS_EventInit(&g_stShellEvent);
     /* uart interrupt priority should be the highest in interrupt preemption mode */
-    ret = LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, (HWI_PROC_FUNC)uart_handler, NULL);
+    ret = LOS_HwiCreate(NUM_HAL_INTERRUPT_UART_PBX, 0, 0, (HWI_PROC_FUNC)uart_handler, NULL);
     if (ret != LOS_OK) {
         PRINT_ERR("%s,%d, uart interrupt created error:%x\n", __FUNCTION__, __LINE__, ret);
     } else {
@@ -227,7 +227,7 @@ INT32 uart_hwiCreate(VOID)
         /* enable receive */
         UARTREG(UART_REG_BASE, UART_CR) |= (1 << 9);
 
-        HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
+        HalIrqUnmask(NUM_HAL_INTERRUPT_UART_PBX);
     }
     return ret;
 }

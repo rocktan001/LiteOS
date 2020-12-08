@@ -81,7 +81,7 @@ extern "C" {
 #define UART1_INT_NUM                45
 #define KEYBOARD_INT_NUM             52
 
-#define NUM_HAL_INTERRUPT_UART       UART0_INT_NUM
+#define NUM_HAL_INTERRUPT_UART_PBX   UART0_INT_NUM
 #define NUM_HAL_INTERRUPT_HRTIMER    NUM_HAL_INTERRUPT_TIMER0
 
 #define IO_ADDRESS(x)                (x)

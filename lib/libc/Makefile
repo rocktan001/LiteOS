@@ -41,7 +41,7 @@ FILTER_FILES = $(wildcard src/string/memcpy.c) \
                $(wildcard src/string/memset.c) \
                $(wildcard src/string/strcmp.c) \
                $(wildcard src/string/memcmp.c)
-LOCAL_SRCS := $(filter-out $(FILTER_FILES), $(LOCAL_SRCS))
+# LOCAL_SRCS := $(filter-out $(FILTER_FILES), $(LOCAL_SRCS))
 else ifeq ($(LITEOS_CPU_TYPE), riscv)
 FILTER_FILES = $(wildcard src/string/memset.c) \
                $(wildcard src/string/strcmp.c) \
