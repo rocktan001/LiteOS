@@ -271,7 +271,11 @@ LITEOS_LD_PATH +=  -L$(OUT)/lib/rdk \
 endif
 
 ifeq ($(LOSCFG_KERNEL_LMS), y)
-LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/kernel/extended/lms
+ifeq ($(LOSCFG_ARCH_ARM_CORTEX_A),y)
+LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/kernel/extended/lms/cortex_a_r
+else
+LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/kernel/extended/lms/cortex_m
+endif
 endif
 
 ifeq ($(LOSCFG_USING_BOARD_LD), y)

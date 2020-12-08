@@ -62,8 +62,8 @@ static struct resource uart0_pl011_resources[] = {
         .flags = IORESOURCE_MEM,
     },
     {
-        .start = NUM_HAL_INTERRUPT_UART,
-        .end = NUM_HAL_INTERRUPT_UART,
+        .start = NUM_HAL_INTERRUPT_UART_PBX,
+        .end = NUM_HAL_INTERRUPT_UART_PBX,
         .flags = IORESOURCE_IRQ,
     },
 };
