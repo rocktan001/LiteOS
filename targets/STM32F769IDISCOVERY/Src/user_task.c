@@ -40,6 +40,9 @@
 #include "shell.h"
 #include "shcmd.h"
 #endif
+#ifdef LOSCFG_DEMOS_LMS
+#include "lms_demo.h"
+#endif
 
 #define USER_TASK_PRIORITY 2
 static UINT32 g_fs_tskHandle;
@@ -70,6 +73,10 @@ UINT32 app_init(VOID)
 
 #ifdef LOSCFG_GUI_ENABLE
     LvglDemo();
+#endif
+
+#ifdef LOSCFG_DEMOS_LMS
+    Example_LMSEntry();
 #endif
 
 #ifdef LOSCFG_DEMOS_FS

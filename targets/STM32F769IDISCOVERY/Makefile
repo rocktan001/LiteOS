@@ -97,7 +97,6 @@ endif
 ###########################################add support for lvgl########################################################
 ifeq ($(LOSCFG_GUI_ENABLE), y)
 LITEGL_INCLUDE += $(COMPONENTS_INCLUDE)
-LITEGL_INCLUDE += $(DEMOS_INCLUDE)
 LVGl_GUI_INC = \
 	-I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers
         LITEGL_INCLUDE += $(LVGl_GUI_INC)
@@ -127,5 +126,5 @@ LOCAL_SRCS := $(subst $(CURDIR)/,, $(BOARD_SRCS))
 BOARD_DEF += $(C_DEFS)
 LOCAL_INCLUDE += $(BOARD_INCLUDES)
 
-LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)  $(LITEOS_CFLAGS_INTERWORK)
 include $(MODULE)
