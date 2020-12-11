@@ -140,10 +140,10 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_SECURITY_MBEDTLS), y)
         LITEOS_BASELIB += -lmbedtls
     endif
-    ifeq ($(LOSCFG_COMPONENTS_LIB_CJSON), Y)
+    ifeq ($(LOSCFG_COMPONENTS_LIB_CJSON), y)
         LITEOS_BASELIB += -lcjson
     endif
-    ifeq ($(LOSCFG_COMPONENTS_LOG), Y)
+    ifeq ($(LOSCFG_COMPONENTS_LOG), y)
         LITEOS_BASELIB += -llog
     endif
     ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT), y)
