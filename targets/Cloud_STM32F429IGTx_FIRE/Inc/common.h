@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Common HeadFile
+ * Description: Targets Stm32f429 Common HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,7 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-/**@defgroup atiny_adapter Agenttiny Adapter
+/**
+ * @defgroup atiny_adapter Agenttiny Adapter
  * @ingroup agent
  */
 

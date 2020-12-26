@@ -290,7 +290,7 @@ extern CHAR __heap_end;
 #define _V(v)                                   _T(HW_LITEOS_SYSNAME)_T(HW_LITEOS_SEP)_T(v)
 
 #define HW_LITEOS_VERSION                       ""
-#define HW_LITEOS_VER                           _V(HW_LITEOS_VERSION"-SMP")
+#define HW_LITEOS_VER                           _V(HW_LITEOS_VERSION"")
 
 /**
  * The Version number of Public

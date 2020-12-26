@@ -44,7 +44,6 @@ extern char __los_heap_addr_end__[];
 #error "fix me"
 #endif
 
-
 struct phys_mem {
     unsigned long start;
     unsigned long end;
@@ -61,6 +60,10 @@ const struct phys_mem system_phys_mem [] = {
     { 0, 0 }
 };
 
+VOID board_config(VOID)
+{
+    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+}
 
 VOID HardwareInit(VOID)
 {
@@ -86,6 +89,7 @@ VOID HardwareInit(VOID)
 
 INT32 main(VOID)
 {
+    board_config();
     HardwareInit();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"

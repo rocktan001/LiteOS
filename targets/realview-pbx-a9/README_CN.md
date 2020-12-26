@@ -24,7 +24,7 @@
 - 通过QEMU运行LiteOS
 
     ```
-    $ qemu-system-arm -machine realview-pbx-a9 -smp 4 -m 512M out/realview-pbx-a9/Huawei_LiteOS.bin -nographic
+    $ qemu-system-arm -machine realview-pbx-a9 -smp 4 -m 512M -kernel out/realview-pbx-a9/Huawei_LiteOS.bin -nographic
     ```
 ### QEMU的参数说明
 - 上面是启动guest虚拟机的命令，qemu命令行参数含义可以通过qemu-system-arm --help查看，其中常用参数含义如下：

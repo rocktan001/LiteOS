@@ -26,7 +26,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#if !defined(LOSCFG_COMPONENTS_NET_LWIP) && !defined(LOSCFG_LWIP_IPV6)
+#if !defined(LOSCFG_COMPONENTS_NET_LWIP) || !defined(LOSCFG_LWIP_IPV6)
 #error This module needs to be enable "Components/Network/Enable Network/Enable Lwip/Enable Ipv6"
 #else
 #include "lwip/sockets.h"

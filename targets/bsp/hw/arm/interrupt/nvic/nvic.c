@@ -30,6 +30,10 @@
 #include "los_hwi_pri.h"
 #include "los_task_pri.h"
 
+#if (__CORTEX_M == 0x0U)  /* only for Cortex-M0*/
+#include "stm32f0xx_hal.h"
+#endif
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -181,9 +185,14 @@ VOID HalIrqInit(VOID)
     for (i = OS_SYS_VECTOR_CNT; i < OS_USER_HWI_MAX; i++) {
         g_hwiVec[i] = (HWI_PROC_FUNC)IrqEntryV7M;
     }
-
-    /* Interrupt vector table location */
+#if (__CORTEX_M == 0x0U)  /* only for Cortex-M0*/
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
+    /* Remap SRAM at 0x00000000 */
+    __HAL_SYSCFG_REMAPMEMORY_SRAM();
+#else
+/* Interrupt vector table location */
     SCB->VTOR = (UINT32)g_hwiVec;
+#endif
 #if (__CORTEX_M >= 0x03U) /* only for Cortex-M3 and above */
     NVIC_SetPriorityGrouping(OS_NVIC_AIRCR_PRIGROUP);
 #endif

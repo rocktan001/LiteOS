@@ -1,5 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Sensorhub Demo
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,14 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
+
 #include "sensorhub_demo.h"
 #include "gyro.h"
 #include "los_printf.h"
@@ -101,7 +97,7 @@ STATIC VOID InitGyro(VOID)
     SensorItemInit(&g_gyroItem2, NULL, TAG_GYRO, SensorReport, TAG_GYRO);
 }
 
-STATIC VOID MiscTask(VOID const *arg)
+STATIC VOID MiscTask(VOID const * arg)
 {
     (VOID)(arg);
     // I2C init
@@ -125,10 +121,10 @@ VOID MiscInit(VOID)
     TSK_INIT_PARAM_S taskInitParam = {0};
 
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)MiscTask;
-    taskInitParam.uwStackSize  = STASK_STKDEPTH_MISC;
-    taskInitParam.pcName       = "Misc Task";
-    taskInitParam.usTaskPrio   = STASK_PRIORITY_MISC; /* 1~7 */
-    taskInitParam.uwResved     = LOS_TASK_STATUS_DETACHED; /* task is detached, the task can deleteself */
+    taskInitParam.uwStackSize = STASK_STKDEPTH_MISC;
+    taskInitParam.pcName = "Misc Task";
+    taskInitParam.usTaskPrio = STASK_PRIORITY_MISC;    /* 1~7 */
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED; /* task is detached, the task can deleteself */
 
     ret = LOS_TaskCreate(&g_miscTskID, &taskInitParam);
     if (ret != LOS_OK) {

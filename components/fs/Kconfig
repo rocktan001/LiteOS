@@ -35,5 +35,4 @@ config LOSCFG_COMPONENTS_FS_SPIFFS
     help
       Answer y to enable LiteOS support spi flash filesystem.
 
-
 endmenu

@@ -13,13 +13,23 @@ LIB_SUBDIRS             += arch/arm/cortex_m
 LITEOS_CPU_OPTS         := -mcpu=$(LOSCFG_ARCH_CPU)$(EXTENSION)
 
 # FPU compile options: hard/soft/softfp, use hard as default
+ifeq ($(LOSCFG_ARCH_CORTEX_M0), y)
+# cortex m0 not support fpu;
+else ifeq ($(LOSCFG_ARCH_CORTEX_M3), y)
+LITEOS_FLOAT_OPTS       := -mfloat-abi=softfp
+else
 LITEOS_FLOAT_OPTS       := -mfloat-abi=hard
 LITEOS_FPU_OPTS         := -mfpu=$(LOSCFG_ARCH_FPU)
+endif
 
 # gcc libc folder style is combine with core and fpu, use thumb as default
 # for example, cortex-m7 with softfp abi and thumb is: thumb/v7e-m+fp/softfp
-# attention: for v6e, can use thumb/v6-m/nofp/libgcc.a
+# for v6m, use thumb/v6-m/nofp/libgcc.a
+ifdef LOSCFG_ARCH_CORTEX_M0
+LITEOS_GCCLIB           := thumb/v6-m/nofp
+else
 LITEOS_GCCLIB           := thumb/v7e-m+fp/$(subst -mfloat-abi=,,$(LITEOS_FLOAT_OPTS))
+endif
 
 LITEOS_CORE_COPTS        = $(LITEOS_CPU_OPTS) $(LITEOS_FLOAT_OPTS) $(LITEOS_FPU_OPTS)
 LITEOS_INTERWORK        += $(LITEOS_CORE_COPTS)

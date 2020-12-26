@@ -1,8 +1,8 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
- * Description: hal platform header
+/*----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Platform Interrupt HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2018-07-10
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of

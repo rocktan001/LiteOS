@@ -33,9 +33,11 @@
 #ifndef _ATINY_OSDEP_H
 #define _ATINY_OSDEP_H
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #include <stdint.h>
 #include <stdio.h>

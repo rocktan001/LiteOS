@@ -43,7 +43,7 @@
 #define  localtime64    localtime
 #define  ctime64        ctime
 #define  mktime64       mktime
-#include "time.h"
+#include "sys/time.h"
 #else
 #include "time64.h"
 #endif

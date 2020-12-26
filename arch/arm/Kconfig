@@ -122,6 +122,13 @@ config LOSCFG_ARCH_CORTEX_M0
     select LOSCFG_ARCH_ARM_V6M
     select LOSCFG_ARCH_ARM_AARCH32
 
+config LOSCFG_ARCH_CORTEX_M3
+    bool
+    select LOSCFG_ARCH_ARM_V7M
+    select LOSCFG_ARCH_ARM_AARCH32
+    select LOSCFG_ARCH_FPU_VFP_V3
+    select LOSCFG_ARCH_FPU_VFP_D16
+
 config LOSCFG_ARCH_CORTEX_M4
     bool
     select LOSCFG_ARCH_ARM_V7M
@@ -158,6 +165,8 @@ config LOSCFG_ARCH_CORTEX_A53_AARCH32
 
 config LOSCFG_ARCH_CPU
     string
+    default "cortex-m0"  if LOSCFG_ARCH_CORTEX_M0
+    default "cortex-m3"  if LOSCFG_ARCH_CORTEX_M3
     default "cortex-m4"  if LOSCFG_ARCH_CORTEX_M4
     default "cortex-m7"  if LOSCFG_ARCH_CORTEX_M7
     default "cortex-a7"  if LOSCFG_ARCH_CORTEX_A7

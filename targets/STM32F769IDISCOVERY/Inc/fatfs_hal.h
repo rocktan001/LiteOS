@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Fat Fs Hal HeaderFile
+ * Description: Fat Fs Hal HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2020-11-20
  * Redistribution and use in source and binary forms, with or without modification,
@@ -30,6 +30,5 @@
 #define _FATFS_HAL_H
 
 int hal_fatfs_init (int need_erase);
-
 
 #endif /* _FATFS_HAL_H */

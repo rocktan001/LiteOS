@@ -6,7 +6,6 @@ KERNEL_DEMO_SRC_y :=
 BOARD_INCLUDES += -I $(LITEOSTOPDIR)/demos/kernel/include
 KERNEL_DEMO_SRC_y += $(wildcard api/*.c)
 
-# C includes
 HAL_DRIVER_INC := \
     -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc \
     -I $(LITEOSTOPDIR)/compat/cmsis

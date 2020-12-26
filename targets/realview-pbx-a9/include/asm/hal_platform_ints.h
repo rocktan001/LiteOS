@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Hal Platform Ints HeaderFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Platform Interrupt HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -81,7 +81,7 @@ extern "C" {
 #define UART1_INT_NUM                45
 #define KEYBOARD_INT_NUM             52
 
-#define NUM_HAL_INTERRUPT_UART_PBX   UART0_INT_NUM
+#define NUM_HAL_INTERRUPT_UART       UART0_INT_NUM
 #define NUM_HAL_INTERRUPT_HRTIMER    NUM_HAL_INTERRUPT_TIMER0
 
 #define IO_ADDRESS(x)                (x)

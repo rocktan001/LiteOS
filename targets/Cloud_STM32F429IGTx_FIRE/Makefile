@@ -10,76 +10,75 @@ ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 LOCAL_SRCS += $(ASSRCS)
 
 HARDWARE_SRC =  \
-        ${wildcard $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Src/*.c}
-        C_SOURCES += $(HARDWARE_SRC)
+    ${wildcard Hardware/Src/*.c}
+    C_SOURCES += $(HARDWARE_SRC)
 
 USER_SRC =  \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/os_adapt/os_adapt.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/main.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/system_stm32f4xx.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/usart.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/dwt.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/eth.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/flash_adaptor.c \
-        $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/user_task.c
-        C_SOURCES += $(USER_SRC)
+    os_adapt/os_adapt.c \
+    Src/main.c \
+    Src/system_stm32f4xx.c \
+    Src/usart.c \
+    Src/eth.c \
+    Src/sys_init.c \
+    Src/flash_adaptor.c \
+    Src/user_task.c
+    C_SOURCES += $(USER_SRC)
 
 ifeq ($(LOSCFG_COMPONENTS_FS), y)
-        ifeq ($(LOSCFG_FATFS_USE_SD_CARD), y)
+    ifeq ($(LOSCFG_FATFS_USE_SD_CARD), y)
         FS_SRC += \
-                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/fatfs_sd_hal.c \
-                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/stm324x9i_eval_sd.c \
-                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/sd_diskio.c
-        endif
-        ifeq ($(LOSCFG_FATFS_USE_SPI_FLASH), y)
+            Src/fatfs_sd_hal.c \
+            Src/stm324x9i_eval_sd.c \
+            Src/sd_diskio.c
+    endif
+    ifeq ($(LOSCFG_FATFS_USE_SPI_FLASH), y)
         FS_SRC += \
-                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/fatfs_spi_hal.c
-        endif
-        ifeq ($(LOSCFG_COMPONENTS_FS_SPIFFS), y)
+            Src/fatfs_spi_hal.c
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_FS_SPIFFS), y)
         FS_SRC += \
-                $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Src/spiffs_hal.c
-        endif
-        C_SOURCES += $(FS_SRC)
+            Src/spiffs_hal.c
+    endif
+    C_SOURCES += $(FS_SRC)
 endif
 
 # C includes
 HAL_DRIVER_INC = \
-        -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc \
-        -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc/Legacy
-        BOARD_INCLUDES += $(HAL_DRIVER_INC)
+   -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc \
+   -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc/Legacy
+    BOARD_INCLUDES += $(HAL_DRIVER_INC)
 
 INCLUDE_INC = \
-        -I $(LITEOSTOPDIR)/include
-        BOARD_INCLUDES += $(INCLUDE_INC)
+    -I $(LITEOSTOPDIR)/include
+    BOARD_INCLUDES += $(INCLUDE_INC)
 
 BSP_INC = \
-        -I $(LITEOSTOPDIR)/targets/bsp/common \
-        -I $(LITEOSTOPDIR)/targets/bsp/include \
-        -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
-        -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/include \
-        -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/BSP/STM324x9I_EVAL \
-        -I $(LITEOSTOPDIR)/kernel/extended/include
-        BOARD_INCLUDES += $(BSP_INC)
+    -I $(LITEOSTOPDIR)/targets/bsp/common \
+    -I $(LITEOSTOPDIR)/targets/bsp/include \
+    -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
+    -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/include \
+    -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/BSP/STM324x9I_EVAL \
+    -I $(LITEOSTOPDIR)/kernel/extended/include
+    BOARD_INCLUDES += $(BSP_INC)
 
 HARDWARE_INC = \
-        -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Inc
-        BOARD_INCLUDES += $(HARDWARE_INC)
+    -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Inc
+    BOARD_INCLUDES += $(HARDWARE_INC)
 
 USER_INC = \
-        -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Inc
-        BOARD_INCLUDES += $(USER_INC)
+    -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Inc
+    BOARD_INCLUDES += $(USER_INC)
 
 # C defines
 C_DEFS +=  \
-        -DUSE_HAL_DRIVER \
-        -DSTM32F429xx \
-        -DNDEBUG \
-        -D__LITEOS__ \
-        -D_ALL_SOURCE
+    -DUSE_HAL_DRIVER \
+    -DSTM32F429xx \
+    -DNDEBUG \
+    -D__LITEOS__ \
+    -D_ALL_SOURCE
 
 ASM_SOURCES =  \
-        ${wildcard $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/los_startup_gcc.S}
+    ${wildcard los_startup_gcc.S}
 
 BOARD_SRCS += $(ASM_SOURCES)
 BOARD_SRCS += $(C_SOURCES)
