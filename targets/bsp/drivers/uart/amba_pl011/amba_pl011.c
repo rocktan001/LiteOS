@@ -34,9 +34,6 @@
 #include "los_task_pri.h"
 #include "los_queue.h"
 
-CHAR g_inputCmd[CMD_LENGTH];
-INT32 g_inputIdx = 0;
-
 #ifdef LOSCFG_SERIAL_OUTPUT_ENABLE
 UINT32 g_uart_fputc_en = 1;
 #else
@@ -55,26 +52,17 @@ STATIC UINT32 g_uartQueue;
 STATIC VOID UartPutcReg(UINTPTR base, CHAR c)
 {
     /* Spin while fifo is full */
-    while (UARTREG(base, UART_FR) & UART_FR_TXFF) {
-        ;
-    }
+    while (UARTREG(base, UART_FR) & UART_FR_TXFF) {}
     UARTREG(base, UART_DR) = c;
-}
-
-STATIC INLINE UINTPTR uart_to_ptr(UINTPTR n)
-{
-    (VOID)n;
-    return UART_REG_BASE;
 }
 
 INT32 uart_putc(CHAR c)
 {
-    UINTPTR base = uart_to_ptr(0);
-    UartPutcReg(base, c);
+    UartPutcReg(UART_REG_BASE, c);
     return 1;
 }
 
-CHAR uart_fputc(CHAR c, VOID *f)
+STATIC CHAR UartFputc(CHAR c, VOID *f)
 {
     (VOID)f;
     if (g_uart_fputc_en == 1) {
@@ -105,7 +93,7 @@ STATIC VOID UartPutStr(UINTPTR base, const CHAR *s, UINT32 len)
     }
 }
 
-UINT32 UartPutsReg(UINTPTR base, const CHAR *s, UINT32 len, BOOL isLock)
+STATIC UINT32 UartPutsReg(UINTPTR base, const CHAR *s, UINT32 len, BOOL isLock)
 {
     UINT32 intSave;
 
@@ -126,8 +114,7 @@ UINT32 UartPutsReg(UINTPTR base, const CHAR *s, UINT32 len, BOOL isLock)
 
 VOID UartPuts(const CHAR *s, UINT32 len, BOOL isLock)
 {
-    UINTPTR base = uart_to_ptr(0);
-    (VOID)UartPutsReg(base, s, len, isLock);
+    (VOID)UartPutsReg(UART_REG_BASE, s, len, isLock);
 }
 
 UINT8 uart_getc(void)
@@ -148,7 +135,7 @@ UINT8 uart_getc(void)
     return ch;
 }
 
-INT32 uart_puts(const CHAR *s, UINTPTR len, VOID *state)
+STATIC INT32 UartFputs(const CHAR *s, UINTPTR len, VOID *state)
 {
     (VOID)state;
     UINTPTR i;
@@ -156,10 +143,10 @@ INT32 uart_puts(const CHAR *s, UINTPTR len, VOID *state)
     for (i = 0; i < len; i++) {
         if (*(s + i) != '\0') {
             if (*(s + i) == '\n') {
-                (VOID)uart_fputc('\r', NULL);
+                (VOID)UartFputc('\r', NULL);
             }
 
-            (VOID)uart_fputc(*(s + i), NULL);
+            (VOID)UartFputc(*(s + i), NULL);
         }
     }
 
@@ -181,15 +168,13 @@ UINT8 uart_read(VOID)
 
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 {
-    uart_puts(buf, len, &timeout);
+    UartFputs(buf, len, &timeout);
     return len;
 }
 
-VOID uart_handler(VOID)
+STATIC VOID UartHandler(VOID)
 {
-    UINT8 ch;
-    UINTPTR base = uart_to_ptr(0);
-    ch = UARTREG(base, UART_DR);
+    UINT8 ch = UARTREG(UART_REG_BASE, UART_DR);
     (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
 }
 
@@ -201,16 +186,14 @@ VOID uart_early_init(VOID)
 
 INT32 ShellQueueCreat(VOID)
 {
-    UINT32 ret;
-    ret = LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
-    return ret;
+    return LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
 }
 
 INT32 uart_hwiCreate(VOID)
 {
     UINT32 ret;
     /* uart interrupt priority should be the highest in interrupt preemption mode */
-    ret = LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, (HWI_PROC_FUNC)uart_handler, NULL);
+    ret = LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, (HWI_PROC_FUNC)UartHandler, NULL);
     if (ret != LOS_OK) {
         PRINT_ERR("%s,%d, uart interrupt created error:%x\n", __FUNCTION__, __LINE__, ret);
     } else {
