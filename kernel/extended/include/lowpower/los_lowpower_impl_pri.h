@@ -35,9 +35,11 @@
 #ifdef LOSCFG_KERNEL_RUNSTOP
 #include "los_runstop_pri.h"
 #endif
-#ifdef LOSCFG_KERNEL_TICKLESS
+
+#if defined(LOSCFG_KERNEL_TICKLESS) || defined(LOSCFG_KERNEL_DEEPSLEEP)
 #include "los_tickless_pri.h"
 #endif
+
 #ifdef LOSCFG_KERNEL_DEEPSLEEP
 #include "los_deepsleep_pri.h"
 #endif

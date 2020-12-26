@@ -52,6 +52,10 @@ extern UINT32 __LOS_HEAP_ADDR_END__;
 
 #define OS_SYS_MEM_SIZE                            ((UINT32)(__LOS_HEAP_ADDR_END__ - __LOS_HEAP_ADDR_START__ + 1))
 
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern UINT32 osAppInit(VOID);
+extern UINT32 app_init(VOID);
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -27,8 +27,6 @@
  * --------------------------------------------------------------------------- */
 
 #include "los_runstop_pri.h"
-
-#include "los_lowpower_impl_pri.h"
 #include "los_task_pri.h"
 #include "los_event_pri.h"
 #include "los_tick_pri.h"
@@ -50,8 +48,9 @@ extern "C" {
 #define FLASH_IMG_SUCCESS   0x02
 
 /* If core is ready for imaging */
-LITE_OS_SEC_DATA_MINOR STATIC UINT32 g_sysDoneFlag[LOSCFG_KERNEL_CORE_NUM] =
-    { [0 ... (LOSCFG_KERNEL_CORE_NUM - 1)] = OS_NO_STORE_SYSTEM };
+LITE_OS_SEC_DATA_MINOR STATIC UINT32 g_sysDoneFlag[LOSCFG_KERNEL_CORE_NUM] = {
+    [0 ... (LOSCFG_KERNEL_CORE_NUM - 1)] = OS_NO_STORE_SYSTEM
+};
 
 /* Start position of flash to write image */
 LITE_OS_SEC_DATA_MINOR STATIC UINTPTR g_flashImgAddr;

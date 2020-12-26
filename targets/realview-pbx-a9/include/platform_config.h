@@ -44,6 +44,11 @@ extern "C" {
 
 #define OS_TIME_TIMER_CLOCK                     3000000
 
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern UINT32 osAppInit(VOID);
+extern UINT32 app_init(VOID);
+#endif
+
 #ifdef __cplusplus
 #if __cplusplus
 }

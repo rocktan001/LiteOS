@@ -289,7 +289,7 @@ extern CHAR __heap_end;
 #define HW_LITEOS_SEP                           " "
 #define _V(v)                                   _T(HW_LITEOS_SYSNAME)_T(HW_LITEOS_SEP)_T(v)
 
-#define HW_LITEOS_VERSION                       "V200R005C10B010"
+#define HW_LITEOS_VERSION                       ""
 #define HW_LITEOS_VER                           _V(HW_LITEOS_VERSION"-SMP")
 
 /**
@@ -302,7 +302,7 @@ extern CHAR __heap_end;
 /**
  * The release candidate version number
  */
-#define EXTRA_V                                 1
+#define EXTRA_V                                 0
 
 #define VERSION_NUM(a, b, c)                    (((a) << 16) | ((b) << 8) | (c))
 #define HW_LITEOS_OPEN_VERSION_NUM              VERSION_NUM(MAJ_V, MIN_V, REL_V)

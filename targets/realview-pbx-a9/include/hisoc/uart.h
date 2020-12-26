@@ -56,6 +56,7 @@ extern void kprintf(const char *fmt, va_list arg);
 extern void dprintf(const char *fmt, ...);
 extern UINT32 UartPutsReg(UINTPTR base, const CHAR *s, UINT32 len, BOOL isLock);
 extern VOID UartPuts(const CHAR *s, UINT32 len, BOOL isLock);
+extern INT32 uart_hwiCreate(VOID);
 
 #define UART_WITHOUT_LOCK 0
 #define UART_WITH_LOCK    1

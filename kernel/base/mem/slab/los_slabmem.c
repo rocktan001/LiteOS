@@ -508,7 +508,7 @@ VOID LOS_SlabSizeCfg(UINT32 *cfg, UINT32 cnt)
     INT32 idx;
 
     if ((cfg == NULL) || (cnt != SLAB_MEM_COUNT)) {
-        PRINT_ERR("cfg is NULL, or cnt %d != SLAB_MEM_COUNT\n", cnt);
+        PRINT_ERR("cfg is NULL, or cnt %u != SLAB_MEM_COUNT\n", cnt);
         return;
     }
 

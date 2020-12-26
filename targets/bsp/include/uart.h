@@ -37,11 +37,15 @@
 
 #define NUM_HAL_INTERRUPT_UART  (16 + USART1_IRQn)
 
+extern INT32 uart_hwiCreate(VOID);
 VOID   uart_init(VOID);
 UINT8  uart_getc(VOID);
 UINT32 uart_wait_adapt(VOID);
 INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
 UINT8  uart_read(VOID);
+
+#ifdef LOSCFG_ARCH_ARM_CORTEX_M
 #define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
+#endif
 
 #endif /* _UART_H */

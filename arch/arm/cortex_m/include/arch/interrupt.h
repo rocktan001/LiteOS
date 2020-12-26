@@ -40,17 +40,13 @@ extern "C" {
 
 extern UINT32 ArchIntLock(VOID);
 extern UINT32 ArchIntUnlock(VOID);
-extern VOID ArchIntRestore(UINT32 uvIntSave);
+extern VOID ArchIntRestore(UINT32 intSave);
 
-STATIC INLINE UINT32 OsIntLocked(VOID)
+STATIC INLINE UINT32 ArchIntLocked(VOID)
 {
     UINT32 intSave;
 
-    asm volatile(
-        "mrs    %0, primask        "
-        : "=r" (intSave)
-        :
-        : "memory");
+    __asm__ volatile("mrs %0, primask" : "=r" (intSave) : : "memory");
 
     return intSave;
 }

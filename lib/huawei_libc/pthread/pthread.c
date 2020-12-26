@@ -185,7 +185,7 @@ STATIC UINT32 InitPthreadData(pthread_t threadId, pthread_attr_t *userAttr,
     LosTaskCB *taskCB = OS_TCB_FROM_TID(threadId);
     _pthread_data *created = &g_pthreadData[threadId];
 
-    err = strncpy_s(created->name, sizeof(created->name), name, len);
+    err = strncpy_s(created->name, sizeof(created->name), name, len - 1);
     if (err != EOK) {
         PRINT_ERR("%s: %d, err: %d\n", __FUNCTION__, __LINE__, err);
         return LOS_NOK;

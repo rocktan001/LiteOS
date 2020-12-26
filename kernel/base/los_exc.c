@@ -226,8 +226,8 @@ VOID LOS_Panic(const CHAR *fmt, ...)
 VOID LOS_BackTrace(VOID)
 {
     LosTaskCB *runTask = OsCurrTaskGet();
-    PrintExcInfo("runTask->taskName = %s\n", runTask->taskName);
-    PrintExcInfo("runTask->taskId = %u\n", runTask->taskId);
+    PrintExcInfo("runTask->taskName = %s\n""runTask->taskId = %u\n",
+        runTask->taskName, runTask->taskId);
     ArchBackTrace();
 }
 
@@ -246,8 +246,8 @@ VOID LOS_TaskBackTrace(UINT32 taskID)
         PRINT_ERR("\r\nThe task is not created!\n");
         return;
     }
-    PRINTK("TaskName = %s\n", taskCB->taskName);
-    PRINTK("TaskId = 0x%x\n", taskCB->taskId);
+    PRINTK("TaskName = %s\n""TaskId = 0x%x\n",
+        taskCB->taskName, taskCB->taskId);
     ArchBackTraceWithSp(taskCB->stackPointer);
 }
 

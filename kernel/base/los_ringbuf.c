@@ -208,7 +208,8 @@ EXIT:
 
 UINT32 LOS_RingbufInit(Ringbuf *ringbuf, CHAR *fifo, UINT32 size)
 {
-    if ((ringbuf == NULL) || (fifo == NULL) || (ringbuf->status == RBUF_INITED)) {
+    if ((ringbuf == NULL) || (fifo == NULL) ||
+        (ringbuf->status == RBUF_INITED) || (size == 0)) {
         return LOS_NOK;
     }
 

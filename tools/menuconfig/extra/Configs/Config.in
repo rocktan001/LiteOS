@@ -93,18 +93,16 @@ source "kernel/Kconfig"
 ######################### config options of lib ########################
 source "lib/Kconfig"
 ######################### config options of compatibility ##############
-source "compat/Kconfig"
-
-######################## config options of components ##################
+osource "compat/Kconfig"
+######################### config options of components ##############
 source "components/Kconfig"
 
 source "demos/Kconfig"
-
 ######################## config options of filesystem ##################
-# source "fs/Kconfig"
+#osource "fs/Kconfig"
 
 ######################## config options of net ############################
-# source "net/Kconfig"
+#osource "net/Kconfig"
 
 ######################## config options of debug ########################
 menu "Debug"
@@ -259,14 +257,14 @@ config LOSCFG_DEBUG_SCHED_STATISTICS
     help
       Answer Y to enable debug schedulder statistics.
 
-source "shell/Kconfig"
+osource "shell/Kconfig"
 config LOSCFG_NET_LWIP_SACK_TFTP
     bool "Enable Tftp"
     default y
     depends on LOSCFG_SHELL && LOSCFG_NET_LWIP_SACK && LOSCFG_DEBUG_VERSION
     help
       Answer Y to enable LiteOS support tftp cmd and tftp tool.
-# source "net/telnet/Kconfig"
+#osource "net/telnet/Kconfig"
 config LOSCFG_EXC_INTERACTION
     bool "Enable exc interaction"
     default n
@@ -426,7 +424,7 @@ config LOSCFG_LLTFS
 
 endchoice
 
-source "kernel/extended/lms/Kconfig"
+osource "kernel/extended/lms/Kconfig"
 
 endmenu
 

@@ -605,6 +605,8 @@ LITE_OS_SEC_TEXT VOID *OsQueueMailAlloc(UINT32 queueId, VOID *mailPool, UINT32 t
         OsTaskWait(&queueCB->memList, OS_TASK_STATUS_PEND, timeout);
 
         OsSchedResched();
+        SCHEDULER_UNLOCK(intSave);
+        SCHEDULER_LOCK(intSave);
 
         if (runTask->taskStatus & OS_TASK_STATUS_TIMEOUT) {
             runTask->taskStatus &= ~OS_TASK_STATUS_TIMEOUT;
@@ -657,7 +659,6 @@ LITE_OS_SEC_TEXT UINT32 OsQueueMailFree(UINT32 queueId, VOID *mailPool, VOID *ma
         return LOS_ERRNO_QUEUE_MAIL_FREE_ERROR;
     }
 
-    queueCB = GET_QUEUE_HANDLE(queueId);
     if ((queueCB->queueId != queueId) || (queueCB->queueState == OS_QUEUE_UNUSED)) {
         SCHEDULER_UNLOCK(intSave);
         return LOS_ERRNO_QUEUE_NOT_CREATE;

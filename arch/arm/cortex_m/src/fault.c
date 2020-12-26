@@ -35,7 +35,6 @@
 #include "securec.h"
 #include "los_printf_pri.h"
 #include "nvic.h"
-#include "los_memory_pri.h"
 
 #ifdef LOSCFG_KERNEL_TRACE
 #include "los_trace_pri.h"
@@ -47,33 +46,12 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern CHAR __text_start, __text_end,__estack;
-static const int text_start = (const int)&__text_start;
-static const int text_end = (const int)&__text_end;
-
 #define USGFAULT (1U << 18)
 #define BUSFAULT (1U << 17)
 #define MEMFAULT (1U << 16)
 #define DIV0FAULT (1U << 4)
 #define HARD_FAULT_IRQN (-13)
-#define MASK_16_BIT            16
-#define OS_MAX_BACKTRACE       15
-#define THUM_OFFSET            2
-#define STACK_OFFSET           4
-#define BL_CMD_OFFSET          4
-#define BLX_CMD_OFFSET         2
-#define PUSH_MASK_WITH_LR      0xb5
-#define PUSH_MASK              0xb4
-#define OFFSET_ADDRESS_MASK    0x7FF07FF
-#define LOW_11_BITS_MASK       0x7FF
-#define HIGH_11_BITS_MASK      0x7FF0000
-#define HIGH_8_BITS_MASK       0xFF00
-#define SIGN_BIT_MASK          0x400000
-#define HIGH_OFFSET_NUMBER     12
-#define LOW_OFFSET_NUMBER      1
-
-#define BL_INS                 0xF000F000
-#define BLX_INX                0x4700
+#define MASK_16_BIT 16
 
 UINT32 g_curNestCount = 0;
 ExcInfo g_excInfo;
@@ -128,6 +106,7 @@ LITE_OS_SEC_TEXT_INIT VOID OsExcHandleEntry(UINT32 excType, UINT32 faultAddr, UI
     UINT16 tmpFlag = (excType >> MASK_16_BIT) & OS_NULL_SHORT; /* 2:in intrrupt,1:faul addr valid */
     g_curNestCount++;
     g_excInfo.nestCnt = (UINT16)g_curNestCount;
+
     g_excInfo.type = excType & OS_NULL_SHORT;
 
     if (tmpFlag & OS_EXC_FLAG_FAULTADDR_VALID) {
@@ -162,132 +141,6 @@ LITE_OS_SEC_TEXT_INIT VOID OsExcHandleEntry(UINT32 excType, UINT32 faultAddr, UI
     while (1) { }
 }
 
-/* this function is used to validate sp or validate the checking range start and end. */
-STATIC INLINE BOOL IsValidSP(UINTPTR regSP, UINTPTR start, UINTPTR end)
-{
-    return (regSP >= start) && (regSP < end);
-}
-
-STATIC INLINE BOOL FindSuitableStack(UINTPTR *regSP, UINTPTR *start, UINTPTR *end)
-{
-    UINT32 index, topOfStack, stackBottom;
-    BOOL found = FALSE;
-    LosTaskCB *taskCB = NULL;
-
-    *regSP = (UINTPTR) ArchGetPsp();
-
-    /* Search in the task stacks */
-    for (index = 0; index < g_taskMaxNum; index++) {
-        taskCB = &g_taskCBArray[index];
-        if (taskCB->taskStatus & OS_TASK_STATUS_UNUSED) {
-            continue;
-        }
-        topOfStack = taskCB->topOfStack;
-        stackBottom = taskCB->topOfStack + taskCB->stackSize;
-
-        if (IsValidSP(*regSP, topOfStack, stackBottom)) {
-            found = TRUE;
-            goto FOUND;
-        }
-    }
-
-FOUND:
-    if (found == TRUE) {
-        *start = topOfStack;
-        *end = stackBottom;
-    }
-
-    return found;
-}
-
-UINTPTR  LoopUntilEntry(UINTPTR addr)
-{
-    while (addr > (UINTPTR)text_start) {
-        if (((*((UINT16 *)addr) >> 8) == PUSH_MASK_WITH_LR) || ((*((UINT16 *)addr) >> 8) == PUSH_MASK)) {
-            break;
-        }
-        addr -= THUM_OFFSET;
-    }
-
-    return addr;
-}
-
-UINTPTR CalculateBLTargetAddress(UINTPTR bl)
-{
-    UINTPTR target = 0;
-    UINT32 off0, off1, off;
-
-    if (*(UINT16 *)bl & SIGN_BIT_MASK) {
-        off1 = *(UINT16 *)bl & LOW_11_BITS_MASK;
-        off0 = *(UINT16 *)(bl + 2) & LOW_11_BITS_MASK;
-    } else {
-        off0 = *(UINT16 *)bl & LOW_11_BITS_MASK;
-        off1 = *(UINT16 *)(bl + 2) & LOW_11_BITS_MASK;
-    }
-    off = (off0 << HIGH_OFFSET_NUMBER) + (off1 << LOW_OFFSET_NUMBER);
-    if (off & SIGN_BIT_MASK) {
-        target = bl + BL_CMD_OFFSET - ((~(off - 1)) & 0x7FFFFF); // 0x7FFFFF : offset mask
-    } else {
-        target = bl + BL_CMD_OFFSET + off;
-    }
-
-    return target;
-}
-
-UINTPTR  CalculateTargetAddress(UINTPTR bl)
-{
-    UINTPTR target = 0;
-    STATIC UINTPTR tmpBL = 0;
-
-    if ((((*(UINT16 *)(bl - BLX_CMD_OFFSET)) & HIGH_8_BITS_MASK) == BLX_INX)) {
-        if (tmpBL != 0) {
-            target = LoopUntilEntry (tmpBL);
-            tmpBL = bl - BLX_CMD_OFFSET;
-            return target;
-        }
-        tmpBL = bl - BLX_CMD_OFFSET;
-        return LoopUntilEntry(tmpBL);
-    } else if ((*(UINT32 *)(bl - BL_CMD_OFFSET) & BL_INS) == BL_INS) {
-        tmpBL = bl - BL_CMD_OFFSET;
-        CalculateBLTargetAddress (tmpBL);
-
-        return CalculateBLTargetAddress (tmpBL);
-    }
-
-    return 0;
-}
-
-VOID BackTraceSub(UINTPTR sp)
-{
-    UINTPTR stackPointer = sp;
-    UINT32 count = 0;
-    UINTPTR topOfStack = 0;
-    UINTPTR stackBottom = 0;
-    STATIC UINTPTR tmpJump = 0;
-
-    if (FindSuitableStack(&stackPointer, &topOfStack, &stackBottom) == FALSE) {
-        return;
-    }
-
-    while ((stackPointer < stackBottom) && (count < OS_MAX_BACKTRACE)) {
-        if (((*(UINT32 *)stackPointer) >= (UINT32)(text_start))
-            && ((*(UINT32 *)stackPointer) <= (UINT32)(text_end))
-            && (IS_ALIGNED(*((UINT32 *) stackPointer - 1), THUM_OFFSET))) {
-
-            /* Get the entry address of current function. */
-            UINTPTR checkBL = CalculateTargetAddress (*(UINT32 *)stackPointer - 1);
-            if (checkBL == 0 || checkBL == tmpJump) {
-                stackPointer += STACK_OFFSET;
-                continue;
-            }
-            tmpJump = checkBL;
-            count++;
-            PrintExcInfo("traceback %u -- lr = 0x%08x -- fp = 0x%08x\n", count, *(UINT32 *)stackPointer - 1, tmpJump);
-        }
-        stackPointer += STACK_OFFSET;
-    }
-}
-
 LITE_OS_SEC_TEXT_INIT VOID ArchExcInit(VOID)
 {
     g_hwiVec[HARD_FAULT_IRQN + OS_SYS_VECTOR_CNT] = OsExcHardFault;
@@ -302,22 +155,14 @@ LITE_OS_SEC_TEXT_INIT VOID ArchExcInit(VOID)
     *(volatile UINT32 *)OS_NVIC_CCR |= DIV0FAULT;
 }
 
-/* stack protector */
-STATIC VOID BackTraceWithSp(UINTPTR sp)
-{
-    PrintExcInfo("*******backtrace begin*******\n");
-    BackTraceSub(sp);
-}
-
 VOID ArchBackTrace(VOID)
 {
-    UINTPTR stackPointer = ArchGetSp();
-    BackTraceWithSp (stackPointer);
+    return;
 }
 
 VOID ArchBackTraceWithSp(const VOID *stackPointer)
 {
-    BackTraceWithSp ((UINTPTR) stackPointer);
+    (VOID)stackPointer;
     return;
 }
 

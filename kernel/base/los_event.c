@@ -82,7 +82,7 @@ LITE_OS_SEC_TEXT STATIC UINT32 OsEventPoll(UINT32 *eventId, UINT32 eventMask, UI
 {
     UINT32 ret = 0;
 
-    LOS_ASSERT(OsIntLocked());
+    LOS_ASSERT(ArchIntLocked());
     LOS_ASSERT(LOS_SpinHeld(&g_taskSpin));
 
     if (mode & LOS_WAITMODE_OR) {

@@ -125,7 +125,7 @@ UINT32 OsPriQueueSize(UINT32 priority)
     UINT32 cpuId = ArchCurrCpuid();
 #endif
 
-    LOS_ASSERT(OsIntLocked());
+    LOS_ASSERT(ArchIntLocked());
     LOS_ASSERT(LOS_SpinHeld(&g_taskSpin));
 
     LOS_DL_LIST_FOR_EACH(curNode, &g_priQueueList[priority]) {

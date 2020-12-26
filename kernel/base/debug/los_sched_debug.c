@@ -58,7 +58,7 @@ STATIC BOOL g_statisticsStartFlag = FALSE;
 STATIC UINT64 g_statisticsStartTime;
 STATIC StatPercpu g_statPercpu[LOSCFG_KERNEL_CORE_NUM] = {0};
 
-STATIC VOID OsSchedStatisticsPerCpu(LosTaskCB *runTask, LosTaskCB *newTask)
+STATIC VOID OsSchedStatisticsPerCpu(const LosTaskCB *runTask, const LosTaskCB *newTask)
 {
     UINT32 cpuId;
     UINT32 idleTaskId;

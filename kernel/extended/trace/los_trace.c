@@ -223,7 +223,7 @@ UINT32 LOS_TraceInit(VOID *buf, UINT32 size)
 {
     UINT32 intSave;
     UINT32 ret;
-printf("uart num = %d\n", NUM_HAL_INTERRUPT_UART);
+
     TRACE_LOCK(intSave);
     if (g_traceState != TRACE_UNINIT) {
         TRACE_ERROR("trace has been initialized already, the current state is :%d\n", g_traceState);

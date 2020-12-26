@@ -27,9 +27,14 @@
  * --------------------------------------------------------------------------- */
 
 #include "los_base.h"
+#include "los_trace.h"
 #include "los_task_pri.h"
 #include "los_priqueue_pri.h"
 #include "los_percpu_pri.h"
+#include "los_mux_debug_pri.h"
+#ifdef LOSCFG_KERNEL_CPUP
+#include "los_cpup_pri.h"
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -291,7 +296,18 @@ VOID OsSchedResched(VOID)
     newTask->lastCpu = cpuid;
 #endif
 
+    OsTaskTimeUpdateHook(runTask->taskId, LOS_TickCountGet());
+
+#ifdef LOSCFG_KERNEL_CPUP
+    OsTaskCycleEndStart(newTask);
+#endif
+
+#ifdef LOSCFG_BASE_CORE_TSK_MONITOR
     OsTaskSwitchCheck(runTask, newTask);
+#endif
+
+    LOS_TRACE(TASK_SWITCH, newTask->taskId, runTask->priority, runTask->taskStatus, newTask->priority,
+        newTask->taskStatus);
 
 #ifdef LOSCFG_DEBUG_SCHED_STATISTICS
     OsSchedStatistics(runTask, newTask);

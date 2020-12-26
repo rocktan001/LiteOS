@@ -272,7 +272,7 @@ typedef struct {
 
 extern VOID OsPerfHook(UINT32 event);
 
-#ifdef LOSCFG_KERNEL_PERF
+#if defined(LOSCFG_KERNEL_PERF) && defined(LOSCFG_PERF_SW_PMU)
 #define LOS_PERF(EVENT) do {      \
         OsPerfHook(EVENT);        \
     } while (0)

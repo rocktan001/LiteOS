@@ -230,7 +230,7 @@ UINT32 ArchSetExcHook(EXC_PROC_FUNC excHook)
 }
 
 
-EXC_PROC_FUNC OsExcRegHookGet(VOID)
+EXC_PROC_FUNC ArchGetExcHook(VOID)
 {
     return g_excHook;
 }

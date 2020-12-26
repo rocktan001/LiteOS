@@ -8,14 +8,13 @@ menuconfig LOSCFG_KERNEL_SMP
     help
       This option will enable smp support of LiteOS.
 
-menu "Smp Options"
-    depends on LOSCFG_KERNEL_SMP
+if LOSCFG_KERNEL_SMP
 
 config LOSCFG_KERNEL_SMP_CORE_NUM
-    int "Multi-processing Core Numbers"
+    int "Muti-processing Core Numbers"
     default 2
     help
-      This represents the number of multi-processing cores.
+      This represents the number of muti-processing cores.
 
 config LOSCFG_KERNEL_SMP_LOCKDEP
     bool "Enable Spinlock Lockdep Check"
@@ -35,7 +34,7 @@ config LOSCFG_KERNEL_SMP_CALL
     help
       This option will enable function call on multi-core.
 
-endmenu
+endif # LOSCFG_KERNEL_SMP
 
 menu "Basic Config"
 
@@ -51,7 +50,7 @@ config LOSCFG_SCHED_SQ
       The scheduler uses a single ready queue.
 
 #config LOSCFG_SCHED_MQ
-#    bool "Multiple Ready Queue"
+#    bool "Mutiple Ready Queue"
 #    help
 #      The scheduler uses multiple ready queues.
 endchoice
@@ -146,7 +145,7 @@ choice
 config LOSCFG_BASE_CORE_USE_MULTI_LIST
     bool "Use Multi List"
     help
-      Use Multi List for Task & Swtmr.
+      The scheduler uses a single ready queue.
 
 config LOSCFG_BASE_CORE_USE_SINGLE_LIST
     bool "Use Single List"
@@ -164,8 +163,6 @@ config LOSCFG_ARCH_INTERRUPT_PREEMPTION
     bool "Enable Interrupt Preemption"
     depends on (LOSCFG_ARCH_ARM_AARCH64 || LOSCFG_ARCH_RISCV)
     default n
-    help
-      This option will support high priority interrupt preemption.
 
 config LOSCFG_IRQ_USE_STANDALONE_STACK
     bool "Use standalone interrupt stack"
@@ -192,32 +189,38 @@ config LOSCFG_HWI_PRIO_LIMIT
 
 endmenu
 
+menu "Exception Management"
+config LOSCFG_ARCH_EXC_SIMPLE_INFO
+    bool "Enable Exception Simple Info"
+    default n
+    help
+      This option is used to reduce exc output info.
+endmenu
+
 menuconfig LOSCFG_BASE_CORE_SWTMR
     bool "Enable Software Timer"
     default y
     select LOSCFG_BASE_IPC_QUEUE
 
-menu "Software Timer Options"
-    depends on LOSCFG_BASE_CORE_SWTMR
+if LOSCFG_BASE_CORE_SWTMR
 
 config LOSCFG_BASE_CORE_SWTMR_LIMIT
-    int "Max Swtmr Number"
+    int "Max Swmtmr Number"
     default 1024
     help
-      This represents the maximum number of software timers.
+      This represents the maximum number of soft-timers.
 
 config LOSCFG_BASE_CORE_SWTMR_IN_ISR
     bool "Software Timer callback in interrupt"
     default n
 
-endmenu
+endif # LOSCFG_BASE_CORE_SWTMR
 
 menuconfig LOSCFG_BASE_IPC_QUEUE
     bool "Enable Queue"
     default y
 
-menu "Queue Options"
-    depends on LOSCFG_BASE_IPC_QUEUE
+if LOSCFG_BASE_IPC_QUEUE
 
 config LOSCFG_QUEUE_STATIC_ALLOCATION
     bool "Enable Queue Static Allocation"
@@ -231,14 +234,13 @@ config LOSCFG_BASE_IPC_QUEUE_LIMIT
     help
       This represents the maximum number of queues.
 
-endmenu
+endif # LOSCFG_BASE_IPC_QUEUE
 
 menuconfig LOSCFG_BASE_IPC_EVENT
     bool "Enable Event"
     default y
 
-menu "Event Options"
-    depends on LOSCFG_BASE_IPC_EVENT
+if LOSCFG_BASE_IPC_EVENT
 
 config LOSCFG_BASE_IPC_EVENT_LIMIT
     int "Max Event Number"
@@ -246,14 +248,13 @@ config LOSCFG_BASE_IPC_EVENT_LIMIT
     help
       This represents the maximum number of events.
 
-endmenu
+endif # LOSCFG_BASE_IPC_EVENT
 
 menuconfig LOSCFG_BASE_IPC_MUX
     bool "Enable Mutex"
     default y
 
-menu "Mutex Options"
-    depends on LOSCFG_BASE_IPC_MUX
+if LOSCFG_BASE_IPC_MUX
 
 choice
     prompt "Mutex wait mode"
@@ -278,14 +279,13 @@ config LOSCFG_BASE_IPC_MUX_LIMIT
     help
       This represents the maximum number of mutexes.
 
-endmenu
+endif # LOSCFG_BASE_IPC_MUX
 
 menuconfig LOSCFG_BASE_IPC_SEM
     bool "Enable Sem"
     default y
 
-menu "Sem Options"
-    depends on LOSCFG_BASE_IPC_SEM
+if LOSCFG_BASE_IPC_SEM
 
 config LOSCFG_BASE_IPC_SEM_LIMIT
     int "Max Semphore Number"
@@ -293,7 +293,7 @@ config LOSCFG_BASE_IPC_SEM_LIMIT
     help
       This represents the maximum number of semaphores.
 
-endmenu
+endif # LOSCFG_BASE_IPC_SEM
 
 config LOSCFG_KERNEL_NX
     bool "Enable Data Sec NX Feature"
@@ -451,6 +451,7 @@ config LOSCFG_KERNEL_PERF
    default n
    depends on LOSCFG_KERNEL_EXTKERNEL
    select LOSCFG_KERNEL_RINGBUF
+   select LOSCFG_KERNEL_SMP_CALL if LOSCFG_KERNEL_SMP
    help
      If you wish to build LiteOS with support for perf.
 

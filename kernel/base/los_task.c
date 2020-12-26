@@ -416,9 +416,6 @@ LITE_OS_SEC_TEXT STATIC VOID OsTaskStackCheck(const LosTaskCB *oldTask, const Lo
                   newTask->taskName, newTask->taskId, newTask->stackPointer, newTask->topOfStack);
     }
 
-    if (g_pfnUsrTskSwitchHook != NULL) {
-        g_pfnUsrTskSwitchHook();
-    }
     if (OsExcStackCheckHook != NULL) {
         OsExcStackCheckHook();
     }
@@ -433,25 +430,16 @@ LITE_OS_SEC_TEXT_MINOR VOID LOS_TaskSwitchHookReg(TSKSWITCHHOOK hook)
 {
     g_pfnUsrTskSwitchHook = hook;
 }
-#endif
 
-LITE_OS_SEC_TEXT_MINOR UINT32 OsTaskSwitchCheck(const LosTaskCB *oldTask, const LosTaskCB *newTask)
+LITE_OS_SEC_TEXT_MINOR VOID OsTaskSwitchCheck(const LosTaskCB *oldTask, const LosTaskCB *newTask)
 {
-#ifdef LOSCFG_BASE_CORE_TSK_MONITOR
     OsTaskStackCheck(oldTask, newTask);
-#endif
 
-    OsTaskTimeUpdateHook(oldTask->taskId, LOS_TickCountGet());
-
-#ifdef LOSCFG_KERNEL_CPUP
-    OsTaskCycleEndStart(newTask);
-#endif
-
-    LOS_TRACE(TASK_SWITCH, newTask->taskId, oldTask->priority, oldTask->taskStatus, newTask->priority,
-        newTask->taskStatus);
-
-    return LOS_OK;
+    if (g_pfnUsrTskSwitchHook != NULL) {
+        g_pfnUsrTskSwitchHook();
+    }
 }
+#endif /* LOSCFG_BASE_CORE_TSK_MONITOR */
 
 #ifdef LOSCFG_KERNEL_LOWPOWER
 LITE_OS_SEC_TEXT_MINOR VOID LOS_LowpowerHookReg(LowPowerHookFn hook)
@@ -558,10 +546,10 @@ STATIC UINT32 OsTaskInitParamCheck(const TSK_INIT_PARAM_S *initParam)
     return LOS_OK;
 }
 
+#ifdef LOSCFG_TASK_STATIC_ALLOCATION
 STATIC UINT32 OsTaskCreateParamCheckStatic(const UINT32 *taskId,
     const TSK_INIT_PARAM_S *initParam, const VOID *topStack)
 {
-#ifdef LOSCFG_TASK_STATIC_ALLOCATION
     UINT32 ret;
 
     if (taskId == NULL) {
@@ -589,13 +577,8 @@ STATIC UINT32 OsTaskCreateParamCheckStatic(const UINT32 *taskId,
         return LOS_ERRNO_TSK_STKSZ_TOO_SMALL;
     }
     return LOS_OK;
-#else
-    (VOID)taskId;
-    (VOID)initParam;
-    (VOID)topStack;
-    return LOS_OK;
-#endif
 }
+#endif
 
 LITE_OS_SEC_TEXT_INIT STATIC UINT32 OsTaskCreateParamCheck(const UINT32 *taskId,
     TSK_INIT_PARAM_S *initParam, VOID **pool)
@@ -751,11 +734,15 @@ LITE_OS_SEC_TEXT_INIT STATIC BOOL OsTaskDelAction(LosTaskCB *taskCB, BOOL useUsr
     LOS_TRACE(TASK_DELETE, taskCB->taskId, taskCB->taskStatus, taskCB->usrStack);
 
     if (taskCB->taskStatus & OS_TASK_STATUS_RUNNING) {
+#ifdef LOSCFG_TASK_STATIC_ALLOCATION
         if (useUsrStack) {
             LOS_ListAdd(&g_losFreeTask, &taskCB->pendList);
         } else {
+#endif
             LOS_ListTailInsert(&g_taskRecyleList, &taskCB->pendList);
+#ifdef LOSCFG_TASK_STATIC_ALLOCATION
         }
+#endif
         OsTaskDelActionOnRun(taskCB);
         return TRUE;
     }
@@ -851,10 +838,11 @@ LITE_OS_SEC_TEXT_INIT STATIC VOID OsTaskCBInit(LosTaskCB *taskCB, const TSK_INIT
     taskCB->priority     = initParam->usTaskPrio;
     taskCB->priBitMap    = 0;
     taskCB->taskEntry    = initParam->pfnTaskEntry;
-
+#ifdef LOSCFG_BASE_IPC_EVENT
     LOS_ListInit(&taskCB->event.stEventList);
     taskCB->event.uwEventID = 0;
     taskCB->eventMask    = 0;
+#endif
 
     taskCB->taskName     = initParam->pcName;
     taskCB->msg          = NULL;
@@ -904,11 +892,15 @@ STATIC UINT32 OsTaskCreateOnly(UINT32 *taskId, TSK_INIT_PARAM_S *initParam, VOID
     LosTaskCB *taskCB = NULL;
     VOID *pool = NULL;
 
+#ifdef LOSCFG_TASK_STATIC_ALLOCATION
     if (useUsrStack) {
         errRet = OsTaskCreateParamCheckStatic(taskId, initParam, topStack);
     } else {
+#endif
         errRet = OsTaskCreateParamCheck(taskId, initParam, &pool);
+#ifdef LOSCFG_TASK_STATIC_ALLOCATION
     }
+#endif
     if (errRet != LOS_OK) {
         return errRet;
     }
@@ -984,7 +976,6 @@ STATIC VOID OsTaskResume(const UINT32 *taskId)
 }
 
 #ifdef LOSCFG_TASK_STATIC_ALLOCATION
-
 UINT32 LOS_TaskCreateOnlyStatic(UINT32 *taskId, TSK_INIT_PARAM_S *initParam, VOID *topStack)
 {
     return OsTaskCreateOnly(taskId, initParam, topStack, TRUE);
@@ -1064,8 +1055,10 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskDelete(UINT32 taskId)
 
     taskCB->taskStatus &= ~OS_TASK_STATUS_SUSPEND;
     taskCB->taskStatus |= OS_TASK_STATUS_UNUSED;
+#ifdef LOSCFG_BASE_IPC_EVENT
     taskCB->event.uwEventID = OS_INVALID_VALUE;
     taskCB->eventMask = 0;
+#endif
 #ifdef LOSCFG_LAZY_STACK
     taskCB->stackFrame = 0;
 #endif
@@ -1242,7 +1235,6 @@ LITE_OS_SEC_TEXT UINT32 LOS_TaskDelay(UINT32 tick)
     LosTaskCB *runTask = NULL;
 
     if (OS_INT_ACTIVE) {
-        PRINT_ERR("!!!LOS_ERRNO_TSK_DELAY_IN_INT!!!\n");
         return LOS_ERRNO_TSK_DELAY_IN_INT;
     }
 
@@ -1497,8 +1489,10 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_TaskInfoGet(UINT32 taskId, TSK_INFO_S *taskInf
     taskInfo->usTaskPrio = taskCB->priority;
     taskInfo->uwStackSize = taskCB->stackSize;
     taskInfo->uwTopOfStack = taskCB->topOfStack;
+#ifdef LOSCFG_BASE_IPC_EVENT
     taskInfo->uwEvent = taskCB->event;
     taskInfo->uwEventMask = taskCB->eventMask;
+#endif
     taskInfo->pTaskSem = taskCB->taskSem;
     taskInfo->pTaskMux = taskCB->taskMux;
     taskInfo->uwTaskID = taskId;
@@ -1618,7 +1612,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsTaskProcSignal(VOID)
         runTask->signal = SIGNAL_NONE;
         ret = LOS_TaskDelete(runTask->taskId);
         if (ret) {
-            PRINT_ERR("%s proc task delete failed err:0x%x\n", __FUNCTION__, ret);
+            PRINT_ERR("%s: tsk del fail err:0x%x\n", __FUNCTION__, ret);
         }
     } else if (runTask->signal & SIGNAL_SUSPEND) {
         runTask->signal &= ~SIGNAL_SUSPEND;

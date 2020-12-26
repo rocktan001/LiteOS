@@ -92,6 +92,7 @@ STATIC INLINE BOOL ValidTimeval(const struct timeval *tv)
     return TRUE;
 }
 
+#ifndef LOSCFG_AARCH64
 STATIC INLINE BOOL ValidTimeval64(const struct timeval64 *tv)
 {
     /* Fail a NULL pointer */
@@ -106,6 +107,7 @@ STATIC INLINE BOOL ValidTimeval64(const struct timeval64 *tv)
 
     return TRUE;
 }
+#endif
 
 STATIC SPIN_LOCK_INIT(g_timeSpin);
 STATIC long long g_adjTimeLeft; /* absolute value of adjtime */

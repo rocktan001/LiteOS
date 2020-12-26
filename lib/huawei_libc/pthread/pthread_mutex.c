@@ -470,39 +470,13 @@ STATIC INT32 OsMuxPostForPosix(pthread_mutex_t *mutex)
     return ENOERR;
 }
 
-UINT32 OsMuxCheckAbsTimeAndCalcAbsTicks(const struct timespec *absTime, UINT32 *absTicks)
-{
-    struct timespec to = {0};
-    if (absTime == NULL) {
-        return EINVAL;
-    }
-
-    if (!ValidTimespec(absTime)) {
-        return EINVAL;
-    }
-    if (clock_gettime(CLOCK_REALTIME, &to)) {
-        return EINVAL;
-    }
-    to.tv_sec = absTime->tv_sec - to.tv_sec;
-    to.tv_nsec = absTime->tv_nsec - to.tv_nsec;
-    if (to.tv_nsec < 0) {
-        to.tv_sec--;
-        to.tv_nsec += OS_SYS_NS_PER_SECOND;
-    }
-    if (to.tv_sec < 0) {
-        return ETIMEDOUT;
-    }
-    /* convert to tick */
-    *absTicks = OsTimespec2Tick(&to);
-    return ENOERR;
-}
-
 int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *absTime)
 {
     MuxBaseCB *muxPended = NULL;
     LosTaskCB *runTask = NULL;
     UINT32 ret;
     UINT32 absTicks;
+    struct timespec to = {0};
 
     runTask = (LosTaskCB*)OsCurrTaskGet();
     ret = OsMuxPreCheck(mutex, runTask);
@@ -518,10 +492,22 @@ int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *absTi
         return EDEADLK;
     }
 
-    ret = OsMuxCheckAbsTimeAndCalcAbsTicks(absTime, &absTicks);
-    if (ret != ENOERR) {
-        return (INT32)ret;
+    if ((absTime == NULL) || (!ValidTimespec(absTime)) || clock_gettime(CLOCK_REALTIME, &to)) {
+        return EINVAL;
     }
+
+    /* calculate abs time */
+    to.tv_sec = absTime->tv_sec - to.tv_sec;
+    to.tv_nsec = absTime->tv_nsec - to.tv_nsec;
+    if (to.tv_nsec < 0) {
+        to.tv_sec--;
+        to.tv_nsec += OS_SYS_NS_PER_SECOND;
+    }
+    if (to.tv_sec < 0) {
+        return ETIMEDOUT;
+    }
+    /* convert to tick */
+    absTicks = OsTimespec2Tick(&to);
 
     ret = OsMuxPendForPosix(mutex, absTicks);
     return map_errno(ret);

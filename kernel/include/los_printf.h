@@ -141,13 +141,13 @@ extern void dprintf(const char *fmt, ...);
  */
 #ifndef PRINT_DEBUG
 #if PRINT_LEVEL < LOS_DEBUG_LEVEL
-#define PRINT_DEBUG(fmt, args...)
+#define PRINT_DEBUG(fmt, ...)
 #else
 #ifdef LOSCFG_SHELL_LK
-#define PRINT_DEBUG(fmt, args...) LOS_LkPrint(LOS_DEBUG_LEVEL, __FUNCTION__, __LINE__, fmt, ##args)
+#define PRINT_DEBUG(fmt, ...) LOS_LkPrint(LOS_DEBUG_LEVEL, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define PRINT_DEBUG(fmt, args...) do {           \
-    (dprintf("[DEBUG] "), dprintf(fmt, ##args)); \
+#define PRINT_DEBUG(fmt, ...) do {           \
+    (dprintf("[DEBUG] "), dprintf(fmt, ##__VA_ARGS__)); \
 } while (0)
 #endif
 #endif
@@ -175,13 +175,13 @@ extern void dprintf(const char *fmt, ...);
  */
 #ifndef PRINT_INFO
 #if PRINT_LEVEL < LOS_INFO_LEVEL
-#define PRINT_INFO(fmt, args...)
+#define PRINT_INFO(fmt, ...)
 #else
 #ifdef LOSCFG_SHELL_LK
-#define PRINT_INFO(fmt, args...) LOS_LkPrint(LOS_INFO_LEVEL, __FUNCTION__, __LINE__, fmt, ##args)
+#define PRINT_INFO(fmt, ...) LOS_LkPrint(LOS_INFO_LEVEL, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define PRINT_INFO(fmt, args...) do {           \
-    (dprintf("[INFO] "), dprintf(fmt, ##args)); \
+#define PRINT_INFO(fmt, ...) do {           \
+    (dprintf("[INFO] "), dprintf(fmt, ##__VA_ARGS__)); \
 } while (0)
 #endif
 #endif
@@ -209,13 +209,13 @@ extern void dprintf(const char *fmt, ...);
  */
 #ifndef PRINT_WARN
 #if PRINT_LEVEL < LOS_WARN_LEVEL
-#define PRINT_WARN(fmt, args...)
+#define PRINT_WARN(fmt, ...)
 #else
 #ifdef LOSCFG_SHELL_LK
-#define PRINT_WARN(fmt, args...) LOS_LkPrint(LOS_WARN_LEVEL, __FUNCTION__, __LINE__, fmt, ##args)
+#define PRINT_WARN(fmt, ...) LOS_LkPrint(LOS_WARN_LEVEL, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define PRINT_WARN(fmt, args...) do {           \
-    (dprintf("[WARN] "), dprintf(fmt, ##args)); \
+#define PRINT_WARN(fmt, ...) do {           \
+    (dprintf("[WARN] "), dprintf(fmt, ##__VA_ARGS__)); \
 } while (0)
 #endif
 #endif
@@ -243,13 +243,13 @@ extern void dprintf(const char *fmt, ...);
  */
 #ifndef PRINT_ERR
 #if PRINT_LEVEL < LOS_ERR_LEVEL
-#define PRINT_ERR(fmt, args...)
+#define PRINT_ERR(fmt, ...)
 #else
 #ifdef LOSCFG_SHELL_LK
-#define PRINT_ERR(fmt, args...) LOS_LkPrint(LOS_ERR_LEVEL, __FUNCTION__, __LINE__, fmt, ##args)
+#define PRINT_ERR(fmt, ...) LOS_LkPrint(LOS_ERR_LEVEL, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define PRINT_ERR(fmt, args...) do {           \
-    (dprintf("[ERR] "), dprintf(fmt, ##args)); \
+#define PRINT_ERR(fmt, ...) do {           \
+    (dprintf("[ERR] "), dprintf(fmt, ##__VA_ARGS__)); \
 } while (0)
 #endif
 #endif
@@ -277,12 +277,12 @@ extern void dprintf(const char *fmt, ...);
  */
 #ifndef PRINTK
 #if PRINT_LEVEL < LOS_COMMOM_LEVEL
-#define PRINTK(fmt, args...)
+#define PRINTK(fmt, ...)
 #else
 #ifdef LOSCFG_SHELL_LK
-#define PRINTK(fmt, args...) LOS_LkPrint(LOS_COMMOM_LEVEL, __FUNCTION__, __LINE__, fmt, ##args)
+#define PRINTK(fmt, ...) LOS_LkPrint(LOS_COMMOM_LEVEL, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define PRINTK(fmt, args...) dprintf(fmt, ##args)
+#define PRINTK(fmt, ...) dprintf(fmt, ##__VA_ARGS__)
 #endif
 #endif
 #endif
@@ -309,10 +309,10 @@ extern void dprintf(const char *fmt, ...);
  */
 #ifndef PRINT_EMG
 #if PRINT_LEVEL < LOS_EMG_LEVEL
-#define PRINT_EMG(fmt, args...)
+#define PRINT_EMG(fmt, ...)
 #else
-#define PRINT_EMG(fmt, args...) do {           \
-    (dprintf("[EMG] "), dprintf(fmt, ##args)); \
+#define PRINT_EMG(fmt, ...) do {           \
+    (dprintf("[EMG] "), dprintf(fmt, ##__VA_ARGS__)); \
 } while (0)
 #endif
 #endif
@@ -338,7 +338,7 @@ extern void dprintf(const char *fmt, ...);
  * @since Huawei LiteOS V100R001C00
  */
 #ifndef PRINT_RELEASE
-#define PRINT_RELEASE(fmt, args...)   dprintf(fmt, ##args)
+#define PRINT_RELEASE(fmt, ...)   dprintf(fmt, ##__VA_ARGS__)
 #endif
 
 /**
@@ -363,9 +363,9 @@ extern void dprintf(const char *fmt, ...);
  */
 #ifndef PRINT_TRACE
 #ifdef DEBUG_TRACE
-#define PRINT_TRACE(fmt, args...)   do {dprintf("[TRACE] "fmt, ##args);} while (0)
+#define PRINT_TRACE(fmt, ...)   do {dprintf("[TRACE] "fmt, ##__VA_ARGS__);} while (0)
 #else
-#define PRINT_TRACE(fmt, args...)
+#define PRINT_TRACE(fmt, ...)
 #endif
 #endif
 

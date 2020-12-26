@@ -146,9 +146,11 @@ typedef struct {
     CHAR            *taskName;          /* Task name */
     LOS_DL_LIST     pendList;           /* Task pend node */
     SortLinkList    sortList;           /* Task sortlink node */
+#ifdef LOSCFG_BASE_IPC_EVENT
     EVENT_CB_S      event;
     UINT32          eventMask;          /* Event mask */
     UINT32          eventMode;          /* Event mode */
+#endif
     VOID            *msg;               /* Memory allocated to queues */
     UINT32          priBitMap;          /* BitMap for recording the change of task priority,
                                              the priority can not be greater than 31 */
@@ -208,13 +210,13 @@ extern UINT32 OsIdleTaskCreate(VOID);
 extern UINT32 OsTaskInit(VOID);
 #ifdef LOSCFG_BASE_CORE_TSK_MONITOR
 extern VOID OsTaskMonInit(VOID);
+extern VOID OsTaskSwitchCheck(const LosTaskCB *oldTask, const LosTaskCB *newTask);
 #endif
 extern UINT32 OsShellCmdDumpTask(INT32 argc, const CHAR **argv);
 
 /* get task info */
 #define OS_ALL_TASK_MASK  0xFFFFFFFF
 extern UINT32 OsShellCmdTskInfoGet(UINT32 taskId);
-
 extern VOID *OsGetMainTask(VOID);
 extern VOID OsSetMainTask(VOID);
 extern LosTaskCB *OsGetTopTask(VOID);
@@ -226,10 +228,10 @@ extern VOID OsTimerListDelete(LosTaskCB *taskCB);
 extern VOID OsTaskWait(LOS_DL_LIST *list, UINT16 taskStatus, UINT32 timeout);
 extern VOID OsTaskWake(LosTaskCB *resumedTask, UINT16 taskStatus);
 extern VOID OsTaskEntry(UINT32 taskId);
-extern SortLinkAttribute *OsTaskSortLinkGet(VOID);
-extern UINT32 OsTaskSwitchCheck(const LosTaskCB *oldTask, const LosTaskCB *newTask);
 extern UINT32 OsTaskProcSignal(VOID);
+#ifdef LOSCFG_DEBUG_SCHED_STATISTICS
 extern VOID OsSchedStatistics(LosTaskCB *runTask, LosTaskCB *newTask);
+#endif
 #ifdef LOSCFG_EXC_INTERACTION
 extern BOOL IsIdleTask(UINT32 taskId);
 #endif

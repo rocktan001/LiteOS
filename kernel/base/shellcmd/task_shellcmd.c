@@ -200,10 +200,14 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoDataExc(const LosTaskCB *all
 #ifdef LOSCFG_KERNEL_SMP
         WriteExcInfoToBuf("0x%04x  %4d   ", taskCB->cpuAffiMask, (INT16)(taskCB->currCpu));
 #endif
-        WriteExcInfoToBuf("%-11u%-13s0x%-11x0x%-11x%p   0x%-8x   0x%-9x0x%-10x", taskCB->priority,
+
+        WriteExcInfoToBuf("%-11u%-13s0x%-11x0x%-11x%p   0x%-8x   0x%-10x", taskCB->priority,
                           OsShellCmdConvertTskStatus(taskCB->taskStatus), taskCB->stackSize,
                           g_taskWaterLine[taskCB->taskId],
-                          taskCB->stackPointer, taskCB->topOfStack, taskCB->eventMask, semId);
+                          taskCB->stackPointer, taskCB->topOfStack, semId);
+#ifdef LOSCFG_BASE_IPC_EVENT
+        WriteExcInfoToBuf("0x%-9x", taskCB->eventMask);
+#endif
 
 #ifdef LOSCFG_KERNEL_CPUP
         WriteExcInfoToBuf("%4u.%1u%9u.%1u%8u.%1u",
@@ -241,10 +245,13 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdTskInfoData(const LosTaskCB *allTas
 #ifdef LOSCFG_KERNEL_SMP
         PRINTK("0x%04x  %4d   ", taskCB->cpuAffiMask, (INT16)(taskCB->currCpu));
 #endif
-        PRINTK("%-11u%-13s0x%-11x0x%-11x%p   0x%-8x   0x%-9x0x%-10x", taskCB->priority,
+        PRINTK("%-11u%-13s0x%-11x0x%-11x%p   0x%-8x   0x%-10x", taskCB->priority,
                OsShellCmdConvertTskStatus(taskCB->taskStatus), taskCB->stackSize,
                g_taskWaterLine[taskCB->taskId],
-               taskCB->stackPointer, taskCB->topOfStack, taskCB->eventMask, semId);
+               taskCB->stackPointer, taskCB->topOfStack, semId);
+#ifdef LOSCFG_BASE_IPC_EVENT
+        PRINTK("0x%-9x", taskCB->eventMask);
+#endif
 
 #ifdef LOSCFG_KERNEL_CPUP
         PRINTK("%4u.%1u%9u.%1u%8u.%1u",

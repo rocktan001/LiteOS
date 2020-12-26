@@ -33,6 +33,7 @@
 #include "los_event.h"
 #include "los_task_pri.h"
 #include "menuconfig.h"
+#include "uart.h"
 
 EVENT_CB_S g_stShellEvent;
 
