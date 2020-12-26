@@ -28,7 +28,6 @@
 
 #include "los_lowpower_impl_pri.h"
 #include "los_hwi.h"
-#include "los_tick_pri.h"
 #include "los_sortlink_pri.h"
 #include "los_swtmr_pri.h"
 #include "los_task_pri.h"
@@ -114,14 +113,19 @@ enum { LOCK_OFF = 0, LOCK_ON };
 
 __attribute__((section(".data"))) STATIC PowerMgr g_pmMgr = {
     .deepSleepOps = NULL,
-    .sleepVoteCount = 0,
     .exVoterHandle = NULL,
+    .sleepVoteCount = 0,
     .maxSleepCount = MAX_SLEEP_TIME,
     .minSleepTicks = MIN_SLEEP_TIME,
-    .sleepMode = {0},
+    .minDeepSleepTicks = 0,
     .sleepTime = {0},
-    .sleepMode = {0},
+    .deepSleepCores = 0,
+    .resumeSleepCores = 0,
     .freq = 1,
+    .freqPending = 0,
+    .deepSleepDelay = 0,
+    .freeLock = 0,
+    .sleepMode = {0},
 };
 
 STATIC VOID OsChangeFreq(VOID);
@@ -130,7 +134,7 @@ STATIC VOID OsLightSleepDefault(VOID);
 
 STATIC VOID OsSetWakeUpTimerDefault(UINT32 sleepTick);
 
-STATIC VOID OsWithrawWakeUpTimerDefault(VOID);
+STATIC UINT32 OsWithrawWakeUpTimerDefault(VOID);
 
 STATIC UINT32 OsGetSleepTimeDefault(VOID);
 
@@ -167,9 +171,10 @@ STATIC VOID OsSetWakeUpTimerDefault(UINT32 sleepTick)
     TRACE_FUNC_CALL();
 }
 
-STATIC VOID OsWithrawWakeUpTimerDefault(VOID)
+STATIC UINT32 OsWithrawWakeUpTimerDefault(VOID)
 {
     TRACE_FUNC_CALL();
+    return 0;
 }
 
 STATIC UINT32 OsGetSleepTimeDefault(VOID)
@@ -280,6 +285,16 @@ STATIC PowerMgrDeepSleepOps g_deepSleepOps = {
     .otherCoreResume = OsOtherCoreResumeDefault
 };
 
+STATIC INLINE VOID OsTickResume(UINT32 sleepTicks)
+{
+    UINT32 cpuid = ArchCurrCpuid();
+    if (sleepTicks > g_pmMgr.sleepTime[cpuid]) {
+        sleepTicks -= g_pmMgr.sleepTime[cpuid];
+    } else {
+        sleepTicks = 0;
+    }
+    OsSysTimeUpdate(sleepTicks);
+}
 
 STATIC VOID OsDeepSleepResume(VOID)
 {
@@ -313,7 +328,8 @@ STATIC INLINE VOID OsEnterDeepSleepMainCore(VOID)
             g_pmRunOps.enterDeepSleep();
             g_deepSleepOps.rollback();
         }
-        g_pmRunOps.withdrawWakeUpTimer();
+        UINT32 sleepTicks = g_pmRunOps.withdrawWakeUpTimer();
+        OsSysTimeUpdate(sleepTicks);
         g_deepSleepOps.resumeDevice();
     } else {
 #ifdef LOSCFG_KERNEL_TICKLESS
@@ -345,7 +361,8 @@ STATIC INLINE VOID OsEnterSleepMode(VOID)
             val = LOS_AtomicRead(&g_pmMgr.resumeSleepCores);
         } while (LOS_AtomicCmpXchg32bits(&g_pmMgr.resumeSleepCores, val & (~cpuMask), val));
         g_deepSleepOps.otherCoreResume();
-        OsTickStart();
+        UINT32 sleepTicks = g_pmRunOps.withdrawWakeUpTimer();
+        OsTickResume(sleepTicks);
     } else {
         if (g_pmMgr.deepSleepCores == LOSCFG_KERNEL_CORE_NUM) {
             LOS_MpSchedule(1 << 0);
@@ -423,6 +440,7 @@ STATIC VOID OsLowpowerDeepSleep(LosIntermitMode *mode, UINT32 cpuid, UINT32 slee
     *mode = LOS_INTERMIT_LIGHT_SLEEP;
 #endif
 }
+
 STATIC VOID OsLowpowerProcess(VOID)
 {
 #ifdef LOSCFG_KERNEL_RUNSTOP
@@ -459,6 +477,7 @@ STATIC VOID OsLowpowerProcess(VOID)
         }
         UINT32 mode = g_pmRunOps.selectSleepMode(sleepTicks);
         if (mode >= LOS_INTERMIT_DEEP_SLEEP) {
+            g_pmMgr.sleepTime[cpuid] = g_pmRunOps.withdrawWakeUpTimer();
             OsLowpowerDeepSleep(&mode, cpuid, sleepTicks);
         }
 
@@ -472,7 +491,6 @@ STATIC VOID OsLowpowerProcess(VOID)
     LOS_TaskUnlock();
     LOS_IntRestore(intSave);
 }
-
 
 STATIC VOID OsLowpowerWakeupFromReset(VOID)
 {
@@ -601,7 +619,10 @@ STATIC PowerMgrOps g_pmOps = {
 #define ASSIGN_MEMBER_NOT_NULL(lhs, rhs, member) \
     do {                                         \
         ASSIGN_MEMBER(lhs, rhs, member);         \
-        LOS_ASSERT((lhs)->member != NULL);       \
+        if ((lhs)->member == NULL) {             \
+            PRINT_ERR("\r\n [PM] %s must be non-null.\n", __FUNCTION__); \
+            while (1) {};                        \
+        }                                        \
     } while (0)
 
 VOID LOS_PowerMgrInit(const PowerMgrParameter *para)

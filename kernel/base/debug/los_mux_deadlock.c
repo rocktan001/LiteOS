@@ -40,7 +40,6 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 
-#ifdef LOSCFG_DEBUG_MUTEX
 typedef struct {
     LOS_DL_LIST muxListHead;    /* Task-held mutexs list */
     UINT64      lastAccessTime; /* The last operation time */
@@ -254,7 +253,6 @@ UINT32 OsShellCmdMuxDeadlockCheck(UINT32 argc, const CHAR **argv)
 }
 SHELLCMD_ENTRY(deadlock_shellcmd, CMD_TYPE_EX, "dlock", 0, (CmdCallBackFunc)OsShellCmdMuxDeadlockCheck);
 #endif /* LOSCFG_SHELL */
-#endif /* LOSCFG_DEBUG_MUTEX_DEADLOCK */
 
 #ifdef __cplusplus
 #if __cplusplus

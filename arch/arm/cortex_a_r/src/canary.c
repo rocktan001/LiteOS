@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Aarch32 Canary
+ * Description: Aach32 Canary
  * Author: Huawei LiteOS Team
  * Create: 2020-01-01
  * Redistribution and use in source and binary forms, with or without modification,

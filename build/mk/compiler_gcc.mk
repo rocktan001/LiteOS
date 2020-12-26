@@ -99,7 +99,7 @@ define path_checker
 endef
 
 # Check GCC lib and include path is avaiable for now.
-# TODO : CXX paths to be added. Since LiteOS support for C++ is based on whether those libs
-#        are compiled for LiteOS. C++ support needs to configured with Kconfigs.
+# CXX paths to be added. Since LiteOS support for C++ is based on whether those libs
+# are compiled for LiteOS. C++ support needs to configured with Kconfigs.
 $(call path_checker,$(LITEOS_COMPILER_GCCLIB_PATH))
 $(call path_checker,$(GCC_GCCLIB_PATH)/include)

@@ -38,12 +38,19 @@ __attribute__((section(".data"))) STATIC const PowerMgrOps *g_pmOps = NULL;
 
 VOID LOS_LowpowerInit(const PowerMgrOps *pmOps)
 {
-#ifdef LOSCFG_KERNEL_POWER_MGR
-    // Reassignment of PowerMgrOps is forbidden.
-    LOS_ASSERT(g_pmOps == NULL && pmOps != NULL);
+    if (pmOps == NULL) {
+        PRINT_ERR("\r\n [PM] PowerMgrOps must be non-null.\n");
+        return;
+    } else if (pmOps->process == NULL) {
+        PRINT_ERR("\r\n [PM] %s must be non-null.\n", __FUNCTION__);
+        return;
+    }
 
-    // check non-null functions
-    LOS_ASSERT(pmOps->process != NULL);
+#ifdef LOSCFG_KERNEL_POWER_MGR
+    if (g_pmOps != NULL) {
+        PRINT_ERR("\r\n [PM] Reassignment of PowerMgrOps is forbidden.\n");
+        return;
+    }
 #endif
     g_pmOps = pmOps;
 

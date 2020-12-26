@@ -79,7 +79,7 @@
 .endm
 
 /*
- * R0: new task
+ * R0: new task 
  */
 OsStartToRun:
     MSR     CPSR_c, #(CPSR_INT_DISABLE | CPSR_SVC_MODE)

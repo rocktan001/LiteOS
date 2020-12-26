@@ -101,11 +101,6 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern UINT32 osAppInit(VOID);
-extern VOID app_init(VOID);
-#endif
-
 LITE_OS_SEC_TEXT_INIT static VOID OsRegister(VOID)
 {
 #ifdef LOSCFG_LIB_CONFIGURABLE
@@ -230,7 +225,6 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(VOID)
 #ifdef LOSCFG_PLATFORM_UART_WITHOUT_VFS
     uart_init();
 #ifdef LOSCFG_SHELL
-    extern int uart_hwiCreate(void); /* HuaWeiChange */
     uart_hwiCreate();
 #endif /* LOSCFG_SHELL */
 #endif /* LOSCFG_PLATFORM_UART_WITHOUT_VFS */

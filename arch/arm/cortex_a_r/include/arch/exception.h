@@ -120,10 +120,10 @@ typedef struct {
     _regFp; \
 })
 
-typedef VOID (*EXC_PROC_FUNC)(UINT32, ExcContext *);
+typedef VOID (*EXC_PROC_FUNC)(UINT32, ExcContext*);
 
 UINT32 ArchSetExcHook(EXC_PROC_FUNC excHook);
-#define ArchSetExcHook LOS_ExcRegHook
+#define LOS_ExcRegHook ArchSetExcHook
 
 STATIC INLINE VOID ArchHaltCpu(VOID)
 {

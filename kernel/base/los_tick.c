@@ -118,10 +118,17 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_CyclePerTickGet(VOID)
 
 LITE_OS_SEC_TEXT_MINOR VOID LOS_GetCpuCycle(UINT32 *highCnt, UINT32 *lowCnt)
 {
-    UINT64 cycle = HalClockGetCycles();
+    UINT64 cycle;
 
-    *highCnt = cycle >> 32;
-    *lowCnt = cycle & 0xFFFFFFFFU;
+    if ((highCnt == NULL) || (lowCnt == NULL)) {
+        return;
+    }
+    cycle = HalClockGetCycles();
+
+    /* get the high 32 bits */
+    *highCnt = (UINT32)(cycle >> 32);
+    /* get the low 32 bits */
+    *lowCnt = (UINT32)(cycle & 0xFFFFFFFFULL);
 }
 
 LITE_OS_SEC_TEXT_MINOR UINT64 LOS_CurrNanosec(VOID)

@@ -39,8 +39,7 @@ extern "C" {
 
 #ifdef LOSCFG_KERNEL_LMS
 
-#define POINTER_SIZE            4
-#define OS_MAX_BACKTRACE        15
+#define POINTER_SIZE                      4
 
 #define STORE_ERRMODE                     1
 #define LOAD_ERRMODE                      0

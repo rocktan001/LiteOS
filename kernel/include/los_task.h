@@ -42,6 +42,7 @@
 #include "los_memory.h"
 #include "los_err.h"
 #include "arch/task.h"
+#include "los_lowpower.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -521,7 +522,7 @@ typedef struct tagTskInitParam {
  *
  */
 typedef struct tagTskInfo {
-    CHAR                acName[LOS_TASK_NAMELEN];   /**< Task entrance function, the default value of
+    CHAR                acName[LOS_TASK_NAMELEN];   /**< Task name, the default value of
 	                                                     #LOS_TASK_NAMELEN is 32  */
     UINT32              uwTaskID;                   /**< Task ID                  */
     UINT16              usTaskStatus;               /**< Task status              */

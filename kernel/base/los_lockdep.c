@@ -174,6 +174,9 @@ VOID OsLockDepCheckIn(const SPIN_LOCK_S *lock)
     LockDep *lockDep = &current->lockDep;
     LosTaskCB *lockOwner = NULL;
 
+    if (lock == NULL) {
+        return;
+    }
     OsLockDepRequire(&intSave);
 
     if (lockDep->lockDepth >= (INT32)MAX_LOCK_DEPTH) {
@@ -223,6 +226,9 @@ VOID OsLockDepRecord(SPIN_LOCK_S *lock)
     LockDep *lockDep = &current->lockDep;
     HeldLocks *heldlock = &lockDep->heldLocks[lockDep->lockDepth];
 
+    if (lock == NULL) {
+        return;
+    }
     OsLockDepRequire(&intSave);
 
     /*
@@ -254,6 +260,10 @@ VOID OsLockDepCheckOut(SPIN_LOCK_S *lock)
     LosTaskCB *owner = NULL;
     LockDep *lockDep = NULL;
     HeldLocks *heldlocks = NULL;
+
+    if (lock == NULL) {
+        return;
+    }
 
     OsLockDepRequire(&intSave);
 

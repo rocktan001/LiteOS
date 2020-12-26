@@ -444,7 +444,7 @@ STATIC INLINE BOOL MqParamCheck(mqd_t personal, const char *msg, size_t msgLen)
         return FALSE;
     }
 
-    if ((msg == NULL) || (msgLen == 0)) {
+    if ((msg == NULL) || (msgLen == 0) || (msgLen > UINT_MAX)) {
         errno = EINVAL;
         return FALSE;
     }

@@ -97,6 +97,7 @@ LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/lib/libc/stdio \
                  -I $(LITEOSTOPDIR)/targets/bsp/include \
                  -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
                  -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \
+                 -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
                  -I $(LITEOSTOPDIR)/targets/bsp/$(LITEOS_PLATFORM)/include \
                  -I $(LITEOSTOPDIR)/targets/bsp/$(HAL_DRIVER_SRC)/Inc \
                  -I $(LITEOSTOPDIR)/targets/bsp/$(HAL_DRIVER_SRC)/Inc/Legacy \

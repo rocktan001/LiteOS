@@ -43,8 +43,8 @@ STATIC INLINE UINT32 ArchIntLock(VOID)
 {
     UINT32 intSave;
     __asm__ __volatile__(
-        "mrs    %0, daif      \n"
-        "msr    daifset, #0xf   "
+        "mrs %0, daif \n"
+        "msr daifset, #0xf"
         : "=r" (intSave)
         :
         : "memory");
@@ -55,8 +55,8 @@ STATIC INLINE UINT32 ArchIntUnlock(VOID)
 {
     UINT32 intSave;
     __asm__ __volatile__(
-        "mrs    %0, daif      \n"
-        "msr    daifclr, #3     "
+        "mrs %0, daif \n"
+        "msr daifclr, #3"
         : "=r"(intSave)
         :
         : "memory");
@@ -65,24 +65,16 @@ STATIC INLINE UINT32 ArchIntUnlock(VOID)
 
 STATIC INLINE VOID ArchIntRestore(UINT32 intSave)
 {
-    __asm__ __volatile__(
-        "msr    daif, %0        "
-        :
-        : "r"(intSave)
-        : "memory");
+    __asm__ __volatile__("msr daif, %0 " : : "r"(intSave) : "memory");
 }
 
 #define PSR_I_BIT   0x00000080U
 
-STATIC INLINE UINT32 OsIntLocked(VOID)
+STATIC INLINE UINT32 ArchIntLocked(VOID)
 {
     UINT32 intSave;
 
-    __asm__ __volatile__(
-        "mrs    %0, daif        "
-        : "=r" (intSave)
-        :
-        : "memory");
+    __asm__ __volatile__("mrs %0, daif" : "=r" (intSave) : : "memory");
 
     return intSave & PSR_I_BIT;
 }

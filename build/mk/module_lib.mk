@@ -12,18 +12,17 @@ LIB := $(LIBA)
 
 # create a separate list of objects per source type
 
-LOCAL_CSRCS    := $(filter %.c,   $(LOCAL_SRCS))
-LOCAL_ASMSRCS  := $(filter %.s,   $(LOCAL_SRCS))
-LOCAL_ASMSRCS2 := $(filter %.S,   $(LOCAL_SRCS))
+LOCAL_CSRCS     := $(filter %.c,$(LOCAL_SRCS))
+LOCAL_ASMSRCS   := $(filter %.s,$(LOCAL_SRCS))
+LOCAL_ASMSRCS2  := $(filter %.S,$(LOCAL_SRCS))
 
-LOCAL_COBJS    := $(patsubst %.c,   $(OBJOUT)/%.o, $(LOCAL_CSRCS))
-LOCAL_ASMOBJS  := $(patsubst %.s,   $(OBJOUT)/%.o, $(LOCAL_ASMSRCS))
-LOCAL_ASMOBJS2 := $(patsubst %.S,   $(OBJOUT)/%.o, $(LOCAL_ASMSRCS2))
-
+LOCAL_COBJS    := $(patsubst %.c,$(OBJOUT)/%.o,$(LOCAL_CSRCS))
+LOCAL_ASMOBJS  := $(patsubst %.s,$(OBJOUT)/%.o,$(LOCAL_ASMSRCS))
+LOCAL_ASMOBJS2 := $(patsubst %.S,$(OBJOUT)/%.o,$(LOCAL_ASMSRCS2))
 
 LOCAL_OBJS := $(LOCAL_COBJS) $(LOCAL_ASMOBJS) $(LOCAL_ASMOBJS2)
 
-LOCAL_CGCH := $(patsubst %.h,%.h.gch,$(LOCAL_CHS))
+LOCAL_CGCH   := $(patsubst %.h,%.h.gch,$(LOCAL_CHS))
 
 all : $(LIB)
 

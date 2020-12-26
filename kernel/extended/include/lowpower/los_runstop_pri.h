@@ -59,7 +59,7 @@ extern VOID OsStoreSystemInfoBeforeSuspend(VOID);
 extern VOID OsWriteWow2Flash(VOID);
 extern UINT32 OsWowWriteFlashTaskCreate(VOID);
 extern size_t OsWowImageSizeGet(VOID);
-extern  VOID OsWowOtherCoreResume(UINT32 cpuid);
+extern VOID OsWowOtherCoreResume(UINT32 cpuid);
 extern UINT32 OsWowSysDoneFlagGet(VOID);
 
 #ifdef __cplusplus

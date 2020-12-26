@@ -98,7 +98,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdHwi(INT32 argc, const CHAR **argv)
         hwiForm = hwiForm->next;
 #endif
         if ((hwiForm->registerInfo != 0) && ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName != NULL) {
-            PRINTK(" %-s     %-8d\n",
+            PRINTK(" %-16s %-32u\n",
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName,
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pDevId);
         } else {
@@ -106,7 +106,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdHwi(INT32 argc, const CHAR **argv)
         }
 #ifndef LOSCFG_NO_SHARED_IRQ
         while ((hwiForm = hwiForm->next) != NULL) {
-            PRINTK("\t\t\t\t\t\t\t\t\t\t   %-s     %-8d\n",
+            PRINTK("\t\t\t\t\t\t\t\t\t\t   %-16s %-32u\n",
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName,
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pDevId);
         }
@@ -139,7 +139,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdHwi(INT32 argc, const CHAR **argv)
         hwiForm = hwiForm->next;
 #endif
         if ((hwiForm->registerInfo != 0) && ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName != NULL) {
-            PRINTK(" %-s      %-8d\n",
+            PRINTK(" %-16s %-32u\n",
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName,
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pDevId);
         } else {
@@ -148,7 +148,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdHwi(INT32 argc, const CHAR **argv)
 
 #ifndef LOSCFG_NO_SHARED_IRQ
         while ((hwiForm = hwiForm->next) != NULL) {
-            PRINTK("\t\t\t\t\t %-s      %-8d\n",
+            PRINTK("\t\t\t\t\t %-16s %-32u\n",
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName,
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pDevId);
         }
