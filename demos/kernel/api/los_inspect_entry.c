@@ -76,9 +76,7 @@ static osInspect_Def g_inspect[LOS_INSPECT_BUFF] = {
 
     {LOS_INSPECT_SMEM, LOS_INSPECT_STU_START, Example_StaticMem, "static memory"},
 
-#if (LOSCFG_PLATFORM_HWI == YES)
     {LOS_INSPECT_INTERRUPT, LOS_INSPECT_STU_START, Example_Interrupt, "interrupt"},
-#endif
 
     {LOS_INSPECT_MSG, LOS_INSPECT_STU_START, Example_MsgQueue, "message queue"},
 
@@ -221,7 +219,7 @@ UINT32 KernelDemoInspectEntry(VOID)
     stTaskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LOS_Inspect_TskDeal;
     stTaskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     stTaskInitParam.pcName = "InspectTask";
-    stTaskInitParam.usTaskPrio = 9;
+    stTaskInitParam.usTaskPrio = 10;
     ret = LOS_TaskCreate(&g_demoTaskId, &stTaskInitParam);
     if (ret != LOS_OK) {
         return LOS_NOK;

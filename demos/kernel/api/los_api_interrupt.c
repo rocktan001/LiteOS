@@ -40,9 +40,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define SOFT_IRQ_NUM 60
+#define SOFT_IRQ_NUM 39
 
-#if (LOSCFG_PLATFORM_HWI == YES)
 #ifdef LOSCFG_PLATFORM_STM32F429IGTX
 static VOID Example_Exti0_Init(VOID)
 {
@@ -99,7 +98,6 @@ UINT32 Example_Interrupt(VOID)
 
     return LOS_OK;
 }
-#endif
 
 #ifdef __cplusplus
 #if __cplusplus
