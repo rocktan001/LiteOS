@@ -32,6 +32,12 @@
 #include "los_task_pri.h"
 #include "los_typedef.h"
 #include "los_sys.h"
+#include "hal_rng.h"
+
+VOID board_config(VOID)
+{
+    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+}
 
 VOID HardwareInit(VOID)
 {
@@ -43,6 +49,7 @@ VOID HardwareInit(VOID)
 
 INT32 main(VOID)
 {
+    board_config();
     HardwareInit();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"

@@ -1,6 +1,6 @@
-/* ----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: User Task
+ * Description: User Task Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,71 +26,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_base.h"
-#include "los_task_pri.h"
+#include <stdio.h>
 #include "los_typedef.h"
-#include "los_sys.h"
-#include "platform_init.h"
-#include "platform_config.h"
+#include "demo_entry.h"
 
-#ifdef LOSCFG_GUI_ENABLE
-#include "lvgl_demo.h"
-#endif
-#ifdef LOSCFG_SHELL
-#include "shell.h"
-#include "shcmd.h"
-#endif
-#ifdef LOSCFG_DEMOS_LMS
-#include "lms_demo.h"
-#endif
-
-#define USER_TASK_PRIORITY 2
-static UINT32 g_fs_tskHandle;
-
-UINT32 create_fs_task(void)
+VOID app_init(VOID)
 {
-    UINT32 ret = LOS_OK;
-    TSK_INIT_PARAM_S task_init_param;
-
-    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
-    task_init_param.usTaskPrio = USER_TASK_PRIORITY;
-    task_init_param.pcName = "fs_task";
-    extern void fs_demo(void);
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)fs_demo;
-    task_init_param.uwStackSize = 0x1000;
-
-    ret = LOS_TaskCreate(&g_fs_tskHandle, &task_init_param);
-    if (ret != LOS_OK) {
-        return ret;
-    }
-
-    return ret;
-}
-
-UINT32 app_init(VOID)
-{
-    UINT32 ret = LOS_OK;
-
-#ifdef LOSCFG_GUI_ENABLE
-    LvglDemo();
-#endif
-
-#ifdef LOSCFG_DEMOS_LMS
-    Example_LMSEntry();
-#endif
-
-#ifdef LOSCFG_DEMOS_FS
-    ret = create_fs_task();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-#endif
-
-#ifdef LOSCFG_SHELL
-    if (OsShellInit(0) != LOS_OK) {
-        PRINT_ERR("shell init failed\n");
-    }
-#endif
-
-    return ret;
+    printf("app init!\n");
+    (VOID)DemoEntry();
 }

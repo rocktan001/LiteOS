@@ -1,5 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Gyro
+ * Author: Huawei LiteOS Team
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -22,14 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-/* ----------------------------------------------------------------------------
- * Notice of Export Control Law
- * ===============================================
- * Huawei LiteOS may be subject to applicable export control laws and regulations, which might
- * include those applicable to Huawei LiteOS of U.S. and the country in which you are located.
- * Import, export and usage of Huawei LiteOS in any manner by you shall be in compliance with such
- * applicable export control laws and regulations.
- * --------------------------------------------------------------------------- */
+
 #include "gyro.h"
 #include "los_printf.h"
 #include "los_swtmr.h"
@@ -55,7 +51,7 @@ STATIC Mpu6050Priv g_gyroPriv = {
 };
 STATIC INT32 g_gyroPeriod;
 
-STATIC VOID GypoTimerFunc(VOID const *arg)
+STATIC VOID GypoTimerFunc(VOID const * arg)
 {
     SensorSample((SensorType *)arg);
 }
@@ -95,7 +91,8 @@ STATIC INT32 GyroOpen(SensorType *sensor, OpenParam *para)
     }
 
     // creat a timer, first parameter is ticks.
-    ret = LOS_SwtmrCreate(sensor->interval, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)GypoTimerFunc, &gyro->gyroTimerId, (UINT32)sensor);
+    ret = LOS_SwtmrCreate(sensor->interval, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)GypoTimerFunc, &gyro->gyroTimerId,
+        (UINT32)sensor);
     if (ret != LOS_OK) {
         PRINT_ERR("creat a timer failed!\n");
         return LOS_NOK;

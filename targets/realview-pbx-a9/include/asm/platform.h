@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Platform HeaderFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Platform HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -32,7 +32,6 @@
 #include "asm/hal_platform_ints.h"
 #include "stdarg.h"
 
-#include "menuconfig.h"
 // type defines
 
 #ifndef uint8_t
@@ -47,7 +46,7 @@
 #define uint32_t unsigned int
 #endif
 
-#include "hisoc/uart.h"
+#include "uart.h"
 int do_uart_getc(void);
 
 // ARM Realview-pbx-a9 board.

@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
  * Description: Board
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -62,8 +62,8 @@ static struct resource uart0_pl011_resources[] = {
         .flags = IORESOURCE_MEM,
     },
     {
-        .start = NUM_HAL_INTERRUPT_UART_PBX,
-        .end = NUM_HAL_INTERRUPT_UART_PBX,
+        .start = NUM_HAL_INTERRUPT_UART,
+        .end = NUM_HAL_INTERRUPT_UART,
         .flags = IORESOURCE_IRQ,
     },
 };

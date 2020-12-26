@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Hal Flash HeaderFile
+ * Description: Hal Flash HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -37,9 +37,11 @@
 
 #include <stdint.h>
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 /**
  * @ingroup hal_flash
@@ -132,8 +134,10 @@ int hal_flash_erase_write(const void *buf, int32_t len, uint32_t location);
  */
 void hal_flash_lock(void);
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 }
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _HAL_FLASH_H */

@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Hal Spi Flash HeaderFile
+ * Description: Hal Spi Flash HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -31,14 +31,16 @@
  * @ingroup hal
  */
 
-#ifndef _HAL_SPI_FLASH_H_
-#define _HAL_SPI_FLASH_H_
+#ifndef _HAL_SPI_FLASH_H
+#define _HAL_SPI_FLASH_H
 
 #include <stdint.h>
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 /**
  * @ingroup hal_spi_flash
@@ -178,8 +180,10 @@ void hal_spi_flash_power_down(void);
  */
 void hal_spi_flash_wake_up(void);
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
+#if __cplusplus
 }
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#endif /* _HAL_SPI_FLASH_H_ */
+#endif /* _HAL_SPI_FLASH_H */

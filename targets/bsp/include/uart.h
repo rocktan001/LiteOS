@@ -29,23 +29,41 @@
 #ifndef _UART_H
 #define _UART_H
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #define UART_WITH_LOCK     1
 #define UART_WITHOUT_LOCK  0
 #define DEFAULT_TIMEOUT    0xFFFF
 #define DEFAULT_UART_IRQN  USART1_IRQn
 
-#define NUM_HAL_INTERRUPT_UART  (16 + USART1_IRQn)
+typedef struct {
+    uint32_t DR;        // data reg
+    uint32_t DSR;
+    uint32_t pad1[4];   // 8+16=24 bytes to FR register
+    uint32_t FR;        // flag reg at 0x18
+    uint32_t pad2[7];
+    uint32_t IMSC;      // at offset 0x38
+} uart_t;
 
+extern UINT32 UartPutsReg(UINTPTR base, const CHAR *s, UINT32 len, BOOL isLock);
 extern INT32 uart_hwiCreate(VOID);
+
+VOID   uart_early_init(VOID);
 VOID   uart_init(VOID);
 UINT8  uart_getc(VOID);
 UINT32 uart_wait_adapt(VOID);
 INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
 UINT8  uart_read(VOID);
+VOID   UartPuts(const CHAR *s, UINT32 len, BOOL isLock);
 
-#ifdef LOSCFG_ARCH_ARM_CORTEX_M
-#define UartPuts(str, len, isLock)   uart_write(str, len, DEFAULT_TIMEOUT)
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _UART_H */

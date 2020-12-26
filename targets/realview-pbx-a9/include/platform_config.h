@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Platfrom Config Header File
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Platfrom Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -40,13 +40,12 @@ extern "C" {
 #define OS_SYS_CLOCK                            0x6000000 /* get_bus_clk() */
 
 #define LOSCFG_BASE_CORE_EXC_TSK_SWITCH         NO        /* exc task swtich */
-#define LOSCFG_BASE_CORE_TICK_PER_SECOND        1000
 
 #define OS_TIME_TIMER_CLOCK                     3000000
 
 #ifdef LOSCFG_PLATFORM_OSAPPINIT
 extern UINT32 osAppInit(VOID);
-extern UINT32 app_init(VOID);
+extern VOID app_init(VOID);
 #endif
 
 #ifdef __cplusplus

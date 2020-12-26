@@ -44,7 +44,6 @@
 #include "string.h"
 #include <stdio.h>
 #include "stm32f4xx_hal.h"
-#include "hal_rng.h"
 #include "usart.h"
 #include "dwt.h"
 
@@ -82,11 +81,11 @@ extern "C" {
 
 #ifdef LOSCFG_COMPONENTS_NET_LWIP
 void net_init(void);
+void hieth_hw_init(void);
 #endif
 uint32_t HAL_GetTick(void);
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
-void hieth_hw_init(void);
 
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)
 

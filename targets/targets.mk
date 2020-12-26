@@ -51,24 +51,48 @@ else ifeq ($(LOSCFG_PLATFORM_STM32F429IGTX), y)
     LITEOS_CMACRO_TEST += -DTESTSTM32F429IGTX
     LITEOS_CMACRO_TEST += -DSTM32F429xx
     HAL_DRIVER_TYPE := STM32F4xx_HAL_Driver
+######################### STM32F407ZGTX Options###############################
+else ifeq ($(LOSCFG_PLATFORM_STM32F407_ATK_EXPLORER), y)
+    TIMER_TYPE := arm/timer/arm_cortex_m
+    LITEOS_CMACRO_TEST += -DSTM32F407xx
+    HAL_DRIVER_TYPE := STM32F4xx_HAL_Driver
 ######################### STM32L431_BearPi Options############################
 else ifeq ($(LOSCFG_PLATFORM_STM32L431_BearPi), y)
     TIMER_TYPE := arm/timer/arm_cortex_m
     LITEOS_CMACRO_TEST += -DTESTSTM32L431_BearPi
     LITEOS_CMACRO_TEST += -DSTM32L431xx
     HAL_DRIVER_TYPE := STM32L4xx_HAL_Driver
+######################### STM32F103VETX Options###############################
+else ifeq ($(LOSCFG_PLATFORM_STM32F103_FIRE_ARBITRARY), y)
+    TIMER_TYPE := arm/timer/arm_cortex_m
+    LITEOS_CMACRO_TEST += -D__FPU_PRESENT -DSTM32F103xE
+    HAL_DRIVER_TYPE := STM32F1xx_HAL_Driver
+############################# hi3516ev200 Options#############################
+else ifeq ($(LOSCFG_PLATFORM_HI3516EV200), y)
+    HWI_TYPE     := arm/interrupt/gic
+    TIMER_TYPE   := hisoc/timer
+    HRTIMER_TYPE := hisoc/hrtimer
+    UART_TYPE    := amba_pl011
+############################# realview-pbx-a9 Options#############################
+else ifeq ($(LOSCFG_PLATFORM_PBX_A9), y)
+    HWI_TYPE     := arm/interrupt/gic
+    TIMER_TYPE   := hw/arm/timer/arm_private
+######################### STM32F072_Nucleo Options###############################
+else ifeq ($(LOSCFG_PLATFORM_STM32F072_Nucleo), y)
+    TIMER_TYPE := arm/timer/arm_cortex_m
+    LITEOS_CMACRO_TEST += -DSTM32F072xB
+    HAL_DRIVER_TYPE := STM32F0xx_HAL_Driver
 endif
 
-HWI_SRC     := bsp/hw/$(HWI_TYPE)
-TIMER_SRC   := bsp/hw/$(TIMER_TYPE)
-HRTIMER_SRC := bsp/hw/$(HRTIMER_TYPE)
+HWI_SRC     := hw/$(HWI_TYPE)
+TIMER_SRC   := hw/$(TIMER_TYPE)
+HRTIMER_SRC := hw/$(HRTIMER_TYPE)
 NET_SRC     := bsp/net/$(NET_TYPE)
-UART_SRC    := bsp/uart/$(UART_TYPE)
+UART_SRC    := drivers/uart/$(UART_TYPE)
 USB_SRC     := bsp/usb/$(USB_TYPE)
 HAL_DRIVER_SRC := drivers/$(HAL_DRIVER_TYPE)
 
 LITEOS_PLATFORM  := $(subst $\",,$(LOSCFG_PLATFORM))
-
 
 PLATFORM_INCLUDE := -I $(LITEOSTOPDIR)/targets/bsp/common \
                     -I $(LITEOSTOPDIR)/targets/bsp/common/pm \
@@ -79,19 +103,26 @@ PLATFORM_INCLUDE := -I $(LITEOSTOPDIR)/targets/bsp/common \
                     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \
                     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/asm \
                     -I $(LITEOSTOPDIR)/arch/arm/cortex_m/cmsis \
-		    -I $(LITEOSTOPDIR)/lib/huawei_libc/time
+                    -I $(LITEOSTOPDIR)/lib/huawei_libc/time
 
-ifeq ($(LITEOS_PLATFORM), hi3556v200)
+ifeq ($(LITEOS_PLATFORM), hi3516ev200)
     PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/platform/bsp/board/$(LITEOS_PLATFORM)/include/hisoc
 endif
 
 LIB_SUBDIRS += targets/bsp
 LIB_SUBDIRS += targets/$(LITEOS_PLATFORM)
 
-#determin libs to link for windows
+#determine libs to link for windows
 ifneq ($(OS), Linux)
     LITEOS_BASELIB += -l$(LITEOS_PLATFORM) -lsec -lbase -linit -lbsp -lc -lm -losdepends
 
+    ifeq ($(LITEOS_CPU_TYPE), $(findstring $(LITEOS_CPU_TYPE), cortex-a7 cortex-a9))
+        LITEOS_BASELIB += -lcsysdeps
+    endif
+
+    ifeq ($(LOSCFG_SHELL), y)
+        LITEOS_BASELIB += -lshell
+    endif
     ifeq ($(LOSCFG_COMPAT_CMSIS), y)
         LITEOS_BASELIB += -lcmsis
     endif
@@ -107,35 +138,30 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_KERNEL_CPPSUPPORT), y)
         LITEOS_BASELIB += -lcppsupport
     endif
+    ifeq ($(LOSCFG_KERNEL_LMS), y)
+        LITEOS_BASELIB += -llms
+    endif
+
     ifeq ($(LOSCFG_COMPONENTS_FS), y)
         LITEOS_BASELIB += -lfs
     endif
     ifeq ($(LOSCFG_COMPONENTS_GUI), y)
         LITEOS_BASELIB += -lgui
     endif
+    ifeq ($(LOSCFG_COMPONNETS_NET_AT), y)
+        LITEOS_BASELIB += -lat_device
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT), y)
+        LITEOS_BASELIB += -lnb_iot
+    endif
     ifeq ($(LOSCFG_COMPONENTS_SENSORHUB), y)
         LITEOS_BASELIB += -lsensorhub
-    endif
-    ifeq ($(LOSCFG_COMPONENTS_NET_LWIP), y)
-        LITEOS_BASELIB += -llwip
-    endif
-    ifeq ($(LOSCFG_DEMOS_FS), y)
-        LITEOS_BASELIB += -lfs_demo
-    endif
-    ifeq ($(LOSCFG_DEMOS_GUI), y)
-        LITEOS_BASELIB += -lgui_demo
     endif
     ifeq ($(LOSCFG_DEMOS_SENSORHUB), y)
         LITEOS_BASELIB += -lsensorhub_demo
     endif
-    ifeq ($(LOSCFG_DEMOS_KERNEL), y)
-        LITEOS_BASELIB += -lkernel_demo
-    endif
-    ifeq ($(LOSCFG_DEMOS_LMS), y)
-        LITEOS_BASELIB += -llms_demo
-    endif
-    ifeq ($(LOSCFG_KERNEL_LMS), y)
-        LITEOS_BASELIB += -llms
+    ifeq ($(LOSCFG_COMPONENTS_NET_LWIP), y)
+        LITEOS_BASELIB += -llwip
     endif
     ifeq ($(LOSCFG_COMPONENTS_SECURITY_MBEDTLS), y)
         LITEOS_BASELIB += -lmbedtls
@@ -150,7 +176,7 @@ ifneq ($(OS), Linux)
         LITEOS_BASELIB += -lmqtt
     endif
     ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_LWM2M), y)
-        LITEOS_BASELIB += -lwm2m
+        LITEOS_BASELIB += -llwm2m
     endif
     ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_ATINY_MQTT), y)
         LITEOS_BASELIB += -latiny_mqtt
@@ -161,26 +187,33 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_NET_SAL), y)
         LITEOS_BASELIB += -lsal
     endif
+
+    ifeq ($(LOSCFG_DEMOS_KERNEL), y)
+        LITEOS_BASELIB += -lkernel_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_FS), y)
+        LITEOS_BASELIB += -lfs_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_GUI), y)
+        LITEOS_BASELIB += -lgui_demo
+    endif
     ifeq ($(LOSCFG_DEMOS_AGENT_TINY_MQTT), y)
         LITEOS_BASELIB += -lagenttiny_mqtt
     endif
-    ifeq ($(LOSCFG_SHELL), y)
-        LITEOS_BASELIB += -lshell
+    ifeq ($(LOSCFG_DEMOS_AGENT_TINY_LWM2M), y)
+        LITEOS_BASELIB += -lagenttiny_lwm2m
     endif
     ifeq ($(LOSCFG_DEMOS_DTLS_SERVER), y)
         LITEOS_BASELIB += -ldtls_server
-    endif
-    ifeq ($(LOSCFG_COMPONNETS_NET_AT), y)
-        LITEOS_BASELIB += -lat_device
-    endif
-    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT), y)
-        LITEOS_BASELIB += -lnb_iot
     endif
     ifeq ($(LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY), y)
         LITEOS_BASELIB += -lnbiot_without_atiny
     endif
     ifeq ($(LOSCFG_DEMOS_IPV6_CLIENT), y)
         LITEOS_BASELIB += -lipv6_client
+    endif
+    ifeq ($(LOSCFG_DEMOS_LMS), y)
+        LITEOS_BASELIB += -llms_demo
     endif
 endif
 

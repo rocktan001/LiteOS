@@ -2,8 +2,6 @@ menu "NBIOT Demo Without Atiny"
 
 config LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
     bool "Enable NBIOT Demo"
-    select LOSCFG_COMPONNETS_NET_AT
-    select LOSCFG_COMPONENTS_NET_AT_BC95
     default n
     help
         Answer y to enable nbiot demo without atiny.

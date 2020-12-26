@@ -27,7 +27,11 @@
  * --------------------------------------------------------------------------- */
 
 .syntax unified
+#if defined(LOSCFG_ARCH_CORTEX_M0)
+.arch armv6-m
+#else
 .arch armv7e-m
+#endif
 .thumb
 
 .equ OS_NVIC_INT_CTRL,           0xE000ED04
@@ -53,7 +57,22 @@ OsStartToRun:
 
     ldr     r1, =g_runTask
     str     r0, [r1]
-
+#if defined(LOSCFG_ARCH_CORTEX_M0)
+    movs    r1, #2   
+    msr     CONTROL, r1
+    ldrh    r7, [r0 , #4]
+    movs    r6,  #OS_TASK_STATUS_RUNNING
+    orrs    r7,  r7, r6
+    strh    r7,  [r0 , #4]
+    ldr     r3, [r0]
+    adds    r3, r3, #36
+    ldmfd   r3!, {r0-r2}
+    adds    r3, r3, #4
+    ldmfd   r3!, {R4-R7}
+    msr     psp, r3
+    subs    r3, r3, #20
+    ldr     r3,  [r3]
+#else
     mov     r1, #2
     msr     CONTROL, r1
 
@@ -63,13 +82,22 @@ OsStartToRun:
     strh    r7,  [r0 , #4]
 
     ldr     r12, [r0]
-    ADD     r12, r12, #100
+    ADD     r12, r12, #36
+#if !defined(LOSCFG_ARCH_CORTEX_M3)
+    ADD     r12, r12, #64
+#endif
 
     ldmfd   r12!, {R0-R7}
+#if !defined(LOSCFG_ARCH_CORTEX_M3)
     add     r12, r12, #72
+#endif
     msr     psp, r12
+#if !defined(LOSCFG_ARCH_CORTEX_M3)
     vpush   {s0};
     vpop    {s0};
+#endif
+#endif
+
     mov     lr, r5
 
     cpsie   I
@@ -127,9 +155,23 @@ osPendSV:
 TaskSwitch:
     mrs     r0, psp
 
-    stmfd   r0!, {r4-r12}
-    vstmdb  r0!, {d8-d15}
+#if defined(LOSCFG_ARCH_CORTEX_M0)
+    subs    r0, #36
+    stmia   r0!, {r4-r7}
+    mov     r3, r8
+    mov     r4, r9
+    mov     r5, r10
+    mov     r6, r11
+    mov     r7, r12
+    stmia   r0!, {r3 - r7}
 
+    subs    r0, #36
+#else
+    stmfd   r0!, {r4-r12}
+#if !defined(LOSCFG_ARCH_CORTEX_M3)
+    vstmdb  r0!, {d8-d15}
+#endif
+#endif
     ldr     r5, =g_oldTask
     ldr     r1, [r5]
     str     r0, [r1]
@@ -140,8 +182,25 @@ TaskSwitch:
     str     r0, [r5]
     ldr     r1, [r0]
 
+#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_CORTEX_M0)
     vldmia  r1!, {d8-d15}
+#endif
+#if defined(LOSCFG_ARCH_CORTEX_M0)
+    adds    r1,   #16
+    ldmfd   r1!, {r3-r7}
+    
+    mov     r8, r3
+    mov     r9, r4
+    mov     r10, r5
+    mov     r11, r6
+    mov     r12, r7
+    subs    r1,  #36
+    ldmfd   r1!, {r4-r7}
+
+    adds    r1,   #20
+#else
     ldmfd   r1!, {r4-r12}
+#endif
     msr     psp,  r1
 
     msr     PRIMASK, r12

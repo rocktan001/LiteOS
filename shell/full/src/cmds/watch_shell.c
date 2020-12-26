@@ -34,7 +34,7 @@
 #define  timeval64      timeval
 #define  gettimeofday64 gettimeofday
 #define  ctime64        ctime
-#include "time.h"
+#include "sys/time.h"
 #else
 #include "time64.h"
 #endif

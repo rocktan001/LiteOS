@@ -130,7 +130,7 @@ static int prv_spi_flash_send_byte(uint8_t send, uint8_t *recv)
     if (HAL_SPI_TransmitReceive(&g_spi_flash, &t_send, &tmp, 1, HAL_MAX_DELAY) != HAL_OK) {
         return -1;
     }
-    if (NULL != recv) {
+    if (recv != NULL) {
         *recv = tmp;
     }
 
@@ -276,7 +276,8 @@ int hal_spi_flash_write(const void *buf, int32_t len, uint32_t *location)
     int i;
     int ret = 0;
 
-    if ((pbuf == NULL) || (location == NULL) || (len < 0) || (*location > SPI_FLASH_TOTAL_SIZE) ||
+    if ((pbuf == NULL) || (location == NULL) || (len < 0) ||
+        (*location > SPI_FLASH_TOTAL_SIZE) ||
         (len + *location > SPI_FLASH_TOTAL_SIZE)) {
         return -1;
     }

@@ -27,6 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "sys_init.h"
+#include "hal_rng.h"
 
 #ifdef LOSCFG_COMPONENTS_NET_LWIP
 struct     netif gnetif;
@@ -137,16 +138,14 @@ void _Error_Handler(char *file, int line)
 {
     /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
-    while(1)
-    {
-    }
+    while (1) {}
     /* USER CODE END Error_Handler_Debug */
 }
 
 void SystemClock_Config(void)
 {
-    RCC_OscInitTypeDef RCC_OscInitStruct;
-    RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
     /* Configure the main internal regulator output voltage */
     __HAL_RCC_PWR_CLK_ENABLE();
@@ -173,8 +172,8 @@ void SystemClock_Config(void)
     }
 
     /* Initializes the CPU, AHB and APB busses clocks */
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-                                  | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
+                                  RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;

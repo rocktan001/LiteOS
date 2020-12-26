@@ -60,7 +60,12 @@ static void at_usart_adapter(uint32_t port)
             break;
         case 3: // 3: usart3
             g_atUSART = USART3;
+#ifdef STM32F072xB
+        case 4:
+            g_atIRQn = USART3_4_IRQn;
+#else
             g_atIRQn = USART3_IRQn;
+#endif
             break;
         default:
             break;

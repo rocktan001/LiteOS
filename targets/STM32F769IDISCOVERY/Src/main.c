@@ -32,9 +32,14 @@
 #include "los_sys.h"
 #include "platform_init.h"
 
+VOID board_config(VOID)
+{
+    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+}
 
 INT32 main(VOID)
 {
+    board_config();
     HardwareInit();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
