@@ -71,9 +71,6 @@ extern "C" {
 #define CONSOLE_FIFO_SIZE              1024
 #define CONSOLE_NUM                    2
 
-
-#define TELNET_RINGBUF_SIZE 0x1000
-
 typedef struct {
     Ringbuf ringbuf;           /* Ring buffer */
     EVENT_CB_S sendEvent;   /* Inform telnet send task */

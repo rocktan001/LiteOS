@@ -307,13 +307,23 @@ config LOSCFG_KERNEL_RINGBUF
     help
       If you wish to build LiteOS with support for ringbuf.
 
-config LOSCFG_KERNEL_CONSOLE
+menuconfig LOSCFG_KERNEL_CONSOLE
     bool "Enable Console"
     default y
     depends on LOSCFG_FS_VFS
     select LOSCFG_KERNEL_RINGBUF
     help
       Answer Y to enable LiteOS support for console.
+
+if LOSCFG_KERNEL_CONSOLE
+
+config LOSCFG_CONSOLE_RINGBUFF_SIZE
+    int "size of console ringbuff"
+    default 4096
+    help
+      This option will change console ringbuff size.
+
+endif # LOSCFG_KERNEL_CONSOLE
 
 config LOSCFG_KERNEL_EXTKERNEL
     bool "Enable Extend Kernel"
@@ -417,7 +427,7 @@ config LOSCFG_KERNEL_TICKLESS
 
 config LOSCFG_KERNEL_POWER_MGR
     bool "Enable Default Implementation of Low Power Management Framework"
-    default y
+    default n
     depends on LOSCFG_KERNEL_LOWPOWER
     help
       If you wish to build LiteOS with support for tickless.
@@ -431,7 +441,7 @@ config LOSCFG_KERNEL_DEEPSLEEP
 
 config LOSCFG_KERNEL_RUNSTOP
     bool "Enable Run stop Feature"
-    default y
+    default n
     depends on LOSCFG_KERNEL_POWER_MGR && (LOSCFG_DRIVERS_MTD_NAND || LOSCFG_DRIVERS_MTD_SPI_NOR) && \
                LOSCFG_KERNEL_MEM_BESTFIT
     help

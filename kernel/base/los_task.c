@@ -59,7 +59,7 @@ extern "C" {
 
 LITE_OS_SEC_BSS LosTaskCB                       *g_taskCBArray;
 LITE_OS_SEC_BSS LOS_DL_LIST                     g_losFreeTask;
-LITE_OS_SEC_BSS LOS_DL_LIST                     g_taskRecyleList;
+LITE_OS_SEC_BSS LOS_DL_LIST                     g_taskRecycleList;
 LITE_OS_SEC_BSS UINT32                          g_taskMaxNum;
 LITE_OS_SEC_BSS UINT32                          g_taskScheduled; /* one bit for each cores */
 #ifdef LOSCFG_LAZY_STACK
@@ -110,17 +110,17 @@ VOID OsSetMainTask()
     }
 }
 
-LITE_OS_SEC_TEXT_INIT STATIC VOID OsTaskCBRecyleToFree(VOID)
+LITE_OS_SEC_TEXT_INIT STATIC VOID OsTaskCBRecycleToFree(VOID)
 {
     LosTaskCB *taskCB = NULL;
     VOID *poolTmp = NULL;
 #ifdef LOSCFG_TASK_STACK_PROTECT
     UINTPTR MMUProtectAddr;
 #endif
-    while (!LOS_ListEmpty(&g_taskRecyleList)) {
+    while (!LOS_ListEmpty(&g_taskRecycleList)) {
         poolTmp = (VOID *)m_aucSysMem1;
-        taskCB = OS_TCB_FROM_PENDLIST(LOS_DL_LIST_FIRST(&g_taskRecyleList));
-        LOS_ListDelete(LOS_DL_LIST_FIRST(&g_taskRecyleList));
+        taskCB = OS_TCB_FROM_PENDLIST(LOS_DL_LIST_FIRST(&g_taskRecycleList));
+        LOS_ListDelete(LOS_DL_LIST_FIRST(&g_taskRecycleList));
         LOS_ListAdd(&g_losFreeTask, &taskCB->pendList);
 #ifdef LOSCFG_TASK_STACK_PROTECT
         MMUProtectAddr = taskCB->topOfStack - MMU_4K;
@@ -143,12 +143,12 @@ LITE_OS_SEC_TEXT_INIT STATIC VOID OsTaskCBRecyleToFree(VOID)
     }
 }
 
-VOID LOS_TaskResRecyle(VOID)
+VOID LOS_TaskResRecycle(VOID)
 {
     UINT32 intSave;
 
     SCHEDULER_LOCK(intSave);
-    OsTaskCBRecyleToFree();
+    OsTaskCBRecycleToFree();
     SCHEDULER_UNLOCK(intSave);
 }
 
@@ -170,7 +170,7 @@ BOOL IsIdleTask(UINT32 taskId)
 LITE_OS_SEC_TEXT WEAK VOID OsIdleTask(VOID)
 {
     while (1) {
-        LOS_TaskResRecyle();
+        LOS_TaskResRecycle();
 
 #ifdef LOSCFG_KERNEL_LOWPOWER
         if (g_lowPowerHook != NULL) {
@@ -317,7 +317,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsTaskInit(VOID)
     (VOID)memset_s(g_taskCBArray, size, 0, size);
 
     LOS_ListInit(&g_losFreeTask);
-    LOS_ListInit(&g_taskRecyleList);
+    LOS_ListInit(&g_taskRecycleList);
     for (index = 0; index < g_taskMaxNum; index++) {
         g_taskCBArray[index].taskStatus = OS_TASK_STATUS_UNUSED;
         g_taskCBArray[index].taskId = index;
@@ -739,7 +739,7 @@ LITE_OS_SEC_TEXT_INIT STATIC BOOL OsTaskDelAction(LosTaskCB *taskCB, BOOL useUsr
             LOS_ListAdd(&g_losFreeTask, &taskCB->pendList);
         } else {
 #endif
-            LOS_ListTailInsert(&g_taskRecyleList, &taskCB->pendList);
+            LOS_ListTailInsert(&g_taskRecycleList, &taskCB->pendList);
 #ifdef LOSCFG_TASK_STATIC_ALLOCATION
         }
 #endif

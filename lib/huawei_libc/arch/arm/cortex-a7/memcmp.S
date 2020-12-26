@@ -99,7 +99,7 @@ memcmp:
         subs    r4, r4, #1
         bhi     1b
         cmp     r2, #4 /* size is less 4 bytes, then byte-wise compare. */
-        bmi     .compare_1_byte_by_loop
+        bmi     7f
         
 .Laligned4_r0: /* here, r0 and r1 are both aligned. */
         cmp     r2, #32 /* size is less 32 bytes, 4-bytes compare. */

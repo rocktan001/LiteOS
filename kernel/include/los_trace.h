@@ -103,7 +103,7 @@ extern "C" {
  *
  * Value: 0x02001401
  *
- * Solution: Decrease the maximum number of tasks.
+ * Solution: Expand the configured system memory or decrease the value defined by LOS_TRACE_BUFFER_SIZE.
  */
 #define LOS_ERRNO_TRACE_NO_MEMORY                  LOS_ERRNO_OS_ERROR(LOS_MOD_TRACE, 0x01)
 

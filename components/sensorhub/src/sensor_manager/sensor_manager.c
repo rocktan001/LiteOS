@@ -41,14 +41,14 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define STASK_PRIORITY_SM   3
-#define STASK_STKDEPTH_SM   0x800
+#define STASK_PRIORITY_SM  3
+#define STASK_STKDEPTH_SM  0x800
 
-#define SM_MAILS_SIZE       10
-#define SM_MAILS_TYPE_SIZE  sizeof(SmMail)
+#define SM_MAILS_SIZE      10
+#define SM_MAILS_TYPE_SIZE sizeof(SmMail)
 
-#define CONFIG_BUFFER_SIZE  25
-#define CNT_INVLID          0xffffffff
+#define CONFIG_BUFFER_SIZE 25
+#define CNT_INVLID         0xffffffff
 
 STATIC UINT32 g_sensorManagerTskId;
 STATIC UINT32 g_sensorManagerQueue;
@@ -89,8 +89,7 @@ STATIC VOID ScbDataUpdate(SensorType *sensor)
     SensorItem *item = NULL;
     struct LOS_DL_LIST *pl = NULL;
 
-    LOS_DL_LIST_FOR_EACH(pl, &sensor->slist)
-    {
+    LOS_DL_LIST_FOR_EACH(pl, &sensor->slist) {
         item = LOS_DL_LIST_ENTRY(pl, SensorItem, list);
         if (item->state != WORKING) {
             continue;
@@ -146,8 +145,7 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID ScbSwitchComplete(const SensorType *sensor, I
     SensorItem *item = NULL;
     struct LOS_DL_LIST *pl = NULL;
 
-    LOS_DL_LIST_FOR_EACH(pl, &sensor->slist)
-    {
+    LOS_DL_LIST_FOR_EACH(pl, &sensor->slist) {
         item = LOS_DL_LIST_ENTRY(pl, SensorItem, list);
         if ((item->state == OPEN) || (item->state == CLOSE)) {
             if ((item->resp != 0) && (item->respFunc != NULL)) {
@@ -157,16 +155,16 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID ScbSwitchComplete(const SensorType *sensor, I
         }
     }
 }
+
 LITE_OS_SEC_TEXT_MINOR STATIC INT32 UpdateScbPeriod(SensorType *sensor, const SensorItem *currentItem)
 {
-    SensorItem *item = NULL;
+    SensorItem *item       = NULL;
     struct LOS_DL_LIST *pl = NULL;
-    UINT8 cnt = 0;
-    UINT8 mode = 0;
-    OpenParam openParam = currentItem->openParam;
+    UINT8 cnt              = 0;
+    UINT8 mode             = 0;
+    OpenParam openParam    = currentItem->openParam;
 
-    LOS_DL_LIST_FOR_EACH(pl, &sensor->slist)
-    {
+    LOS_DL_LIST_FOR_EACH(pl, &sensor->slist) {
         item = LOS_DL_LIST_ENTRY(pl, SensorItem, list);
         if ((item->state == WORKING) || (item->state == OPEN)) {
             if (item->openParam.mode >= MODE_END) {
@@ -219,7 +217,7 @@ LITE_OS_SEC_TEXT_MINOR STATIC INT32 SensorSwitch(const SensorItem *item)
     }
 
     switch (UpdateScbPeriod(sensorInterface, item)) {
-        case SENSOR_ATTACH_NONE: // no item is working,sensor would be turn off
+        case SENSOR_ATTACH_NONE:  // no item is working,sensor would be turn off
             if ((sensorInterface->sensorOp == NULL) || (sensorInterface->sensorOp->Close == NULL)) {
                 break;
             }
@@ -228,7 +226,7 @@ LITE_OS_SEC_TEXT_MINOR STATIC INT32 SensorSwitch(const SensorItem *item)
                 sensorInterface->sensorStat &= ~SENSOR_STAT_OPEN;
             }
             break;
-        case SENSOR_ATTACH_CHANGE: // sensor would be turn on,or change period
+        case SENSOR_ATTACH_CHANGE:  // sensor would be turn on,or change period
             sensorInterface->interval = sensorInterface->openParam.period;
             if ((sensorInterface->sensorOp == NULL) || (sensorInterface->sensorOp->Open == NULL)) {
                 break;
@@ -238,7 +236,7 @@ LITE_OS_SEC_TEXT_MINOR STATIC INT32 SensorSwitch(const SensorItem *item)
                 sensorInterface->sensorStat |= SENSOR_STAT_OPEN;
             }
             break;
-        default: // sensor is on ,and period no change
+        default:  // sensor is on ,and period no change
             break;
     }
     return ret;
@@ -263,40 +261,40 @@ LITE_OS_SEC_TEXT_MINOR STATIC VOID ItemSwitch(const SensorItem *item)
 LITE_OS_SEC_TEXT_MINOR STATIC VOID ItemEnable(const MailItemEnable *itemEnable)
 {
     PRINT_DEBUG("TAG %d item enable\n", itemEnable->item->tag);
-    itemEnable->item->state = OPEN;
-    itemEnable->item->resp = itemEnable->resp;
-    itemEnable->item->updateCnt = CNT_INVLID; // Insure the first data be updated to app
+    itemEnable->item->state      = OPEN;
+    itemEnable->item->resp       = itemEnable->resp;
+    itemEnable->item->updateCnt  = CNT_INVLID;  // Insure the first data be updated to app
     itemEnable->item->updateTime = 0;
-    itemEnable->item->openParam = itemEnable->openParam;
-    itemEnable->item->id = itemEnable->id;
+    itemEnable->item->openParam  = itemEnable->openParam;
+    itemEnable->item->id         = itemEnable->id;
     ItemSwitch(itemEnable->item);
 }
 
 LITE_OS_SEC_TEXT_MINOR STATIC VOID ItemDisable(const MailItemDisable *itemDisable)
 {
     PRINT_DEBUG("TAG %d item disable\n", itemDisable->item->tag);
-    itemDisable->item->state = CLOSE;
-    itemDisable->item->resp = itemDisable->resp;
+    itemDisable->item->state      = CLOSE;
+    itemDisable->item->resp       = itemDisable->resp;
     itemDisable->item->closeParam = itemDisable->closeParam;
-    itemDisable->item->id = itemDisable->id;
+    itemDisable->item->id         = itemDisable->id;
     ItemSwitch(itemDisable->item);
 }
+
 LITE_OS_SEC_TEXT_MINOR STATIC VOID ItemInit(const MailItemInit *itemInit)
 {
     SensorType *sensorInterface = NULL;
     SensorItem *item = NULL;
 
     PRINT_DEBUG("item init tag %d index %d \n", itemInit->item->tag, itemInit->tag - TAG_BEGIN);
-    itemInit->item->state = IDLE;
-    itemInit->item->respFunc = itemInit->respFunc;
-    itemInit->item->tag = itemInit->tag;
+    itemInit->item->state      = IDLE;
+    itemInit->item->respFunc   = itemInit->respFunc;
+    itemInit->item->tag        = itemInit->tag;
     itemInit->item->updateFunc = itemInit->updateFunc;
-    itemInit->item->updateArg = itemInit->updateArg;
+    itemInit->item->updateArg  = itemInit->updateArg;
 
     sensorInterface = g_sensorScbTable[ScbTableIndex(itemInit->tag)].sensorInterface;
     if (sensorInterface != NULL) {
-        LOS_DL_LIST_FOR_EACH_ENTRY(item, &(sensorInterface->slist), SensorItem, list)
-        {
+        LOS_DL_LIST_FOR_EACH_ENTRY(item, &(sensorInterface->slist), SensorItem, list) {
             if ((item->tag == itemInit->item->tag) && (item->id == itemInit->item->id)) {
                 PRINT_ERR("duplicate item init err tag %d id %u\n", item->tag, item->id);
                 return;
@@ -346,11 +344,11 @@ LITE_OS_SEC_TEXT_MINOR INT32 SensorItemDisable(SensorItem *item, CloseParam *par
         return LOS_NOK;
     }
 
-    smMail.event = SM_EVENT_ITEM_DISABLE;
-    smMail.itemDisable.item = item;
+    smMail.event                  = SM_EVENT_ITEM_DISABLE;
+    smMail.itemDisable.item       = item;
     smMail.itemDisable.closeParam = *param;
-    smMail.itemDisable.id = id;
-    smMail.itemDisable.resp = resp;
+    smMail.itemDisable.id         = id;
+    smMail.itemDisable.resp       = resp;
 
     ret = LOS_QueueWriteCopy(g_sensorManagerQueue, (VOID *)&smMail, SM_MAILS_TYPE_SIZE, 0);
     if (ret != LOS_OK) {
@@ -359,8 +357,9 @@ LITE_OS_SEC_TEXT_MINOR INT32 SensorItemDisable(SensorItem *item, CloseParam *par
     }
     return LOS_OK;
 }
-LITE_OS_SEC_TEXT_MINOR INT32 SensorItemInit(SensorItem *item, RespFunc respFunc, ObjTag tag, UpdateFunc updateFunc,
-    UINT32 upArg)
+
+LITE_OS_SEC_TEXT_MINOR INT32 SensorItemInit(
+    SensorItem *item, RespFunc respFunc, ObjTag tag, UpdateFunc updateFunc, UINT32 upArg)
 {
     SmMail smMail;
     UINT32 ret;
@@ -369,12 +368,12 @@ LITE_OS_SEC_TEXT_MINOR INT32 SensorItemInit(SensorItem *item, RespFunc respFunc,
         return LOS_NOK;
     }
 
-    smMail.event = SM_EVENT_ITEM_INIT;
-    smMail.itemInit.item = item;
-    smMail.itemInit.respFunc = respFunc;
-    smMail.itemInit.tag = tag;
+    smMail.event               = SM_EVENT_ITEM_INIT;
+    smMail.itemInit.item       = item;
+    smMail.itemInit.respFunc   = respFunc;
+    smMail.itemInit.tag        = tag;
     smMail.itemInit.updateFunc = updateFunc;
-    smMail.itemInit.updateArg = upArg;
+    smMail.itemInit.updateArg  = upArg;
 
     ret = LOS_QueueWriteCopy(g_sensorManagerQueue, (VOID *)&smMail, SM_MAILS_TYPE_SIZE, 0);
     if (ret != LOS_OK) {
@@ -386,9 +385,9 @@ LITE_OS_SEC_TEXT_MINOR INT32 SensorItemInit(SensorItem *item, RespFunc respFunc,
 
 LITE_OS_SEC_TEXT_MINOR INT32 SensorConfigNotify(const PktParameterReq *pkt, UINT8 resp)
 {
-    SmMail smMail;
+    SmMail  smMail;
     errno_t rc;
-    UINT32 ret;
+    UINT32  ret;
 
     if ((pkt == NULL) || (pkt->hd.tag >= TAG_END) || (pkt->hd.tag < TAG_BEGIN)) {
         return LOS_NOK;
@@ -407,11 +406,11 @@ LITE_OS_SEC_TEXT_MINOR INT32 SensorConfigNotify(const PktParameterReq *pkt, UINT
         return LOS_NOK;
     }
 
-    smMail.event = SM_EVENT_CONFIG;
-    smMail.config.cmd = pkt->hd.cmd;
-    smMail.config.id = pkt->hd.tranId;
+    smMail.event       = SM_EVENT_CONFIG;
+    smMail.config.cmd  = pkt->hd.cmd;
+    smMail.config.id   = pkt->hd.tranId;
     smMail.config.resp = resp;
-    smMail.config.tag = pkt->hd.tag;
+    smMail.config.tag  = pkt->hd.tag;
 
     ret = LOS_QueueWriteCopy(g_sensorManagerQueue, (VOID *)&smMail, SM_MAILS_TYPE_SIZE, 0);
     if (ret != LOS_OK) {
@@ -427,12 +426,12 @@ STATIC VOID SensorConfigRespond(UINT8 tag, UINT8 cmd, UINT16 id, UINT8 resp, INT
     PktHeaderResp rpkt;
 
     if (resp) {
-        rpkt.tag = tag;
-        rpkt.resp = NO_RESP;
+        rpkt.tag    = tag;
+        rpkt.resp   = NO_RESP;
         rpkt.tranId = id;
         rpkt.length = CMN_RESP_LENGTH;
-        rpkt.errNo = ((result < 0) ? EN_FAIL : EN_OK);
-        rpkt.cmd = cmd + 1;
+        rpkt.errNo  = ((result < 0) ? EN_FAIL : EN_OK);
+        rpkt.cmd    = cmd + 1;
         SensorCommuSend((UINT8 *)&rpkt, sizeof(rpkt));
     }
 }
@@ -454,7 +453,7 @@ LITE_OS_SEC_TEXT_MINOR VOID STATIC SensorConfig(const MailConfig *config)
     LOS_SemPost(g_sensorManagerSem);
 }
 
-LITE_OS_SEC_TEXT STATIC VOID SmTask(VOID const * arg)
+LITE_OS_SEC_TEXT STATIC VOID SmTask(VOID const *arg)
 {
     SmMail smMail;
     UINT32 ret;
@@ -508,10 +507,10 @@ INT32 SensorManagerInit(VOID)
     }
 
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)SmTask;
-    taskInitParam.uwStackSize = STASK_STKDEPTH_SM;
-    taskInitParam.pcName = "Sensor Manager task";
-    taskInitParam.usTaskPrio = STASK_PRIORITY_SM;      /* 1~7 */
-    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED; /* task is detached, the task can deleteself */
+    taskInitParam.uwStackSize  = STASK_STKDEPTH_SM;
+    taskInitParam.pcName       = "Sensor Manager task";
+    taskInitParam.usTaskPrio   = STASK_PRIORITY_SM; /* 1~7 */
+    taskInitParam.uwResved     = LOS_TASK_STATUS_DETACHED; /* task is detached, the task can deleteself */
 
     ret = LOS_TaskCreate(&g_sensorManagerTskId, &taskInitParam);
     if (ret != LOS_OK) {

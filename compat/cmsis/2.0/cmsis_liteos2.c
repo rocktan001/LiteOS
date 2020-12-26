@@ -521,15 +521,17 @@ uint32_t osThreadFlagsSet(osThreadId_t thread_id, uint32_t flags)
     LosTaskCB *taskCB = (LosTaskCB *)thread_id;
     UINT32 ret;
     EVENT_CB_S *eventCB = NULL;
+    UINT32 eventSave;
 
     if (taskCB == NULL) {
         return (uint32_t)osFlagsErrorParameter;
     }
 
     eventCB = &(taskCB->event);
+    eventSave = eventCB->uwEventID;
     ret = LOS_EventWrite(eventCB, (UINT32)flags);
     if (ret == LOS_OK) {
-        return (uint32_t)(eventCB->uwEventID);
+        return ((uint32_t)eventSave | flags);
     } else if (ret == LOS_ERRNO_EVENT_SETBIT_INVALID) {
         return (uint32_t)osFlagsErrorParameter;
     } else {
@@ -560,6 +562,20 @@ uint32_t osThreadFlagsClear(uint32_t flags)
     } else {
         return (uint32_t)osFlagsErrorResource;
     }
+}
+
+uint32_t osThreadFlagsGet(void)
+{
+    LosTaskCB *runTask = NULL;
+    EVENT_CB_S *eventCB = NULL;
+
+    if (OS_INT_ACTIVE) {
+        return (uint32_t)osFlagsErrorUnknown;
+    }
+
+    runTask = OsCurrTaskGet();
+    eventCB = &(runTask->event);
+    return (uint32_t)(eventCB->uwEventID);
 }
 
 uint32_t osThreadFlagsWait(uint32_t flags, uint32_t options, uint32_t timeout)
@@ -605,7 +621,7 @@ uint32_t osThreadFlagsWait(uint32_t flags, uint32_t options, uint32_t timeout)
         case LOS_ERRNO_EVENT_READ_TIMEOUT:
             return (uint32_t)osFlagsErrorTimeout;
         default:
-            return (uint32_t)osErrorResource;
+            return (uint32_t)osFlagsErrorResource;
     }
 }
 
@@ -780,6 +796,11 @@ const char *osEventFlagsGetName(osEventFlagsId_t ef_id)
 osStatus_t osDelay(uint32_t ticks)
 {
     UINT32 ret;
+
+    if (OS_INT_ACTIVE) {
+        return osErrorISR;
+    }
+
     ret = LOS_TaskDelay(ticks);
     if (ret == LOS_OK) {
         return osOK;
@@ -791,14 +812,25 @@ osStatus_t osDelay(uint32_t ticks)
 osStatus_t osDelayUntil(uint64_t ticks)
 {
     UINT32 ret;
-    UINT32 ticksGap;
-    UINT64 tickCount = LOS_TickCountGet();
-    if (ticks < tickCount) {
+    UINT64 ticksGap;
+    UINT64 tickCount;
+
+    if (OS_INT_ACTIVE) {
+        return osErrorISR;
+    }
+
+    tickCount = LOS_TickCountGet();
+    if ((ticks < tickCount)) {
         return osError;
     }
 
-    ticksGap = (UINT32)(ticks - tickCount);
-    ret = LOS_TaskDelay(ticksGap);
+    ticksGap = ticks - tickCount;
+    /* get the high 32 bits */
+    if ((ticksGap >> 32) > 0) {
+        return osError;
+    }
+
+    ret = LOS_TaskDelay((UINT32)ticksGap);
     if (ret == LOS_OK) {
         return osOK;
     } else {

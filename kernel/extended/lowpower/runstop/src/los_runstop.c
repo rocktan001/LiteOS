@@ -30,8 +30,9 @@
 #include "los_task_pri.h"
 #include "los_event_pri.h"
 #include "los_tick_pri.h"
+#ifndef LOSCFG_PLATFORM_NO_UART
 #include "uart.h"
-
+#endif
 #ifdef LOSCFG_KERNEL_CPUP
 #include "los_cpup_pri.h"
 #endif
@@ -385,7 +386,9 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsWowWriteFlashTaskCreate(VOID)
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     taskInitParam.pcName = "WowWriteFlashTask";
     taskInitParam.usTaskPrio = OS_TASK_PRIORITY_LOWEST - 1;
-
+#ifdef LOSCFG_KERNEL_SMP
+    taskInitParam.usCpuAffiMask = CPUID_TO_AFFI_MASK(0);
+#endif
     ret = LOS_TaskCreate(&writeFlashTaskId, &taskInitParam);
     return ret;
 }

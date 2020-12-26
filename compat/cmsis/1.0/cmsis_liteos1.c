@@ -589,6 +589,8 @@ osStatus osPoolDelete(osPoolId pool_id)
 }
 
 
+#ifdef LOSCFG_BASE_IPC_QUEUE
+
 /* internal function for osMessage and osMail */
 STATIC_INLINE osStatus MappingQueueWriteRet(UINT32 ret)
 {
@@ -630,8 +632,6 @@ STATIC_INLINE osStatus MappingQueueReadRet(UINT32 ret)
 
 
 //  ==== Message Queue Management Functions ====
-#ifdef LOSCFG_BASE_IPC_QUEUE
-
 osMessageQId osMessageCreate(const osMessageQDef_t *queue_def, osThreadId thread_id)
 {
     (VOID)thread_id;
@@ -712,12 +712,8 @@ osStatus osMessageDelete(const osMessageQId queue_id)
     }
 }
 
-#endif /* LOSCFG_BASE_IPC_QUEUE */
-
 
 //  ==== Mail Queue Management Functions ====
-#ifdef LOSCFG_BASE_IPC_QUEUE
-
 osMailQId osMailCreate(const osMailQDef_t *queue_def, osThreadId thread_id)
 {
     (VOID)thread_id;

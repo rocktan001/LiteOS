@@ -146,7 +146,7 @@ typedef VOID (*PERF_BUF_FLUSH_HOOK)(VOID *addr, UINT32 size);
  *
  * Value: 0x02002005
  *
- * Solution: Check if this type of pmu has already registered.
+ * Solution: Check whether the corresponding pmu is enabled in the menuconfig.
  */
 #define LOS_ERRNO_PERF_INVALID_PMU           LOS_ERRNO_OS_ERROR(LOS_MOD_PERF, 0x05)
 
