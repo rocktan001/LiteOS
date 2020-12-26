@@ -38,7 +38,12 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#ifdef LOSCFG_ARCH_ARM_CORTEX_A
+#define MEM_DYN_SIZE  (256 * 4)
+#else
 #define MEM_DYN_SIZE  256
+#endif
+
 static UINT32 g_demoDynMem[MEM_DYN_SIZE / 4];
 
 UINT32 Example_Dyn_Mem(VOID)

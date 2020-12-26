@@ -83,13 +83,6 @@ else
 endif
 endif
 
-ifeq ($(LOSCFG_PLATFORM_UM_ISOLATION), y)
-$(LIBO): $(LOCAL_OBJS)
-ifneq ($(strip $(LOCAL_OBJS)), )
-	$(HIDE)$(LD) -r -o $@ $^
-endif
-endif
-
 clean:
 	$(HIDE)$(RM) $(LIB) $(OBJOUT) $(LOCAL_GCH) *.bak *~
 

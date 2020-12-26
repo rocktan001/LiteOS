@@ -4,7 +4,7 @@
 #
 mainmenu "Huawei LiteOS Configuration"
 
-menu "Compilers"
+menu "Compiler"
 
 config LOSCFG_COMPILER_GCC
     bool
