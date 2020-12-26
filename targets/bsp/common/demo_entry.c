@@ -76,6 +76,10 @@
 #include "lms_demo.h"
 #endif /* LOSCFG_DEMOS_LMS */
 
+#ifdef LOSCFG_DEMOS_TRACE
+#include "trace_demo.h"
+#endif /* LOSCFG_DEMOS_TRACE */
+
 #ifdef LOSCFG_SHELL
 #include "shell.h"
 #include "shcmd.h"
@@ -305,6 +309,14 @@ UINT32 DemoEntry(VOID)
     ret = Example_LMSEntry();
     if (ret != LOS_OK) {
         PRINT_ERR("LMS Entry Failed.\n");
+        return ret;
+    }
+#endif
+
+#ifdef LOSCFG_DEMOS_TRACE
+    ret = create_trace_task();
+    if (ret != LOS_OK) {
+        PRINT_ERR("Trace demo Failed.\n");
         return ret;
     }
 #endif

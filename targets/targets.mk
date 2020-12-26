@@ -194,6 +194,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_LMS), y)
         LITEOS_BASELIB += -llms_demo
     endif
+    ifeq ($(LOSCFG_DEMOS_TRACE), y)
+        LITEOS_BASELIB += -ltrace_demo
+    endif
     ifeq ($(LOSCFG_DEMOS_AI), y)
         LITEOS_BASELIB += -lai_demo
     endif
