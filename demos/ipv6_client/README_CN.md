@@ -11,11 +11,11 @@ Ipv6_client用于演示Ipv6客户端与服务端的连接。下面以开发板Cl
 
 ### 2.设置开发板Ipv6地址和网关地址
 
-在`targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c`文件中的`void net_init(void)`函数中设置开发板的IP地址及网关地址，网关地址与路由器中设置的前缀保持一致。
+在<a href="https://gitee.com/LiteOS/LiteOS/blob/master/targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c" target="_blank">sys_init.c</a>文件的`void net_init(void)`函数中设置开发板的IP地址及网关地址，网关地址与路由器中设置的前缀保持一致。
 
 ### 3.设置服务端的地址和监听端口
 
-在服务端的PC机上获取到Ipv6地址后，在开发板的`demos/ipv6_client/client_demo.c`文件中通过`SERVER_ADDR`、`SERVER_PORT`宏设置服务端的ipv6地址和端口。
+在服务端的PC机上获取到Ipv6地址后，在开发板的<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/ipv6_client/client_demo.c" target="_blank">client_demo.c</a>文件中通过`SERVER_ADDR`、`SERVER_PORT`宏设置服务端的Ipv6地址和端口。
 
 ## 开启客户端 Client并选择连接方式
 
@@ -29,7 +29,7 @@ Ipv6_client支持Tcp和Udp协议，下面通过make munuconfig使能该Demo并�
 ```
 Demos --> Ipv6 Client Demo --> Enable Ipv6 Client Demo -> Enable Tcp Or Udp --> Enable Tcp Client
 ```
-完成以上操作后编译LiteOS源码，生成二进制镜像文件Huawei_LiteOS.bin，并将.bin文件烧写到开发板，复位重启开发板后，Ipv6_client即启动。
+完成以上操作后编译LiteOS源码，生成系统镜像文件Huawei_LiteOS.bin，并将.bin文件烧写到开发板，复位重启开发板后，Ipv6_client即启动。
 
 ## 编写服务端程序
 
@@ -171,7 +171,6 @@ SERVER_PORT    服务端监听端口
 ```
 
 #### Tcp
-
 在文件路径下执行`gcc ipv6_server.c -o server`命令编译服务端程序，编译后生成可执行程序server，执行`./server`运行该服务端程序。传输协议为`Tcp`时的服务端执行结果如下：
 
 ```

@@ -6,9 +6,10 @@ extern "C" {
 
 #include "stdio.h"
 #include "los_task.h"
+#include "arch/cpu.h"
 
-UINT32 g_taskHiId;
 UINT32 g_taskLoId;
+UINT32 g_taskHiId;
 #define TSK_PRIOR_HI 4
 #define TSK_PRIOR_LO 5
 
@@ -16,74 +17,67 @@ UINT32 Example_TaskHi(VOID)
 {
     UINT32 ret;
 
-    printf("Enter TaskHi Handler.\r\n");
+    printf("[cpu%d] Enter TaskHi Handler.\r\n", ArchCurrCpuid());
 
-    /* å»¶æ—¶2ä¸ªTickï¼Œå»¶æ—¶åè¯¥ä»»åŠ¡ä¼šæŒ‚èµ·ï¼Œæ‰§è¡Œå‰©ä½™ä»»åŠ¡ä¸­æœ€é«˜ä¼˜å…ˆçº§çš„ä»»åŠ¡(g_taskLoIdä»»åŠ¡) */
+    /* ÑÓÊ±2¸öTick£¬ÑÓÊ±ºó¸ÃÈÎÎñ»á¹ÒÆğ£¬Ö´ĞĞÊ£ÓàÈÎÎñÖĞ×î¸ßÓÅÏÈ¼¶µÄÈÎÎñ(g_taskLoIdÈÎÎñ) */
     ret = LOS_TaskDelay(2);
     if (ret != LOS_OK) {
         printf("Delay Task Failed.\r\n");
         return LOS_NOK;
     }
 
-    /* 2ä¸ªTickæ—¶é—´åˆ°äº†åï¼Œè¯¥ä»»åŠ¡æ¢å¤ï¼Œç»§ç»­æ‰§è¡Œ */
+    /* 2¸öTickºó£¬¸ÃÈÎÎñ»Ö¸´£¬¼ÌĞøÖ´ĞĞ */
     printf("TaskHi LOS_TaskDelay Done.\r\n");
 
-    /* æŒ‚èµ·è‡ªèº«ä»»åŠ¡ */
+    /* ¹ÒÆğ×ÔÉíÈÎÎñ */
     ret = LOS_TaskSuspend(g_taskHiId);
     if (ret != LOS_OK) {
         printf("Suspend TaskHi Failed.\r\n");
         return LOS_NOK;
     }
     printf("TaskHi LOS_TaskResume Success.\r\n");
-
     return ret;
 }
 
-/* ä½ä¼˜å…ˆçº§ä»»åŠ¡å…¥å£å‡½æ•° */
+/* µÍÓÅÏÈ¼¶ÈÎÎñÈë¿Úº¯Êı */
 UINT32 Example_TaskLo(VOID)
 {
     UINT32 ret;
 
-    printf("Enter TaskLo Handler.\r\n");
+    printf("[cpu%d] Enter TaskLo Handler.\r\n", ArchCurrCpuid());
 
-    /* å»¶æ—¶2ä¸ªTickï¼Œå»¶æ—¶åè¯¥ä»»åŠ¡ä¼šæŒ‚èµ·ï¼Œæ‰§è¡Œå‰©ä½™ä»»åŠ¡ä¸­æœ€é«˜ä¼˜å…ˆçº§çš„ä»»åŠ¡(èƒŒæ™¯ä»»åŠ¡) */
+    /* ÑÓÊ±2¸öTick£¬ÑÓÊ±ºó¸ÃÈÎÎñ»á¹ÒÆğ£¬Ö´ĞĞÊ£ÓàÈÎÎñÖĞ¾Í¸ßÓÅÏÈ¼¶µÄÈÎÎñ(±³¾°ÈÎÎñ) */
     ret = LOS_TaskDelay(2);
     if (ret != LOS_OK) {
         printf("Delay TaskLo Failed.\r\n");
         return LOS_NOK;
     }
 
-    printf("TaskHi LOS_TaskSuspend Success.\r\n");
-
-    /* æ¢å¤è¢«æŒ‚èµ·çš„ä»»åŠ¡g_taskHiId */
-    ret = LOS_TaskResume(g_taskHiId);
-    if (ret != LOS_OK) {
-        printf("Resume TaskHi Failed.\r\n");
-        return LOS_NOK;
-    }
-
     printf("TaskHi LOS_TaskDelete Success.\r\n");
-
     return ret;
 }
 
-/* ä»»åŠ¡æµ‹è¯•å…¥å£å‡½æ•°ï¼Œåˆ›å»ºä¸¤ä¸ªä¸åŒä¼˜å…ˆçº§çš„ä»»åŠ¡ */
+/* ÈÎÎñ²âÊÔÈë¿Úº¯Êı£¬´´½¨Á½¸ö²»Í¬ÓÅÏÈ¼¶µÄÈÎÎñ */
 UINT32 Example_TskCaseEntry(VOID)
 {
     UINT32 ret;
-    TSK_INIT_PARAM_S initParam;
+    TSK_INIT_PARAM_S initParam = {0};
 
-    /* é”ä»»åŠ¡è°ƒåº¦ï¼Œé˜²æ­¢æ–°åˆ›å»ºçš„ä»»åŠ¡æ¯”æœ¬ä»»åŠ¡é«˜è€Œå‘ç”Ÿè°ƒåº¦ */
+    /* ËøÈÎÎñµ÷¶È */
     LOS_TaskLock();
 
-    printf("LOS_TaskLock() Success!\r\n");
+    printf("LOS_TaskLock() Success on cpu%d!\r\n", ArchCurrCpuid());
 
     initParam.pfnTaskEntry = (TSK_ENTRY_FUNC)Example_TaskHi;
     initParam.usTaskPrio = TSK_PRIOR_HI;
     initParam.pcName = "TaskHi";
     initParam.uwStackSize = LOSCFG_TASK_MIN_STACK_SIZE;
     initParam.uwResved   = LOS_TASK_STATUS_DETACHED;
-    /* åˆ›å»ºé«˜ä¼˜å…ˆçº§ä»»åŠ¡ï¼Œç”±äºé”ä»»åŠ¡è°ƒåº¦ï¼Œä»»åŠ¡åˆ›å»ºæˆåŠŸåä¸ä¼šé©¬ä¸Šæ‰§è¡Œ */
+#ifdef LOSCFG_KERNEL_SMP
+    /* °ó¶¨¸ßÓÅÏÈ¼¶ÈÎÎñµ½CPU1ÔËĞĞ */
+    initParam.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
+#endif
+    /* ´´½¨¸ßÓÅÏÈ¼¶ÈÎÎñ£¬ÓÉÓÚCPU1µÄµ÷¶ÈÆ÷±»Ëø£¬ÈÎÎñ´´½¨³É¹¦ºó²»»áÂíÉÏÖ´ĞĞ */
     ret = LOS_TaskCreate(&g_taskHiId, &initParam);
     if (ret != LOS_OK) {
         LOS_TaskUnlock();
@@ -99,8 +93,11 @@ UINT32 Example_TskCaseEntry(VOID)
     initParam.pcName = "TaskLo";
     initParam.uwStackSize = LOSCFG_TASK_MIN_STACK_SIZE;
     initParam.uwResved   = LOS_TASK_STATUS_DETACHED;
-
-    /* åˆ›å»ºä½ä¼˜å…ˆçº§ä»»åŠ¡ï¼Œç”±äºé”ä»»åŠ¡è°ƒåº¦ï¼Œä»»åŠ¡åˆ›å»ºæˆåŠŸåä¸ä¼šé©¬ä¸Šæ‰§è¡Œ */
+#ifdef LOSCFG_KERNEL_SMP
+    /* µÍÓÅÏÈ¼¶ÈÎÎñ²»ÉèÖÃCPUÇ×ºÍĞÔ */
+    initParam.usCpuAffiMask = 0;
+#endif
+    /* ´´½¨µÍÓÅÏÈ¼¶ÈÎÎñ£¬¾¡¹ÜËøÈÎÎñµ÷¶È£¬µ«ÊÇÓÉÓÚ¸ÃÈÎÎñÃ»ÓĞ°ó¶¨¸Ã´¦ÀíÆ÷£¬ÈÎÎñ´´½¨³É¹¦ºó¿ÉÒÔÂíÉÏÔÚÆäËûCPUÖ´ĞĞ */
     ret = LOS_TaskCreate(&g_taskLoId, &initParam);
     if (ret != LOS_OK) {
         LOS_TaskUnlock();
@@ -111,7 +108,7 @@ UINT32 Example_TskCaseEntry(VOID)
 
     printf("Example_TaskLo create Success!\r\n");
 
-    /* è§£é”ä»»åŠ¡è°ƒåº¦ï¼Œæ­¤æ—¶ä¼šå‘ç”Ÿä»»åŠ¡è°ƒåº¦ï¼Œæ‰§è¡Œå°±ç»ªé˜Ÿåˆ—ä¸­æœ€é«˜ä¼˜å…ˆçº§ä»»åŠ¡ */
+    /* ½âËøÈÎÎñµ÷¶È£¬´ËÊ±»á·¢ÉúÈÎÎñµ÷¶È£¬Ö´ĞĞ¾ÍĞ÷ÁĞ±íÖĞ×î¸ßÓÅÏÈ¼¶ÈÎÎñ */
     LOS_TaskUnlock();
 
     return LOS_OK;
