@@ -8,26 +8,8 @@ UART_SRC    :=
 USB_SRC     :=
 HAL_DRIVER_TYPE :=
 
-############################# HI3556V200 Options##############################
-ifeq ($(LOSCFG_PLATFORM_HI3556V200), y)
-    HWI_TYPE     := arm/interrupt/gic
-    TIMER_TYPE   := arm/timer/arm_generic
-    HRTIMER_TYPE := hisoc/hrtimer
-    NET_TYPE     := hieth
-    UART_TYPE    := amba_pl011
-    USB_TYPE     := usb3.0_hi3556v200
-    LITEOS_CMACRO_TEST += -DTEST3556V200
-
-########################## hi1980_imu Options################################
-else ifeq ($(LOSCFG_PLATFORM_HI1980_IMU), y)
-    HWI_TYPE    := arm/interrupt/gic
-    TIMER_TYPE  := arm/timer/arm_generic
-    UART_TYPE   := amba-pl011
-    WARNING_AS_ERROR   :=
-    LITEOS_CMACRO_TEST += -DTESTHI1980IMU
-
 ########################## qemu virt a53 Options##############################
-else ifeq ($(LOSCFG_PLATFORM_QEMU_VIRT_A53), y)
+ifeq ($(LOSCFG_PLATFORM_QEMU_VIRT_A53), y)
     HWI_TYPE    := arm/interrupt/gic
     TIMER_TYPE  := arm/timer/arm_generic
     UART_TYPE   := amba_pl011
@@ -67,12 +49,6 @@ else ifeq ($(LOSCFG_PLATFORM_STM32F103_FIRE_ARBITRARY), y)
     TIMER_TYPE := arm/timer/arm_cortex_m
     LITEOS_CMACRO_TEST += -D__FPU_PRESENT -DSTM32F103xE
     HAL_DRIVER_TYPE := STM32F1xx_HAL_Driver
-############################# hi3516ev200 Options#############################
-else ifeq ($(LOSCFG_PLATFORM_HI3516EV200), y)
-    HWI_TYPE     := arm/interrupt/gic
-    TIMER_TYPE   := hisoc/timer
-    HRTIMER_TYPE := hisoc/hrtimer
-    UART_TYPE    := amba_pl011
 ############################# realview-pbx-a9 Options#############################
 else ifeq ($(LOSCFG_PLATFORM_PBX_A9), y)
     HWI_TYPE     := arm/interrupt/gic
@@ -134,6 +110,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_KERNEL_CPUP), y)
         LITEOS_BASELIB += -lcpup
+    endif
+    ifeq ($(LOSCFG_KERNEL_TRACE), y)
+        LITEOS_BASELIB += -ltrace
     endif
     ifeq ($(LOSCFG_KERNEL_CPPSUPPORT), y)
         LITEOS_BASELIB += -lcppsupport
@@ -215,6 +194,17 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_LMS), y)
         LITEOS_BASELIB += -llms_demo
     endif
+    ifeq ($(LOSCFG_DEMOS_AI), y)
+        LITEOS_BASELIB += -lai_demo
+    endif
+endif
+
+ifeq ($(LOSCFG_DEMOS_AI), y)
+    ifeq ($(LOSCFG_ARCH_ARM_CORTEX_A), y)
+        LITEOS_BASELIB += -lcortex-a-nnacl
+    else ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M), y)
+        LITEOS_BASELIB += -lcortex-m-nnacl
+endif
 endif
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)
