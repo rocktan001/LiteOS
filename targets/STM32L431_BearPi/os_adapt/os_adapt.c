@@ -28,6 +28,4 @@
 
 #include "los_typedef.h"
 
-VOID uart_init(VOID) {}
-
 VOID OsBackTrace(VOID) {}

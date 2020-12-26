@@ -52,11 +52,6 @@ extern "C" {
 #define UART_ICR                0x44
 #define UART_DMACR              0x48  /* DMA control register */
 
-#define CMD_LENGTH  128
-
-extern CHAR g_inputCmd[CMD_LENGTH];
-extern INT32 g_inputIdx;
-
 #ifdef __cplusplus
 #if __cplusplus
 }

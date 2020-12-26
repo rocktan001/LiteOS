@@ -51,30 +51,28 @@ UINT8 uart_getc(VOID)
     return ch;
 }
 
-STATIC VOID uart_irqhandle(VOID)
+STATIC VOID UartHandler(VOID)
 {
-    uart_getc();
+    (VOID)uart_getc();
 }
 
 INT32 ShellQueueCreat(VOID)
 {
-    UINT32 ret;
-    ret = LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
-    return ret;
+    return LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);;
 }
 
 INT32 uart_hwiCreate(VOID)
 {
     HAL_NVIC_EnableIRQ(USART1_IRQn);
     __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_TC);
-    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, uart_irqhandle, NULL);
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
     return LOS_OK;
 }
 
 UINT8 uart_read(VOID)
 {
-    UINT8 rec[2] = {0};
+    UINT8 rec[UART_QUEUE_BUF_MAX_LEN] = {0};
     UINT32 ret;
     UINT32 len;
     len = UART_QUEUE_BUF_MAX_LEN;
@@ -100,3 +98,5 @@ VOID UartPuts(const CHAR *s, UINT32 len, BOOL isLock)
 {
     uart_write(s, len, 0);
 }
+
+VOID uart_init(VOID) {}

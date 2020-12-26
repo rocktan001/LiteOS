@@ -49,7 +49,6 @@ typedef struct {
     uint32_t IMSC;      // at offset 0x38
 } uart_t;
 
-extern UINT32 UartPutsReg(UINTPTR base, const CHAR *s, UINT32 len, BOOL isLock);
 extern INT32 uart_hwiCreate(VOID);
 
 VOID   uart_early_init(VOID);
