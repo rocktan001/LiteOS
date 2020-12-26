@@ -85,9 +85,14 @@
 #include "client_demo.h"
 #endif /* LOSCFG_DEMOS_IPV6_CLIENT */
 
+#ifdef LOSCFG_DEMOS_AI
+#include "ai_demo.h"
+#endif
+
 #define USER_TASK_PRIORITY 2
 #define DTLS_TASK_PRIORITY 3
 #define IPV6_TASK_PRIORITY 4
+#define AI_TASK_PRIORITY   5
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
 static UINT32 g_atiny_tskHandle;
@@ -197,7 +202,7 @@ UINT32 create_fs_task(VOID)
     task_init_param.uwStackSize = 0x1000;
 
     ret = LOS_TaskCreate(&g_fs_tskHandle, &task_init_param);
-    if (LOS_OK != ret) {
+    if (ret != LOS_OK) {
         return ret;
     }
     return ret;
@@ -220,7 +225,7 @@ UINT32 create_dtls_server_task(VOID)
     task_init_param.uwStackSize = 0x1000;
 
     ret = LOS_TaskCreate(&g_dtls_server_tskHandle, &task_init_param);
-    if (LOS_OK != ret) {
+    if (ret != LOS_OK) {
         return ret;
     }
     return ret;
@@ -255,9 +260,38 @@ UINT32 ipv6_tasks(VOID)
 }
 #endif
 
+#ifdef LOSCFG_DEMOS_AI
+static UINT32 g_ai_tskHandle;
+UINT32 creat_ai_task(VOID)
+{
+    UINT32 ret = LOS_OK;
+    TSK_INIT_PARAM_S task_init_param;
+
+    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
+    task_init_param.usTaskPrio = AI_TASK_PRIORITY;
+    task_init_param.pcName = "ai_task";
+    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)ai_demo_entry;
+    task_init_param.uwStackSize = 0x6000;
+    ret = LOS_TaskCreate(&g_ai_tskHandle, &task_init_param);
+    if(ret != LOS_OK) {
+        return ret;
+    }
+    return ret;
+}
+#endif
+
 UINT32 DemoEntry(VOID)
 {
     UINT32 ret = LOS_OK;
+
+#ifdef LOSCFG_DEMOS_AI
+    printf("Hello, welcome to liteos demo!\n");
+    ret = creat_ai_task();
+    if (ret != LOS_OK) {
+        PRINT_ERR("Ai Demo Failed.\n");
+        return ret;
+    }
+#endif
 
 #ifdef LOSCFG_GUI_ENABLE
     ret = LvglDemo();
@@ -344,6 +378,7 @@ UINT32 DemoEntry(VOID)
 #endif
 
 #ifdef LOSCFG_SHELL
+    ShellQueueCreat();
     if (OsShellInit(0) != LOS_OK) {
         PRINT_ERR("Shell Init Failed.\n");
     }
