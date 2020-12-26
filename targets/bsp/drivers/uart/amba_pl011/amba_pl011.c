@@ -32,8 +32,7 @@
 #include "los_spinlock.h"
 #include "los_event.h"
 #include "los_task_pri.h"
-
-EVENT_CB_S g_stShellEvent;
+#include "los_queue.h"
 
 CHAR g_inputCmd[CMD_LENGTH];
 INT32 g_inputIdx = 0;
@@ -44,12 +43,14 @@ UINT32 g_uart_fputc_en = 1;
 UINT32 g_uart_fputc_en = 0;
 #endif
 
-#define REG32(addr) ((volatile UINT32 *)(UINTPTR)(addr))
-#define UARTREG(base, reg)  (*REG32((base) + (reg)))
-#define UART_FR_TXFF (0x1U << 5)
-#define UART_EVENT_MASK     0x1
+#define REG32(addr)             ((volatile UINT32 *)(UINTPTR)(addr))
+#define UARTREG(base, reg)      (*REG32((base) + (reg)))
+#define UART_FR_TXFF            (0x1U << 5)
+#define UART_QUEUE_SIZE         64
+#define UART_QUEUE_BUF_MAX_LEN  2
+#define UART_QUEUE_REC_DELAY    5
 
-static UINT8 g_uart_rec = 0;
+STATIC UINT32 g_uartQueue;
 
 STATIC VOID UartPutcReg(UINTPTR base, CHAR c)
 {
@@ -97,7 +98,7 @@ STATIC VOID UartPutStr(UINTPTR base, const CHAR *s, UINT32 len)
          * Only system uart output needs to add extra '\r' to improve
          * the compatibility on win.
          */
-        if ((*(s + i) == '\n') && (base == UART_REG_BASE))  {
+        if ((*(s + i) == '\n') && (base == UART_REG_BASE)) {
             UartPutcReg(base, '\r');
         }
         UartPutcReg(base, *(s + i));
@@ -165,25 +166,17 @@ INT32 uart_puts(const CHAR *s, UINTPTR len, VOID *state)
     return (INT32)len;
 }
 
-UINT32 uart_wait_adapt(VOID)
-{
-    UINT32 ret;
-    ret = LOS_EventRead(&g_stShellEvent, UART_EVENT_MASK, LOS_WAITMODE_AND | LOS_WAITMODE_CLR, LOS_WAIT_FOREVER);
-    if (ret == UART_EVENT_MASK) {
-        return LOS_OK;
-    }
-
-    return LOS_NOK;
-}
-
 UINT8 uart_read(VOID)
 {
-    UINT8 ch = 0;
-    if (uart_wait_adapt() == LOS_OK) {
-        ch = g_uart_rec;
-        return ch;
+    UINT8 rec[UART_QUEUE_BUF_MAX_LEN] = {0};
+    UINT32 ret;
+    UINT32 len;
+    len = UART_QUEUE_BUF_MAX_LEN;
+    ret = LOS_QueueReadCopy(g_uartQueue, &rec, &len, LOS_WAIT_FOREVER);
+    if (ret == LOS_OK) {
+        return rec[0];
     }
-    return ch;
+    return rec[0];
 }
 
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
@@ -194,9 +187,10 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 
 VOID uart_handler(VOID)
 {
+    UINT8 ch;
     UINTPTR base = uart_to_ptr(0);
-    g_uart_rec = UARTREG(base, UART_DR);
-    LOS_EventWrite(&g_stShellEvent, 0x1);
+    ch = UARTREG(base, UART_DR);
+    (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
 }
 
 VOID uart_early_init(VOID)
@@ -205,10 +199,16 @@ VOID uart_early_init(VOID)
     UARTREG(UART_REG_BASE, UART_CR) = (1 << 8) | (1 << 0);
 }
 
+INT32 ShellQueueCreat(VOID)
+{
+    UINT32 ret;
+    ret = LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
+    return ret;
+}
+
 INT32 uart_hwiCreate(VOID)
 {
     UINT32 ret;
-    LOS_EventInit(&g_stShellEvent);
     /* uart interrupt priority should be the highest in interrupt preemption mode */
     ret = LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, (HWI_PROC_FUNC)uart_handler, NULL);
     if (ret != LOS_OK) {

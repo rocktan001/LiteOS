@@ -59,6 +59,7 @@ UINT32 uart_wait_adapt(VOID);
 INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
 UINT8  uart_read(VOID);
 VOID   UartPuts(const CHAR *s, UINT32 len, BOOL isLock);
+INT32  ShellQueueCreat(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

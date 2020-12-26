@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Uart Module Implementation
  * Author: Huawei LiteOS Team
@@ -30,12 +30,13 @@
 #include <los_hwi.h>
 #include <los_sem.h>
 #include "usart.h"
+#include "los_queue.h"
 
-#define UART_EVENT_MASK 0x1
-#define UART_READ_MASK  0xFF
+#define UART_QUEUE_SIZE        64
+#define UART_QUEUE_BUF_MAX_LEN 2
+#define UART_QUEUE_REC_DELAY   5
 
-STATIC UINT8 g_rec = 0;
-EVENT_CB_S g_uartEvent;
+STATIC UINT32 g_uartQueue;
 
 INT32 uart_putc(CHAR c)
 {
@@ -45,53 +46,44 @@ INT32 uart_putc(CHAR c)
 UINT8 uart_getc(VOID)
 {
     UINT8 ch = 0;
-    LOS_IntLock();
-    HAL_UART_Receive(&huart1, &ch, 1, 0);
-    LOS_IntUnLock();
+    HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
+    (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
     return ch;
-}
-
-STATIC VOID uart_notice_adapt(VOID)
-{
-    LOS_EventWrite(&g_uartEvent, UART_EVENT_MASK);
-}
-
-UINT32 uart_wait_adapt(VOID)
-{
-    UINT32 ret;
-    ret = LOS_EventRead(&g_uartEvent, UART_EVENT_MASK,
-                        LOS_WAITMODE_AND | LOS_WAITMODE_CLR, LOS_WAIT_FOREVER);
-    if (ret == UART_EVENT_MASK) {
-        return LOS_OK;
-    }
-
-    return LOS_NOK;
 }
 
 STATIC VOID uart_irqhandle(VOID)
 {
-    g_rec = uart_getc();
-    uart_notice_adapt();
+    uart_getc();
+}
+
+INT32 ShellQueueCreat(VOID)
+{
+    UINT32 ret;
+    ret = LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
+    return ret;
 }
 
 INT32 uart_hwiCreate(VOID)
 {
     HAL_NVIC_EnableIRQ(USART1_IRQn);
+    __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_TC);
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, uart_irqhandle, NULL);
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
-    (VOID)LOS_HwiCreate(USART1_IRQn + 16, 0, 0, uart_irqhandle, NULL); // 16: cortex-m irq number shift
-    (VOID)LOS_EventInit(&g_uartEvent);
-
     return LOS_OK;
 }
 
 UINT8 uart_read(VOID)
 {
-    UINT8 c = 0;
-    if (uart_wait_adapt() == LOS_OK) {
-        c = g_rec;
-        return c;
+    UINT8 rec[2] = {0};
+    UINT32 ret;
+    UINT32 len;
+    len = UART_QUEUE_BUF_MAX_LEN;
+    ret = LOS_QueueReadCopy(g_uartQueue, &rec, &len, LOS_WAIT_FOREVER);
+    if (ret == LOS_OK) {
+        LOS_TaskDelay(UART_QUEUE_REC_DELAY);
+        return rec[0];
     }
-    return c;
+    return rec[0];
 }
 
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
@@ -103,6 +95,7 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 #endif
     return len;
 }
+
 VOID UartPuts(const CHAR *s, UINT32 len, BOOL isLock)
 {
     uart_write(s, len, 0);

@@ -64,17 +64,19 @@ extern "C" {
  */
 #define OS_USER_HWI_MIN                 OS_HWI_MIN
 
-#define OS_TICK_INT_NUM     (SysTick_IRQn + 16) // 16: cortem-m irq sh
+#define OS_TICK_INT_NUM                 (SysTick_IRQn + 16) // 16: cortem-m irq shift
 
-#define IO_ADDRESS(x)       (x)
+#define NUM_HAL_INTERRUPT_UART          (USART1_IRQn + 16)  // 16: cortem-m irq shift
 
-#define HAL_READ_UINT8(addr, data)  READ_UINT8(data, addr)
+#define IO_ADDRESS(x)                   (x)
 
-#define HAL_WRITE_UINT8(addr, data) WRITE_UINT8(data, addr)
+#define HAL_READ_UINT8(addr, data)      READ_UINT8(data, addr)
 
-#define HAL_READ_UINT32(addr, data) READ_UINT32(data, addr)
+#define HAL_WRITE_UINT8(addr, data)     WRITE_UINT8(data, addr)
 
-#define HAL_WRITE_UINT32(addr, data) WRITE_UINT32(data, addr)
+#define HAL_READ_UINT32(addr, data)     READ_UINT32(data, addr)
+
+#define HAL_WRITE_UINT32(addr, data)    WRITE_UINT32(data, addr)
 
 #ifdef __cplusplus
 #if __cplusplus
