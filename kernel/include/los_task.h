@@ -1121,7 +1121,7 @@ extern UINT16 LOS_TaskCpuAffiGet(UINT32 taskId);
  * @see None.
  * @since Huawei LiteOS V200R003C00
  */
-extern VOID LOS_TaskResRecyle(VOID);
+extern VOID LOS_TaskResRecycle(VOID);
 
 #ifdef LOSCFG_OBSOLETE_API
     #define LOS_TASK_PARAM_INIT_ARG_0(initParam, arg) \

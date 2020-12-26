@@ -88,8 +88,9 @@ LITE_OS_SEC_DATA_MINOR LosTaskCB *g_saveTsk[LOSCFG_KERNEL_CORE_NUM];
 #define TRACE_FUNC_CALL()
 #endif
 
-#define MAX_SLEEP_TIME 1000
-#define MIN_SLEEP_TIME 100
+#define MAX_SLEEP_TIME      10000
+#define MIN_DEEP_SLEEP_TIME 1000
+#define MIN_SLEEP_TIME      100
 
 typedef struct {
     PowerMgrDeepSleepOps *deepSleepOps;
@@ -117,7 +118,7 @@ __attribute__((section(".data"))) STATIC PowerMgr g_pmMgr = {
     .sleepVoteCount = 0,
     .maxSleepCount = MAX_SLEEP_TIME,
     .minSleepTicks = MIN_SLEEP_TIME,
-    .minDeepSleepTicks = 0,
+    .minDeepSleepTicks = MIN_DEEP_SLEEP_TIME,
     .sleepTime = {0},
     .deepSleepCores = 0,
     .resumeSleepCores = 0,
@@ -299,7 +300,6 @@ STATIC INLINE VOID OsTickResume(UINT32 sleepTicks)
 STATIC VOID OsDeepSleepResume(VOID)
 {
     DEEPOPS_CALL_FUNC_VOID(resumeFromReset);
-    g_resumeFromImg = LOS_COLD_RESET;
     LOS_AtomicSet(&g_pmMgr.resumeSleepCores, OS_MP_CPU_ALL);
 
 #ifdef LOSCFG_KERNEL_CPUP
@@ -324,13 +324,14 @@ STATIC INLINE VOID OsEnterDeepSleepMainCore(VOID)
         OsSRSaveRegister();
 
         if (g_resumeFromImg == LOS_COLD_RESET) {
+            g_resumeFromImg = LOS_DEEP_SLEEP_RESET;
             CALL_RUN_OPS_FUNC_NO_RETURN(contextSave);
             g_pmRunOps.enterDeepSleep();
             g_deepSleepOps.rollback();
         }
+        g_deepSleepOps.resumeDevice();
         UINT32 sleepTicks = g_pmRunOps.withdrawWakeUpTimer();
         OsSysTimeUpdate(sleepTicks);
-        g_deepSleepOps.resumeDevice();
     } else {
 #ifdef LOSCFG_KERNEL_TICKLESS
         OsTicklessOpen();
@@ -637,7 +638,7 @@ VOID LOS_PowerMgrInit(const PowerMgrParameter *para)
 #endif
         g_pmMgr.minSleepTicks = para->config.minLightSleepTicks;
         g_pmMgr.maxSleepCount = para->config.maxDeepSleepTicks;
-        g_pmMgr.minDeepSleepTicks = para->config.maxDeepSleepTicks;
+        g_pmMgr.minDeepSleepTicks = para->config.minDeepSleepTicks;
     }
 
     LOS_AtomicSet(&g_pmMgr.resumeSleepCores, 0);
@@ -669,10 +670,12 @@ VOID LOS_PowerMgrInit(const PowerMgrParameter *para)
         ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, couldDeepSleep);
         ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, systemWakeup);
         ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, suspendPreConfig);
+        ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, suspendDevice);
         ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, rollback);
         ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, resumeDevice);
         ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, resumePostConfig);
         ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, resumeCallBack);
+        ASSIGN_MEMBER(&g_deepSleepOps, deepSleepOps, otherCoreResume);
     }
 #endif
     // Register PowerMgr to Low-Power Framework.

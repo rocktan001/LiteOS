@@ -16,13 +16,6 @@ LIBA := $(OUT)/lib/lib$(MODULE_NAME).a
 endif
 LIB := $(LIBA) $(LIBSO)
 
-ifeq ($(LOSCFG_PLATFORM_UM_ISOLATION), y)
-LIBO := $(OUT)/lib/lib$(MODULE_NAME).O
-LIB  += $(LIBO)
-LITEOS_ASFLAGS   += $(LITEOS_K_INCLUDES)
-LITEOS_CFLAGS    += $(LITEOS_K_INCLUDES)
-endif
-
 # create a separate list of objects per source type
 
 LOCAL_CSRCS    := $(filter %.c,   $(LOCAL_SRCS))
@@ -115,13 +108,6 @@ endif
 ifeq ($(LOCAL_SO), y)
 $(LIBSO): $(LOCAL_OBJS)
 	$(HIDE)$(CC) $(LITEOS_CFLAGS) -fPIC -shared $^ -o $@
-endif
-
-ifeq ($(LOSCFG_PLATFORM_UM_ISOLATION), y)
-$(LIBO): $(LOCAL_OBJS)
-ifneq ($(strip $(LOCAL_OBJS)), )
-	$(HIDE)$(LD) -r -o $@ $^
-endif
 endif
 
 clean:

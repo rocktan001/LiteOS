@@ -62,8 +62,7 @@ OsStartToRun:
     msr     CONTROL, r1
     ldrh    r7, [r0 , #4]
     movs    r6,  #OS_TASK_STATUS_RUNNING
-    orrs    r7,  r7, r6
-    strh    r7,  [r0 , #4]
+    strh    r6,  [r0 , #4]
     ldr     r3, [r0]
     adds    r3, r3, #36
     ldmfd   r3!, {r0-r2}
@@ -78,8 +77,7 @@ OsStartToRun:
 
     ldrh    r7, [r0 , #4]
     mov     r8,  #OS_TASK_STATUS_RUNNING
-    orr     r7,  r7, r8
-    strh    r7,  [r0 , #4]
+    strh    r8,  [r0 , #4]
 
     ldr     r12, [r0]
     ADD     r12, r12, #36

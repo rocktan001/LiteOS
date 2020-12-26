@@ -346,11 +346,7 @@ STATIC UINT32 OsAppTaskCreate(VOID)
 #ifdef LOSCFG_KERNEL_SMP
     appTask.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
 #endif
-#ifdef LOSCFG_PLATFORM_UM_ISOLATION
-    return LOS_TaskKernelCreate(&taskId, &appTask);
-#else
     return LOS_TaskCreate(&taskId, &appTask);
-#endif
 }
 
 #ifdef LOSCFG_MEM_RECORDINFO

@@ -342,12 +342,12 @@ STATIC VOID BackTraceWithSp(UINTPTR sp)
 VOID ArchBackTrace(VOID)
 {
     UINTPTR stackPointer = ArchGetSp();
-    BackTraceWithSp (stackPointer);
+    BackTraceWithSp(stackPointer);
 }
 
 VOID ArchBackTraceWithSp(const VOID *stackPointer)
 {
-    BackTraceWithSp ((UINTPTR) stackPointer);
+    BackTraceWithSp((UINTPTR)stackPointer);
     return;
 }
 
