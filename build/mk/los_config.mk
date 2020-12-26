@@ -95,10 +95,6 @@ BOARD_LD_S_FILE = $(BOARD_LD_FILE).S
 MODULE = $(MK_PATH)/module.mk
 MODULE_LIB = $(MK_PATH)/module_lib.mk
 
-ifeq ($(LOSCFG_PLATFORM_UM_ISOLATION), y)
-UMODULE = $(MK_PATH)/umodule.mk
-endif
-
 ifeq ($(LOSCFG_COMPILER_HIMIX_32), y)
 LITEOS_CMACRO      += -D__COMPILER_HUAWEILITEOS__
 else ifeq ($(LOSCFG_COMPILER_HIMIX210_64), y)
@@ -273,11 +269,15 @@ LITEOS_LD_PATH +=  -L$(OUT)/lib/rdk \
                    -L$(OUT)/lib/main_server
 endif
 
+ifeq ($(LOSCFG_DEMOS_AI), y)
+LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/components/ai/nnacl_lib
+endif
+
 ifeq ($(LOSCFG_KERNEL_LMS), y)
-ifeq ($(LOSCFG_ARCH_ARM_CORTEX_A),y)
-LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/kernel/extended/lms/cortex_a_r
+ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M),y)
+LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/kernel/extended/lms/cortex_m/$(LOSCFG_ARCH_CPU)
 else
-LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/kernel/extended/lms/cortex_m
+LITEOS_LD_PATH +=  -L$(LITEOSTOPDIR)/kernel/extended/lms/cortex_a_r
 endif
 endif
 

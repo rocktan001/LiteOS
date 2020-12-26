@@ -39,3 +39,8 @@ ifeq ($(LOSCFG_COMPONENTS_ATINY_LOG), y)
 include $(LITEOSTOPDIR)/components/log/atiny_log.mk
 COMPONENTS_INCLUDE += $(COMPONENTS_ATINY_LOG_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_AI), y)
+include $(LITEOSTOPDIR)/components/ai/ai.mk
+COMPONENTS_INCLUDE += $(COMPONENTS_AI_INCLUDE)
+endif
