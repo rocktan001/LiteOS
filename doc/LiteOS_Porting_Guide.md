@@ -53,7 +53,7 @@
 表格列出了LiteOS源码的目录，其中加粗字体的目录/文件在移植过程中需要修改。
 
 **表 1**  LiteOS源码目录
-| 一级目录                     | 二级目录/文件             | 说明                                                          |
+| 一级目录                    | 二级目录/文件            | 说明                                                          |
 | ----------                  | ----------------------   |  -----------------------------------------------------------  |
 | arch                        |                          |  芯片架构支持                                                 |
 | build                       |                          |  LiteOS编译系统需要的配置及脚本                               |
@@ -67,12 +67,15 @@
 | osdepends                   |                          |  LiteOS提供的部分OS适配接口                                   |
 | targets                     | bsp                      |  通用板级支持包                                               |
 |                             | Cloud_STM32F429IGTx_FIRE |  野火STM32F429（ARM Cortex M4）开发板的开发工程源码包         |
+|                             | qemu-virt-a53            |  Coretex A53的qemu开发工程源码包                              |
+|                             | realview-pbx-a9          |  Coretex A9的qemu开发工程源码包                               |
+|                             | STM32F072_Nucleo         |  STM32F072_Nucleo（ARM Cortex M0）开发板的开发工程源码包      |
+|                             | STM32F103_FIRE_Arbitrary |  野火STM32F103（ARM Cortex M3）霸道开发板的开发工程源码包     |
 |                             | STM32F769IDISCOVERY      |  STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包   |
-|                             | STM32L431_BearPi         |  小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包       |
+|                             | ...                      |  其他开发板的开发工程源码包                                   |
 |                             | Kconfig                  |                                                               |
 |                             | Makefile                 |                                                               |
 |                             | **<font color="blue">targets.mk</font>** |                                               |
-| tests                       |                          |  内核及系统库的参考测试代码                                   |
 | tools                       | **<font color="blue">build/config</font>** |  LiteOS支持的各开发板的编译配置文件，移植新的开发板时，需要在这个目录下增加这个新开发板的编译配置文件 |
 |                             |  menuconfig              |  LiteOS编译所需的menuconfig脚本                               |
 |                             |  stackusage              |  LiteOS栈使用估算工具                                         |
@@ -283,13 +286,13 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 1.  添加头文件：
 
-    ```
+    ```c
     #include <stdio.h>
     ```
 
 2.  在main\(\)函数的while\(1\)循环中添加如下代码：
 
-    ```
+    ```c
     printf("hello\n");
     HAL_Delay(1000);
     HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9);
@@ -297,7 +300,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 3.  /\* USER CODE BEGIN 4 \*/中添加函数：
 
-    ```
+    ```c
     __attribute__((used)) int _write(int fd, char *ptr, int len)
     {
         (void)HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, 0xFFFF);
@@ -458,7 +461,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
     -   Src\\sys\_init.c中：
 
-        ```
+        ```c
         /*
         int atiny_random(void *output, size_t len)
         {
@@ -469,7 +472,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
     -   Src\\main.c中：
 
-        ```
+        ```c
         VOID HardwareInit(VOID)
         {
             SystemClock_Config();
@@ -481,7 +484,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 4.  在STM32F407\_OpenEdv\\Src\\main.c硬件初始化函数的第一行，添加初始化HAL库的函数HAL\_Init\(\)：
 
-    ```
+    ```c
     VOID HardwareInit(VOID)
     {
         HAL_Init();
@@ -499,7 +502,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
     可在STM32F407\_OpenEdv\\include\\hisoc\\clock.h文件中设置，一般将时间频率设置为SystemCoreClock，实现代码为：
 
-    ```
+    ```c
     #define get_bus_clk()  SystemCoreClock
     ```
 
@@ -513,22 +516,22 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 1.  使用裸机工程的串口初始化文件**Core\\Src\\usart.c**和**Core\\Inc\\usart.h**替换LiteOS源码中的**targets\\STM32F407\_OpenEdv\\Src\\usart.c**和**targets\\STM32F407\_OpenEdv\\Inc\\usart.h**。
 2.  在targets\\STM32F407\_OpenEdv\\Inc\\usart.h中增加对STM32F4系列芯片的HAL驱动头文件的引用：
 
-    ```
+    ```c
     #include "stm32f4xx_hal.h"
     ```
 
 3.  在targets\\STM32F407\_OpenEdv\\Src\\usart.c文件尾部添加如下两个函数定义：
 
-    ```
+    ```c
     __attribute__((used)) int _write(int fd, char *ptr, int len)
     {
-    (void)HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, 0xFFFF);
-    return len;
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, 0xFFFF);
+        return len;
     }
     int uart_write(const char *buf, int len, int timeout)
     {
-    (void)HAL_UART_Transmit(&huart1, (uint8_t *)buf, len, 0xFFFF);
-    return len;
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)buf, len, 0xFFFF);
+        return len;
     }
     ```
 
@@ -581,13 +584,13 @@ STM32F407\_OpenEdv\\liteos.ld是新开发板的链接脚本，需要根据开发
 1.  将所有“**Cloud\_STM32F429IGTx\_FIRE**”替换成“**STM32F407\_OpenEdv**”。
 2.  STM32F407\_OpenEdv目录结构相对于Cloud\_STM32F429IGTx\_FIRE工程的目录少了一些文件和子目录，需要在Makefile中删除对这些目录文件的引用，即删除如下内容：
 
-    ```
+    ```makefile
     HARDWARE_SRC =  \
             ${wildcard $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Src/*.c}
             C_SOURCES += $(HARDWARE_SRC)
     ```
 
-    ```
+    ```makefile
     HARDWARE_INC = \
             -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Inc
             BOARD_INCLUDES += $(HARDWARE_INC)
@@ -602,7 +605,7 @@ STM32F407\_OpenEdv\\liteos.ld是新开发板的链接脚本，需要根据开发
 
     可以参考其他开发板的编译配置，新增正点原子开发板的配置，如下所示：
 
-    ```
+    ```makefile
     ######################### STM32F407ZGTX Options###############################
     else ifeq ($(LOSCFG_PLATFORM_STM32F407ZGTX), y)
         TIMER_TYPE := arm/timer/arm_cortex_m
@@ -657,7 +660,7 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
 
 1.  编写任务函数，创建两个不同闪烁频率的LED指示灯任务：
 
-    ```
+    ```c
     UINT32 LED1_init(VOID)
     {
         while(1) {
@@ -679,7 +682,7 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
 
 2.  配置两个任务的参数并创建任务：
 
-    ```
+    ```c
     STATIC UINT32 LED1TaskCreate(VOID)
     {
         UINT32 taskId;
@@ -711,14 +714,14 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
 
 3.  在硬件初始化函数HardwareInit\(\)中增加对LED灯的初始化：
 
-    ```
+    ```c
     MX_GPIO_Init();
     ```
 
 4.  对于移植好的STM32F407\_OpenEdv工程，任务处理函数app\_init定义在targets\\STM32F407\_OpenEdv\\Src\\user\_task.c文件中，其中包含了网络、文件系统等相关的任务，目前并不需要执行这些任务，可在targets\\STM32F407\_OpenEdv\\Makefile的“**USER\_SRC**”变量中删除这个文件，后续有相关任务需求时，可以参考这个文件的实现。
 5.  在main.c文件的main\(\)函数前实现任务处理函数app\_init\(\)，添加对LED任务创建函数的调用：
 
-    ```
+    ```c
     UINT32 app_init(VOID)
     {
         LED1TaskCreate();

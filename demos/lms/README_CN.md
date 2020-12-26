@@ -2,11 +2,12 @@
 
 ## 基本概念
 
-LMS全称为Lite Memory Sanitizer，是一种实时检测内存操作合法性的算法。LMS能够实时检测缓冲区溢出，释放后使用，多重释放和释放野指针等内存问题，在异常发生的第一时间通知操作系统，结合操作系统Backtrace等定位手段，能准确定位到问题根因，大大提升内存问题定位效率。
+LMS全称为Lite Memory Sanitizer，是一种实时检测内存操作合法性的算法。LMS能够实时检测缓冲区溢出（buffer overflow），释放后使用（use after free），多重释放（double free）和释放野指针（wild pointer），在异常发生的第一时间通知操作系统，结合操作系统Backtrace等定位手段，能准确定位到问题根因，大大提升内存问题定位效率。
 
 ## 使用场景
 
-疑似系统内存问题需要定位时, 开发过程中需要验证是否存在内存问题。
+- 疑似系统内存问题需要定位时。
+- 开发过程中需要验证是否存在内存问题。
 
 ## 示例程序
 
@@ -16,7 +17,7 @@ LMS全称为Lite Memory Sanitizer，是一种实时检测内存操作合法性�
 
 示例代码程序中，申请长度4字节的堆内存，但读取buf[4]，会超出申请的内存长度，导致堆读取溢出内存问题。LMS可以检测出本示例程序中的堆溢出内存问题。
 
-示例代码位置：`demos\lms\lms_demo.c`，代码片段如下：
+示例代码为<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/lms/lms_demo.c" target="_blank">lms_demo.c</a>，代码片段如下：
 
 
 ```c
@@ -36,9 +37,7 @@ LMS全称为Lite Memory Sanitizer，是一种实时检测内存操作合法性�
 
 ### 编译选项
 
-要检测内存问题，Makefile需要增加LMS的编译选项。编译`demos\lms\lms_demo.c`的Makefile文件位置如下：`demos\lms\Makefile`
-
-编译选项片段如下：
+要检测内存问题，<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/lms/Makefile" target="_blank">Makefile</a>需要增加LMS的编译选项，如下：
 
 ```
 C_DEFS = -fsanitize=kernel-address
@@ -47,8 +46,7 @@ C_DEFS = -fsanitize=kernel-address
 
 ### LMS配置项
 
-LMS只适配了Bestfit内存算法，且不支持SLAB算法，需要开启如下配置项：
-选择bestfit内存算法，且不要开启MEM SLAB。
+LMS只适配了Bestfit内存算法，且不支持SLAB算法，所以需要在配置项中选择Bestfit内存算法，且不开启MEM SLAB：
 
 ```
 Kernel --> Memory Management --> Dynamic Memory Management Algorithm --> BESTFIT
@@ -81,10 +79,10 @@ Demos --> LMS Demo --> Enable LMS Demo
 
 ### Demo程序调用
 
-示例程序是在各个开发板的user_task.c文件中被调用的，比如`targets\STM32F769IDISCOVERY\Src\user_task.c`。
+示例程序是在各个开发板的user_task.c文件中被调用的，比如STM32F769IDISCOVERY开发板的<a href="https://gitee.com/LiteOS/LiteOS/blob/master/targets/STM32F769IDISCOVERY/Src/user_task.c" target="_blank">user_task.c</a>。
 
 调用代码片段如下:
-```
+```c
 #ifdef LOSCFG_DEMOS_LMS
 #include "lms_demo.h"
 #endif

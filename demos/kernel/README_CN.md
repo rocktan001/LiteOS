@@ -7,9 +7,8 @@ KERNEL DEMOS使用指南
     * [2.2 内存管理](#b)
     * [2.3 中断](#c)
     * [2.4 IPC通信](#d)
-    * [2.5 任务同步](#e)
-    * [2.6 时间管理](#f)
-    * [2.7 双向链表](#g)
+    * [2.5 时间管理](#e)
+    * [2.6 双向链表](#f)
 * [3.运行实例](#3)
 
 
@@ -50,8 +49,6 @@ los_api_msgqueue.c/.h实现了消息队列实例。
 los_api_event.c/.h实现了事件实例。
 -   实现了事件的创建、删除、读事件和写事件功能。
 
-**任务同步**
-
 los_api_mutex.c/.h实现了互斥锁实例。
 -   实现了互斥锁的创建、删除、申请和释放等功能。
 
@@ -75,7 +72,7 @@ los_api_list.c/.h实现了双向链表实例
 
 <h3 id="a">2.1 任务</h3>
 
-**任务实例：los_api_task.c/.h**
+**任务实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_task.c" target="_blank">los_api_task.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_task.h" target="_blank">los_api_task.h</a>**
 
 任务是竞争系统资源的最小运行单元。任务可以使用或等待CPU、使用内存空间等系统资源，并独立于其它任务运行。
 
@@ -106,7 +103,7 @@ Kernel task demo ok.
 
 Huawei LiteOS的内存管理分为静态内存管理和动态内存管理，提供内存初始化、分配、释放等功能。
 
-**动态内存管理实例：los_api_dynamic_mem.c/.h**
+**动态内存管理实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_dynamic_mem.c" target="_blank">los_api_dynamic_mem.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_dynamic_mem.h" target="_blank">los_api_dynamic_mem.h</a>**
 
 当用户需要使用内存时，可以通过操作系统的动态内存申请函数申请指定大小的内存，动态内存管理模块会从系统配置的一块连续内存（内存池）中为用户分配指定大小的内存块。一旦使用完毕，用户再通过动态内存释放函数归还所占用内存，使之可以重复使用。
 
@@ -129,7 +126,7 @@ Mem free ok.
 Kernel dynamic memory demo ok.
 ```
 
-**静态内存管理实例：los_api_static_mem.c/.h**
+**静态内存管理实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_static_mem.c" target="_blank">los_api_static_mem.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_static_mem.h" target="_blank">los_api_static_mem.h</a>**
 
 静态内存池由一个控制块和若干相同大小的内存块构成。控制块位于内存池头部，用于内存块管理。内存块大小在内存池初始化时设定，初始化后内存块的大小不可变更。所以静态内存池是由若干大小相同的内存块构成的。内存块的申请和释放以块大小为粒度。
 
@@ -156,7 +153,7 @@ Kernel static memory demo ok.
 
 <h3 id="c">2.3 中断</h3>
 
-**中断实例：los_api_interrupt.c/.h**
+**中断实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_interrupt.c" target="_blank">los_api_interrupt.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_interrupt.h" target="_blank">los_api_interrupt.h</a>**
 
 中断是指出现需要时，CPU暂停执行当前程序，转而执行新程序的过程。即在程序运行过程中，出现了一个必须由CPU立即处理的事务。此时，CPU暂时中止当前程序的执行转而处理这个事务，这个过程就叫做中断。
 
@@ -200,9 +197,9 @@ Button IRQ test ok.
 
 <h3 id="d">2.4 IPC通信</h3>
 
-IPC通信提供事件、消息队列功能。
+IPC通信提供消息队列、事件、互斥锁和信号量功能。
 
-**消息队列实例：los_api_msgqueue.c/.h**
+**消息队列实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_msgqueue.c" target="_blank">los_api_msgqueue.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_msgqueue.h" target="_blank">los_api_msgqueue.h</a>**
 
 队列又称消息队列，是一种常用于任务间通信的数据结构，能够接收来自任务或中断的不固定长度的消息，并根据不同的接口选择消息是否存放在自己空间。任务能够从队列里读取消息，当队列中的消息为空时，挂起读取任务；当队列中有新消息时，挂起的读取任务被唤醒并处理新消息。
 
@@ -229,7 +226,7 @@ Delete the queue ok.
 Kernel message queue demo ok.
 ```
 
-**事件实例：los_api_event.c/.h**
+**事件实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_event.c" target="_blank">los_api_event.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_event.h" target="_blank">los_api_event.h</a>**
 
 事件是一种实现任务间通信的机制，可用于实现任务间的同步。一个任务可以等待多个事件的发生：可以是任意一个事件发生时唤醒任务进行事件处理，也可以是几个事件都发生后才唤醒任务进行事件处理。
 
@@ -253,11 +250,7 @@ EventMask : 0
 Kernel event demo ok.
 ```
 
-<h3 id="e">2.5 任务同步</h3>
-
-任务同步分为信号量和互斥锁。
-
-**互斥锁实例：los_api_mutex.c/.h**
+**互斥锁实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_mutex.c" target="_blank">los_api_mutex.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_mutex.h" target="_blank">los_api_mutex.h</a>**
 
 互斥锁又称互斥型信号量，是一种特殊的二值性信号量，用于实现对共享资源的独占式处理。
 
@@ -283,7 +276,7 @@ Task1 wait forever, got mutex g_demoMux01 ok.
 Kernel mutex demo ok.
 ```
 
-**信号量实例：los_api_sem.c/.h**
+**信号量实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_sem.c" target="_blank">los_api_sem.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_sem.h" target="_blank">los_api_sem.h</a>**
 
 信号量（Semaphore）是一种实现任务间通信的机制，实现任务之间同步或临界资源的互斥访问。常用于协助一组相互竞争的任务来访问临界资源。
 
@@ -313,11 +306,11 @@ Example_SemTask1 wait_forever and got sem g_demoSemId ok.
 Kernel semaphore demo ok.
 ```
 
-<h3 id="f">2.6 时间管理</h3>
+<h3 id="e">2.5 时间管理</h3>
 
 时间管理以系统时钟为基础。时间管理提供给应用程序所有和时间有关的服务。下面包括时钟管理和软件定时器两个实例。
 
-**时钟管理实例：los_api_systick.c/.h**
+**时钟管理实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_systick.c" target="_blank">los_api_systick.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_systick.h" target="_blank">los_api_systick.h</a>**
 
 本实例执行以下步骤：
 
@@ -334,7 +327,7 @@ LOS_TickCountGet after delay = 9189.
 Kernel systick demo ok.
 ```
 
-**软件定时器实例：los_api_timer.c/.h**
+**软件定时器实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_timer.c" target="_blank">los_api_timer.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_timer.h" target="_blank">los_api_timer.h</a>**
 
 软件定时器，是基于系统Tick时钟中断且由软件来模拟的定时器，当经过设定的Tick时钟计数后会触发用户定义的回调函数。定时精度与系统Tick时钟的周期有关。
 
@@ -382,9 +375,9 @@ LOS_TickCountGet tickLast2 = 12410.
 Kernel timer demo ok.
 ```
 
-<h3 id="g">2.7 双向链表</h3>
+<h3 id="f">2.6 双向链表</h3>
 
-**双向链表实例：los_api_list.c/.h**
+**双向链表实例：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_list.c" target="_blank">los_api_list.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_api_list.h" target="_blank">los_api_list.h</a>**
 
 双向链表是指含有往前和往后两个方向的链表，即每个结点中除存放下一个节点指针外，还增加一个指向其前一个节点的指针。其头指针head是唯一确定的。
 
@@ -413,13 +406,11 @@ Kernel list demo ok.
 
 <h2 id="3">3.运行实例</h2>
 
-在target文件夹下的main.c或者user_task.c中找到app_init函数。LiteOS系统完成初始化后，会创建用户任务，其任务处理函数就是app_init(), 用户可以直接在该函数中运行demos/kernel下各个实例。
+在target文件夹下的main.c或者user_task.c中找到app_init函数。LiteOS系统完成初始化后，会创建用户任务，其任务处理函数就是app_init(), 用户可以直接在该函数中运行<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel" target="_blank">demos/kernel</a>下的各个实例。
 
 这里提供两种方式来运行[2.实例介绍](#2)中的各个实例。
 
-### 实例1：los_inspect_entry.c/.h
-
-测试[2.实例介绍](#2)中所有实例。
+### 实例1：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_inspect_entry.c" target="_blank">los_inspect_entry.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_inspect_entry.h" target="_blank">los_inspect_entry.h</a>
 
 **开发流程**
 
@@ -428,15 +419,15 @@ Kernel list demo ok.
 `Demos --> Kernel Demo --> Enable Kernel Demo --> Kernel Demo Entry --> InspectEntry`
 
 2.在实现app_init()的源文件中添加头文件引用：
-```
+```c
 #include "los_inspect_entry.h"  // 调用测试函数头文件
 ```
 3.在app_init()中调用KernelDemoInspectEntry()函数，该函数会执行所有内核实例：
-```
+```c
 KernelDemoInspectEntry();    // 调用测试任务测试所有实例
 ```
 
-### 实例2：los_demo_entry.c/.h
+### 实例2：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_demo_entry.c" target="_blank">los_demo_entry.c</a>/<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/kernel/api/los_demo_entry.h" target="_blank">los_demo_entry.h</a>
 
 通过宏开关来判断是否调用各内核实例，以实现对[2.实例介绍](#2)中某个或多个实例的执行。
 
@@ -448,13 +439,13 @@ KernelDemoInspectEntry();    // 调用测试任务测试所有实例
 
 2.在实现app_init()的源文件中添加头文件引用：
 
-```
+```c
 #include "los_demo_entry.h" // 调用测试函数头文件
 ```
 
 3.在app_init()中调用KernelDemoEntry()函数，该函数通过宏开关来判断是否调用某内核实例：
 
-```
+```c
 KernelDemoEntry();   // 调用测试任务
 ```
 
