@@ -81,11 +81,11 @@ static LITE_OS_SEC_TEXT VOID LOS_Demo_Tskfunc(VOID)
     printf("Kernel systick demo ok.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_SWTIMER
-    Example_swTimer();
+    Example_SwTimer();
     printf("Kernel swtimer demo ok.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_LIST
-    Example_list();
+    Example_List();
     printf("Kernel list demo ok.\n\n");
 #endif
 #endif /* LOS_KERNEL_DEMO_ALL */
@@ -95,7 +95,7 @@ static LITE_OS_SEC_TEXT VOID LOS_Demo_Tskfunc(VOID)
     }
 }
 
-VOID KernelDemoEntry(VOID)
+UINT32 KernelDemoEntry(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S stTaskInitParam;
@@ -108,9 +108,9 @@ VOID KernelDemoEntry(VOID)
     ret = LOS_TaskCreate(&g_DemoTaskId, &stTaskInitParam);
     if (ret != LOS_OK) {
         printf("Api demo test task create failed.\n");
-        return;
+        return ret;
     }
-    return;
+    return ret;
 }
 
 #ifdef __cplusplus

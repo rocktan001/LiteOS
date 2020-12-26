@@ -94,7 +94,7 @@ STATIC VOID ButtonIrqHandle(VOID)
 
 STATIC VOID UserButtonIrqConfig(VOID)
 {
-    UINT32 ret
+    UINT32 ret;
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.Mode = GPIO_MODE_IT_FALLING;
     GPIO_InitStructure.Pull = GPIO_PULLUP;

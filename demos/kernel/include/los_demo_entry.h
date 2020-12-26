@@ -54,6 +54,6 @@
 /* dlist */
 #include "los_api_list.h"
 
-extern VOID KernelDemoEntry(VOID);
+extern UINT32 KernelDemoEntry(VOID);
 
 #endif /* _LOS_DEMO_ENTRY_H */
