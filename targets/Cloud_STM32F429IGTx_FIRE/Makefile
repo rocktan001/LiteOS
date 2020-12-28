@@ -42,6 +42,13 @@ ifeq ($(LOSCFG_COMPONENTS_FS), y)
     C_SOURCES += $(FS_SRC)
 endif
 
+ifeq ($(LOSCFG_DEMOS_SENSORHUB), y)
+BSP_DRIVER_SRC = \
+    Drivers/i2c/i2c.c \
+    Drivers/mpu6050/mpu6050.c
+    C_SOURCES += $(BSP_DRIVER_SRC)
+endif
+
 # C includes
 HAL_DRIVER_INC = \
    -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc \
@@ -58,7 +65,8 @@ BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
     -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/include \
     -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/BSP/STM324x9I_EVAL \
-    -I $(LITEOSTOPDIR)/kernel/extended/include
+    -I $(LITEOSTOPDIR)/kernel/extended/include \
+    -I $(LITEOSTOPDIR)/kernel/include
     BOARD_INCLUDES += $(BSP_INC)
 
 HARDWARE_INC = \
@@ -68,6 +76,11 @@ HARDWARE_INC = \
 USER_INC = \
     -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Inc
     BOARD_INCLUDES += $(USER_INC)
+
+BSP_DRIVER_INC = \
+    -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/i2c \
+    -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/mpu6050
+    BOARD_INCLUDES += $(BSP_DRIVER_INC)
 
 # C defines
 C_DEFS +=  \

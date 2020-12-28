@@ -33,7 +33,7 @@
 #include "los_queue.h"
 
 #define UART_QUEUE_SIZE        64
-#define UART_QUEUE_BUF_MAX_LEN 2
+#define UART_QUEUE_BUF_MAX_LEN 1
 #define UART_QUEUE_REC_DELAY   5
 
 STATIC UINT32 g_uartQueue;
@@ -72,16 +72,16 @@ INT32 uart_hwiCreate(VOID)
 
 UINT8 uart_read(VOID)
 {
-    UINT8 rec[UART_QUEUE_BUF_MAX_LEN] = {0};
+    UINT8 rec = 0;
     UINT32 ret;
     UINT32 len;
     len = UART_QUEUE_BUF_MAX_LEN;
     ret = LOS_QueueReadCopy(g_uartQueue, &rec, &len, LOS_WAIT_FOREVER);
     if (ret == LOS_OK) {
         LOS_TaskDelay(UART_QUEUE_REC_DELAY);
-        return rec[0];
+        return rec;
     }
-    return rec[0];
+    return rec;
 }
 
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)

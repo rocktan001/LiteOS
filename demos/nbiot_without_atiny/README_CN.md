@@ -59,11 +59,11 @@ profile开发的详细操作方法可以参考<a href="https://support.huaweiclo
 
 -  需要在`menuconfig`中打开配置项`LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY`。
    ```
-   Demos --> NBIOT Demo Without Atiny --> Enable NBIOT Demo
+   Demos --> NB-IoT Demo Without Atiny --> Enable NB-IoT Demo
    ```
 -  如需加密则打开配置项`LOSCFG_DEMOS_NBIOT_DTLS`。
    ```
-   Demos --> NBIOT Demo Without Atiny --> Enable NBIOT Demo --> Enable NBIOT Demo With Dtls
+   Demos --> NB-IoT Demo Without Atiny --> Enable NB-IoT Demo --> Enable NB-IoT Demo With Dtls
    ```
 -  同时在AT设备中选择BC95，即使能`LOSCFG_COMPONENTS_NET_AT_BC95`。
    ```

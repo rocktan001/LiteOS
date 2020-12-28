@@ -24,10 +24,6 @@ AT_SRCS := $(wildcard nb_bc95/*.c)
 AT_INC := -I $(LITEOSTOPDIR)/components/net/at_device/nb_bc95
 endif
 
-AT_SRCS += \
-    $(LITEOSTOPDIR)/components/net/at_frame/at_api.c \
-    $(LITEOSTOPDIR)/components/net/at_frame/at_main.c
-
 AT_INC := -I $(LITEOSTOPDIR)/include
 
 LOCAL_SRCS := $(AT_SRCS)

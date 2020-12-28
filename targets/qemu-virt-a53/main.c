@@ -40,17 +40,19 @@ Atomic ncpu = 1;
 LITE_OS_SEC_TEXT_INIT void osSystemInfo(void)
 {
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n\n"
-        "Processor   : %s"
+	    "LiteOS Kernel Version : %s\n"
+        "Processor  : %s"
 #if (LOSCFG_KERNEL_SMP == YES)
         " * %d\n"
-        "Run Mode    : SMP\n"
+        "Run Mode   : SMP\n"
 #else
         "\n"
-        "Run Mode    : UP\n"
+        "Run Mode   : UP\n"
 #endif
-        "GIC Rev     : %s\n"
-        "build time  : %s %s\n\n"
+        "GIC Rev    : %s\n"
+        "build time : %s %s\n\n"
         "**********************************\n",
+		HW_LITEOS_KERNEL_VERSION_STRING,
         LOS_CpuInfo(),
 #if (LOSCFG_KERNEL_SMP == YES)
         LOSCFG_KERNEL_SMP_CORE_NUM,

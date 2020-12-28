@@ -384,7 +384,7 @@ UINT32 DemoEntry(VOID)
 #ifdef LOSCFG_DEMOS_SENSORHUB
     ret = MiscInit();
     if (ret != LOS_OK) {
-        PRINR_ERR("Sensorhub Demo Task Creat Fail.\n");
+        PRINT_ERR("Sensorhub Demo Task Creat Fail.\n");
         return ret;
     }
 #endif

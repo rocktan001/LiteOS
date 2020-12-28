@@ -129,6 +129,7 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_COMPONNETS_NET_AT), y)
         LITEOS_BASELIB += -lat_device
+        LITEOS_BASELIB += -lat_frame
     endif
     ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT), y)
         LITEOS_BASELIB += -lnb_iot

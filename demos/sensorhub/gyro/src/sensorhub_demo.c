@@ -100,9 +100,7 @@ STATIC VOID InitGyro(VOID)
 STATIC VOID MiscTask(VOID const * arg)
 {
     (VOID)(arg);
-    // I2C init
-    I2cMaster_Init();
-
+    MX_I2C1_Init();
     SensorManagerInit();
     LOS_TaskDelay(1000);
     GyroSensorRegister();
@@ -115,7 +113,7 @@ STATIC VOID MiscTask(VOID const * arg)
     CloseGyro();
 }
 
-VOID MiscInit(VOID)
+UINT32 MiscInit(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam = {0};
@@ -129,9 +127,10 @@ VOID MiscInit(VOID)
     ret = LOS_TaskCreate(&g_miscTskID, &taskInitParam);
     if (ret != LOS_OK) {
         PRINT_ERR("Misc Task create fail\n");
-        return;
+        return ret;
     }
     PRINT_DEBUG("MiscTask init \n");
+    return ret;
 }
 
 #ifdef __cplusplus

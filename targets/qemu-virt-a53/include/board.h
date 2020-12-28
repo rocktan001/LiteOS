@@ -35,6 +35,15 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
   
+#define MMU_4K  0x1000
+#define MMU_1M  0x100000
+#define MMU_1G  0x40000000
+#define SHIFT_4K  12
+#define SHIFT_2M  21
+#define SHIFT_1G  30
+#define FIRST_SECTION_TABLE_LEN    (MMU_4K * 9)
+#define SECOND_PAGE_TABLE_OS_LEN   (MMU_4K * 8)
+#define SECOND_PAGE_TABLE_APP_LEN  (MMU_1M * 8)
 #define SYS_MEM_BASE            0x40010000
 
 #define TEXT_OFFSET             0x00000000
