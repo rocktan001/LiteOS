@@ -1,6 +1,6 @@
 ## AI代码生成及使能教程
 
-&emsp;&emsp;阅读本教程前请先查看链接：`http://liteos.rnd.huawei.com:81/#/introduction`中`AI模型代码生成向导界面介绍`部分的内容。
+&emsp;&emsp;阅读本教程前请先查看链接：`https://liteos.gitee.io/liteos_studio/#/introduction`中`AI模型代码生成向导界面介绍`部分的内容。
 
 &emsp;&emsp;目前`AI代码生成`LiteOS提供mnist、mobilenet、resnet三种模型，三种模型均可导出成算子类型为FP32的推理代码(即demo)，其中mnist模型的量化类型支持非量化和训练后量化，mobilenet和resent模型的量化类型支持非量化类型。由于受开发板RAM大小限制，部分开发板无法运行或无法同时运行以上三种模型生成的推理代码，目前Cloud_STM32F429IGTx_FIRE仅能运行mnist训练后量化生成的推理代码，STM32F769IDISCOVERY均能运行(只支持单独运行，无法同时运行三种模型)，另外可在realview-pbx-a9上运用qemu进行模拟运行(可同时运行)。
 

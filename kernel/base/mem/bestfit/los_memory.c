@@ -222,7 +222,7 @@ STATIC INLINE VOID OsMemDispMoreDetails(const LosMemDynNode *node)
 STATIC INLINE VOID OsMemDispWildPointerMsg(const LosMemDynNode *node, const VOID *ptr)
 {
     PRINT_ERR("*****************************************************\n");
-    PRINT_ERR("find an control block at: %p, gap size: 0x%x, sizeof(LosMemDynNode): 0x%x\n", node,
+    PRINT_ERR("find a control block at: %p, gap size: 0x%x, sizeof(LosMemDynNode): 0x%x\n", node,
               node->selfNode.gapSize, sizeof(LosMemDynNode));
     PRINT_ERR("the pointer should be: %p\n",
               ((UINTPTR)node + node->selfNode.gapSize + sizeof(LosMemDynNode)));
