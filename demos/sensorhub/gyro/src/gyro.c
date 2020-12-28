@@ -46,6 +46,8 @@ extern "C" {
 STATIC INT32 g_gyroSensorData[SENSOR_DATA_LEN];
 STATIC INT16 g_accel[SENSOR_DATA_LEN];
 STATIC INT16 g_gyro[SENSOR_DATA_LEN];
+STATIC INT16 g_tempDate = 0;
+
 STATIC Mpu6050Priv g_gyroPriv = {
     .gyroTimerId = INVALID_TIMER_ID,
 };
@@ -60,8 +62,8 @@ STATIC INT32 GyroInit(SensorType *sensor)
 {
     (VOID)(sensor);
     PRINT_DEBUG("gypo init.\n");
-    MPU6050_Init();
-    if (MPU6050ReadID() == 1) { // 1 read ok
+    MpuSensorInit();
+    if (MpuSensorGetId() == LOS_OK) { // 1 read ok
         PRINT_DEBUG("gypo read id ok.\n");
     } else {
         PRINT_DEBUG("gypo read id fail.\n");
@@ -134,11 +136,14 @@ STATIC INT32 GyroClose(SensorType *sensor)
 STATIC INT32 GyroReadData(SensorType *sensor)
 {
     PRINTK("read data\n");
-    MPU6050ReadAcc(g_accel);
-    PRINTK("Acc: %8d%8d%8d", g_accel[0], g_accel[1], g_accel[2]); // 0: x, 1: y, 2: z
+    MpuSensorGetData(g_accel, MPU6050_AACEL_DATA_TYPE);
+    PRINTK("Acc:  %8d%8d%8d\n", g_accel[0], g_accel[1], g_accel[2]); // 0: x, 1: y, 2: z
 
-    MPU6050ReadGyro(g_gyro);
-    PRINTK("Gyro: %8d%8d%8d\r\n", g_gyro[0], g_gyro[1], g_gyro[2]); // 0: x, 1: y, 2: z
+    MpuSensorGetData(g_gyro, MPU6050_GYRO_DATA_TYPE);
+    PRINTK("Gyro: %8d%8d%8d\n", g_gyro[0], g_gyro[1], g_gyro[2]); // 0: x, 1: y, 2: z
+
+    MpuSensorGetData(&g_tempDate, MPU6050_TEMP_DATA_TYPE);
+    PRINTK("temp: %8d\n", g_tempDate); // temperature °C
 
     INT32 *data = (INT32 *)sensor->sensorData;
     data[0] = g_gyro[0]; // 0: x

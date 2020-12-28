@@ -1,8 +1,27 @@
+/**
+  ******************************************************************************
+  * @file    i2c.h
+  * @brief   This file contains all the function prototypes for
+  *          the i2c.c file
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  */
+
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Sensorhub Demo HeadFile
+ * Description: I2C Driver Update HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-12-25
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,23 +45,42 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _SENSORHUB_DEMO_H
-#define _SENSORHUB_DEMO_H
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __I2C_H__
+#define __I2C_H__
 
-#include "los_typedef.h"
+#include "stm32f4xx.h"
+#include "stm32f4xx_hal.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+#endif
 
-UINT32 MiscInit(VOID);
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+extern I2C_HandleTypeDef hi2c1;
+
+/* USER CODE BEGIN Private defines */
+
+/* USER CODE END Private defines */
+
+void MX_I2C1_Init(void);
+
+/* USER CODE BEGIN Prototypes */
+uint8_t I2C1_WriteBuffer(uint8_t Addr, uint8_t Reg,  uint8_t *pBuffer, uint16_t Length);
+uint8_t I2C1_ReadBuffer(uint8_t Addr, uint8_t Reg,  uint8_t *pBuffer, uint16_t Length);
+
+/* USER CODE END Prototypes */
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+#endif
 
-#endif /* _SENSORHUB_DEMO_H */
+#endif /* __I2C_H__ */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

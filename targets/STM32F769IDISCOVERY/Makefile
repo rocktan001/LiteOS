@@ -16,7 +16,7 @@ ifeq ($(LOSCFG_COMPONENTS_FS), y)
     ifeq ($(LOSCFG_FATFS_USE_SD_CARD), y)
     FS_SRC += \
         $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/fatfs_sd_hal.c \
-        ake$(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/sd_diskio.c
+        $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/sd_diskio.c
     endif
 
 C_SOURCES += $(FS_SRC)
