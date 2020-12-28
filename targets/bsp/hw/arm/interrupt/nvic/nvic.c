@@ -42,9 +42,9 @@ extern "C" {
 
 STATIC UINT32 g_curIrqNum = 0;
 
-LITE_OS_SEC_BSS HwiHandleInfo g_hwiForm[OS_USER_HWI_MAX];
+LITE_OS_SEC_BSS HwiHandleInfo g_hwiForm[LOSCFG_PLATFORM_HWI_LIMIT];
 
-LITE_OS_SEC_DATA_VEC HWI_PROC_FUNC g_hwiVec[OS_USER_HWI_MAX] = {
+LITE_OS_SEC_DATA_VEC HWI_PROC_FUNC g_hwiVec[LOSCFG_PLATFORM_HWI_LIMIT] = {
     (HWI_PROC_FUNC)0,             /* [0] Top of Stack */
     (HWI_PROC_FUNC)Reset_Handler, /* [1] reset */
     (HWI_PROC_FUNC)IrqEntryV7M,   /* [2] NMI Handler */
@@ -182,7 +182,7 @@ VOID HalIrqInit(VOID)
 {
     UINT32 i;
 
-    for (i = OS_SYS_VECTOR_CNT; i < OS_USER_HWI_MAX; i++) {
+    for (i = OS_SYS_VECTOR_CNT; i < LOSCFG_PLATFORM_HWI_LIMIT; i++) {
         g_hwiVec[i] = (HWI_PROC_FUNC)IrqEntryV7M;
     }
 #if (__CORTEX_M == 0x0U)  /* only for Cortex-M0*/

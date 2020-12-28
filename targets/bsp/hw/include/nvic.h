@@ -222,7 +222,7 @@ extern VOID osPendSV(VOID);
     g_hwiForm[num + OS_SYS_VECTOR_CNT].pfnHook = vector;            \
 } while (0)
 
-extern HWI_PROC_FUNC g_hwiVec[OS_USER_HWI_MAX];
+extern HWI_PROC_FUNC g_hwiVec[LOSCFG_PLATFORM_HWI_LIMIT];
 
 #ifdef __cplusplus
 #if __cplusplus
