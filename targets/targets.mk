@@ -117,10 +117,6 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_KERNEL_CPPSUPPORT), y)
         LITEOS_BASELIB += -lcppsupport
     endif
-    ifeq ($(LOSCFG_KERNEL_LMS), y)
-        LITEOS_BASELIB += -llms
-    endif
-
     ifeq ($(LOSCFG_COMPONENTS_FS), y)
         LITEOS_BASELIB += -lfs
     endif
@@ -209,6 +205,10 @@ ifeq ($(LOSCFG_DEMOS_AI), y)
     else ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M), y)
         LITEOS_BASELIB += -lcortex-m-nnacl
 endif
+endif
+
+ifeq ($(LOSCFG_KERNEL_LMS), y)
+    LITEOS_BASELIB += -llms
 endif
 
 LITEOS_PLATFORM_INCLUDE += $(PLATFORM_INCLUDE)

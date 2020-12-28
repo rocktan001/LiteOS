@@ -52,8 +52,6 @@ VOID MX_TIM3_Init(VOID)
     if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK) {
         Error_Handler();
     }
-
-    HAL_TIM_Base_Start_IT(&htim3);
 }
 
 VOID HAL_TIM_Base_MspInit(TIM_HandleTypeDef *tim_baseHandle)
