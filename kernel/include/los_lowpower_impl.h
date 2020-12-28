@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
  * Description: Low-power Framework.
  * Author: Huawei LiteOS Team
  * Create: 2020-09-19

@@ -78,7 +78,6 @@
 |                             | **<font color="blue">targets.mk</font>** |                                               |
 | tools                       | **<font color="blue">build/config</font>** |  LiteOS支持的各开发板的编译配置文件，移植新的开发板时，需要在这个目录下增加这个新开发板的编译配置文件 |
 |                             |  menuconfig              |  LiteOS编译所需的menuconfig脚本                               |
-|                             |  stackusage              |  LiteOS栈使用估算工具                                         |
 | Makefile                    |                          |  整个LiteOS的Makefile                                         |
 | **<font color="blue">.config</font>** |                |  开发板的编译配置文件，默认为Cloud_STM32F429IGTx_FIRE开发板的配置文件，移植时需要替换成新开发板的编译配置文件 |
 

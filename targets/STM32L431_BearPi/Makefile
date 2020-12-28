@@ -26,6 +26,7 @@ USER_SRC =  \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/sys_init.c \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/system_stm32l4xx.c \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/usart.c \
+    $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/tim.c \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/user_task.c
     C_SOURCES += $(USER_SRC)
 
@@ -50,6 +51,7 @@ BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/bsp/common \
     -I $(LITEOSTOPDIR)/targets/bsp/include \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
+    -I $(LITEOSTOPDIR)/targets/bsp/drivers/st_timer \
     -I $(LITEOSTOPDIR)/compat/posix/src \
     -I $(LITEOSTOPDIR)/targets/STM32L431_BearPi/include \
     -I $(LITEOSTOPDIR)/kernel/extended/include

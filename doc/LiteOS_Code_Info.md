@@ -106,6 +106,5 @@ INT32 main(VOID)
 |            | STM32L431_BearPi         |                      | 小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包       |
 | tools      | build                    |                      | LiteOS支持的开发板编译配置文件                               |
 |            | menuconfig               |                      | LiteOS编译所需的menuconfig脚本                               |
-|            | stackusage               |                      | LiteOS栈使用估算工具                                         |
 | Makefile   |                          |                      | LiteOS Makefile                                              |
 | .config    |                          |                      | 开发板的配置文件，如果用户不重新选择开发板，默认为野火挑战者STM32F429开发板的配置文件 |

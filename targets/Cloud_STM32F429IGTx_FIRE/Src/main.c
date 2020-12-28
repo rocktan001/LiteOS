@@ -33,6 +33,7 @@
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "hal_rng.h"
+#include "timer.h"
 
 VOID board_config(VOID)
 {
@@ -43,6 +44,7 @@ VOID HardwareInit(VOID)
 {
     SystemClock_Config();
     MX_USART1_UART_Init();
+    TimerInit();
     hal_rng_config();
     dwt_delay_init(SystemCoreClock);
 }
