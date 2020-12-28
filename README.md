@@ -31,9 +31,7 @@ Huawei LiteOS自开源社区发布以来，围绕NB-IoT物联网市场从技术�
 
 ## LiteOS Demos
 
-- [LiteOS Kernel Demos使用指南](./demos/kernel/README_CN.md)
-
-该文档详细讲解了LiteOS demos/kernel目录下各内核实例测试的功能以及运行各实例的方法。
+[LiteOS demos](./demos)目录下包含了LiteOS提供的各模块Demo及其文档。文档详细介绍了Demo的功能以及运行方法。
 
 
 ## LiteOS Shell
@@ -48,19 +46,6 @@ Huawei LiteOS自开源社区发布以来，围绕NB-IoT物联网市场从技术�
 * LiteOS开源项目目前支持ARM Cortex-M0，Cortex-M3，Cortex-M4，Cortex-M7，Cortex-A等芯片架构
 
 * LiteOS联合业界主流MCU厂家，通过开发者活动，目前已经适配了多种通用MCU开发套件
-
-
-## LiteOS 接入云平台开发指南
-
-* <a href="https://github.com/SuYai/OceanConnectHelp" target="_blank">LiteOS接入华为云平台</a>
-  * [LiteOS SDK端云互通组件开发指南](./doc/Huawei_LiteOS_SDK_Developer_Guide.md)
-
-LiteOS SDK是Huawei LiteOS软件开发工具包（Software Development Kit），通过LiteOS SDK端云互通组件，简单快速地实现与华为云IoT平台安全可靠连接，可以大大减少开发周期，快速构建IoT产品。
-
-* [LiteOS SDK端云互通组件Coap开发指南](./doc/Huawei_LiteOS_SDK_Coap_LwM2M_Developer_Guide_zh.md)
-* [LiteOS SDK端云互通组件MQTT开发指南](./doc/Huawei_LiteOS_SDK_MQTT_Developer_Guide.md)
-
-* [LiteOS接入3rd云平台](https://github.com/LiteOS/LiteOS_Connect_to_3rd_Cloud)
 
 
 ## 开源协议

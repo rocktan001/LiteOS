@@ -33,6 +33,7 @@
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "uart.h"
+#include "timer.h"
 
 
 VOID HardwareInit(VOID)
@@ -40,6 +41,7 @@ VOID HardwareInit(VOID)
     HAL_Init();
     SystemClock_Config();
     MX_USART2_UART_Init();
+    TimerInit();
     dwt_delay_init(SystemCoreClock);
 }
 

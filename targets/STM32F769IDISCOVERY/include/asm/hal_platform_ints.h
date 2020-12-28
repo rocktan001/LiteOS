@@ -31,12 +31,16 @@
 
 #include "stm32f769xx.h"
 #include "los_typedef.h"
+#include "tim.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
+#define CPUP_TIMER                      3
+#define TIM_IRQ                         (TIM3_IRQn + 16)
 
 /**
  * Maximum number of supported hardware devices that generate hardware interrupts.

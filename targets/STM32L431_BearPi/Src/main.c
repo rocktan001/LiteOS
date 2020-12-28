@@ -33,6 +33,7 @@
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "uart.h"
+#include "timer.h"
 
 #if defined(__CC_ARM)
 extern char Image$$RW_IRAM1$$ZI$$Limit[];
@@ -85,6 +86,7 @@ VOID HardwareInit(VOID)
     LCD_ShowString(10, 170, 240, 16, 16, "This is LiteOS kernel demo.");
 
     MX_USART1_UART_Init();
+    TimerInit();
 }
 
 INT32 main(VOID)

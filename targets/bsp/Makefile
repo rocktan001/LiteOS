@@ -158,6 +158,7 @@ LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/targets/bsp/common \
     -I $(LITEOSTOPDIR)/targets/bsp/include \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
+    -I $(LITEOSTOPDIR)/targets/bsp/drivers/st_timer \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
     -I $(LITEOSTOPDIR)/targets/bsp/$(LITEOS_PLATFORM)/include \
@@ -180,6 +181,7 @@ BSP_TIMER_SRC = \
     LOCAL_SRCS += $(BSP_TIMER_SRC)
 
 LOCAL_SRCS += $(wildcard drivers/uart/uart_debug.c)
+LOCAL_SRCS += $(wildcard drivers/st_timer/timer.c)
 endif
 
 LOCAL_SRCS += $(wildcard common/demo_entry.c)

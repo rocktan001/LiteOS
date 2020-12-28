@@ -65,6 +65,7 @@
 
 #include "platform_init.h"
 #include "cmsis_os.h"
+#include "timer.h"
 
 
 #define LTCD_LINE                   0
@@ -481,6 +482,7 @@ void HardwareInit(void)
     SystemClock_Config();
 
     UART_Config(115200);
+    TimerInit();
 
     /* Initialize the SDRAM */
     BSP_SDRAM_Init();

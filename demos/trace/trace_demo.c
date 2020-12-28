@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
  * Description: LiteOS Trace Demo Code
  * Author: Huawei LiteOS Team
  * Create: 2020-08-31
@@ -260,7 +260,7 @@ UINT32 create_trace_task(VOID)
     traceDemoTask.usTaskPrio   = TRACE_DEMO_TASK_PRIO;
     traceDemoTask.uwResved     = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskId, &traceDemoTask);
-    if(ret != LOS_OK){
+    if (ret != LOS_OK) {
         printf("traceDemoTask create failed .\n");
         return LOS_NOK;
     }
@@ -268,7 +268,7 @@ UINT32 create_trace_task(VOID)
     /* trace is already started in offline mode, user can stop and reset it before run demo */
 #ifdef LOSCFG_RECORDER_MODE_OFFLINE
     LOS_TraceStop();
-    //LOS_TraceReset();
+    // LOS_TraceReset();
 #endif
     LOS_TraceEventMaskSet(TRACE_TASK_FLAG);
     return LOS_OK;

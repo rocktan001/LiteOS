@@ -34,6 +34,7 @@ USER_SRC =  \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/os_adapt/os_adapt.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/main.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/user_task.c \
+    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/tim.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/platform_init.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/stm32f7xx_it.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/system_stm32f7xx.c
@@ -56,6 +57,7 @@ BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Inc \
     -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/include\asm \
     -I $(LITEOSTOPDIR)/targets/bsp/include \
+    -I $(LITEOSTOPDIR)/targets/bsp/drivers/st_timer \
     -I $(LITEOSTOPDIR)/arch/arm/cortex_m/cmsis \
     -I $(LITEOSTOPDIR)/arch/arm/include \
     -I $(LITEOSTOPDIR)/arch/arm/cortex_m/include \

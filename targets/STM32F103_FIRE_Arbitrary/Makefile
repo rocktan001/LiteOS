@@ -13,6 +13,7 @@ USER_SRC =  \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/system_stm32f1xx.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/usart.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/sys_init.c \
+    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/tim.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/user_task.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/gpio.c
     C_SOURCES += $(USER_SRC)
@@ -31,6 +32,7 @@ BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/bsp/common \
     -I $(LITEOSTOPDIR)/targets/bsp/include \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
+    -I $(LITEOSTOPDIR)/targets/bsp/drivers/st_timer \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
     -I $(LITEOSTOPDIR)/kernel/extended/include
     BOARD_INCLUDES += $(BSP_INC)

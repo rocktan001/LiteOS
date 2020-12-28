@@ -12,7 +12,7 @@
 
   * 1. `量化类型`和`配置文件`是对应的，有量化类型才有配置文件，非量化(量化类型为空)则不需要选择配置文件。
 
-  * 2. LiteOS提供的，mnist、mobilenet、resnet三种模型的对应的模型文件`mnist.tflite`、`mobilenet.tflite`、`resnet.tflite`位于LiteOS工程源码的demos/ai/models目录下，mnist训练后量化的配置文件`config.mnist`及校准数据集`mnist_image`位于此目录下的quant_files目录。`config.mnist`文件中的`image_path`参数为数据集mnist_image的路径，使用时请根据实际情况修改。
+  * 2. LiteOS提供的，mnist、mobilenet、resnet三种模型的对应的模型文件`mnist.tflite`、`mobilenet.tflite`、`resnet.tflite`位于`https://gitee.com/LiteOS/LiteOS_Studio/tree/master/tools/models`下，请自行下载。mnist训练后量化的配置文件`config.mnist`及校准数据集`mnist_image`位于此目录下的quant_files目录。`config.mnist`文件中的`image_path`参数为数据集mnist_image的路径，使用时请根据实际情况修改。
 
   * 3. 使用`mnist.tflite`模型文件`非量化`类型生成的推理代码将位于LiteOS工程源码的demos/ai/mnist目录下。
 
@@ -62,3 +62,5 @@ mnist_quant inference End.
 
 Huawei LiteOS # 
 ```
+
+* 更多关于MindSpore的教程，请参考：https://www.mindspore.cn/tutorial/training/zh-CN/master/quick_start/quick_start.html

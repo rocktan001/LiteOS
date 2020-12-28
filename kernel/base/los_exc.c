@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
  * Description:  Exception Implementation
  * Author: Huawei LiteOS Team
  * Create: 2020-06-24

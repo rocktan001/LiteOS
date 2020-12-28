@@ -21,7 +21,8 @@ USER_SRC =  \
     Src/eth.c \
     Src/sys_init.c \
     Src/flash_adaptor.c \
-    Src/user_task.c
+    Src/user_task.c \
+    Src/tim.c
     C_SOURCES += $(USER_SRC)
 
 ifeq ($(LOSCFG_COMPONENTS_FS), y)
@@ -63,6 +64,7 @@ BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/bsp/common \
     -I $(LITEOSTOPDIR)/targets/bsp/include \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
+    -I $(LITEOSTOPDIR)/targets/bsp/drivers/st_timer \
     -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/include \
     -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/BSP/STM324x9I_EVAL \
     -I $(LITEOSTOPDIR)/kernel/extended/include \

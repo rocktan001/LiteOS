@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------RCH_ATOMIC_H
- * Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Atomic Operations HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
