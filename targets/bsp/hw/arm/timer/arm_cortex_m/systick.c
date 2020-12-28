@@ -33,11 +33,17 @@
 #include "los_hwi_pri.h"
 #include "nvic.h"
 
+#if defined (LOSCFG_ARCH_ARM_CORTEX_M) && (LOSCFG_KERNEL_CPUP)
+#include "timer.h"
+#endif
+
 #define CYCLE_REG_MASK    0xFFFFFFFFU
 
 #define TICK_INTR_CHECK   0x4000000U
 
 #define OS_CYCLE_PER_TICK (OS_SYS_CLOCK / LOSCFG_BASE_CORE_TICK_PER_SECOND)
+
+#define TIMER_CYCLE_SWITCH     (OS_CYCLE_PER_TICK / 10)
 
 LITE_OS_SEC_BSS UINT32     g_cyclesPerTick;
 
@@ -49,6 +55,9 @@ VOID HalClockInit(VOID)
     if (ret != 0) {
         PRINTK("ret of LOS_HwiCreate = %#x\n", ret);
     }
+#if defined (LOSCFG_ARCH_ARM_CORTEX_M) && (LOSCFG_KERNEL_CPUP)
+    TimerHwiCreate();
+#endif
 }
 
 VOID HalClockStart(VOID)
@@ -68,6 +77,13 @@ VOID HalClockStart(VOID)
         PRINTK("LOS_HwiEnable failed. ret = %#x\n", ret);
     }
 }
+
+#if defined (LOSCFG_ARCH_ARM_CORTEX_M) && (LOSCFG_KERNEL_CPUP)
+UINT64 HalClockGetCpupCycles(VOID)
+{
+    return GetTimerCpupCycles();
+}
+#endif
 
 UINT64 HalClockGetCycles(VOID)
 {
@@ -89,7 +105,9 @@ UINT64 HalClockGetCycles(VOID)
 
     cycle = (swTick * g_cyclesPerTick) + (g_cyclesPerTick - hwCycle);
     LOS_IntRestore(intSave);
-
+#if defined (LOSCFG_ARCH_ARM_CORTEX_M) && (LOSCFG_KERNEL_CPUP)
+    cycle = HalClockGetCpupCycles() * TIMER_CYCLE_SWITCH;
+#endif
     return cycle;
 }
 

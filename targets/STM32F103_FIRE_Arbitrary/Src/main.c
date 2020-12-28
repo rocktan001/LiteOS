@@ -33,6 +33,7 @@
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "gpio.h"
+#include "timer.h"
 
 VOID board_config(VOID)
 {
@@ -45,6 +46,7 @@ VOID HardwareInit(VOID)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_USART1_UART_Init();
+    TimerInit();
     dwt_delay_init(SystemCoreClock);
 }
 
