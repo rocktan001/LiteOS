@@ -451,7 +451,7 @@ int atiny_net_send(void *ctx, const unsigned char *buf, size_t len)
         if ((errno == EAGAIN) || (errno == EWOULDBLOCK) || (errno == EINTR)) {
             return 0;
         } else {
-            SOCKET_LOG("error accured when send: 0x%x", errno);
+            SOCKET_LOG("error occurred when send: 0x%x", errno);
             return -1;
         }
     }
