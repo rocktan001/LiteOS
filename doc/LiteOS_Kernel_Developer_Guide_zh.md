@@ -4,7 +4,11 @@
 
 -   [知识共享许可协议说明](#1)
 -   [前言](#2)
--   [概述](#3)
+-   [内核架构](#3)
+-   [Lincense](#4)
+-   [各模块简介](#5)
+-   [内核启动流程](#setup)
+-   [使用约束](#6)
 -   [任务](#任务)
 -   [内存](#内存)
 -   [中断](#中断)
@@ -16,16 +20,14 @@
 -   [互斥锁](#互斥锁)
 -   [软件定时器](#软件定时器)
 -   [自旋锁](#自旋锁)
--   [C++支持](#C++支持)
+-   [C++支持](#cppsupport)
 -   [其他](#其他)
     -   [时间管理](#时间管理)
     -   [双向链表](#双向链表)
     -   [原子操作](#原子操作)
     -   [位操作](#位操作)
--   [附录](#附录)
-    -   [Huawei LiteOS Kernel启动流程](#setup)
 
-<h2 id="1">1.知识共享许可协议说明</h2>
+<h2 id="1">知识共享许可协议说明</h2>
 
 **您可以自由地：**  
 
@@ -56,7 +58,7 @@
 >![](public_sys-resources/icon-notice.gif) **须知：**   
 >为了方便用户理解，这是协议的概述。可以访问网址<https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>了解完整协议内容。  
 
-<h2 id="2">2.前言</h2>
+<h2 id="2">前言</h2>
 
 **目的**
 
@@ -73,33 +75,27 @@
 
 在本文中可能出现下列标志，它们所代表的含义如下。  
 
-| 符号 | 说明 |  
-| - | :- |  
-|![](./meta/DevGuide/icon_danger.png)| 用于警示紧急的危险情形，若不避免，将会导致人员死亡或严重的人身伤害 |                                                       
-|![](./meta/DevGuide/icon_warning.png)| 用于警示潜在的危险情形，若不避免，可能会导致人员死亡或严重的人身伤害 |
-|![](./meta/DevGuide/icon_careful.png)| 用于警示潜在的危险情形，若不避免，可能会导致中度或轻微的人身伤害 |
-|![](./meta/DevGuide/icon_notice.png)| 用于传递设备或环境安全警示信息，若不避免，可能会导致设备损坏、数据丢失、设备性能降低或其它不可预知的结果，“注意”不涉及人身伤害 |
-|![](./meta/DevGuide/icon_note.png)| “说明”不是安全警示信息，不涉及人身、设备及环境伤害信息 |
+| 符号 | 说明 |
+| - | :- |
+|![](figures/kernel_develop/icon_careful.png)| 用于警示潜在的危险情形，若不避免，可能会导致中度或轻微的人身伤害 |
+|![](figures/kernel_develop/icon_notice.png)| 用于传递设备或环境安全警示信息，若不避免，可能会导致设备损坏、数据丢失、设备性能降低或其它不可预知的结果，“须知”不涉及人身伤 |
+|![](figures/kernel_develop/icon_note.png)| “说明”不是安全警示信息，不涉及人身、设备及环境伤害信息 |
 
 
 
-<h2 id="3">3.概述</h2>
-
-Huawei LiteOS是轻量级的实时操作系统，具备轻量级、低功耗、快速启动、组件丰富等关键能力。
-
-### 内核架构
+<h2 id="3">内核架构</h2>
 
 **图 1**  Huawei LiteOS Kernel的基本框架图<a name="f1eee3c6e1dea487dbd09c754ac1f0383"></a>  
-![](figures/Huawei-LiteOS-Kernel的基本框架图.png "Huawei-LiteOS-Kernel的基本框架图")
+![](figures/kernel_develop/Huawei_LiteOS_Kernel_Architecture.png "Huawei-LiteOS-Kernel的基本框架图")
 
 Huawei LiteOS基础内核包括不可裁剪的极小内核和可裁剪的其他模块。极小内核包含任务管理、内存管理、中断管理、异常管理和系统时钟。可裁剪的模块包括信号量、互斥锁、队列管理、事件管理、软件定时器等。
 Huawei LiteOS支持 UP（单核）与 SMP（多核）模式，即支持在单核或者多核的环境上运行。
 
-### Lincense
+<h2 id="4">Lincense</h2>
 
 Huawei LiteOS Kernel遵循BSD-3开源许可协议。
 
-### 各模块简介
+<h2 id="5">各模块简介</h2>
 
 **任务管理**
 
@@ -116,7 +112,7 @@ Huawei LiteOS Kernel遵循BSD-3开源许可协议。
 
 -   中断管理：提供中断的创建、删除、使能、禁止、请求位的清除功能。
 -   异常管理：系统运行过程中发生异常后，跳转到异常处理模块，打印当前发生异常的函数调用栈信息，或者保存当前系统状态。
--   Tick ：Tick是操作系统调度的基本时间单位，对应的时长由每秒Tick数决定，由用户配置。
+-   Tick：Tick是操作系统调度的基本时间单位，对应的时长由每秒Tick数决定，由用户配置。
 
 **IPC通信**
 
@@ -151,7 +147,11 @@ Huawei LiteOS Kernel遵循BSD-3开源许可协议。
 
 Huawei LiteOS支持部分STL特性、异常和RTTI特性，其他特性由编译器支持。
 
-## 使用约束
+<h2 id="setup">内核启动流程</h2>
+
+![](figures/kernel_develop/kernel_startup_process.png)
+
+<h2 id="6">使用约束</h2>
 
 -   Huawei LiteOS提供一套自有OS接口，同时也支持POSIX和CMSIS接口。请勿混用这些接口。混用接口可能导致不可预知的错误，例如：用POSIX接口申请信号量，但用Huawei LiteOS接口释放信号量。
 -   开发驱动程序只能用Huawei LiteOS的接口，上层APP建议用POSIX接口。
@@ -188,7 +188,7 @@ Huawei LiteOS系统中的任务有多种运行状态。系统初始化完成后�
 **任务状态迁移**
 
 **图 1**  任务状态示意图<a name="fig4529463815587"></a>  
-![](figures/任务状态示意图.png "任务状态示意图")
+![](figures/kernel_develop/task_status.png "任务状态示意图")
 
 任务状态迁移说明：
 
@@ -400,7 +400,7 @@ Huawei LiteOS 的任务管理模块提供下面几种功能，接口详细信息
 </table>
 
 >![](public_sys-resources/icon-notice.gif) **须知：** 
->-   可以通过make menuconfig配置LOSCFG\_KERNEL\_SMP使能多核模式。在SMP的子菜单中，还可以设置核的数量、使能多任务的核间同步、使能函数跨核调用。
+>-   可以通过make menuconfig配置LOSCFG\_KERNEL\_SMP使能多核模式（菜单路径为Kernel ---\> Enable Kernel SMP）。在SMP的子菜单中，还可以设置核的数量、使能多任务的核间同步、使能函数跨核调用。
 >-   在多核模式下，创建任务时可以传入usCpuAffiMask来配置任务的CPU亲和性，该标志位采用1bit-1core的对应方式，详细可见TSK\_INIT\_PARAM\_S结构体。
 >-   各个任务的任务栈大小，在创建任务时可以进行针对性的设置，若设置为0，则使用默认任务栈大小（LOSCFG\_BASE\_CORE\_TSK\_DEFAULT\_STACK\_SIZE）作为任务栈大小。
 
@@ -861,7 +861,7 @@ Huawei LiteOS任务的大多数状态由内核维护，唯有自删除状态对�
 
 以创建任务为例，讲解开发流程。
 
-1.  通过make menuconfig配置任务模块。
+1.  通过make menuconfig配置任务模块，菜单路径为：Kernel ---\> Basic Config ---\> Task。
 
     <a name="table12907575155221"></a>
     <table><thead align="left"><tr id="row23629430155221"><th class="cellrowborder" valign="top" width="26.750000000000007%" id="mcps1.1.6.1.1"><p id="p61687296155221"><a name="p61687296155221"></a><a name="p61687296155221"></a>配置项</p>
@@ -882,7 +882,7 @@ Huawei LiteOS任务的大多数状态由内核维护，唯有自删除状态对�
     </td>
     <td class="cellrowborder" valign="top" width="15.830000000000002%" headers="mcps1.1.6.1.3 "><p id="p147081729164416"><a name="p147081729164416"></a><a name="p147081729164416"></a>[0, OS_SYS_MEM_SIZE)</p>
     </td>
-    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p5304493155221"><a name="p5304493155221"></a><a name="p5304493155221"></a>64</p>
+    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p5304493155221"><a name="p5304493155221"></a><a name="p5304493155221"></a>不同平台默认值不一样</p>
     </td>
     <td class="cellrowborder" valign="top" width="7.580000000000002%" headers="mcps1.1.6.1.5 "><p id="p57580333155221"><a name="p57580333155221"></a><a name="p57580333155221"></a>无</p>
     </td>
@@ -893,7 +893,7 @@ Huawei LiteOS任务的大多数状态由内核维护，唯有自删除状态对�
     </td>
     <td class="cellrowborder" valign="top" width="15.830000000000002%" headers="mcps1.1.6.1.3 "><p id="p870810296444"><a name="p870810296444"></a><a name="p870810296444"></a>[0, OS_SYS_MEM_SIZE)</p>
     </td>
-    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p1936214173244"><a name="p1936214173244"></a><a name="p1936214173244"></a>0x800</p>
+    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p1936214173244"><a name="p1936214173244"></a><a name="p1936214173244"></a>不同平台默认值不一样</p>
     </td>
     <td class="cellrowborder" valign="top" width="7.580000000000002%" headers="mcps1.1.6.1.5 "><p id="p2910031392834"><a name="p2910031392834"></a><a name="p2910031392834"></a>无</p>
     </td>
@@ -904,7 +904,7 @@ Huawei LiteOS任务的大多数状态由内核维护，唯有自删除状态对�
     </td>
     <td class="cellrowborder" valign="top" width="15.830000000000002%" headers="mcps1.1.6.1.3 "><p id="p1708429134410"><a name="p1708429134410"></a><a name="p1708429134410"></a>[0, OS_SYS_MEM_SIZE)</p>
     </td>
-    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p35008432155221"><a name="p35008432155221"></a><a name="p35008432155221"></a>0x6000</p>
+    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p35008432155221"><a name="p35008432155221"></a><a name="p35008432155221"></a>不同平台默认值不一样</p>
     </td>
     <td class="cellrowborder" valign="top" width="7.580000000000002%" headers="mcps1.1.6.1.5 "><p id="p3680129155221"><a name="p3680129155221"></a><a name="p3680129155221"></a>无</p>
     </td>
@@ -915,7 +915,7 @@ Huawei LiteOS任务的大多数状态由内核维护，唯有自删除状态对�
     </td>
     <td class="cellrowborder" valign="top" width="15.830000000000002%" headers="mcps1.1.6.1.3 "><p id="p11708129174419"><a name="p11708129174419"></a><a name="p11708129174419"></a>[0, OS_SYS_MEM_SIZE)</p>
     </td>
-    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p184744132215"><a name="p184744132215"></a><a name="p184744132215"></a>0x800</p>
+    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p184744132215"><a name="p184744132215"></a><a name="p184744132215"></a>不同平台默认值不一样</p>
     </td>
     <td class="cellrowborder" valign="top" width="7.580000000000002%" headers="mcps1.1.6.1.5 "><p id="p32619484155221"><a name="p32619484155221"></a><a name="p32619484155221"></a>无</p>
     </td>
@@ -948,7 +948,7 @@ Huawei LiteOS任务的大多数状态由内核维护，唯有自删除状态对�
     </td>
     <td class="cellrowborder" valign="top" width="15.830000000000002%" headers="mcps1.1.6.1.3 "><p id="p1270811297446"><a name="p1270811297446"></a><a name="p1270811297446"></a>[0, 65535]</p>
     </td>
-    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p14238792155221"><a name="p14238792155221"></a><a name="p14238792155221"></a>2</p>
+    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p14238792155221"><a name="p14238792155221"></a><a name="p14238792155221"></a>不同平台默认值不一样</p>
     </td>
     <td class="cellrowborder" valign="top" width="7.580000000000002%" headers="mcps1.1.6.1.5 "><p id="p38182968155221"><a name="p38182968155221"></a><a name="p38182968155221"></a>无</p>
     </td>
@@ -961,7 +961,7 @@ Huawei LiteOS任务的大多数状态由内核维护，唯有自删除状态对�
     </td>
     <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p112801811985"><a name="p112801811985"></a><a name="p112801811985"></a><span>不同平台默认值不一样</span></p>
     </td>
-    <td class="cellrowborder" valign="top" width="7.580000000000002%" headers="mcps1.1.6.1.5 "><p id="p16782175717218"><a name="p16782175717218"></a><a name="p16782175717218"></a><span>不同平台默认值不一样</span></p>
+    <td class="cellrowborder" valign="top" width="7.580000000000002%" headers="mcps1.1.6.1.5 "><p id="p16782175717218"><a name="p16782175717218"></a><a name="p16782175717218"></a><span>无</span></p>
     </td>
     </tr>
     <tr id="row15335440215"><td class="cellrowborder" valign="top" width="26.750000000000007%" headers="mcps1.1.6.1.1 "><p id="p83359408120"><a name="p83359408120"></a><a name="p83359408120"></a>LOSCFG_LAZY_STACK</p>
@@ -970,7 +970,7 @@ Huawei LiteOS任务的大多数状态由内核维护，唯有自删除状态对�
     </td>
     <td class="cellrowborder" valign="top" width="15.830000000000002%" headers="mcps1.1.6.1.3 "><p id="p8125122914217"><a name="p8125122914217"></a><a name="p8125122914217"></a>YES/NO</p>
     </td>
-    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p1312510299211"><a name="p1312510299211"></a><a name="p1312510299211"></a>NO</p>
+    <td class="cellrowborder" valign="top" width="10.430000000000001%" headers="mcps1.1.6.1.4 "><p id="p1312510299211"><a name="p1312510299211"></a><a name="p1312510299211"></a>YES</p>
     </td>
     <td class="cellrowborder" valign="top" width="7.580000000000002%" headers="mcps1.1.6.1.5 "><p id="p183352040418"><a name="p183352040418"></a><a name="p183352040418"></a>M核</p>
     </td>
@@ -1352,7 +1352,7 @@ LiteOS动态内存支持bestfit（也称为dlink）和bestfit\_little两种内�
     **图 1**  bestfit动态内存管理结构图<a name="fig65001513154539"></a>  
     
 
-    ![](figures/zh-cn_image_0291644912.png)
+    ![](figures/kernel_develop/bestfit_management_structure.png)
 
     -   第一部分
 
@@ -1389,12 +1389,12 @@ LiteOS动态内存支持bestfit（也称为dlink）和bestfit\_little两种内�
         **图 2**  LosMemDynNode结构体介绍图<a name="fig5721062515475"></a>  
         
 
-        ![](figures/zh-cn_image_0291654485.png)
+        ![](figures/kernel_develop/LosMemDynNode_structure.png)
 
         **图 3**  对齐方式申请内存结果示意<a name="fig787862301116"></a>  
         
 
-        ![](figures/zh-cn_image_0291668666.png)
+        ![](figures/kernel_develop/align_alloc_in_bestfit.png)
 
         当申请到的节点包含的数据空间首地址不符合对齐要求时需要进行对齐，通过增加Gap域确保返回的指针符合对齐要求。
 
@@ -1410,7 +1410,7 @@ LiteOS动态内存支持bestfit（也称为dlink）和bestfit\_little两种内�
 
     每次申请内存时，先在满足申请大小的最佳slab class中申请（比如用户申请20字节内存，就在slab块大小为32字节的slab class中申请），如果申请成功，就将slab内存块整块返回给用户，释放时整块回收。需要注意的是，如果满足条件的slab class中已无可以分配的内存块，则从内存池中按照最佳适配算法申请，而不会继续从有着更大slab块空间的slab class中申请。释放内存时，先检查释放的内存块是否属于slab class，如果是则还回对应的slab class中，否则还回内存池中。
 
-    ![](figures/zh-cn_image_0302223794.png)
+    ![](figures/kernel_develop/bestfit_little_management_structure.png)
 
 
 #### 静态内存运作机制<a name="section61862829154619"></a>
@@ -1420,7 +1420,7 @@ LiteOS动态内存支持bestfit（也称为dlink）和bestfit\_little两种内�
 静态内存池由一个控制块和若干相同大小的内存块构成。控制块位于内存池头部，用于内存块管理。内存块的申请和释放以块大小为粒度。
 
 **图 4**  静态内存示意图<a name="fig7616325154619"></a>  
-![](figures/静态内存示意图.png "静态内存示意图")
+![](figures/kernel_develop/static_memory_schematic.png "静态内存示意图")
 
 <h2 id="动态内存">动态内存</h2>
 
@@ -1585,8 +1585,8 @@ Huawei LiteOS系统中的动态内存管理模块为用户提供下面几种功�
 </table>
 
 >![](public_sys-resources/icon-notice.gif) **须知：**
->-   上述接口中，通过宏开关控制的都是内存调测功能相关的接口。
->-   对于bestfit\_little算法，只支持宏开关LOSCFG_MEM_MUL_POOL控制的多内存池相关接口和宏开关LOSCFG_BASE_MEM_NODE_INTEGRITY_CHECK控制的内存合法性检查接口，不支持其他内存调测功能。
+>-   上述接口中，通过宏开关控制的都是内存调测功能相关的接口，具体使用方法见[内存调测方法](./LiteOS_Maintenance_Guide.md#内存调测方法)。
+>-   对于bestfit\_little算法，只支持宏开关LOSCFG_MEM_MUL_POOL控制的[多内存池机制](./LiteOS_Maintenance_Guide.md#多内存池机制)和宏开关LOSCFG_BASE_MEM_NODE_INTEGRITY_CHECK控制的[内存合法性检查](./LiteOS_Maintenance_Guide.md#内存合法性检查)，不支持其他内存调测功能。
 >-   通过LOS\_MemAllocAlign/LOS\_MemMallocAlign申请的内存进行LOS\_MemRealloc/LOS\_MemMrealloc操作后，不能保障新的内存首地址保持对齐。
 >-   对于bestfit\_little算法，不支持对LOS\_MemAllocAlign申请的内存进行LOS\_MemRealloc操作，否则将返回失败。
 
@@ -1637,7 +1637,7 @@ Huawei LiteOS系统中的动态内存管理模块为用户提供下面几种功�
     -   OS\_SYS\_MEM\_ADDR：一般使用默认值即可。
     -   OS\_SYS\_MEM\_SIZE：一般使用默认值即可。
 
-2.  通过make menuconfig配置动态内存管理模块。
+2.  通过make menuconfig配置动态内存管理模块，菜单路径为：Kernel ---\> Memory Management。
 
     <a name="table12268254121010"></a>
     <table><thead align="left"><tr id="row1926718548109"><th class="cellrowborder" valign="top" width="20.632063206320634%" id="mcps1.1.6.1.1"><p id="p3267754171012"><a name="p3267754171012"></a><a name="p3267754171012"></a>配置项</p>
@@ -1714,7 +1714,7 @@ Huawei LiteOS系统中的动态内存管理模块为用户提供下面几种功�
 
     初始一个内存池后如图，生成一个 EndNode，并且剩余的内存全部被标记为FreeNode节点。注：EndNode作为内存池末尾的节点，size为0。
 
-    ![](figures/zh-cn_image_0175230266.jpg)
+    ![](figures/kernel_develop/dynamic_memory_init.jpg)
 
 4.  申请任意大小的动态内存LOS\_MemAlloc。
 
@@ -1722,7 +1722,7 @@ Huawei LiteOS系统中的动态内存管理模块为用户提供下面几种功�
 
     调用三次LOS\_MemAlloc函数可以创建三个节点，假设分别为UsedA，UsedB，UsedC，大小分别为sizeA，sizeB，sizeC。因为刚初始化内存池的时候只有一个大的FreeNode，所以这些内存块是从这个FreeNode中切割出来的。
 
-    ![](figures/zh-cn_image_0175230636.jpg)
+    ![](figures/kernel_develop/dynamic_memory_alloc.jpg)
 
     当内存池中存在多个FreeNode的时候进行malloc，将会适配最合适大小的FreeNode用来新建内存块，减少内存碎片。若新建的内存块不等于被使用的FreeNode的大小，则在新建内存块后，多余的内存又会被标记为一个新的FreeNode。
 
@@ -1732,7 +1732,7 @@ Huawei LiteOS系统中的动态内存管理模块为用户提供下面几种功�
 
     假设调用LOS\_MemFree释放内存块UsedB，则会回收内存块UsedB，并且将其标记为FreeNode。在回收内存块时，相邻的FreeNode会自动合并。
 
-    ![](figures/zh-cn_image_0175230495.jpg)
+    ![](figures/kernel_develop/dynamic_memory_free.jpg)
 
 
 #### 平台差异性<a name="section6221139012631"></a>
@@ -1885,7 +1885,7 @@ Huawei LiteOS的静态内存管理主要为用户提供以下功能，接口详�
 
 本节介绍使用静态内存的典型场景开发流程。
 
-1.  通过make menuconfig配置静态内存管理模块。
+1.  通过make menuconfig配置静态内存管理模块，菜单路径为：Kernel ---\> Memory Management。
 
     <a name="table1124543155750"></a>
     <table><thead align="left"><tr id="row1056095314712"><th class="cellrowborder" valign="top" width="24.062406240624064%" id="mcps1.1.6.1.1"><p id="p15912448155750"><a name="p15912448155750"></a><a name="p15912448155750"></a>配置项</p>
@@ -2567,7 +2567,7 @@ UINT32 It_Hwi_001(VOID)
 
 异常接管作为一种调测手段，可以在系统发生异常时给用户提供有用的异常信息，譬如异常类型、发生异常时的系统状态等，方便用户定位分析问题。
 
-Huawei LiteOS的异常接管，在系统发生异常时的处理动作为：显示异常发生时正在运行的任务信息（包括任务名、任务号、堆栈大小等），以及CPU现场等信息。
+Huawei LiteOS的异常接管，在系统发生异常时的处理动作为：显示异常发生时正在运行的任务信息（包括任务名、任务号、堆栈大小等），以及CPU现场等信息。针对某些RISC-V架构的芯片，对内存size要求较高的场景，Huawei LiteOS提供了极小特性宏LOSCFG\_ARCH\_EXC\_SIMPLE\_INFO（menuconfig菜单项为：Kernel --\> Exception Management --\> Enable Exception Simple Info），用于裁剪多余的异常提示字符串信息，但是仍然保留发生异常时的CPU执行环境的所有信息。
 
 #### 运作机制<a name="section30766000195929"></a>
 
@@ -2593,7 +2593,7 @@ Huawei LiteOS的异常接管，在系统发生异常时的处理动作为：显�
 **图 1**  堆栈分析原理示意图<a name="fig43116015195929"></a>  
 
 
-![](figures/zh-cn_image_0293458930.png)
+![](figures/kernel_develop/stack_analysis_principle.png)
 
 图中不同颜色的寄存器表示不同的函数。可以看到函数调用过程中，寄存器的保存。通过FP寄存器，栈回溯到异常函数的父函数，继续按照规律对栈进行解析，推出函数调用关系，方便用户定位问题。
 
@@ -2646,12 +2646,12 @@ traceback 4 -- fp = 0x805da164
 
 定位步骤如下：
 
-1.  打开编译后生成的 asm 文件，默认是 vs\_server.asm（默认生成在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名）。
+1.  打开编译后生成的 .asm 反汇编文件（默认生成在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名）。
 2.  搜索PC指针 8034d3cc 在asm文件中的位置（去掉0x）。
 
     PC地址指向发生异常时程序正在执行的指令。在当前执行的二进制文件对应的asm文件中，查找PC值8034d3cc，找到当前CPU正在执行的指令行，得到如下图所示结果。
 
-    ![](figures/word_2017725143057811.jpg)
+    ![](figures/kernel_develop/find_pc_instruction_in_asm.jpg)
 
     从图中可以看到：
 
@@ -2660,7 +2660,7 @@ traceback 4 -- fp = 0x805da164
 
     结合ldrh指令分析，此指令是从内存的\(r4-4\)地址中读值，将其load到寄存器r2中。再结合异常时打印的寄存器信息，查看此时r4的值。下图是异常时打印的寄存器信息，可以看到，r4此时值是0xffffffff。
 
-    ![](figures/word_2017725145158755.jpg)
+    ![](figures/kernel_develop/register_information_in_asm.jpg)
 
     显然，r4的值超出了内存范围，故CPU执行到该指令时发生了数据终止异常。根据汇编知识，从asm文件可以看到，r4是从r1 mov过来，而r1是函数第二个入参，于是可以确认，在调用osSlabMemFree时传入了0xffffffff（或-1）这样一个错误入参。
 
@@ -2670,7 +2670,7 @@ traceback 4 -- fp = 0x805da164
 
     从异常信息的backtrace begin开始，打印的是调用栈信息。在asm文件中查找backtrace 0对应的LR，如下图所示。
 
-    ![](figures/word_201772515849931.jpg)
+    ![](figures/kernel_develop/search_call_stack_by_LR.jpg)
 
     可见，是LOS\_MemFree调用了osSlabMemFree。依此方法，可得到异常时函数调用关系如下：MNT\_buf\_send\(业务函数\) -\> free -\> LOS\_MemFree -\> osSlabMemFree。
 
@@ -2692,7 +2692,7 @@ traceback 4 -- fp = 0x805da164
 错误处理是一种机制，用于处理异常状况。当程序出现错误时，会显示相应的错误码。此外，如果注册了相应的错误处理函数，则会执行这个函数。
 
 **图 1**  错误处理示意图<a name="fig1551272917226"></a>  
-![](figures/错误处理示意图.png "错误处理示意图")
+![](figures/kernel_develop/error_handling.png "错误处理示意图")
 
 <h3 id="开发指导-15">开发指导</h3>
 
@@ -2956,7 +2956,7 @@ typedef struct
 删除队列时，根据队列ID找到对应队列，把队列状态置为未使用，把队列控制块置为初始状态。如果是通过系统动态申请内存方式创建的队列，还会释放队列所占内存。
 
 **图 1**  队列读写数据操作示意图<a name="fig1396012213119"></a>  
-![](figures/队列读写数据操作示意图.png "队列读写数据操作示意图")
+![](figures/kernel_develop/queue_read_write.png "队列读写数据操作示意图")
 
 上图对读写队列做了示意，图中只画了尾节点写入方式，没有画头节点写入，但是两者是类似的。
 
@@ -3376,7 +3376,7 @@ Huawei LiteOS中的队列模块提供下面几种功能，接口详细信息可�
 
 使用队列模块的典型流程如下：
 
-1.  通过make menuconfig配置队列模块。
+1.  通过make menuconfig配置队列模块，菜单路径为：Kernel ---\> Enable Queue。
 
     <a name="table32617244171025"></a>
     <table><thead align="left"><tr id="row41225896171025"><th class="cellrowborder" valign="top" width="23.25%" id="mcps1.1.6.1.1"><p id="p50963290171025"><a name="p50963290171025"></a><a name="p50963290171025"></a>配置项</p>
@@ -3433,6 +3433,9 @@ Huawei LiteOS中的队列模块提供下面几种功能，接口详细信息可�
 5.  获取队列信息。
 6.  删除队列。
 
+#### 平台差异性<a name="section769015813432"></a>
+
+无。
 <h3 id="注意事项-20">注意事项</h3>
 
 -   系统支持的最大队列数是指：整个系统的队列资源总个数，而非用户能使用的个数。例如：系统软件定时器多占用一个队列资源，那么用户能使用的队列资源就会减少一个。
@@ -3622,7 +3625,7 @@ uwEventID：用于标识该任务发生的事件类型，其中每一位表示�
 任务在调用LOS\_EventClear接口清除事件时，根据入参事件和待清除的事件类型，对事件对应位进行清0操作。
 
 **图 1**  事件唤醒任务示意图<a name="fig5480864217647"></a>  
-![](figures/事件唤醒任务示意图.png "事件唤醒任务示意图")
+![](figures/kernel_develop/event_wakeup_task.png "事件唤醒任务示意图")
 
 <h3 id="开发指导-23">开发指导</h3>
 
@@ -3812,7 +3815,7 @@ Huawei LiteOS 的事件模块为用户提供下面几种功能，接口详细信
 
 使用事件模块的典型流程如下：
 
-1.  通过make menuconfig配置事件。
+1.  通过make menuconfig配置事件，菜单路径为：Kernel ---\> Enable Event。
 
     <a name="table32617244171025"></a>
     <table><thead align="left"><tr id="row41225896171025"><th class="cellrowborder" valign="top" width="22.380000000000003%" id="mcps1.1.6.1.1"><p id="p50963290171025"><a name="p50963290171025"></a><a name="p50963290171025"></a>配置项</p>
@@ -4033,7 +4036,7 @@ typedef struct {
 信号量允许多个任务在同一时刻访问共享资源，但会限制同一时刻访问此资源的最大任务数目。当访问资源的任务数达到该资源允许的最大数量时，会阻塞其他试图获取该资源的任务，直到有任务释放该信号量。
 
 **图 1**  信号量运作示意图<a name="fig5558667216401"></a>  
-![](figures/信号量运作示意图.png "信号量运作示意图")
+![](figures/kernel_develop/sem_working_principle.png "信号量运作示意图")
 
 <h3 id="开发指导-27">开发指导</h3>
 
@@ -4240,7 +4243,7 @@ Huawei LiteOS 的信号量模块为用户提供下面几种功能，接口详细
 
 信号量的开发典型流程：
 
-1.  通过make menuconfig配置信号量模块。
+1.  通过make menuconfig配置信号量模块，菜单路径为：Kernel ---\> Enable Sem。
 
     <a name="table34659900162615"></a>
     <table><thead align="left"><tr id="row3414390162615"><th class="cellrowborder" valign="top" width="25.757424257574236%" id="mcps1.1.6.1.1"><p id="p8130151162615"><a name="p8130151162615"></a><a name="p8130151162615"></a>配置项</p>
@@ -4472,7 +4475,7 @@ Huawei LiteOS提供的互斥锁具有如下特点：
 用互斥锁处理临界资源的同步访问时，如果有任务访问该资源，则互斥锁为加锁状态。此时其他任务如果想访问这个临界资源则会被阻塞，直到互斥锁被持有该锁的任务释放后，其他任务才能重新访问该公共资源，此时互斥锁再次上锁，如此确保同一时刻只有一个任务正在访问这个临界资源，保证了临界资源操作的完整性。
 
 **图 1**  互斥锁运作示意图<a name="fig25049494142655"></a>  
-![](figures/互斥锁运作示意图.png "互斥锁运作示意图")
+![](figures/kernel_develop/mutex_working_principle.png "互斥锁运作示意图")
 
 <h3 id="开发指导-31">开发指导</h3>
 
@@ -4699,7 +4702,7 @@ Huawei LiteOS 的互斥锁模块为用户提供下面几种功能，接口详细
 
 互斥锁典型场景的开发流程：
 
-1.  通过make menuconfig配置互斥锁模块。
+1.  通过make menuconfig配置互斥锁模块，菜单路径为：Kernel ---\> Enable Mutex。
 
     <a name="table1016571215273"></a>
     <table><thead align="left"><tr id="row716519123275"><th class="cellrowborder" valign="top" width="20.96%" id="mcps1.1.6.1.1"><p id="p50963290171025"><a name="p50963290171025"></a><a name="p50963290171025"></a>配置项</p>
@@ -5256,7 +5259,7 @@ Huawei LiteOS的软件定时器模块为用户提供下面几种功能，接口�
 
 软件定时器的典型开发流程：
 
-1.  通过make menuconfig配置软件定时器。
+1.  通过make menuconfig配置软件定时器，菜单路径为：Kernel ---\> Enable Software Timer。
 
     <a name="table32617244171025"></a>
     <table><thead align="left"><tr id="row41225896171025"><th class="cellrowborder" valign="top" width="19.1%" id="mcps1.1.6.1.1"><p id="p50963290171025"><a name="p50963290171025"></a><a name="p50963290171025"></a>配置项</p>
@@ -5304,7 +5307,7 @@ Huawei LiteOS的软件定时器模块为用户提供下面几种功能，接口�
     <td class="cellrowborder" valign="top" width="19.5%" headers="mcps1.1.6.1.5 "><p id="p63502095557"><a name="p63502095557"></a><a name="p63502095557"></a>LOSCFG_BASE_CORE_SWTMR</p>
     </td>
     </tr>
-    <tr id="row2631049132410"><td class="cellrowborder" valign="top" width="19.1%" headers="mcps1.1.6.1.1 "><p id="p9632749192412"><a name="p9632749192412"></a><a name="p9632749192412"></a>LOSCFG_BASE_CORE_TSK_SWTMR_STACK_SIZE</p>
+    <tr id="row2631049132410"><td class="cellrowborder" valign="top" width="19.1%" headers="mcps1.1.6.1.1 "><p id="p9632749192412"><a name="p9632749192412"></a><a name="p9632749192412"></a>LOSCFG_BASE_CORE_TSK_SWTMR_STACK_SIZE（菜单路径为：Kernel ---\> Basic Config ---\> Task）</p>
     </td>
     <td class="cellrowborder" valign="top" width="25.66%" headers="mcps1.1.6.1.2 "><p id="p1263216496241"><a name="p1263216496241"></a><a name="p1263216496241"></a>软件定时器任务栈大小</p>
     </td>
@@ -5525,7 +5528,7 @@ Huawei LiteOS 的自旋锁模块为用户提供下面几种功能，接口详细
 
 自旋锁的开发典型流程：
 
-1.  自旋锁依赖于SMP，可以通过make menuconfig配置。
+1.  自旋锁依赖于SMP，可以通过make menuconfig配置，菜单路径为Kernel ---\> Enable Kernel SMP。
 
     <a name="table34659900162615"></a>
     <table><thead align="left"><tr id="row3414390162615"><th class="cellrowborder" valign="top" width="21.3978602139786%" id="mcps1.1.6.1.1"><p id="p8130151162615"><a name="p8130151162615"></a><a name="p8130151162615"></a>配置项</p>
@@ -5726,7 +5729,7 @@ task1 release spinlock
 [sample\_spinlock.c](resource/sample_spinlock.c)
 
 
-<h2 id="C++支持">C++支持</h2>
+<h2 id="cppsupport">C++支持</h2>
 
 <h3 id="概述-99">概述</h3>
 
@@ -5769,7 +5772,7 @@ STL（Standard Template Library）标准模板库，是一些“容器”的集�
 
 #### 开发流程<a name="section41972154195820"></a>
 
-1.  通过make menuconfig使能C++支持。
+1.  通过make menuconfig使能C++支持，菜单路径为：Kernel ---\> Enable Extend Kernel ---\> C++ Support。
 
     <a name="table06655375130"></a>
     <table><thead align="left"><tr id="row8665203751318"><th class="cellrowborder" valign="top" width="24.36%" id="mcps1.1.6.1.1"><p id="p61687296155221"><a name="p61687296155221"></a><a name="p61687296155221"></a>配置项</p>
@@ -6133,7 +6136,7 @@ Huawei LiteOS的时间管理提供下面几种功能，接口详细信息可以�
 时间管理的典型开发流程：
 
 1.  根据实际需求，在板级配置适配时确认是否使能LOSCFG\_BASE\_CORE\_TICK\_HW\_TIME宏选择外部定时器，并配置系统主时钟频率OS\_SYS\_CLOCK（单位Hz）。OS\_SYS\_CLOCK的默认值基于硬件平台配置。
-2.  通过make menuconfig配置LOSCFG\_BASE\_CORE\_TICK\_PER\_SECOND。
+2.  通过make menuconfig配置LOSCFG\_BASE\_CORE\_TICK\_PER\_SECOND，菜单路径为：Kernel ---\> Basic Config ---\> Task。
 
     <a name="table1124543155750"></a>
     <table><thead align="left"><tr id="row32017475155750"><th class="cellrowborder" valign="top" width="27.400000000000002%" id="mcps1.1.6.1.1"><p id="p15912448155750"><a name="p15912448155750"></a><a name="p15912448155750"></a>配置项</p>
@@ -6882,10 +6885,3 @@ LOS_HighBitGet:The highest one bit is 28, the flag is 0x10101110
 LOS_BitmapClr: pos : 28, the flag is 0x00101110
 LOS_LowBitGet: The lowest one bit is 4, the flag is 0x00101110
 ```
-
-<h2 id="附录">附录</h2>
-
-<h3 id="setup">Huawei LiteOS Kernel启动流程</h3>
-
-![](figures/zh-cn_image_0301026617.png)
-
