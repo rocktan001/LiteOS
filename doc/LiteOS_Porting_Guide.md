@@ -1,1582 +1,755 @@
-# Huawei LiteOS Shell使用教程
+# LiteOS移植指南
+-   [概述](#概述)
+    -   [什么是移植，为什么要移植](#什么是移植-为什么要移植)
+    -   [指南适用范围](#指南适用范围)
+    -   [移植目录结构](#移植目录结构)
+-   [环境准备](#环境准备)
+    -   [获取LiteOS源代码](#获取LiteOS源代码)
+    -   [硬件环境](#硬件环境)
+    -   [软件环境](#软件环境)
+-   [创建裸机工程](#创建裸机工程)
+    -   [简介](#简介-1)
+    -   [新建工程](#新建工程)
+    -   [配置芯片外设](#配置芯片外设)
+    -   [配置工程](#配置工程)
+    -   [生成裸机工程代码](#生成裸机工程代码)
+    -   [测试裸机工程](#测试裸机工程)
+-   [移植适配](#移植适配)
+    -   [移植步骤](#移植步骤)
+    -   [增加新开发板的目录](#增加新开发板的目录)
+    -   [适配外设驱动和HAL库配置文件](#适配外设驱动和HAL库配置文件)
+    -   [配置系统时钟](#配置系统时钟)
+    -   [适配串口初始化文件](#适配串口初始化文件)
+    -   [修改链接脚本](#修改链接脚本)
+    -   [适配编译配置](#适配编译配置)
+    -   [在LiteOS Studio上验证](#在LiteOS-Studio上验证)
+-   [任务创建示例](#任务创建示例)
+    -   [任务处理函数简介](#任务处理函数简介)
+    -   [创建任务](#创建任务)
+-   [常见问题](#常见问题)
+    -   [如何进行GDB调试](#如何进行GDB调试)
+    -   [如何联系LiteOS官方开发人员](#如何联系LiteOS官方开发人员)
+<h2 id="概述">概述</h2>
 
-## 基本概念
-Huawei LiteOS提供shell命令行，它能够以命令行交互的方式访问操作系统的功能或服务：它接收并解析用户输入的命令，并处理操作系统的输出结果。
+-   **[什么是移植，为什么要移植](#什么是移植-为什么要移植)**
 
-## 开发指导
+-   **[指南适用范围](#指南适用范围)**
 
-### 使用场景
-Huawei LiteOS提供的Shell作为在线调试工具，可以通过串口工具输入输出，支持常用的基本调试功能。同时用户可以新增定制的命令，新增命令需重新编译烧录后才能执行。
-
-### 功能
-1. Huawei LiteOS提供的Shell命令参见后面[命令参考](#系统命令参考)章节。
-2. Huawei LiteOS的Shell模块为用户提供下面几个接口，接口详细信息可以查看API参考。
-   | 接口名          | 描述                     |
-   | --------------- | ------------------------ |
-   | SHELLCMD_ENTRY  | 静态注册命令             |
-   | osCmdReg        | 动态注册命令             |
-
-    >![](public_sys-resources/icon-note.gif) **说明：** 
-    >静态注册命令方式一般用于注册系统常用命令，动态注册命令方式一般用于注册用户命令。
-    >静态注册命令有5个入参，动态注册命令有4个入参。下面除去第一个入参是静态注册独有的，剩余的四个入参两个注册命令是一致的。
-    >-   第一个入参：命令变量名，用于设置链接选项（build/mk/liteos\_tables\_ldflags.mk的LITEOS\_TABLES\_LDFLAGS变量）。例如变量名为ls\_shellcmd，链接选项就应该设置为：LITEOS\_TABLES\_LDFLAGS += -uls\_shellcmd。这个入参是静态注册独有的，动态注册中没有这个入参。
-    >-   第二个入参：命令类型，目前支持两种命令类型。
-    >      -   CMD\_TYPE\_EX：不支持标准命令参数输入，会把用户填写的命令关键字屏蔽掉。例如：输入ls /ramfs，传入给命令处理函数的参数只有/ramfs，对应于命令处理函数中的argv\[0\]，而ls命令关键字并不会被传入。
-    >      -   CMD\_TYPE\_STD：支持的标准命令参数输入，所有输入的字符都会通过命令解析后被传入。例如：输入ls /ramfs，ls和/ramfs都会被传入命令处理函数，分别对应于命令处理函数中的argv\[0\]和argv\[1\]。
-    >-   第三个入参：命令关键字，是命令处理函数在Shell中对应的名称。**命令关键字必须唯一**，即两个不同的命令项不能有相同的命令关键字，否则只会执行其中一个。Shell在执行用户命令时，如果存在多个命令关键字相同的命令，只会执行在“help”命令中排在最前面的那个。
-    >-   第四个入参：命令处理函数的入参最大个数。
-    >      -   静态注册命令暂不支持设置。
-    >      -   动态注册命令支持设置不超过32的入参最大个数，或者设置为XARGS（其在代码中被定义为0xffffffff）表示不限制参数个数。
-    >-   第五个入参：命令处理函数名，即在Shell中执行命令时被调用的函数。
-
-
-### 配置项
-
-可以通过make menuconfig配置Shell，菜单路径为：Debug ---\> Enable a Debug Version ---\> Enable Shell。
-
-| 配置项          | 含义                     | 取值范围     | 默认值     | 依赖        |
-| --------------- | ------------------------ | ------------ | ---------- | ------------ |
-| LOSCFG_SHELL    | Shell功能的裁剪开关      | YES/NO       | YES        | LOSCFG_DEBUG_VERSION=y && LOSCFG_DRIVERS_UART=y |
-| LOSCFG_SHELL_CONSOLE（开源版本无该配置项） | 设置Shell直接与Console交互 | YES/NO     | YES     | LOSCFG_SHELL=y |
-| LOSCFG_SHELL_UART    | 设置Shell直接与uart驱动交互 | YES/NO   | NO     | LOSCFG_DRIVERS_UART=y |
+-   **[移植目录结构](#移植目录结构)**
 
 
-### 新增命令开发流程
+<h3 id="什么是移植-为什么要移植">什么是移植，为什么要移植</h3>
 
-下面以注册系统命令ls为例，介绍新增Shell命令的典型开发流程。
+对于嵌入式设备，由于芯片型号和外设差异较大，且资源有限，所以物联网操作系统无法像 Windows/Linux 那样适配集成所有驱动，因此通常会先适配部分芯片/开发板。为了让操作系统运行在其他芯片/开发板上，此时就需要移植。
 
-1.  定义Shell命令处理函数。
+开发板的移植包括 CPU架构移植、板级/外设驱动移植和操作系统的移植。
 
-    Shell命令处理函数用于处理注册的命令。例如定义一个命令处理函数osShellCmdLs，处理ls命令，并在头文件中声明命令处理函数原型。
+<h3 id="指南适用范围">指南适用范围</h3>
+
+本指南基于STM32芯片平台，以正点原子STM32F407开发板为例介绍如何快速移植LiteOS，其中并不涉及CPU架构移植。
+
+<h3 id="移植目录结构">移植目录结构</h3>
+
+表格列出了LiteOS源码的目录，其中加粗字体的目录/文件在移植过程中需要修改。
+
+**表 1**  LiteOS源码目录
+| 一级目录                    | 二级目录/文件            | 说明                                                          |
+| ----------                  | ----------------------   |  -----------------------------------------------------------  |
+| arch                        |                          |  芯片架构支持                                                 |
+| build                       |                          |  LiteOS编译系统需要的配置及脚本                               |
+| compat                      |                          |  LiteOS提供的CMSIS-RTOS 1.0和2.0接口                          |
+| components                  |                          |  组件代码                                                     |
+| demos                       |                          |  组件和内核的demo                                             |
+| doc                         |                          |  LiteOS使用文档                                               |
+| include                     |                          |  components中各模块的头文件                                   |
+| kernel                      |                          |  内核代码                                                     |
+| lib                         |                          |  libc/zlib/posix接口                                          |
+| osdepends                   |                          |  LiteOS提供的部分OS适配接口                                   |
+| targets                     | bsp                      |  通用板级支持包                                               |
+|                             | Cloud_STM32F429IGTx_FIRE |  野火STM32F429（ARM Cortex M4）开发板的开发工程源码包         |
+|                             | qemu-virt-a53            |  Coretex A53的qemu开发工程源码包                              |
+|                             | realview-pbx-a9          |  Coretex A9的qemu开发工程源码包                               |
+|                             | STM32F072_Nucleo         |  STM32F072_Nucleo（ARM Cortex M0）开发板的开发工程源码包      |
+|                             | STM32F103_FIRE_Arbitrary |  野火STM32F103（ARM Cortex M3）霸道开发板的开发工程源码包     |
+|                             | STM32F769IDISCOVERY      |  STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包   |
+|                             | ...                      |  其他开发板的开发工程源码包                                   |
+|                             | Kconfig                  |                                                               |
+|                             | Makefile                 |                                                               |
+|                             | **<font color="blue">targets.mk</font>** |                                               |
+| tools                       | **<font color="blue">build/config</font>** |  LiteOS支持的各开发板的编译配置文件，移植新的开发板时，需要在这个目录下增加这个新开发板的编译配置文件 |
+|                             |  menuconfig              |  LiteOS编译所需的menuconfig脚本                               |
+| Makefile                    |                          |  整个LiteOS的Makefile                                         |
+| **<font color="blue">.config</font>** |                |  开发板的编译配置文件，默认为Cloud_STM32F429IGTx_FIRE开发板的配置文件，移植时需要替换成新开发板的编译配置文件 |
+
+target目录下保存了当前已经支持的开发板工程源码。当移植新开发板时，应该在target目录下增加该开发板的目录，目录结构和代码可以参考当前已支持的开发板的目录。例如：
+
+-   STM32F4系列的移植可以参考Cloud\_STM32F429IGTx\_FIRE工程。
+-   STM32F7系列的移植可以参考STM32F769IDISCOVERY工程。
+-   STM32L4系列的移植可以参考STM32L431\_BearPi工程。
+
+<h2 id="环境准备">环境准备</h2>
+
+-   **[获取LiteOS源代码](#获取LiteOS源代码)**
+
+-   **[硬件环境](#硬件环境)**
+
+-   **[软件环境](#软件环境)**
+
+
+<h3 id="获取LiteOS源代码">获取LiteOS源代码</h3>
+
+<a href="https://gitee.com/LiteOS/LiteOS" target="_blank">LiteOS源码仓</a>在码云上，使用master分支。
+
+<h3 id="硬件环境">硬件环境</h3>
+
+<h4 id="开发板">开发板</h4>
+
+本指南以国内主流STM32学习板-正点原子STM32F407开发板为例进行移植。该开发板的介绍可参考官方网站：<a href="http://www.alientek.com/productinfo/714608.html" target="_blank">探索者STM32F407开发板</a>。
+
+<h4 id="烧录仿真器">烧录仿真器</h4>
+
+JLink。
+
+<h3 id="软件环境">软件环境</h3>
+
+<h4 id="简介">简介</h4>
+
+本指南主要基于LiteOS Studio集成开发环境进行移植，烧录工具为JLink，同时使用STM32CubeMX软件生成裸机工程。
+
+<h4 id="安装STM32CubeMX">安装STM32CubeMX</h4>
+
+<a href="https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-configurators-and-code-generators/stm32cubemx.html" target="_blank">STM32CubeMX下载</a>，本指南使用的是6.0.1版本。
+
+<h4 id="安装LiteOS-Studio">安装LiteOS Studio</h4>
+
+除了LiteOS Studio，同时还需要安装git工具、arm-none-eabi软件、make构建软件、C/C++扩展、JLink烧录软件，这些软件的安装均可参考<a href="https://liteos.gitee.io/liteos_studio/#/install" target="_blank">LiteOS Studio安装指南</a>。
+
+所有软件安装完毕后，需要重启计算机。
+
+>![](public_sys-resources/icon-notice.gif) **须知：**
+>对于板载STLink仿真器的STM32开发板，需要先把STLink仿真器刷成JLink仿真器，再按照JLink的方式烧写。可以参考LiteOS Studio官方文档的“STM32工程示例”中的<a href="https://liteos.gitee.io/liteos_studio/#/project_stm32?id=st-link仿真器单步调测" target="_blank">“ST-Link仿真器单步调测”</a>。
+
+<h4 id="验证LiteOS-Studio集成开发环境">验证LiteOS Studio集成开发环境</h4>
+
+在正式开始移植前，可以先验证当前开发环境是否能成功编译LiteOS代码并完成烧录。目前<a href="https://gitee.com/LiteOS/LiteOS" target="_blank">开源LiteOS</a>支持了若干开发板，如：Cloud\_STM32F429IGTx\_FIRE、STM32F769IDISCOVERY、STM32L431\_BearPi等。可以视情况验证环境：
+
+-   没有官方已适配的开发板，可以先使用LiteOS已支持的开发板工程验证编译功能。暂时不验证烧录功能，在下一章节“[测试裸机工程](#测试裸机工程)”中再验证。
+-   有官方已适配的开发板，使用开发板对应的工程验证编译和烧录功能。即：
+    -   对于Cloud\_STM32F429IGTx\_FIRE开发板，在LiteOS Studio中配置目标板信息时，选择STM32F429IG。
+    -   对于STM32F769IDISCOVERY开发板，在LiteOS Studio中配置目标板信息时，选择STM32F769NI。
+    -   对于STM32L431\_BearPi 开发板，在LiteOS Studio中配置目标板信息时，选择STM32L431RC。
+
+
+验证方法可以参考LiteOS Studio官方文档的“STM32工程示例”中的<a href="https://liteos.gitee.io/liteos_studio/#/project_stm32?id=使用入门" target="_blank">“使用入门”</a>（只需关注其中的“打开工程”、“目标板配置”、“编译配置-编译代码”和“烧录配置-烧录”）。
+
+<h2 id="创建裸机工程">创建裸机工程</h2>
+
+-   **[简介](#简介-1)**
+
+-   **[新建工程](#新建工程)**
+
+-   **[配置芯片外设](#配置芯片外设)**
+
+-   **[配置工程](#配置工程)**
+
+-   **[生成裸机工程代码](#生成裸机工程代码)**
+
+-   **[测试裸机工程](#测试裸机工程)**
+
+<h3 id="简介-1">简介</h3>
+
+STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支持 STM32 全系列产品，能够让用户轻松配置芯片外设引脚和功能，并一键生成C语言的裸机工程。
+
+裸机工程可以为移植提供硬件配置文件和外设驱动文件，同时可以测试开发板的基本功能。以下介绍正点原子STM32F407的裸机工程创建过程。
+
+<h3 id="新建工程">新建工程</h3>
+
+1.  打开STM32CubeMX软件，点击菜单栏“File”在下拉菜单中选择“New Project”，如下图所示：
+
+    **图 1**  新建工程<a name="fig4460124474916"></a>
+    ![](figures/porting/build_project.png "新建工程")
+
+2.  选择开发板芯片。
+
+    选择对应的开发板MCU（对于正点原子STM32F407开发板，选择STM32F407ZG），如下图所示：
+
+    **图 2**  设置开发板芯片<a name="fig13913182955219"></a>
+    ![](figures/porting/set_chip.png "设置开发板芯片")
+
+
+<h3 id="配置芯片外设">配置芯片外设</h3>
+
+<h4 id="简介-0">简介</h4>
+
+可以根据需要，自定义配置外设。这里仅配置了最基本的时钟、串口和LED灯、以及烧录调试方式，已经能满足LiteOS运行所需的基本硬件需求。
+
+<h4 id="配置时钟">配置时钟</h4>
+
+1.  配置时钟引脚。
+
+    选择“Pinout & Configuration”标签页，在左边的“System Core”中选择RCC，设置HSE（High Speed Clock，外部高速时钟）为Crystal/ Ceramic Resonator（晶振/陶瓷谐振器），即采用外部晶振作为 HSE 的时钟源，如下图所示：
+
+    **图 1**  配置时钟引脚<a name="fig197751515215"></a>
+    ![](figures/porting/configure_clock_pins.png "配置时钟引脚")
+
+2.  配置时钟频率。
+
+    将标签页切换为“Clock Configuration”。STM32F407芯片的最高时钟为168MHz，在HCLK处输入168并且回车即可完成配置，如下图所示。其他开发板的配置方式也类似。
+
+    **图 2**  配置时钟频率<a name="fig118761971236"></a>
+    ![](figures/porting/configure_clock_freq.png "配置时钟频率")
+
+
+<h4 id="配置串口和LED灯">配置串口和LED灯</h4>
+
+将标签页切换回“Pinout & Configuration”。下图是正点原子STM32F407开发板的配置方法。对于其他开发板，可以参考开发板的原理图进行相应配置。
+
+**图 1**  配置串口和LED引脚<a name="fig103021431642"></a>
+![](figures/porting/configure_serial_and_LED.png "配置串口和LED引脚")
+
+<h4 id="配置烧录调试方式">配置烧录调试方式</h4>
+
+仍然在“Pinout & Configuration”标签页中，在左边的“System Core”中选择“SYS”，将“Debug”设置为“Serial Wire”，即SWD接口。该接口适用于STLink和JLink。
+
+**图 1**  设置烧录调试方式<a name="fig18835710054"></a>
+![](figures/porting/set_burn_and_debug_mode.png "设置烧录调试方式")
+
+<h3 id="配置工程">配置工程</h3>
+
+工程配置中，需要设置工程名、代码保存路径、编译工具链/IDE、代码使用的堆栈大小以及HAL库版本。CubeMX 可以生成 Makefile、MDK-ARM、IAR 等 IDE 工程。本指南基于GCC编译工具链，所以Toolchain/IDE需要选择Makefile。将标签页切换到“Project Manager”，选择左边的“Project”标签，如下图所示：
+
+**图 1**  工程配置<a name="fig1322816561169"></a>
+![](figures/porting/project_configuration.png "工程配置")
+
+为便于外设相关代码维护，建议勾选生成外设驱动的.c/.h文件。选择左边的“Code Generator”标签，如下图所示：
+
+**图 2**  生成代码配置<a name="fig1246184715710"></a>
+![](figures/porting/generate_code_configuration.png "生成代码配置")
+
+<h3 id="生成裸机工程代码">生成裸机工程代码</h3>
+
+按以上步骤设置完外设和工程配置后，就可以生成裸机工程代码了，如下图所示：
+
+**图 1**  生成工程<a name="fig74894405817"></a>
+![](figures/porting/generate_project.png "生成工程")
+
+生成的裸机工程目录结构如下表所示：
+
+**表 1**  裸机工程目录结构
+
+<a name="table1355043241010"></a>
+<table><thead align="left"><tr id="row6550732141014"><th class="cellrowborder" valign="top" width="23.78%" id="mcps1.2.3.1.1"><p id="p955023201015"><a name="p955023201015"></a><a name="p955023201015"></a>目录/文件</p>
+</th>
+<th class="cellrowborder" valign="top" width="76.22%" id="mcps1.2.3.1.2"><p id="p1551103211018"><a name="p1551103211018"></a><a name="p1551103211018"></a>说明</p>
+</th>
+</tr>
+</thead>
+<tbody><tr id="row7551103213106"><td class="cellrowborder" valign="top" width="23.78%" headers="mcps1.2.3.1.1 "><p id="p911519532107"><a name="p911519532107"></a><a name="p911519532107"></a>build</p>
+</td>
+<td class="cellrowborder" valign="top" width="76.22%" headers="mcps1.2.3.1.2 "><p id="p492631615117"><a name="p492631615117"></a><a name="p492631615117"></a>该目录用于存放编译生成的文件</p>
+</td>
+</tr>
+<tr id="row7551632101015"><td class="cellrowborder" valign="top" width="23.78%" headers="mcps1.2.3.1.1 "><p id="p20115115317106"><a name="p20115115317106"></a><a name="p20115115317106"></a>Core</p>
+</td>
+<td class="cellrowborder" valign="top" width="76.22%" headers="mcps1.2.3.1.2 "><p id="p169261616141113"><a name="p169261616141113"></a><a name="p169261616141113"></a>用户代码和开发板的基本配置文件</p>
+</td>
+</tr>
+<tr id="row195511328107"><td class="cellrowborder" valign="top" width="23.78%" headers="mcps1.2.3.1.1 "><p id="p1711515391010"><a name="p1711515391010"></a><a name="p1711515391010"></a>Drivers</p>
+</td>
+<td class="cellrowborder" valign="top" width="76.22%" headers="mcps1.2.3.1.2 "><p id="p49262169111"><a name="p49262169111"></a><a name="p49262169111"></a>STM32 官方HAL 库</p>
+</td>
+</tr>
+<tr id="row14551163281018"><td class="cellrowborder" valign="top" width="23.78%" headers="mcps1.2.3.1.1 "><p id="p181151153131010"><a name="p181151153131010"></a><a name="p181151153131010"></a>Makefile</p>
+</td>
+<td class="cellrowborder" valign="top" width="76.22%" headers="mcps1.2.3.1.2 "><p id="p1892611671116"><a name="p1892611671116"></a><a name="p1892611671116"></a>裸机工程的Makefile</p>
+</td>
+</tr>
+<tr id="row14551123210105"><td class="cellrowborder" valign="top" width="23.78%" headers="mcps1.2.3.1.1 "><p id="p2115165316101"><a name="p2115165316101"></a><a name="p2115165316101"></a>startup_stm32f407xx.s</p>
+</td>
+<td class="cellrowborder" valign="top" width="76.22%" headers="mcps1.2.3.1.2 "><p id="p109261516151116"><a name="p109261516151116"></a><a name="p109261516151116"></a>芯片启动文件，主要包含堆栈定义等</p>
+</td>
+</tr>
+<tr id="row117273425108"><td class="cellrowborder" valign="top" width="23.78%" headers="mcps1.2.3.1.1 "><p id="p51152053131017"><a name="p51152053131017"></a><a name="p51152053131017"></a>STM32F407ZGTx_FLASH.ld</p>
+</td>
+<td class="cellrowborder" valign="top" width="76.22%" headers="mcps1.2.3.1.2 "><p id="p1792691651118"><a name="p1792691651118"></a><a name="p1792691651118"></a>裸机工程的链接脚本</p>
+</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="测试裸机工程">测试裸机工程</h3>
+
+<h4 id="编写测试程序">编写测试程序</h4>
+
+下面在裸机工程Core\\Src\\main.c文件中编写测试代码，实现串口循环输出并且LED灯闪烁：
+
+1.  添加头文件：
 
     ```c
-    int osShellCmdLs(int argc, const char **argv);
+    #include <stdio.h>
     ```
 
-    >![](public_sys-resources/icon-notice.gif) **须知：** 
-    >命令处理函数的参数与C语言中main函数的参数类似，包括两个入参：
-    >-   argc：Shell命令的参数个数。个数中是否包括命令关键字，和注册命令时的命令类型有关。
-    >-   argv：为指针数组，每个元素指向一个字符串，该字符串就是执行shell命令时传入命令处理函数的参数。参数中是否包括命令关键字，和注册命令时的命令类型有关。
-
-2.  注册命令。
-
-    有静态注册命令和系统运行时动态注册命令两种注册方式。
-
-    -   静态注册ls命令：
-
-        ```c
-        #include "shcmd.h"
-        SHELLCMD_ENTRY(ls_shellcmd, CMD_TYPE_EX, "ls", XARGS, (CMD_CBK_FUNC)osShellCmdLs);
-        ```
-
-    -   动态注册ls命令：
-
-        ```c
-        #include "shell.h"
-        osCmdReg(CMD_TYPE_EX, "ls", XARGS, (CMD_CBK_FUNC)osShellCmdLs);
-        ```
-
-3.  对于静态注册命令方式，在build/mk/liteos\_tables\_ldflags.mk中设置链接选项（LITEOS\_TABLES\_LDFLAGS变量）。
-
-4.  通过make menuconfig使能Shell，详见[配置项](#配置项)。
-5.  编译烧录系统后，可以执行新增的Shell命令。
-
-
-### 执行Shell命令
-
-1. 通过串口终端工具（比如xShell），连接串口。
-
-2. 选择SERIAL协议，然后配置SERIAL：选择对应的串口号，设置波特率为115200。
-
-3. 连接后重启开发板，系统启动后可以在串口工具中看到“Huawei LiteOS #”的提示符。
-   ```
-   Huawei LiteOS #
-   ```
-
-   这时可以输入命令，按`回车键`执行。
-
-   - 按`Tab键`可自动联想补全，若有多个匹配项则补全共同字符，并打印多个匹配项。
-
-   - 按`退格键`可删除一个字符，如果在UTF8格式下输入了中文字符，只能通过回退三次来删除。默认模式为英文输入。
-
-   - 按`方向键上下`可选择历史命令。
-
-
-## 静态注册编程实例
-
-### 实例描述
-
-本实例演示如何使用静态注册命令方式新增一个名为test的Shell命令。
-
-1.  定义一个新增命令所要调用的命令处理函数cmd\_test。
-2.  使用SHELLCMD\_ENTRY函数添加新增命令项。
-3.  在liteos\_tables\_ldflags.mk中添加链接该新增命令项参数。
-4.  通过make menuconfig使能Shell。
-5.  重新编译代码后运行。
-
-### 编程示例
-
-1.  定义命令所要调用的命令处理函数cmd\_test：
+2.  在main\(\)函数的while\(1\)循环中添加如下代码：
 
     ```c
-    #include "shell.h"
-    #include "shcmd.h"
-    
-    int cmd_test(void)
+    printf("hello\n");
+    HAL_Delay(1000);
+    HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9);
+    ```
+
+3.  /\* USER CODE BEGIN 4 \*/中添加函数：
+
+    ```c
+    __attribute__((used)) int _write(int fd, char *ptr, int len)
     {
-        printf("hello everybody!\n");
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, 0xFFFF);
+        return len;
+    }
+    ```
+
+
+<h4 id="使用LiteOS-Studio测试裸机工程">使用LiteOS Studio测试裸机工程</h4>
+
+1.  配置目标板。
+
+    在“工程配置”界面中点击“目标板”，在“操作”列中点击“+”后，在出现的空行中填入STM32F407开发板信息，选中新增的开发板后，点击确认按钮保存，如下图所示：
+
+    ![](figures/porting/target_board_configuration.png)
+
+2.  编译。
+
+    在裸机工程根目录下的Makefile文件上点击右键-\>设置为Makefile文件，然后编译工程，编译生成的二进制镜像文件在工程根目录的build目录下，如下图所示：
+
+    **图 1**  编译裸机工程<a name="fig11370205501817"></a>
+    ![](figures/porting/build_bare_project.png "编译裸机工程")
+
+3.  烧录。
+    1)  配置烧录器。
+
+        在“工程配置”界面中点击“烧录器”，参照下图进行配置，要烧录的二进制镜像文件就是上一步编译生成的bin文件，配置项中的“连接速率”、“加载地址”保持默认即可。
+
+        ![](figures/porting/burner_configuration.png)
+
+    2)  点击“工具栏”上的“烧录”按钮，进行烧录。
+
+        ![](figures/porting/burn_button.png)
+
+        烧录成功后，可以在终端界面看到如下输出：
+
+        ![](figures/porting/output_of_successful_burning.png)
+
+    3)  查看串口输出。
+
+        点击“工具栏”上“串口终端”图标![](figures/porting/serial_terminal_button.png)，打开串口终端界面。如下图，只需设置与开发板连接的实际端口号，并打开串口开关。开发板按下复位RESET按钮后，即可在“串口终端”界面中看到不断输出hello，同时也可以观察到开发板的LED灯闪烁。
+
+        ![](figures/porting/serial_output_of_bare_project.png)
+
+
+
+>![](public_sys-resources/icon-note.gif) **说明：**
+>如果想更详细的了解LiteOS Studio的使用，可以参考LiteOS Studio官方文档的<a href="https://liteos.gitee.io/liteos_studio/#/project_stm32" target="_blank">“STM32工程示例”</a>。
+
+<h2 id="移植适配">移植适配</h2>
+
+-   **[移植步骤](#移植步骤)**
+
+-   **[增加新开发板的目录](#增加新开发板的目录)**
+
+-   **[适配外设驱动和HAL库配置文件](#适配外设驱动和HAL库配置文件)**
+
+-   **[配置系统时钟](#配置系统时钟)**
+
+-   **[适配串口初始化文件](#适配串口初始化文件)**
+
+-   **[修改链接脚本](#修改链接脚本)**
+
+-   **[适配编译配置](#适配编译配置)**
+
+-   **[在LiteOS Studio上验证](#在LiteOS-Studio上验证)**
+
+
+<h3 id="移植步骤">移植步骤</h3>
+
+下面的移植工作会基于现有的裸机工程进行，大致步骤如下：
+
+1.  增加新移植开发板的目录。
+2.  适配新开发板的外设驱动和HAL库配置文件。
+3.  配置系统时钟。
+4.  适配串口初始化文件。
+5.  修改链接脚本。
+6.  适配编译配置。
+
+<h3 id="增加新开发板的目录">增加新开发板的目录</h3>
+
+正点原子STM32F407开发板使用的是STM32F4芯片，可以参考Cloud\_STM32F429IGTx\_FIRE工程代码。
+
+在LiteOS源码target目录下拷贝Cloud\_STM32F429IGTx\_FIRE目录，并将目录重命名为新开发板名，比如STM32F407\_OpenEdv。下表是STM32F407\_OpenEdv目录中的子目录和文件，只列出了和本次移植相关的内容，不相关的文件和目录可以删除。
+
+**表 1**  新增开发板目录结构
+
+<a name="table21661548135412"></a>
+<table><thead align="left"><tr id="row21661485542"><th class="cellrowborder" valign="top" width="20.369999999999997%" id="mcps1.2.3.1.1"><p id="p838233610550"><a name="p838233610550"></a><a name="p838233610550"></a>目录/文件</p>
+</th>
+<th class="cellrowborder" valign="top" width="79.63%" id="mcps1.2.3.1.2"><p id="p17777155205513"><a name="p17777155205513"></a><a name="p17777155205513"></a>说明</p>
+</th>
+</tr>
+</thead>
+<tbody><tr id="row1316624817544"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p15382183612550"><a name="p15382183612550"></a><a name="p15382183612550"></a>Inc</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p87771652145517"><a name="p87771652145517"></a><a name="p87771652145517"></a>芯片外设配置的头文件</p>
+</td>
+</tr>
+<tr id="row10166164845419"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p153821036165519"><a name="p153821036165519"></a><a name="p153821036165519"></a>include</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p117777527557"><a name="p117777527557"></a><a name="p117777527557"></a>LiteOS系统相关配置头文件</p>
+</td>
+</tr>
+<tr id="row1716714815415"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p73831362557"><a name="p73831362557"></a><a name="p73831362557"></a>os_adapt</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p13777185210556"><a name="p13777185210556"></a><a name="p13777185210556"></a>LiteOS适配的接口文件</p>
+</td>
+</tr>
+<tr id="row1516734814544"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p2038353611557"><a name="p2038353611557"></a><a name="p2038353611557"></a>Src</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p147771452155511"><a name="p147771452155511"></a><a name="p147771452155511"></a>芯片外设配置的源文件</p>
+</td>
+</tr>
+<tr id="row516754815410"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p1738383615558"><a name="p1738383615558"></a><a name="p1738383615558"></a>config.mk</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p577745211554"><a name="p577745211554"></a><a name="p577745211554"></a>当前开发板工程的编译配置文件</p>
+</td>
+</tr>
+<tr id="row141671148115413"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p03834365559"><a name="p03834365559"></a><a name="p03834365559"></a>liteos.ld</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p477765245517"><a name="p477765245517"></a><a name="p477765245517"></a>当前开发板工程的链接文件</p>
+</td>
+</tr>
+<tr id="row11167204825415"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p1238303665519"><a name="p1238303665519"></a><a name="p1238303665519"></a>los_startup_gcc.S</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p1577775219559"><a name="p1577775219559"></a><a name="p1577775219559"></a>芯片启动文件，主要包含堆栈定义等</p>
+</td>
+</tr>
+<tr id="row121671948115419"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p7383153615514"><a name="p7383153615514"></a><a name="p7383153615514"></a>Makefile</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p87772521551"><a name="p87772521551"></a><a name="p87772521551"></a>当前开发板工程的Makefile</p>
+</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="适配外设驱动和HAL库配置文件">适配外设驱动和HAL库配置文件</h3>
+
+1.  将芯片外设驱动文件替换为对应芯片的文件。
+    -   修改芯片外设驱动源文件system\_xxx.c。
+
+        LiteOS对STM32F407\_OpenEdv\\Src\\system\_stm32f4xx.c做了修改，所以该文件无法使用在新开发板上，移植时可以直接替换为裸机工程中对应的文件。对于正点原子STM32F407开发板，在裸机工程中的对应文件为：Core\\Src\\system\_stm32f4xx.c。
+
+    -   修改芯片外设驱动头文件。
+
+        删除原stm32f429芯片外设驱动的头文件STM32F407\_OpenEdv\\Inc\\stm32f429xx.h，替换为新开发版对应的文件，可以直接使用裸机工程中的Drivers\\CMSIS\\Device\\ST\\STM32F4xx\\Include\\stm32f407xx.h文件。
+
+        同时注意在某些文件中可能引用了原芯片外设的头文件stm32f429xx.h，需要在文件中改为stm32f407xx.h。目前在新增开发板STM32F407\_OpenEdv目录下，只有include\\asm\\hal\_platform\_ints.h中的引用了stm32f429xx.h，修改 **\#include "stm32f429xx.h"** 为 **\#include "stm32f407xx.h"**。
+
+2.  移植HAL库配置文件。
+
+    直接用裸机工程中的**Core\\Inc\\stm32f4xx\_hal\_conf.h**文件替换**STM32F407\_OpenEdv\\Inc\\stm32f4xx\_hal\_conf.h**即可。
+
+3.  注释随机数代码。
+
+    目前不需要使用随机数，为减少不必要的移植工作，先注释随机数相关代码。搜索关键字“**rng**”，在STM32F407\_OpenEdv目录下找到以下几处使用，将其注释掉：
+
+    -   Src\\sys\_init.c中：
+
+        ```c
+        /*
+        int atiny_random(void *output, size_t len)
+        {
+            return hal_rng_generate_buffer(output, len);
+        }
+        */
+        ```
+
+    -   Src\\main.c中：
+
+        ```c
+        VOID HardwareInit(VOID)
+        {
+            SystemClock_Config();
+            MX_USART1_UART_Init();
+            // hal_rng_config();
+            dwt_delay_init(SystemCoreClock);
+        }
+        ```
+
+4.  在STM32F407\_OpenEdv\\Src\\main.c硬件初始化函数的第一行，添加初始化HAL库的函数HAL\_Init\(\)：
+
+    ```c
+    VOID HardwareInit(VOID)
+    {
+        HAL_Init();
+        SystemClock_Config();
+        MX_USART1_UART_Init();
+        // hal_rng_config();
+        dwt_delay_init(SystemCoreClock);
+    }
+    ```
+
+
+<h3 id="配置系统时钟">配置系统时钟</h3>
+
+1.  设置系统主频。
+
+    可在STM32F407\_OpenEdv\\include\\hisoc\\clock.h文件中设置，一般将时间频率设置为SystemCoreClock，实现代码为：
+
+    ```c
+    #define get_bus_clk()  SystemCoreClock
+    ```
+
+2.  修改系统时钟配置函数SystemClock\_Config\(\)。
+
+    函数定义在STM32F407\_OpenEdv\\Src\\sys\_init.c文件中，可以直接使用裸机工程Core\\Src\\main.c中的函数实现。同时在函数结束前加上 **SystemCoreClockUpdate\(\);** 调用。
+
+
+<h3 id="适配串口初始化文件">适配串口初始化文件</h3>
+
+1.  使用裸机工程的串口初始化文件**Core\\Src\\usart.c**和**Core\\Inc\\usart.h**替换LiteOS源码中的**targets\\STM32F407\_OpenEdv\\Src\\usart.c**和**targets\\STM32F407\_OpenEdv\\Inc\\usart.h**。
+2.  在targets\\STM32F407\_OpenEdv\\Inc\\usart.h中增加对STM32F4系列芯片的HAL驱动头文件的引用：
+
+    ```c
+    #include "stm32f4xx_hal.h"
+    ```
+
+3.  在targets\\STM32F407\_OpenEdv\\Src\\usart.c文件尾部添加如下两个函数定义：
+
+    ```c
+    __attribute__((used)) int _write(int fd, char *ptr, int len)
+    {
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, 0xFFFF);
+        return len;
+    }
+    int uart_write(const char *buf, int len, int timeout)
+    {
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)buf, len, 0xFFFF);
+        return len;
+    }
+    ```
+
+
+<h3 id="修改链接脚本">修改链接脚本</h3>
+
+STM32F407\_OpenEdv\\liteos.ld是新开发板的链接脚本，需要根据开发板实际情况修改stack，flash，ram的值，可以参考裸机工程链接脚本STM32F407ZGTx\_FLASH.ld中的设定值进行设置。
+
+-   stack在链接脚本中对应的是“\_estack”变量。
+-   flash 对应的是“FLASH”变量。
+-   ram对应的是“RAM ”变量。
+
+同时为适配LiteOS操作系统，链接脚本中增加了如下代码：
+
+1.  增加了一个vector，用于初始化LiteOS：
+
+    ```
+    /* used by the startup to initialize liteos vector */
+    _si_liteos_vector_data = LOADADDR(.vector_ram);
+    
+    /* Initialized liteos vector sections goes into RAM, load LMA copy after code */
+    .vector_ram :
+    {
+    . = ORIGIN(RAM);
+    _s_liteos_vector = .;
+    *(.data.vector)    /* liteos vector in ram */
+    _e_liteos_vector = .;
+    } > RAM AT> FLASH
+    ```
+
+2.  在.bss段中增加“\_\_bss\_end”变量的定义，因为在LiteOS中使用的是这个变量而非“\_\_bss\_end\_\_”变量：
+
+    ```
+    __bss_end = _ebss;
+    ```
+
+3.  设置LiteOS使用的内存池的地址，包括起始地址和结束地址：
+
+    ```
+    . = ALIGN(8);
+    __los_heap_addr_start__ = .;
+    __los_heap_addr_end__ = ORIGIN(RAM) + LENGTH(RAM) - _Min_Stack_Size - 1;
+    ```
+
+
+<h3 id="适配编译配置">适配编译配置</h3>
+
+<h4 id="修改开发板Makefile文件">修改开发板Makefile文件</h4>
+
+1.  将所有“**Cloud\_STM32F429IGTx\_FIRE**”替换成“**STM32F407\_OpenEdv**”。
+2.  STM32F407\_OpenEdv目录结构相对于Cloud\_STM32F429IGTx\_FIRE工程的目录少了一些文件和子目录，需要在Makefile中删除对这些目录文件的引用，即删除如下内容：
+
+    ```makefile
+    HARDWARE_SRC =  \
+            ${wildcard $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Src/*.c}
+            C_SOURCES += $(HARDWARE_SRC)
+    ```
+
+    ```makefile
+    HARDWARE_INC = \
+            -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Inc
+            BOARD_INCLUDES += $(HARDWARE_INC)
+    ```
+
+3.  搜索关键字“**STM32F429**”，替换为“**STM32F407**”。
+4.  如果需要添加自己的源文件，可以将该源文件添加到“**USER\_SRC**”变量中。
+
+<h4 id="添加新开发板到系统配置中">添加新开发板到系统配置中</h4>
+
+1.  修改targets\\targets.mk。
+
+    可以参考其他开发板的编译配置，新增正点原子开发板的配置，如下所示：
+
+    ```makefile
+    ######################### STM32F407ZGTX Options###############################
+    else ifeq ($(LOSCFG_PLATFORM_STM32F407ZGTX), y)
+        TIMER_TYPE := arm/timer/arm_cortex_m
+        LITEOS_CMACRO_TEST += -DSTM32F407xx
+        HAL_DRIVER_TYPE := STM32F4xx_HAL_Driver
+    ```
+
+2.  新增STM32F407\_OpenEdv.config。
+
+    在tools\\build\\config文件夹下复制Cloud\_STM32F429IGTx\_FIRE.config文件，并重命名为STM32F407\_OpenEdv.config，同时将文件内容中的“**Cloud\_STM32F429IGTx\_FIRE**”改为“**STM32F407\_OpenEdv**”，将“**LOSCFG\_PLATFORM\_STM32F429IGTX**”改为“**LOSCFG\_PLATFORM\_STM32F407ZGTX**”。
+
+3.  修改.config。
+
+    复制tools\\build\\config\\STM32F407\_OpenEdv.config文件到LiteOS根目录下，并重命名为.config以替换根目录下原有的.config文件。
+
+
+<h3 id="在LiteOS-Studio上验证">在LiteOS Studio上验证</h3>
+
+通过编译和烧录，验证移植后的LiteOS源码，验证方法可以参考“[使用LiteOS Studio测试裸机工程](#使用LiteOS-Studio测试裸机工程)”。
+
+>![](public_sys-resources/icon-note.gif) **说明：**
+>对于移植后的LiteOS源码，其**Makefile**文件在源码根目录下，编译生成的镜像文件**Huawei\_LiteOS.bin**在根目录的**out**目录下。
+
+将Huawei\_LiteOS.bin烧录到开发板后，复位开发板，可以在串口看到类似下图的输出：
+
+![](figures/porting/LiteOS_version_output.png)
+
+<h2 id="任务创建示例">任务创建示例</h2>
+
+-   **[任务处理函数简介](#任务处理函数简介)**
+
+-   **[创建任务](#创建任务)**
+
+
+<h3 id="任务处理函数简介">任务处理函数简介</h3>
+
+LiteOS的main函数定义在开发板工程的main.c文件中，主要负责硬件和内核的初始化工作，并在初始化完成后开始任务调度。在**main\(\)** 调用的**OsMain**函数中，会调用**OsAppInit\(\)** 创建一个名为“app\_Task”的任务，该任务的处理函数为**app\_init\(\)**。用户可以直接在app\_init\(\)中添加自己的代码，可以为一段功能代码或者是一个任务。
+
+<h3 id="创建任务">创建任务</h3>
+
+#### 任务简介<a name="section4752185813211"></a>
+
+LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务可以使用或等待CPU、使用内存空间等系统资源，并独立于其它任务运行。LiteOS实现了任务之间的切换和通信，帮助开发者管理业务程序流程。开发者可以将更多的精力投入到业务功能的实现中。
+
+在LiteOS中，通过函数LOS\_TaskCreate\(\)创建任务，LOS\_TaskCreate\(\)函数原型在kernel\\base\\los\_task.c文件中定义。调用LOS\_TaskCreate\(\)创建一个任务后，任务就会进入就绪状态。
+
+#### 任务创建流程<a name="section844516171537"></a>
+
+下面以一个循环亮灯任务为例，介绍LiteOS任务创建流程。
+
+在移植好的开发板工程“targets\\开发板名称\\Src\\main.c”文件中按照如下流程创建任务：
+
+1.  编写任务函数，创建两个不同闪烁频率的LED指示灯任务：
+
+    ```c
+    UINT32 LED1_init(VOID)
+    {
+        while(1) {
+            HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9); // 需要和“创建裸机工程”中配置的LED灯引脚对应
+            LOS_TaskDelay(500000);
+        }
+        return 0;
+    }
+    
+    UINT32 LED2_init(VOID)
+    {
+        while(1) {
+            HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_10); // 需要和“创建裸机工程”中配置的LED灯引脚对应
+            LOS_TaskDelay(1000000);
+        }
         return 0;
     }
     ```
 
-2.  添加新增命令项：
+2.  配置两个任务的参数并创建任务：
 
     ```c
-    SHELLCMD_ENTRY(test_shellcmd, CMD_TYPE_EX, "test", 0, (CMD_CBK_FUNC)cmd_test);
-    ```
-
-3.  在链接选项中添加链接该新增命令项参数：
-
-    在build/mk/liteos\_tables\_ldflags.mk中LITEOS\_TABLES\_LDFLAGS项下添加-utest\_shellcmd。
-
-4.  通过make menuconfig使能Shell，即设置LOSCFG\_SHELL=y。
-5.  重新编译代码：
-
-    ```
-    make clean;make
-    ```
-
-### 结果验证
-
-烧录新系统镜像后，重启系统。使用help命令查看当前系统中所有注册的命令，可以看到test命令已经注册。
-
-
-## 动态注册编程实例
-
-### 实例描述
-
-本实例演示如何使用动态注册命令方式新增一个名为test的Shell命令。
-
-1.  定义一个新增命令所要调用的命令处理函数cmd\_test。
-2.  使用osCmdReg函数添加新增命令项。
-3.  通过make menuconfig使能Shell。
-4.  重新编译代码后运行。
-
-### 编程示例
-
-1.  定义命令所要调用的命令处理函数cmd\_test：
-
-    ```c
-    #include "shell.h"
-    #include "shcmd.h"
-    
-    int cmd_test(void)
+    STATIC UINT32 LED1TaskCreate(VOID)
     {
-        printf("hello everybody!\n");
+        UINT32 taskId;
+        TSK_INIT_PARAM_S LEDTask;
+    
+        (VOID)memset_s(&LEDTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+        LEDTask.pfnTaskEntry = (TSK_ENTRY_FUNC)LED1_init;
+        LEDTask.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+        LEDTask.pcName = "LED1_Task";
+        LEDTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+        LEDTask.uwResved = LOS_TASK_STATUS_DETACHED;
+        return LOS_TaskCreate(&taskId, &LEDTask);
+    }
+    
+    STATIC UINT32 LED2TaskCreate(VOID)
+    {
+        UINT32 taskId;
+        TSK_INIT_PARAM_S LEDTask;
+    
+        (VOID)memset_s(&LEDTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+        LEDTask.pfnTaskEntry = (TSK_ENTRY_FUNC)LED2_init;
+        LEDTask.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+        LEDTask.pcName = "LED2_Task";
+        LEDTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+        LEDTask.uwResved = LOS_TASK_STATUS_DETACHED;
+        return LOS_TaskCreate(&taskId, &LEDTask);
+    }
+    ```
+
+3.  在硬件初始化函数HardwareInit\(\)中增加对LED灯的初始化：
+
+    ```c
+    MX_GPIO_Init();
+    ```
+
+4.  对于移植好的STM32F407\_OpenEdv工程，任务处理函数app\_init定义在targets\\STM32F407\_OpenEdv\\Src\\user\_task.c文件中，其中包含了网络、文件系统等相关的任务，目前并不需要执行这些任务，可在targets\\STM32F407\_OpenEdv\\Makefile的“**USER\_SRC**”变量中删除这个文件，后续有相关任务需求时，可以参考这个文件的实现。
+5.  在main.c文件的main\(\)函数前实现任务处理函数app\_init\(\)，添加对LED任务创建函数的调用：
+
+    ```c
+    UINT32 app_init(VOID)
+    {
+        LED1TaskCreate();
+        LED2TaskCreate();
+    
         return 0;
     }
     ```
 
-2.  在app\_init函数中调用osCmdReg函数动态注册命令：
 
-    ```c
-    void app_init(void)
-    {
-         ....
-         ....
-         osCmdReg(CMD_TYPE_EX, "test", 0,(CMD_CBK_FUNC)cmd_test);
-         ....
-    }
-    ```
+#### 完整代码示例<a name="section1095419341137"></a>
 
-3.  通过make menuconfig使能Shell，即设置LOSCFG\_SHELL=y。
-4.  重新编译代码：
+[main.c](resource/main.c)
 
-    ```
-    make clean;make
-    ```
+>![](public_sys-resources/icon-note.gif) **说明：**
+>此代码示例只完成了基本任务的创建，开发者可以根据实际需求创建自己的任务。
 
-### 结果验证
+<h2 id="常见问题">常见问题</h2>
 
-烧录新系统镜像后，重启系统。使用help命令查看当前系统中所有注册的命令，可以看到test命令已经注册。
+-   **[如何进行GDB调试](#如何进行GDB调试)**
 
+-   **[如何联系LiteOS官方开发人员](#如何联系LiteOS官方开发人员)**
 
-## 系统命令参考
 
--   **[help](#help)**
+<h3 id="如何进行GDB调试">如何进行GDB调试</h3>
 
--   **[date](#date)**
+参考LiteOS Studio官方文档的“STM32工程示例”中的“使用入门”，其中有<a href="https://liteos.gitee.io/liteos_studio/#/project_stm32?id=调试器-执行调试" target="_blank">“调试器”</a>相关介绍。
 
--   **[uname](#uname)**
+<h3 id="如何联系LiteOS官方开发人员">如何联系LiteOS官方开发人员</h3>
 
--   **[task](#task)**
-
--   **[free](#free)**
-
--   **[memcheck](#memcheck)**
-
--   **[memused](#memused)**
-
--   **[hwi](#hwi)**
-
--   **[queue](#queue)**
-
--   **[sem](#sem)**
-
--   **[mutex](#mutex)**
-
--   **[dlock](#dlock)**
-
--   **[swtmr](#swtmr)**
-
--   **[systeminfo](#systeminfo)**
-
--   **[log](#log)**
-
--   **[dmesg](#dmesg)**
-
--   **[stack](#stack)**
-
--   **[cpup](#cpup)**
-
--   **[watch](#watch)**
-
-使用Shell中的系统命令前，需要先通过make menuconfig使能Shell，详见[配置项](#配置项)。
-
-### help
-
-#### 命令功能
-显示当前操作系统内所有Shell命令。
-
-#### 命令格式
-```
-help
-```
-
-#### 使用实例
-
-举例：
-
-输入help。
-
-#### 输出说明
-
-执行help，输出当前系统内的所有Shell命令：
-```
-Huawei LiteOS # help
-*******************shell commands:*************************
-
-cpup          date          dlock         dmesg         free          help          hwi
-log           memcheck      mutex         queue         sem           stack         swtmr
-systeminfo    task          uname         watch
-```
-
-### date
-#### 命令功能
-查询及设置系统时间。
-
-#### 命令格式
-```
-date
-
-date --help
-
-date +Format
-
-date -s YY/MM/DD
-
-date -s hh:mm:ss
-
-date  -r  Filename（开源版本暂不支持该命令）
-```
-
-#### 参数说明
-参数|参数说明|取值范围|
-|:---:|:---|:---:|
-|--help|使用帮助|N/A|
-|+Format|根据Format格式打印时间|--help中列出的占位符|
-|-s YY/MM/DD|设置系统时间，用“/”分割的年月日|>= 1970/01/01|
-|-s hh\:mm\:ss|设置系统时间，用“:”分割的时分秒|N/A|
-|-r|查询文件修改时间，需要使能LOSCFG_FS_VFS|N/A|
-
-#### 使用指南
--  date参数缺省时，默认显示当前系统时间。
--  --help、+Format、-s、-r不能混合使用。
-
-#### 使用实例
-
-举例：
-
-输入date +%Y--%m--%d。
-
-#### 输出说明
-
-执行date +%Y--%m--%d，按其指定格式打印当前系统时间：
-
-```
-Huawei LiteOS # date +%Y--%m--%d
-2021--01--20
-```
-
-### uname
-#### 命令功能
-显示操作系统的名称，系统编译时间，版本信息等。
-
-#### 命令格式
-```
-uname [-a | -s | -t | -v | --help]
-```
-
-#### 参数说明
-参数|参数说明
-|:---:|:---|
-|-a|显示全部信息|
-|-s|显示操作系统名称|
-|-t|显示系统的编译时间|
-|-v|显示版本信息|
-|--help|显示uname的帮助信息|
-
-#### 使用指南
--  参数缺省时，默认显示操作系统名称。
--  `uname`的参数不能混合使用。
-
-#### 使用实例
-
-举例：
-
-输入uname -a。
-
-#### 输出说明
-
-执行uname -a，获取系统信息：
-
-```
-Huawei LiteOS # uname -a
-Huawei LiteOS - Huawei LiteOS 5.0.0-rc1 Nov  2 2020 00:50:54
-```
-
-### task
-#### 命令功能
-查询系统的任务信息。
-
-#### 命令格式
-```
-task [ID]
-```
-
-#### 参数说明
-|参数|参数说明|取值范围|
-|:---:|:---|:---:|
-|ID|任务ID号，输入形式以十进制表示或十六进制表示皆可|[0, 0xFFFFFFFF]|
-
-#### 使用指南
--  参数缺省时，默认打印全部运行任务信息。
--  task后加ID，当ID参数在\[0, 64\]范围内时，返回指定ID号任务的任务名、任务ID、任务的调用栈信息（最大支持15层调用栈），其他取值时返回参数错误的提示。如果指定ID号对应的任务未创建，则提示。
--  如果在task命令中，发现任务是Invalid状态，请确保pthread\_create创建函数时有进行如下操作之一，否则资源无法正常回收。
-    -  选择的是阻塞模式应该调用pthread\_join\(\)函数。
-    -  选择的是非阻塞模式应该调用pthread\_detach\(\)函数。
-    -  如果不想调用前面两个接口，就需要设置pthread\_attr\_t状态为PTHREAD\_STATE\_DETACHED，将attr参数传入pthread\_create，此设置和调用pthread\_detach函数一样，都是非阻塞模式。
-
-
-#### 使用实例
-
-举例1：输入task  6。
-
-举例2：输入task。
-
-#### 输出说明
-
-执行task 0xb，查询ID号为b的任务信息：
-
-```
-Huawei LiteOS # task 0xb
-TaskName = SerialEntryTask
-TaskId = 0xb
-*******backtrace begin*******
-traceback 0 -- lr = 0x1d804    fp = 0xa86bc
-traceback 1 -- lr = 0x1da40    fp = 0xa86e4
-traceback 2 -- lr = 0x20154    fp = 0xa86fc
-traceback 3 -- lr = 0x258e4    fp = 0xa8714
-traceback 4 -- lr = 0x242f4    fp = 0xa872c
-traceback 5 -- lr = 0x123e4    fp = 0xa8754
-traceback 6 -- lr = 0x2a9d8    fp = 0xb0b0b0b
-```
-
-执行task，查询所有任务信息：
-
-```
-Huawei LiteOS # task
-Name          TaskEntryAddr    TID   Priority  Status     StackSize  WaterLine  StackPoint  TopOfStack EventMask SemID  CPUUSE  CPUUSE10s  CPUUSE1s MEMUSE
-----          ------------     ---   -------   --------   ---------  --------   ----------  ---------- -------  -----  -------  ---------  ------  -------
-Swt_Task          0x40002770   0x0    0        QueuePend  0x6000     0x2cc     0x4015a318  0x401544e8  0x0      0xffff    0.0       0.0     0.0     0
-IdleCore000       0x40002dc8   0x1    31       Ready      0x400      0x15c     0x4015a7f4  0x4015a550  0x0      0xffff   98.6      98.2    99.9     0
-system_wq         0x400b80fc   0x3    1        Pend       0x6000     0x244     0x40166928  0x40160ab8  0x1      0xffff    0.0       0.0     0.0     0
-SerialShellTask   0x40090158   0x5    9        Running    0x3000     0x55c     0x40174918  0x40171e70  0xfff    0xffff    1.2       1.7     0.0     48
-SerialEntryTask   0x4008fe30   0x6    9        Pend       0x1000      0x2c4    0x40175c78  0x40174e88  0x1      0xffff    0.0       0.0     0.0     72
-```
-
->![](public_sys-resources/icon-note.gif) **说明：** 
->1.  输出项说明：
->     -   Name：任务名。
->     -   TID：任务ID。
->     -   Priority：任务的优先级。
->     -   Status：任务当前的状态。
->     -   StackSize：任务栈大小。
->     -   WaterLine：该任务栈已经被使用的内存大小。
->     -   StackPoint：任务栈指针，表示栈的起始地址。
->     -   TopOfStack：栈顶的地址。
->     -   EventMask：当前任务的事件掩码，没有使用事件，则默认任务事件掩码为0（如果任务中使用多个事件，则显示的是最近使用的事件掩码）。
->     -   SemID：当前任务拥有的信号量ID，没有使用信号量，则默认0xFFFF（如果任务中使用了多个信号量，则显示的是最近使用的信号量ID）。
->     -   CPUUSE：系统启动以来的CPU占用率。
->     -   CPUUSE10s：系统最近10秒的CPU占用率。
->     -   CPUUSE1s：系统最近1秒的CPU占用率。
->     -   MEMUSE：截止到当前时间，任务所申请的内存大小，以字节为单位显示。MEMUSE仅针对系统内存池进行统计，不包括中断中处理的内存和任务启动之前的内存。
->        任务申请内存，MEMUSE会增加，任务释放内存，MEMUSE会减小，所以MEMUSE会有正值和负值的情况。
->        1）MEMUSE为0：说明该任务没有申请内存，或者申请的内存和释放的内存相同。
->        2）MEMUSE为正值：说明该任务中有内存未释放。
->        3）MEMUSE为负值：说明该任务释放的内存大于申请的内存。
->2.  系统任务说明（Huawei LiteOS系统初始任务有以下几种）：
->     -   Swt\_Task：软件定时器任务，用于处理软件定时器超时回调函数。
->     -   IdleCore000：系统空闲时执行的任务。
->     -   system\_wq：系统默认工作队列处理任务。
->     -   SerialEntryTask：从底层buf读取用户的输入，初步解析命令，例如tab补全，方向键等。
->     -   SerialShellTask：接收命令后进一步解析，并查找匹配的命令处理函数，进行调用。
->3.  任务状态说明：
->     -   Ready：任务处于就绪状态。
->     -   Pend：任务处于阻塞状态。
->     -   PendTime：阻塞的任务处于等待超时状态。
->     -   Suspend：任务处于挂起状态。
->     -   Running：该任务正在运行。
->     -   Delay：任务处于延时等待状态。
->     -   SuspendTime：挂起的任务处于等待超时状态。
->     -   Invalid：非上述任务状态。
-
-### free
-#### 命令功能
-显示系统内存的使用情况，同时显示系统的text段、data段、rodata段、bss段大小。
-
-#### 命令格式
-```
-free [-k | -m]
-```
-
-#### 参数说明
-|参数|参数说明|取值范围|
-|:---:|:---|:---:|
-|无参数|以Byte为单位显示|N/A|
-|-k|以KByte为单位显示|N/A|
-|-m|以MByte为单位显示|N/A|
-
-#### 使用指南
--  输入free显示内存使用情况，total表示系统动态内存池的总大小，used表示已使用的内存大小，free表示空闲的内存大小。text表示代码段大小，data表示数据段大小，rodata表示只读数据段大小，bss表示未初始化全局变量占用的内存大小。
--  free命令能够以三种单位来显示内存使用情况，包括Byte、KByte和MByte。
-
-#### 使用实例
-
-举例：
-
-分别输入free、free -k、free -m。
-
-#### 输出说明
-
-以三种单位显示内存使用情况的输出：
-
-```
-Huawei LiteOS # free
-
-        total        used          free
-Mem:    117631744    31826864      85804880
-
-        text         data          rodata        bss
-Mem:    4116480      423656        1204224       6659316
-
-Huawei LiteOS # free -k
-
-        total        used          free
-Mem:    114874       31080         83793
-
-        text         data          rodata        bss
-Mem:    4020         423           1176         6503
-
-Huawei LiteOS # free -m
-
-        total        used          free
-Mem:    112          30            81
-
-        text         data          rodata        bss
-Mem:    3            0             1             6
-```
-
-### memcheck
-#### 命令功能
-检查动态申请的内存块是否完整，是否存在内存越界造成的节点损坏。
-
-#### 命令格式
-```
-memcheck
-```
-
-#### 使用指南
-
--   打开内存完整性检查开关。
-    -   目前只有bestfit内存管理算法支持该命令，需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT：
-
-        ```
-        Kernel ---> Memory Management ---> Dynamic Memory Management Algorithm ---> bestfit
-        ```
-
-    -   该命令依赖于LOSCFG\_BASE\_MEM\_NODE\_INTEGRITY\_CHECK，使用时需要在配置项中开启"Enable integrity check or not"。
-
-        ```
-        Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable integrity check or not
-        ```
-
--   当内存池所有节点完整时，输出"memcheck over, all passed!"。
--   当内存池存在节点不完整时，输出被损坏节点的内存块信息。
-
-#### 使用实例
-
-举例：
-
-输入memcheck。
-
-#### 输出说明
-
--   没有内存越界时，执行memcheck输出内容如下：
-
-    ```
-    Huawei LiteOS # memcheck
-    system memcheck over, all passed!
-    ```
-
--   发生内存越界时，执行memcheck输出内容如下：
-
-    ```
-    Huawei LiteOS # memcheck
-    [ERR][OsMemIntegrityCheck], 1145, memory check error!
-    freeNodeInfo.pstPrev:(nil) is out of legal mem range[0x80353540, 0x84000000]
-    
-    broken node head: (nil)  (nil)  (nil)  0x0, pre node head: 0x7fc6a31b  0x8  0x80395ccc  0x80000110
-    
-    ---------------------------------------------
-     dump mem tmpNode:0x80395df4 ~ 0x80395e34
-    
-     0x80395df4 :00000000 00000000 00000000 00000000
-     0x80395e04 :cacacaca cacacaca cacacaca cacacaca
-     0x80395e14 :cacacaca cacacaca cacacaca cacacaca
-     0x80395e24 :cacacaca cacacaca cacacaca cacacaca
-    
-    ---------------------------------------------
-     dump mem :0x80395db4 ~ tmpNode:0x80395df4
-    
-     0x80395db4 :00000000 00000000 00000000 00000000
-     0x80395dc4 :00000000 00000000 00000000 00000000
-     0x80395dd4 :00000000 00000000 00000000 00000000
-     0x80395de4 :00000000 00000000 00000000 00000000
-    
-    ---------------------------------------------
-    cur node: 0x80395df4
-    pre node: 0x80395ce4
-    pre node was allocated by task:SerialShellTask
-    cpu0 is in exc.
-    cpu1 is running.
-    excType:software interrupt
-    taskName = SerialShellTask
-    taskId = 8
-    task stackSize = 12288
-    system mem addr = 0x80353540
-    excBuffAddr pc = 0x80210b78
-    excBuffAddr lr = 0x80210b7c
-    excBuffAddr sp = 0x803b2d50
-    excBuffAddr fp = 0x80280368
-    R0         = 0x59
-    R1         = 0x600101d3
-    R2         = 0x0
-    R3         = 0x8027a300
-    R4         = 0x1
-    R5         = 0xa0010113
-    R6         = 0x80395e04
-    R7         = 0x80317254
-    R8         = 0x803b2de4
-    R9         = 0x4
-    R10        = 0x803afca4
-    R11        = 0x80280368
-    R12        = 0x1
-    CPSR       = 0x600101d3
-    ```
-
-    以上各关键输出项含义如下：
-    - “mem check error”，表示检测到了内存节点被破坏。
-    - “cur node：”，表示该节点内存被踩，并打印内存地址。
-    - “pre node：”，表示被踩节点前面的节点，并打印节点地址。
-    - “pre node was allocated by task:SerialShellTask”表示在SerialShellTask任务中发生了踩内存。
-    - “taskName”和“taskId”，分别表示发生异常的任务名和任务ID。
-
-### memused
-#### 命令功能
-查看当前系统used节点中保存的函数调用栈LR信息。通过分析数据可检测内存泄露问题。
-
-#### 命令格式
-```
-memused
-```
-
-#### 使用指南
-
-通过make menuconfig打开内存泄漏检测。
-
--   目前只有bestfit内存管理算法支持该功能，需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT。
-
-    ```
-    Kernel ---> Memory Management ---> Dynamic Memory Management Algorithm ---> bestfit
-    ```
-
--   该命令依赖于LOSCFG\_MEM\_LEAKCHECK，可以在menuconfig中配置“Enable Function call stack of Mem operation recorded”：
-
-    ```
-    Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable Function call stack of Mem operation recorded
-    ```
-
-    此配置项打开时，会在内存操作时，将函数调用关系LR记录到内存节点中，若相同调用栈的内存节点随时间增长而不断增多，则可能存在内存泄露，通过LR可以追溯内存申请的位置。重点关注LR重复的节点。
-
-    >![](public_sys-resources/icon-notice.gif) **须知：** 
-    >此配置打开时，会影响内存占用和内存操作性能，因此仅在检测内存泄露问题时打开。
-
-
-#### 使用实例
-
-举例：
-
-输入memused。
-
-#### 输出说明
-
-```
-Huawei LiteOS # memused
-node         LR[0]       LR[1]       LR[2]
-0x802d79e4:  0x8011d740  0x8011a990  0x00000000
-0x802daa0c:  0x8011d5ec  0x8011d740  0x8011a990
-0x802dca28:  0x8006e6f4  0x8006e824  0x8011d5ec
-0x802e2a48:  0x8014daac  0x8014db4c  0x800f6da0
-0x802e8a68:  0x8011d274  0x8011d654  0x8011d740
-0x802e8a94:  0x8014daac  0x8014db4c  0x8011d494
-0x802eeab4:  0x8011d4e0  0x8011d658  0x8011d740
-0x802f4ad4:  0x8015326c  0x80152a20  0x800702bc
-0x802f4b48:  0x8015326c  0x80152a20  0x800702bc
-0x802f4bac:  0x801504d8  0x801505d8  0x80150834
-0x802f4c08:  0x801504d8  0x801505d8  0x80150834
-0x802f4c74:  0x801504d8  0x801505d8  0x80150834
-0x802f4e08:  0x801504d8  0x801505d8  0x80150834
-0x802f4e60:  0x801030e8  0x801504d8  0x801505d8
-0x802f4e88:  0x80103114  0x801504d8  0x801505d8
-0x802f4eb4:  0x801504d8  0x801505d8  0x80150834
-0x802f4f7c:  0x801504d8  0x801505d8  0x80150834
-0x802f5044:  0x801504d8  0x801505d8  0x80150834
-0x802f510c:  0x800702bc  0x80118f24  0x00000000
-```
-
-### hwi
-#### 命令功能
-查询当前中断信息。
-
-#### 命令格式
-```
-hwi
-```
-
-#### 使用指南
--  输入hwi即显示当前中断号、中断次数及注册中断名称。
--  若打开宏开关`LOSCFG_CPUP_INCLUDE_IRQ`，还会显示各个中断的处理时间（cycles）、CPU占用率以及中断类型。该宏开关可以通过`make menuconfig`在配置项中开启`Enable Cpup include irq`使能。
-   ```
-   Kernel --> Enable Cpup --> Enable Cpup include irq
-   ```
-
-    关于该宏开关更详细的介绍，参见[CPU占用率开发流程](/doc/LiteOS_Maintenance_Guide.md#开发流程)。
-
-
-#### 使用实例
-
-举例：
-
-输入hwi。
-
-#### 输出说明
-
-1.  显示中断信息（LOSCFG\_CPUP\_INCLUDE\_IRQ关闭）
-
-    ```
-    Huawei LiteOS # hwi
-    InterruptNo     Count     Name
-    35:             1364:
-    36:             0:
-    40:             79:       uart_pl011
-    ```
-
-2.  显示中断信息（LOSCFG\_CPUP\_INCLUDE\_IRQ打开）
-
-    ```
-    Huawei LiteOS # hwi
-    InterruptNo Count   Name   CYCLECOST  CPUUSE CPUUSE10s CPUUSE1s mode
-            3:  1333            122       0.0    0.0       0.0    normal
-            4:  0               0         0.0    0.0       0.0    normal
-            5:  59   uart_pl011 305       0.0    0.0       0.0    normal
-           12:  96      ETH     131       0.0    0.0       0.0    normal
-    ```
-
-### queue
-#### 命令功能
-查看队列的使用情况。
-
-#### 命令格式
-```
-queue
-```
-
-#### 使用指南
-
-该命令依赖于LOSCFG\_DEBUG\_QUEUE，使用时需要在配置项中开启"Enable Queue Debugging"。
-```
-Debug  ---> Enable a Debug Version---> Enable Debug LiteOS Kernel Resource ---> Enable Queue Debugging
-```
-
-#### 使用实例
-
-举例：
-
-输入queue。
-
-#### 输出说明
-
-执行queue后得到队列的使用情况：
-
-```
-Huawei LiteOS # queue
-used queues information:
-Queue ID <0x0> may leak, queue len is 0x10, readable cnt:0x0, writeable cnt:0x10, TaskEntry of creator:0x0x80007d5, Latest operation time: 0x614271
-```
-
-以上各输出项含义如下：
-- Queue ID：队列编号
-- queue len：队列消息节点个数
-- readable cnt：队列中可读的消息个数
-- writeable cnt：队列中可写的消息个数
-- TaskEntry of creator：创建队列的接口地址
-- Latest operation time：队列最后操作时间
-
-### sem
-#### 命令功能
-查询系统内核信号量的相关信息。
-
-#### 命令格式
-```
-sem [ID] 
-sem fulldata
-```
-
-#### 参数说明
-参数|参数说明|取值范围
-|:---:|:---|:---:|
-|ID|信号ID号，输入形式以十进制表示或十六进制表示皆可|[0, 0xFFFFFFFF]|
-|fulldata|查询所有在用的信号量信息，打印信息包括：SemID, Count, Original Count, Creater TaskEntry, Last Access Time|N/A|
-
-#### 使用指南
-- 参数缺省时，显示所有信号量的使用数及信号量总数。
--   sem后加ID，当ID参数在[0, 1023]范围内时，返回指定ID号的信号量使用数（如果指定ID号的信号量未被使用则提示），其他取值时返回参数错误的提示。
--   sem的参数ID和fulldata不可以混用。
--   参数fulldata依赖LOSCFG\_DEBUG\_SEMAPHORE，使用时需要在配置项中开启"Enable Semaphore Debugging"。
-
-    ```
-    Debug ---> Enable a Debug Version ---> Enable Debug LiteOS Kernel Resource ---> Enable Semaphore Debugging
-    ```
-
-#### 使用实例
-
-举例1：输入sem 1。
-
-举例2：输入sem和sem fulldata。
-
-#### 输出说明
-
-执行sem 1，查询指令结果：
-
-```
-Huawei LiteOS # sem 1
-   SemID       Count
-   ----------  -----
-   0x00000001    0x1
-No task is pended on this semphore!
-```
-
-执行sem和sem fulldata，查询所有在用的信号量信息：
-
-```
-Huawei LiteOS # sem
-   SemID       Count
-   ----------  -----
-   0x00000000  1
-   SemID       Count
-   ----------  -----
-   0x00000001  1
-   SemID       Count
-   ----------  -----
-   0x00000002  1
-   SemUsingNum   : 3
-
-Huawei LiteOS # sem fulldata
-Used Semaphore List:
-   SemID   Count   OriginalCout   Creater(TaskEntry)   LastAccessTime
-   ------  -----   ------------   -----------------    --------------
-   0x2     0x1     0x1            0x80164d70           0x3
-   0x0     0x1     0x1            0x0                  0x3
-   0x1     0x1     0x1            0x0                  0x3
-```
-
-### mutex
-#### 命令功能
-
-查看互斥锁的使用情况。
-
-#### 命令格式
-```
-mutex
-```
-
-#### 使用指南
-该命令依赖于LOSCFG\_DEBUG\_MUTEX，使用时需要在配置项中开启"Enable Mutex Debugging"。
-```
-Debug ---> Enable a Debug Version ---> Enable Debug LiteOS Kernel Resource ---> Enable Mutex Debugging
-```
-
-#### 使用实例
-
-举例：
-
-输入mutex。
-
-#### 输出说明
-
-执行mutex输出互斥锁使用情况：
-
-```
-Huawei LiteOS # mutex
-used mutexs information: 
-Mutex ID <0x0> may leak, Owner is null, TaskEntry of creator: 0x8000711,Latest operation time: 0x0
-```
-
-以上各输出项含义如下：
-- Mutex ID：互斥锁序号
-- TaskEntry of creator：创建互斥锁的接口地址
-- Latest operation time：任务最后调度时间
-
-### dlock
-#### 命令功能
-检查系统中的任务是否存在互斥锁（Mutex）死锁，输出系统中所有任务持有互斥锁的信息。
-
-#### 命令格式
-```
-dlock
-```
-
-#### 使用指南
--  该命令需使能`LOSCFG_DEBUG_DEADLOCK`，使能方式可以通过`make menuconfig`在配置项中开启`Enable Mutex Deadlock Debugging`。
-   ```
-   Debug ---> Enable a Debug Version ---> Enable Debug LiteOS Kernel Resource ---> Enable Mutex Deadlock Debugging
-   ```
-- dlock检测输出的是在超过时间阈值（默认为10min）内没有获取到互斥锁的任务信息，并不能代表这些任务都发生了死锁，需要通过互斥锁信息及任务调用栈信息进一步确认。
-
-#### 使用实例
-
-举例：
-
-输入dlock。
-
-#### 输出说明
-
-当系统中的任务无死锁时，dlock输出如下：
-
-```
-Huawei LiteOS # dlock
-Start mutexs deadlock check:
-Task_name:agenttiny_task, ID:0x0, holds the Mutexs below:
-null
-*******backtrace begin*******
-********backtrace end********
-
-Task_name:SerialShellTask, ID:0x4, holds the Mutexs below:
-null
-*******backtrace begin*******
-********backtrace end********
-
------------End-----------
-```
-
-当系统出现死锁时，dlock输出如下：
-
-```
-Huawei LiteOS # dlock
-Start mutexs deadlock check:
-Task_name:SendToSer, ID:0x0, holds the Mutexs below:
-null
-*******backtrace begin*******
-********backtrace end********
-
-Task_name:WowWriteFlashTask, ID:0x3, holds the Mutexs below:
-null
-*******backtrace begin*******
-********backtrace end********
-
-Task_name:system_wq, ID:0x4, holds the Mutexs below:
-null
-*******backtrace begin*******
-********backtrace end********
-
-Task_name:app_Task, ID:0x5, holds the Mutexs below:
-<Mutex0 info>
-Ptr handle:0x8036104c
-Owner:app_Task
-Count:1
-Pended task: 0. name:mutexDlock_Task, id:0xc
-*******backtrace begin*******
-********backtrace end********
-
-Task_name:Swt_Task, ID:0x6, holds the Mutexs below:
-null
-*******backtrace begin*******
-*******backtrace begin*******
-traceback 0 -- lr = 0x4    fp = 0x0
-********backtrace end********
-
-Task_name:IdleCore000, ID:0x7, holds the Mutexs below:
-null
-*******backtrace begin*******
-********backtrace end********
-
-Task_name:eth_irq_Task, ID:0xb, holds the Mutexs below:
-null
-*******backtrace begin*******
-********backtrace end********
-
-Task_name:mutexDlock_Task, ID:0xc, holds the Mutexs below:
-<Mutex0 info>
-Ptr handle:0x80361060
-Owner:mutexDlock_Task
-Count:1
-Pended task: 0. name:app_Task       , id:0x5
-*******backtrace begin*******
-********backtrace end********
-
------------End-----------
-```
-
-  以上各输出项含义如下：
-  - Task_name:xxx, ID:xxx, holds the Mutexs below：表示疑似死锁的任务名和ID，后面几行信息是该任务持有的各个互斥锁信息，如果为“null”表示该任务并没有持有互斥锁。
-  - \<MutexN info\>：后面几行是该互斥锁的详细信息，包括：
-    | 输出项        | 说明                                        |
-    | ------------- | ------------------------------------------- |
-    | Ptr handle    | 该互斥锁的控制块地址                        |
-    | Owner         | 持有该互斥锁的任务名                        |
-    | Count         | 该互斥锁的引用计数                          |
-    | Pended Task   | 正在等待该互斥锁的任务名，如果没有则为null  |
-
-### swtmr
-#### 命令功能
-查询系统软件定时器相关信息。
-
-#### 命令格式
-```
-swtmr [ID]
-```
-
-#### 参数说明
-|参数|参数说明|取值范围|
-|:---:|:---|:---:|
-|ID|软件定时器ID号，输入形式以十进制表示或十六进制表示皆可|[0, 0xFFFFFFFF]|
-
-#### 使用指南
--  参数缺省时，默认显示所有软件定时器的相关信息。
--  swtmr后加ID号时，当ID在[0, 当前软件定时器个数 - 1]范围内时，返回对应ID的软件定时器的相关信息，其他取值时返回错误提示。
-
-#### 使用实例
-
-举例：
-
-输入swtmr和swtmr 1。
-
-#### 输出说明
-
-执行swtmr查询软件定时器相关信息，输出如下：
-
-```
-Huawei LiteOS # swtmr
-
-SwTmrID     State    Mode    Interval  Arg         handlerAddr
-----------  -------  ------- --------- ----------  --------
-0x00000000  Ticking  Period   1000     0x00000000  0x800442d
-```
-
-执行swtmr 0查询ID为0的软件定时器信息，输出如下：
-
-```
-Huawei LiteOS # swtmr 0
-
-SwTmrID     State    Mode    Interval  Arg         handlerAddr
-----------  -------  ------- --------- ----------  --------
-0x00000000  Ticking  Period   1000     0x00000000  0x800442d
-```
-
-以上各关键输出项含义如下：
-| 输出项      | 说明                   |
-| ----------- | --------------------- |
-| SwTmrID     | 软件定时器ID           |
-| State       | 软件定时器状态         |
-| Mode        | 软件定时器模式         |
-| Interval    | 软件定时器使用的Tick数 |
-| Arg         | 传入的参数             |
-| handlerAddr | 回调函数的地址         |
-
-### systeminfo
-#### 命令功能
-显示当前操作系统的资源使用情况，包括任务、信号量、互斥锁、队列、软件定时器等。
-对于信号量、互斥锁、队列和软件定时器，如果在系统镜像中已经裁剪了这些模块，那么说明系统没有使用这些资源，该命令也就不会显示这些资源的情况。
-
-#### 命令格式
-```
-systeminfo
-```
-
-#### 使用实例
-
-举例：
-
-输入systeminfo。
-
-#### 输出说明
-
-执行systeminfo查看系统资源使用情况，输出如下：
-
-```
-Huawei LiteOS # systeminfo
-
-   Module    Used      Total
---------------------------------
-   Task      5         16
-   Sem       0         20
-   Mutex     1         20
-   Queue     1         10
-   SwTmr     1         16
-```
-
-以上各输出项含义如下：
-| 输出项      | 说明            |
-| ---------- | --------------- |
-| Module     | 模块名称         |
-| Used       | 当前使用量       |
-| Total      | 最大可用量       |
-
-### log
-#### 命令功能
-设置&查询系统的日志打印等级。
-
-#### 命令格式
-```
-log level [levelNum]
-```
-
-#### 参数说明
-参数|参数说明|取值范围
-|:---:|:---|:---:|
-|levelNum|设置日志打印等级|[0x0，0x5]|
-
->![](public_sys-resources/icon-notice.gif) **须知：** 
->暂不支持设置module、path。
-
-#### 使用指南
-
--   该命令依赖于LOSCFG\_SHELL\_LK，使用时可以通过make menuconfig在配置项中开启"Enable Shell lk"。
-    ```
-    Debug --> Enable a Debug Version --> Enable Shell --> Functionality of Shell --> Enable Shell lk
-    ```
--  `log level`命令用于设置系统的日志打印等级，包括6个等级。
-    ```
-    TRACE_EMG = 0,
-    TRACE_COMMOM = 1,
-    TRACE_ERROR = 2,
-    TRACE_WARN = 3,
-    TRACE_INFO = 4,
-    TRACE_DEBUG = 5
-    ```
--  若`log level`命令不加`levelNum`参数，则会显示系统当前的日志打印等级，并且提示使用方法。
-
-#### 使用实例
-
-举例：
-
-输入log level 4。
-
-#### 输出说明
-
-执行log level 4，设置系统的日志打印等级为INFO级别：
-
-```
-Huawei LiteOS # log level 4
-Set current log level INFO
-```
-
-### dmesg
-#### 命令功能
-dmesg命令用于控制内核dmesg缓存区。
-
-#### 命令格式
-```
-dmesg
-
-dmesg [-c | -C | -D | -E | -L | -U]
-
-dmesg -s size
-
-dmesg -l level
-
-dmesg > file
-```
-
-#### 参数说明
-|参数|参数说明|取值范围|
-|:---:|:---|:---|
-|-c|打印缓存区内容并清空缓存区|N/A|
-|-C|清空缓存区|N/A|
-|-D \| -E|关闭/开启控制台打印，开源版本暂不支持该参数|N/A|
-|-L \| -U|关闭/开启串口打印，开源版本暂不支持该参数|N/A|
-|-s size|设置缓存区大小|N/A|
-|-l level|设置缓存区的日志打印等级|0 -- 5|
-|> file|将缓存区内容写入文件，开源版本暂不支持该参数|N/A|
-
-#### 使用指南
--  该命令依赖于LOSCFG\_SHELL\_DMESG，使用时可以通过make menuconfig在配置项中开启"Enable Shell dmesg"。
-   ```
-   Debug  ---> Enable a Debug Version---> Enable Shell ---> Functionality of Shell ---> Enable Shell dmesg
-   ```
--  参数缺省时，默认打印缓存区内容。
--  参数均不能混合使用。
-
-#### 使用实例
-
-举例：
-
-输入dmesg后，接着输入dmesg  -C和dmesg。
-
-#### 输出说明
-
-第一次执行dmesg后，可以看到输出了缓存区内容。接着执行dmesg  -C清空缓存区内容，紧接着再次执行dmesg可以看到之前缓存区中的内容已经被清空：
-
-```
-Huawei LiteOS # dmesg
-
-
-Huawei LiteOS # log level 4
-
-Set current log level INFO
-
-Huawei LiteOS # dmesg
-
-
-Huawei LiteOS # dmesg -C
-
-Huawei LiteOS # dmesg
-
-
-Huawei LiteOS # dmesg
-```
-
-### stack
-
-#### 命令功能
-
-stack命令用于显示当前操作系统内所有栈的信息。
-
-#### 命令格式
-```
-stack
-```
-
-#### 使用指南
-
-#### 使用实例
-
-举例：
-
-输入stack。
-
-#### 输出说明
-
-执行stack命令查看系统内所有栈的信息：
-
-```
-Huawei LiteOS # stack
-
- stack name    cpu id     stack addr     total size   used size
- ----------    ------     ---------      --------     --------
-  udf_stack      3        0x3c800        0x28         0x0   
-  udf_stack      2        0x3c828        0x28         0x0   
-  udf_stack      1        0x3c850        0x28         0x0   
-  udf_stack      0        0x3c878        0x28         0x0   
-  abt_stack      3        0x3c8a0        0x28         0x0   
-  abt_stack      2        0x3c8c8        0x28         0x0   
-  abt_stack      1        0x3c8f0        0x28         0x0   
-  abt_stack      0        0x3c918        0x28         0x0   
-  fiq_stack      3        0x3ca40        0x40         0x0   
-  fiq_stack      2        0x3ca80        0x40         0x0   
-  fiq_stack      1        0x3cac0        0x40         0x0   
-  fiq_stack      0        0x3cb00        0x40         0x0   
-  svc_stack      3        0x3cb40        0x2000       0x524 
-  svc_stack      2        0x3eb40        0x2000       0x524 
-  svc_stack      1        0x40b40        0x2000       0x524 
-  svc_stack      0        0x42b40        0x2000       0x528 
-  irq_stack      3        0x3c940        0x40         0x0   
-  irq_stack      2        0x3c980        0x40         0x0   
-  irq_stack      1        0x3c9c0        0x40         0x0   
-  irq_stack      0        0x3ca00        0x40         0x0   
-  exc_stack      3        0x44b40        0x1000       0x0   
-  exc_stack      2        0x45b40        0x1000       0x0   
-  exc_stack      1        0x46b40        0x1000       0x0   
-  exc_stack      0        0x47b40        0x1000       0x0
-```
-
-### cpup
-#### 命令功能
-查询系统CPU的占用率，并以百分比显示占用率。
-
-#### 命令格式
-```
-cpup [mode] [taskID]
-```
-
-#### 参数说明
-|参数|参数说明|取值范围|
-|:---:|:---|:---:|
-|mode|缺省：显示系统最近10s的CPU占用率<br>0：显示系统最近10s的CPU占用率<br>1：显示系统最近1s的CPU占用率<br>其他数字：显示系统启动至今总的CPU占用率| [0,0xFFFF]<br>或0xFFFFFFFF|
-|taskID|任务ID号|[0,0xFFFF]或0xFFFFFFFF|
-
-#### 使用指南
--  参数缺省时，显示系统最近10s的CPU占用率。
-
--  只输入一个参数时，该参数为mode，显示系统相应时间的CPU占用率。
-
--  输入两个参数时，第一个参数为mode，第二个参数为taskID，显示指定任务ID的任务在相应时间的CPU占用率。
--   该功能需要使能CPU占用率模块，可以通过make menuconfig使能，菜单路径为：
-
-    ```
-    Kernel ---> Enable Extend Kernel ---> Enable Cpup
-    ```
-
-    想更多的了解CPU占用率模块，参见[CPU占用率](/doc/LiteOS_Maintenance_Guide.md#CPU占用率)。
-
-
-#### 使用实例
-
-举例：
-
-输入cpup 1 1
-
-#### 输出说明
-
-执行cpup 1 1，显示ID为1的任务最近1s的CPU占用率：
-
-```
-Huawei LiteOS # cpup 1 1
-TaskId 1 CpuUsage in 1s: 78.7
-```
-
-### watch
-#### 命令功能
-周期性监听一个命令的运行结果。
-
-#### 命令格式
-```
-watch [-c | -n | -t | --count | --interval | -no-title] [command]
-watch --over
-```
-
-#### 参数说明
-
-|参数|参数说明|缺省值|取值范围|
-|:---:|:---|:---|:---|
-|-c / --count|命令执行的总次数|0xFFFFFF|（0,0xFFFFFF]|
-|-n / --interval|命令周期性执行的时间间隔（s）|1s|（0,0xFFFFFF]|
-|-t / -no-title|关闭顶端的时间显示|N/A|N/A|
-|command|需要监听的Shell命令|N/A|N/A|
-|--over|关闭当前的监听|N/A|N/A|
-
-#### 使用指南
--  command参数必须是Shell命令，对于非Shell命令，会有错误提示“command is not fount”。
--  如果要监听命令，command是必填参数。
--  --over参数不能与其他参数混合使用。
-
-#### 使用实例
-
-举例1：输入watch -c  5  task 1。
-
-举例2：在不需要watch命令监听的情况下，执行watch --over。
-
-#### 输出说明
-
-每个周期间隔1秒的执行task 1命令，共执行5次，watch命令监听到的结果如下所示：
-
-```
-Huawei LiteOS # watch -c 3 task 1
-
-Huawei LiteOS # Thu Jan  1 16:26:26 1970
-
-TaskName = Swt_Task
-TaskId = 0x1
-*******backtrace begin*******
-traceback 1 -- lr = 0x08004006 -- fp = 0x0800045e
-traceback 2 -- lr = 0x08004000 -- fp = 0x0800194c
-traceback 3 -- lr = 0x080040da -- fp = 0x08003e50
-traceback 4 -- lr = 0x080015c2 -- fp = 0x080040a8
-traceback 5 -- lr = 0x0800396e -- fp = 0x08001598
-
-Thu Jan  1 16:26:27 1970
-
-TaskName = Swt_Task
-TaskId = 0x1
-*******backtrace begin*******
-traceback 1 -- lr = 0x08004006 -- fp = 0x0800045e
-traceback 2 -- lr = 0x08004000 -- fp = 0x0800194c
-traceback 3 -- lr = 0x080040da -- fp = 0x08003e50
-traceback 4 -- lr = 0x080015c2 -- fp = 0x080040a8
-traceback 5 -- lr = 0x0800396e -- fp = 0x08001598
-
-Thu Jan  1 16:26:28 1970
-
-TaskName = Swt_Task
-TaskId = 0x1
-*******backtrace begin*******
-traceback 1 -- lr = 0x08004006 -- fp = 0x0800045e
-traceback 2 -- lr = 0x08004000 -- fp = 0x0800194c
-traceback 3 -- lr = 0x080040da -- fp = 0x08003e50
-traceback 4 -- lr = 0x080015c2 -- fp = 0x080040a8
-traceback 5 -- lr = 0x0800396e -- fp = 0x08001598
-```
-
-## Trace命令参考
-
--   **[trace_mask](#trace_mask)**
-
--   **[trace_start](#trace_start)**
-
--   **[trace_stop](#trace_stop)**
-
--   **[trace_dump](#trace_dump)**
-
--   **[trace_reset](#trace_reset)**
-
-使用Shell中的Trace命令前，需要先通过make menuconfig使能Shell，详见[配置项](#配置项)。
-同时配置Trace模块，详见Trace开发流程中的[配置Trace](/doc/LiteOS_Maintenance_Guide.md#开发流程-1)。下文中的“离线模式”在menuconfig中的菜单项为：Kernel ---\> Enable Extend Kernel ---\> Enable Trace Feature ---\> Trace work mode ---\> Offline mode”。
-关于Trace模块的详细介绍，详见[Trace](/doc/LiteOS_Maintenance_Guide.md#Trace)。
-
-<h3 id="trace_mask">trace_mask</h3>
-
-#### 命令功能
-
-设置事件过滤掩码。
-
-#### 命令格式
-```
-trace_mask [MASK]
-```
-
-#### 参数说明
-参数|参数说明|取值范围|
-|:---:|:---|:---:|
-|MASK|Trace事件掩码|[0, 0xFFFFFFFF]|
-
-#### 使用指南
-
--   如果不设置事件掩码，或者执行该命令时参数缺省，则默认仅开启任务和中断事件记录。
--   trace_mask后加MASK，则开启对应模块的事件记录。
-
-#### 使用实例
-
-举例：
-
-1.  输入trace_mask 0
-2.  输入trace_mask 0xFFFFFFFF
-
-#### 输出说明
-
-执行trace_mask 0，设置所有模块的事件都不记录，命令执行成功后，不会输出信息。
-
-```
-Huawei LiteOS # trace_mask 0
-
-Huawei LiteOS #
-```
-
-执行trace_mask 0xFFFFFFFF，设置所有模块的事件都进行记录，命令执行成功后，不会输出信息。
-
-```
-Huawei LiteOS # trace_mask 0xFFFFFFFF
-
-Huawei LiteOS #
-```
-
-<h3 id="trace_start">trace_start</h3>
-
-#### 命令功能
-
-开启Trace。
-
-#### 命令格式
-```
-trace_start
-```
-
-#### 使用指南
-
-输入trace_start即开启系统Trace功能，离线模式下会记录系统发生的事件并保存在指定buffer中。
-
-#### 使用实例
-
-举例：开启系统Trace功能，输入trace_start。
-
-#### 输出说明
-
-在离线模式下，成功执行trace_start命令后，不会输出信息。
-
-```
-Huawei LiteOS # trace_start
-
-Huawei LiteOS #
-```
-
-<h3 id="trace_stop">trace_stop</h3>
-
-#### 命令功能
-
-停止Trace。
-
-#### 命令格式
-```
-trace_stop
-```
-
-#### 使用指南
-
-输入trace_stop即终止系统Trace功能， 停止记录事件。
-
-#### 使用实例
-
-举例：停止系统Trace功能，输入trace_stop。
-
-#### 输出说明
-
-成功执行trace_stop命令后，不会输出信息。
-
-```
-Huawei LiteOS # trace_stop
-
-Huawei LiteOS #
-```
-
-<h3 id="trace_dump">trace_dump</h3>
-
-#### 命令功能
-
-在离线模式下，dump出Trace buffer的信息。
-
-#### 命令格式
-```
-trace_dump [1 | 0]
-```
-
-#### 参数说明
-参数|参数说明|取值范围|
-|:---:|:---|:---:|
-|1|将Trace数据输出到客户端|N/A|
-|0|将Trace数据格式化打印|N/A|
-
-#### 使用指南
-
--   只能在离线模式下使用trace_dump命令。
--   参数缺省时将格式化打印Trace数据。
--   trace_dump命令打印的是trace_start和trace_stop之间的数据，所以需要先执行trace_stop停止Trace后，再执行trace_dump打印Trace buffer的信息。
-
-#### 使用实例
-
-举例：
-
-输入trace_dump。
-
-#### 输出说明
-
-执行trace_dump命令，格式化打印缓存中的数据。
-
-```
-Huawei LiteOS # trace_dump
-*******TraceInfo begin*******
-clockFreq = 180000000
-CurEvtIndex = 19
-Index   Time(cycles)      EventType      CurTask   Identity      params    
-0       0x7da8da5180      0x45           0x5       0x2           0x9          0x20         0x1f
-1       0x7dde8c6980      0x45           0x2       0x5           0x1f         0x4          0x9
-2       0x7e1431df20      0x45           0x5       0x2           0x9          0x20         0x1f
-3       0x7e49e3f720      0x45           0x2       0x5           0x1f         0x4          0x9
-4       0x7e7f896cc0      0x45           0x5       0x2           0x9          0x20         0x1f
-5       0x7eb53b84c0      0x45           0x2       0x5           0x1f         0x4          0x9
-6       0x7eeae0fa60      0x45           0x5       0x2           0x9          0x20         0x1f
-7       0x7f20931260      0x45           0x2       0x5           0x1f         0x4          0x9
-8       0x7f56388800      0x45           0x5       0x2           0x9          0x20         0x1f
-9       0x7f8beaa000      0x45           0x2       0x5           0x1f         0x4          0x9
-10      0x7fc19015a0      0x45           0x5       0x2           0x9          0x20         0x1f
-11      0x7ff7422da0      0x45           0x2       0x5           0x1f         0x4          0x9
-12      0x802ce7a340      0x45           0x5       0x2           0x9          0x20         0x1f
-13      0x806299bb40      0x45           0x2       0x5           0x1f         0x4          0x9
-14      0x80983f30e0      0x45           0x5       0x2           0x9          0x20         0x1f
-15      0x80cdf148e0      0x45           0x2       0x5           0x1f         0x4          0x9
-……
-24      0x6c560a8d00      0x24           0x2       0x2d          0x0          0x0          0x0
-25      0x6c8baf7600      0x25           0x2       0x2d          0x0          0x0          0x0
-……
-36      0x71fe6f2000      0x24           0x2       0x2d          0x0          0x0          0x0
-37      0x7234140900      0x25           0x2       0x2d          0x0          0x0          0x0
-38      0x7269c20250      0x45           0x2       0x1           0x1f         0x4          0x0
-39      0x734055a650      0x45           0x1       0x2           0x0          0x8          0x1f
-40      0x7380b52450      0x45           0x2       0x1           0x1f         0x4          0x0
-……
-48      0x77a6d3b300      0x24           0x2       0x2d          0x0          0x0          0x0 
-49      0x77dc789c00      0x25           0x2       0x2d          0x0          0x0          0x0
-50      0x7812269550      0x45           0x2       0x1           0x1f         0x4          0x0
-……
-*******TraceInfo end*******
-```
-
-<h3 id="trace_reset">trace_reset</h3>
-
-#### 命令功能
-
-在离线模式下，清除Trace buffer中的事件数据。
-
-#### 命令格式
-```
-trace_reset
-```
-
-#### 使用指南
-
-只能在离线模式下使用trace_reset命令。
-
-#### 使用实例
-
-举例：
-
-输入 trace_reset。
-
-#### 输出说明
-
-执行trace_reset，清除事件数据：
-
-```
-Huawei LiteOS # trace_reset
-
-Huawei LiteOS #
-```
+1.  在gitee网站上的<a href="https://gitee.com/LiteOS/LiteOS/issues" target="_blank">LiteOS项目</a>中提出issue。
+2.  在<a href="https://bbs.huaweicloud.com/forum/forum-729-1.html" target="_blank">Huawei LiteOS官方论坛</a>上提问。
