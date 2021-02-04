@@ -3841,17 +3841,6 @@ Huawei LiteOS 的事件模块为用户提供下面几种功能，接口详细信
     <td class="cellrowborder" valign="top" width="19.680000000000003%" headers="mcps1.1.6.1.5 "><p id="p39572571171025"><a name="p39572571171025"></a><a name="p39572571171025"></a>无</p>
     </td>
     </tr>
-    <tr id="row58701968171025"><td class="cellrowborder" valign="top" width="22.380000000000003%" headers="mcps1.1.6.1.1 "><p id="p57239002171025"><a name="p57239002171025"></a><a name="p57239002171025"></a>LOSCFG_BASE_IPC_EVENT_LIMIT</p>
-    </td>
-    <td class="cellrowborder" valign="top" width="29.67000000000001%" headers="mcps1.1.6.1.2 "><p id="p5847613171025"><a name="p5847613171025"></a><a name="p5847613171025"></a>最大支持的事件控制块数量</p>
-    </td>
-    <td class="cellrowborder" valign="top" width="13.970000000000002%" headers="mcps1.1.6.1.3 "><p id="p9693172175013"><a name="p9693172175013"></a><a name="p9693172175013"></a>无</p>
-    </td>
-    <td class="cellrowborder" valign="top" width="14.3%" headers="mcps1.1.6.1.4 "><p id="p47029099171025"><a name="p47029099171025"></a><a name="p47029099171025"></a>1024</p>
-    </td>
-    <td class="cellrowborder" valign="top" width="19.680000000000003%" headers="mcps1.1.6.1.5 "><p id="p297512291482"><a name="p297512291482"></a><a name="p297512291482"></a>LOSCFG_BASE_IPC_EVENT</p>
-    </td>
-    </tr>
     </tbody>
     </table>
 
