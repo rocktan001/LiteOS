@@ -167,14 +167,14 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 1.  打开STM32CubeMX软件，点击菜单栏“File”在下拉菜单中选择“New Project”，如下图所示：
 
     **图 1**  新建工程<a name="fig4460124474916"></a>
-    ![](figures/新建工程.png "新建工程")
+    ![](figures/porting/build_project.png "新建工程")
 
 2.  选择开发板芯片。
 
     选择对应的开发板MCU（对于正点原子STM32F407开发板，选择STM32F407ZG），如下图所示：
 
     **图 2**  设置开发板芯片<a name="fig13913182955219"></a>
-    ![](figures/设置开发板芯片.png "设置开发板芯片")
+    ![](figures/porting/set_chip.png "设置开发板芯片")
 
 
 <h3 id="配置芯片外设">配置芯片外设</h3>
@@ -190,14 +190,14 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
     选择“Pinout & Configuration”标签页，在左边的“System Core”中选择RCC，设置HSE（High Speed Clock，外部高速时钟）为Crystal/ Ceramic Resonator（晶振/陶瓷谐振器），即采用外部晶振作为 HSE 的时钟源，如下图所示：
 
     **图 1**  配置时钟引脚<a name="fig197751515215"></a>
-    ![](figures/配置时钟引脚.png "配置时钟引脚")
+    ![](figures/porting/configure_clock_pins.png "配置时钟引脚")
 
 2.  配置时钟频率。
 
     将标签页切换为“Clock Configuration”。STM32F407芯片的最高时钟为168MHz，在HCLK处输入168并且回车即可完成配置，如下图所示。其他开发板的配置方式也类似。
 
     **图 2**  配置时钟频率<a name="fig118761971236"></a>
-    ![](figures/配置时钟频率.png "配置时钟频率")
+    ![](figures/porting/configure_clock_freq.png "配置时钟频率")
 
 
 <h4 id="配置串口和LED灯">配置串口和LED灯</h4>
@@ -205,33 +205,33 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 将标签页切换回“Pinout & Configuration”。下图是正点原子STM32F407开发板的配置方法。对于其他开发板，可以参考开发板的原理图进行相应配置。
 
 **图 1**  配置串口和LED引脚<a name="fig103021431642"></a>
-![](figures/配置串口和LED引脚.png "配置串口和LED引脚")
+![](figures/porting/configure_serial_and_LED.png "配置串口和LED引脚")
 
 <h4 id="配置烧录调试方式">配置烧录调试方式</h4>
 
 仍然在“Pinout & Configuration”标签页中，在左边的“System Core”中选择“SYS”，将“Debug”设置为“Serial Wire”，即SWD接口。该接口适用于STLink和JLink。
 
 **图 1**  设置烧录调试方式<a name="fig18835710054"></a>
-![](figures/设置烧录调试方式.png "设置烧录调试方式")
+![](figures/porting/set_burn_and_debug_mode.png "设置烧录调试方式")
 
 <h3 id="配置工程">配置工程</h3>
 
 工程配置中，需要设置工程名、代码保存路径、编译工具链/IDE、代码使用的堆栈大小以及HAL库版本。CubeMX 可以生成 Makefile、MDK-ARM、IAR 等 IDE 工程。本指南基于GCC编译工具链，所以Toolchain/IDE需要选择Makefile。将标签页切换到“Project Manager”，选择左边的“Project”标签，如下图所示：
 
 **图 1**  工程配置<a name="fig1322816561169"></a>
-![](figures/工程配置.png "工程配置")
+![](figures/porting/project_configuration.png "工程配置")
 
 为便于外设相关代码维护，建议勾选生成外设驱动的.c/.h文件。选择左边的“Code Generator”标签，如下图所示：
 
 **图 2**  生成代码配置<a name="fig1246184715710"></a>
-![](figures/生成代码配置.png "生成代码配置")
+![](figures/porting/generate_code_configuration.png "生成代码配置")
 
 <h3 id="生成裸机工程代码">生成裸机工程代码</h3>
 
 按以上步骤设置完外设和工程配置后，就可以生成裸机工程代码了，如下图所示：
 
 **图 1**  生成工程<a name="fig74894405817"></a>
-![](figures/生成工程.png "生成工程")
+![](figures/porting/generate_project.png "生成工程")
 
 生成的裸机工程目录结构如下表所示：
 
@@ -314,35 +314,35 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
     在“工程配置”界面中点击“目标板”，在“操作”列中点击“+”后，在出现的空行中填入STM32F407开发板信息，选中新增的开发板后，点击确认按钮保存，如下图所示：
 
-    ![](figures/目标板配置.png)
+    ![](figures/porting/target_board_configuration.png)
 
 2.  编译。
 
     在裸机工程根目录下的Makefile文件上点击右键-\>设置为Makefile文件，然后编译工程，编译生成的二进制镜像文件在工程根目录的build目录下，如下图所示：
 
     **图 1**  编译裸机工程<a name="fig11370205501817"></a>
-    ![](figures/编译裸机工程.png "编译裸机工程")
+    ![](figures/porting/build_bare_project.png "编译裸机工程")
 
 3.  烧录。
     1)  配置烧录器。
 
         在“工程配置”界面中点击“烧录器”，参照下图进行配置，要烧录的二进制镜像文件就是上一步编译生成的bin文件，配置项中的“连接速率”、“加载地址”保持默认即可。
 
-        ![](figures/烧录器配置.png)
+        ![](figures/porting/burner_configuration.png)
 
     2)  点击“工具栏”上的“烧录”按钮，进行烧录。
 
-        ![](figures/烧录按钮.png)
+        ![](figures/porting/burn_button.png)
 
         烧录成功后，可以在终端界面看到如下输出：
 
-        ![](figures/烧录成功的输出.png)
+        ![](figures/porting/output_of_successful_burning.png)
 
     3)  查看串口输出。
 
-        点击“工具栏”上“串口终端”图标![](figures/串口终端按钮.png)，打开串口终端界面。如下图，只需设置与开发板连接的实际端口号，并打开串口开关。开发板按下复位RESET按钮后，即可在“串口终端”界面中看到不断输出hello，同时也可以观察到开发板的LED灯闪烁。
+        点击“工具栏”上“串口终端”图标![](figures/porting/serial_terminal_button.png)，打开串口终端界面。如下图，只需设置与开发板连接的实际端口号，并打开串口开关。开发板按下复位RESET按钮后，即可在“串口终端”界面中看到不断输出hello，同时也可以观察到开发板的LED灯闪烁。
 
-        ![](figures/裸机工程串口输出.png)
+        ![](figures/porting/serial_output_of_bare_project.png)
 
 
 
@@ -630,7 +630,7 @@ STM32F407\_OpenEdv\\liteos.ld是新开发板的链接脚本，需要根据开发
 
 将Huawei\_LiteOS.bin烧录到开发板后，复位开发板，可以在串口看到类似下图的输出：
 
-![](figures/LiteOS版本输出.png)
+![](figures/porting/LiteOS_version_output.png)
 
 <h2 id="任务创建示例">任务创建示例</h2>
 
@@ -753,4 +753,3 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
 
 1.  在gitee网站上的<a href="https://gitee.com/LiteOS/LiteOS/issues" target="_blank">LiteOS项目</a>中提出issue。
 2.  在<a href="https://bbs.huaweicloud.com/forum/forum-729-1.html" target="_blank">Huawei LiteOS官方论坛</a>上提问。
-
