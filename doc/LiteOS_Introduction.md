@@ -14,7 +14,7 @@ Huawei LiteOS是华为面向IoT领域，构建的轻量级物联网操作系统�
 
 Huawei LiteOS发布于2015年5月的华为网络大会上。自开源社区发布以来，围绕 NB-IoT 物联网市场从技术、生态、解决方案、商用支持等多维度使能合作伙伴，构建开源的物联网生态。目前已经聚合了 50+ MCU 和解决方案合作伙伴，共同推出一批开源开发套件和行业解决方案，帮助众多行业客户快速的推出物联网产品和服务。客户涵盖抄表、停车、路灯、环保、共享单车、物流等众多行业，为开发者提供 “一站式” 完整软件平台，可大幅降低设备布置及维护成本，有效降低开发门槛、缩短开发周期。
 
-Huawei LiteOS开源项目目前支持  ARM64、ARM Cortex-A、ARM Cortex-M0，Cortex-M3，Cortex-M4，Cortex-M7 等芯片架构。
+Huawei LiteOS开源项目目前支持 ARM64、ARM Cortex-A、ARM Cortex-M0，Cortex-M3，Cortex-M4，Cortex-M7 等芯片架构。
 
 ### 优势
 
@@ -32,14 +32,14 @@ Huawei LiteOS遵循BSD-3开源许可协议。
 **图 1**  Huawei LiteOS架构框图<a name="fig15710165065411"></a>
 
 
-![](figures/LiteOS架构框图.png)
+![](figures/introduction/Huawei_LiteOS_architecture.png)
 
 Huawei LiteOS支持多种芯片架构，如Cortex-M series、Cortex-R series、Cortex-A series等，可以快速移植到多种硬件平台。Huawei LiteOS也支持 UP（单核）与 SMP（多核）模式，即支持在单核或者多核的环境上运行。
 
 除基础内核外，Huawei LiteOS还包含了丰富的组件，可帮助用户快速构建物联网相关领域的应用场景及实例，主要包含以下组成部分：
 
 -   基础内核：包括不可裁剪的极小内核和可裁剪的其他模块。极小内核包含任务管理、内存管理、中断管理、异常管理和系统时钟。可裁剪的模块包括信号量、互斥锁、队列管理、事件管理、软件定时器等。
--   扩展内核：在内核基础功能之上，进一步提供扩展功能，包括C++支持、调测组件等。调测组件提供了强大的问题定位及调测能力，包括shell命令、Trace事件跟踪、获取CPU占用率、LMS等。
+-   内核增强：在内核基础功能之上，进一步提供增强功能，包括C++支持、调测组件等。调测组件提供了强大的问题定位及调测能力，包括shell命令、Trace事件跟踪、获取CPU占用率、LMS等。
 -   文件系统：提供一套轻量级的文件系统接口以支持文件系统的基本功能，包括vfs、ramfs、fatfs等。
 -   系统库接口：提供一系列系统库接口以提升操作系统的可移植性及兼容性，包括Libc/Libm/POSIX以及CMSIS适配层接口。
 -   网络协议栈：提供丰富的网络协议栈以支持多种网络功能，包括CoAP/LwM2M、MQTT等。
@@ -101,35 +101,4 @@ Huawei LiteOS支持多种芯片架构，如Cortex-M series、Cortex-R series、C
 
 ### LiteOS代码入口
 
-LiteOS入口在工程对应的main.c中，基本流程如下：
-
-```c
-INT32 main(VOID)
-{
-    HardwareInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-    return 0;
-}
-```
-
-首先进行硬件初始化HardwareInit\(\)，然后打印Huawei LiteOS的版本信息；
-
-接着执行OsMain\(\)初始化Huawei LiteOS内核及例程，在OsMain\(\)函数中会创建用户任务，其任务处理函数为app\_init\(\)；
-
-最后调用OsStart\(\)开始任务调度，Huawei LiteOS开始正常工作。
-
-### Huawei LiteOS的代码目录结构说明
-
-参见Huawei LiteOS码云代码仓的markdown文档：<a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/LiteOS_Code_Info.md#liteos%E7%9A%84%E4%BB%A3%E7%A0%81%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E" target="_blank">LiteOS的代码目录结构说明</a>。
+关于Huawei LiteOS的代码入口和目录结构说明，参见Huawei LiteOS码云代码仓的markdown文档：[LiteOS的代码目录结构说明](LiteOS_Code_Info.md)。
