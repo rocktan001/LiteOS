@@ -52,7 +52,7 @@ typedef struct tagHwiHandleForm {
 
 typedef struct {
     VOID (*triggerIrq)(HWI_HANDLE_T hwiNum);
-    VOID (*clearIrq)(HWI_HANDLE_T hwiNum);
+    UINT32 (*clearIrq)(HWI_HANDLE_T hwiNum);
     VOID (*enableIrq)(HWI_HANDLE_T hwiNum);
     VOID (*disableIrq)(HWI_HANDLE_T hwiNum);
     UINT32 (*setIrqPriority)(HWI_HANDLE_T hwiNum, UINT8 priority);

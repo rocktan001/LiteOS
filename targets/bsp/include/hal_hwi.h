@@ -37,13 +37,15 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#define HWI_NUM_VALID(num)    (((num) >= OS_USER_HWI_MIN) && ((num) <= OS_USER_HWI_MAX))
+
 extern VOID HalIrqInit(VOID);
 extern VOID HalIrqInitPercpu(VOID);
 extern VOID HalIrqMask(UINT32 vector);
 extern VOID HalIrqUnmask(UINT32 vector);
 extern VOID HalIrqPending(UINT32 vector);
-extern VOID HalIrqClear(UINT32 vector);
 extern CHAR *HalIrqVersion(VOID);
+extern UINT32 HalIrqClear(UINT32 vector);
 extern UINT32 HalCurIrqGet(VOID);
 extern UINT32 HalIrqSetPrio(UINT32 vector, UINT8 priority);
 #if (LOSCFG_KERNEL_SMP == YES)
