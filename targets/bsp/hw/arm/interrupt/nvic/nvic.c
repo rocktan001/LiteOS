@@ -148,6 +148,17 @@ VOID HalIrqPending(UINT32 hwiNum)
     LOS_IntRestore(intSave);
 }
 
+UINT32 HalIrqClear(UINT32 hwiNum)
+{
+    if (!HWI_NUM_VALID(hwiNum)) {
+        return OS_ERRNO_HWI_NUM_INVALID;
+    }
+
+    hwiNum -= OS_SYS_VECTOR_CNT;
+	NVIC_ClearPendingIRQ((IRQn_Type)hwiNum);
+    return LOS_OK;
+}
+
 UINT32 HalCurIrqGet(VOID)
 {
     g_curIrqNum = __get_IPSR();
@@ -176,6 +187,7 @@ STATIC const HwiControllerOps g_nvicOps = {
     .getCurIrqNum   = HalCurIrqGet,
     .getIrqVersion  = HalIrqVersion,
     .getHandleForm  = HalIrqGetHandleForm,
+    .clearIrq       = HalIrqClear,
 };
 
 VOID HalIrqInit(VOID)

@@ -100,9 +100,10 @@ VOID HalIrqPending(UINT32 vector)
     GIC_REG_32(GICD_ISPENDR(vector >> 5)) = 1U << (vector % 32);
 }
 
-VOID HalIrqClear(UINT32 vector)
+UINT32 HalIrqClear(UINT32 vector)
 {
     GIC_REG_32(GICC_EOIR) = vector;
+    return LOS_OK;
 }
 
 VOID HalIrqHandler(VOID)

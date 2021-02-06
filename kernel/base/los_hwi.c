@@ -74,10 +74,10 @@ STATIC VOID DefaultTriggerIrq(HWI_HANDLE_T hwiNum)
     return;
 }
 
-STATIC VOID DefaultClearIrq(HWI_HANDLE_T hwiNum)
+STATIC UINT32 DefaultClearIrq(HWI_HANDLE_T hwiNum)
 {
     (VOID) hwiNum;
-    return;
+    return LOS_OK;
 }
 
 STATIC VOID DefaultEnableIrq(HWI_HANDLE_T hwiNum)

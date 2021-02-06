@@ -298,10 +298,11 @@ VOID HalIrqPending(UINT32 vector)
     GIC_REG_32(GICD_ISPENDR(vector >> 5)) = 1U << (vector % 32);
 }
 
-VOID HalIrqClear(UINT32 vector)
+UINT32 HalIrqClear(UINT32 vector)
 {
     GiccSetEoir(vector);
     ISB();
+    return LOS_OK;
 }
 
 UINT32 HalIrqSetPrio(UINT32 vector, UINT8 priority)
