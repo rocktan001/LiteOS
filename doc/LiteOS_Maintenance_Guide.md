@@ -188,13 +188,13 @@ Huawei LiteOS的CPU占用率模块为用户提供下面几种功能，接口详�
 </table>
 
 >![](public_sys-resources/icon-notice.gif) **须知：**
->错误码定义见<a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/Huawei_LiteOS_Kernel_Developer_Guide_zh.md#错误码简介" target="_blank">错误码简介</a>。8\~15位的所属模块为CPUP模块，值为0x1e。
+>错误码定义见[错误码简介](./LiteOS_Kernel_Developer_Guide.md#错误码简介)。8\~15位的所属模块为CPUP模块，值为0x1e。
 
 #### 开发流程
 
 CPU占用率的典型开发流程：
 
-1.  通过make menuconfig的配置CPU占用率模块。
+1.  通过make menuconfig的配置CPU占用率模块，菜单路径为：Kernel ---\> Enable Extend Kernel ---\> Enable Cpup。
 
     <a name="table06655375130"></a>
     <table><thead align="left"><tr id="row8665203751318"><th class="cellrowborder" valign="top" width="20.910000000000004%" id="mcps1.1.6.1.1"><p id="p61687296155221"><a name="p61687296155221"></a><a name="p61687296155221"></a>配置项</p>
@@ -442,37 +442,37 @@ Huawei LiteOS的Trace模块为用户提供下面几种功能，接口详细信�
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >1.  LOS\_TRACE\_EASY\(TYPE, IDENTITY, params...\) 简易插桩。
->    -   一句话插桩，用户在目标源代码中插入该接口即可。
->    -   TYPE有效取值范围为\[0, 0xF\]，表示不同的事件类型。
->    -   IDENTITY类型UINTPTR，表示事件操作的主体对象。
->    -   Params类型UINTPTR，表示事件的参数。
->    -   示例：
->        ```c
->        LOS_TRACE_EASY(1, userId0, userParam1, userParam2);
->        LOS_TRACE_EASY(2, userId0);
->        LOS_TRACE_EASY(1, userId1, userParam1, userParam2);
->        LOS_TRACE_EASY(2, userId1);
->        ```
+>       -   一句话插桩，用户在目标源代码中插入该接口即可。
+>       -   TYPE有效取值范围为\[0, 0xF\]，表示不同的事件类型。
+>       -   IDENTITY类型UINTPTR，表示事件操作的主体对象。
+>       -   Params类型UINTPTR，表示事件的参数。
+>       -   示例：
+>           ```c
+>           LOS_TRACE_EASY(1, userId0, userParam1, userParam2);
+>           LOS_TRACE_EASY(2, userId0);
+>           LOS_TRACE_EASY(1, userId1, userParam1, userParam2);
+>           LOS_TRACE_EASY(2, userId1);
+>           ```
 >2.  LOS\_TRACE\(TYPE, IDENTITY, params...\) 标准插桩。
->    -   相比简易插桩，支持动态过滤事件和参数裁剪，但使用上需要用户按规则来扩展。
->    -   TYPE用于设置具体的事件类型，可以在头文件los\_trace.h中的enum LOS\_TRACE\_TYPE中自定义事件类型。定义方法和规则可以参考其他事件类型。
->    -   IDENTITY和Params的类型及含义同简易插桩。
->    -   示例：
->        ```
->        1.在enum LOS_TRACE_MASK中定义事件掩码，即模块级别的事件类型。定义规范为TRACE_#MOD#_FLAG，#MOD#表示模块名，例如：
->          TRACE_FS_FLAG = 0x2000
->        2.在enum LOS_TRACE_TYPE中定义具体事件类型。定义规范为#TYPE# = TRACE_#MOD#_FLAG | NUMBER，例如：
->          FS_READ  = TRACE_FS_FLAG | 0; // 读文件
->          FS_WRITE = TRACE_FS_FLAG | 1; // 写文件
->        3.定义事件参数。定义规范为#TYPE#_PARAMS(IDENTITY, parma1...) IDENTITY, ...
->          其中的#TYPE#就是上面2中的#TYPE#，例如：
->          #define FS_READ_PARAMS(fp, fd, flag, size)    fp, fd, flag, size
->          宏定义的参数对应于Trace缓冲区中记录的事件参数，用户可对任意参数字段进行裁剪；
->          当定义为空时，表示不追踪该类型事件：
->          #define FS_READ_PARAMS(fp, fd, flag, size) // 不追踪文件读事件
->        4.在适当位置插入代码桩。定义规范为LOS_TRACE(#TYPE#, #TYPE#_PARAMS(IDENTITY, parma1...))
->          LOS_TRACE(FS_READ, fp, fd, flag, size); // 读文件的代码桩，#TYPE#之后的入参就是上面3中的FS_READ_PARAMS函数的入参
->        ```
+>       -   相比简易插桩，支持动态过滤事件和参数裁剪，但使用上需要用户按规则来扩展。
+>       -   TYPE用于设置具体的事件类型，可以在头文件los\_trace.h中的enum LOS\_TRACE\_TYPE中自定义事件类型。定义方法和规则可以参考其他事件类型。
+>       -   IDENTITY和Params的类型及含义同简易插桩。
+>       -   示例：
+>           ```
+>           1.在enum LOS_TRACE_MASK中定义事件掩码，即模块级别的事件类型。定义规范为TRACE_#MOD#_FLAG，#MOD#表示模块名，例如：
+>             TRACE_FS_FLAG = 0x2000
+>           2.在enum LOS_TRACE_TYPE中定义具体事件类型。定义规范为#TYPE# = TRACE_#MOD#_FLAG | NUMBER，例如：
+>             FS_READ  = TRACE_FS_FLAG | 0; // 读文件
+>             FS_WRITE = TRACE_FS_FLAG | 1; // 写文件
+>           3.定义事件参数。定义规范为#TYPE#_PARAMS(IDENTITY, parma1...) IDENTITY, ...
+>             其中的#TYPE#就是上面2中的#TYPE#，例如：
+>             #define FS_READ_PARAMS(fp, fd, flag, size)    fp, fd, flag, size
+>             宏定义的参数对应于Trace缓冲区中记录的事件参数，用户可对任意参数字段进行裁剪；
+>             当定义为空时，表示不追踪该类型事件：
+>             #define FS_READ_PARAMS(fp, fd, flag, size) // 不追踪文件读事件
+>           4.在适当位置插入代码桩。定义规范为LOS_TRACE(#TYPE#, #TYPE#_PARAMS(IDENTITY, parma1...))
+>             LOS_TRACE(FS_READ, fp, fd, flag, size); // 读文件的代码桩，#TYPE#之后的入参就是上面3中的FS_READ_PARAMS函数的入参
+>           ```
 >3.  Huawei Liteos预置的Trace事件及参数均可以通过上述方式进行裁剪，参数详见kernel\\include\\los\_trace.h。
 
 #### Trace错误码
@@ -530,13 +530,13 @@ Huawei LiteOS的Trace模块为用户提供下面几种功能，接口详细信�
 </table>
 
 >![](public_sys-resources/icon-notice.gif) **须知：** 
->错误码定义见<a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/Huawei_LiteOS_Kernel_Developer_Guide_zh.md#错误码简介" target="_blank">错误码简介</a>。8\~15位的所属模块为Trace模块，值为0x14。
+>错误码定义见[错误码简介](./LiteOS_Kernel_Developer_Guide.md#错误码简介)。8\~15位的所属模块为Trace模块，值为0x14。
 
 #### 开发流程
 
 Trace的典型开发流程：
 
-1.  通过make menuconfig配置Trace。
+1.  通过make menuconfig配置Trace，菜单路径为：Kernel ---\> Enable Extend Kernel ---\> Enable Trace Feature。
 
     <a name="table06655375130"></a>
     <table><thead align="left"><tr id="row8665203751318"><th class="cellrowborder" valign="top" width="24.36%" id="mcps1.1.6.1.1"><p id="p61687296155221"><a name="p61687296155221"></a><a name="p61687296155221"></a>配置项</p>
@@ -807,27 +807,27 @@ LMS使用影子内存映射标记系统内存的状态，一共可标记为四�
 #### 使用流程
 
 1.  在被检测模块的Makefile文件里，增加LMS检测编译选项-fsanitize=kernel-address。
-2.  通过menuconfig，开启LMS配置项：
+2.  为避免编译器优化，通过menuconfig配置编译器不优化：
 
-    LOSCFG\_KERNEL\_LMS=y   【Debug--\>Enable Lite Memory Sanitizer】
+    LOSCFG\_COMPILER\_OPTIMIZE\_NONE=y 【Compiler --\> Optimize Option --\> Optimize None】
 
-3.  为输出Backtrace信息，需要开启配置项：
+3.  LMS只适配了bestfit内存算法，且不支持SLAB算法，需要开启如下配置项：
 
-    LOSCFG\_BACKTRACE=y 【Debug--\>Enable Backtrace】
+    LOSCFG\_KERNEL\_MEM\_BESTFIT=y 【Kernel --\> Memory Management --\> Dynamic Memory Management Algorithm --\> bestfit】
 
-4.  为避免编译器优化，需要配置编译器选项：
+    LOSCFG\_KERNEL\_MEM\_SLAB\_EXTENTION is not set 【Kernel --\>Memory Management --\> Enable Mem SLAB Extension】
 
-    LOSCFG\_COMPILER\_OPTIMIZE\_NONE=y 【Compiler--\>Optimize Option --\> Optimize None】
+4.  为输出Backtrace信息，需要开启配置项：
 
-5.  LMS只适配了bestfit内存算法，且不支持SLAB算法，需要开启如下配置项：
+    LOSCFG\_BACKTRACE=y 【Debug --\> Enable Backtrace】
 
-    LOSCFG\_KERNEL\_MEM\_BESTFIT=y【Kernel--\>Memory Management--\>Dynamic Memory Management Algorithm】
+5.  开启LMS配置项：
 
-    LOSCFG\_KERNEL\_MEM\_SLAB\_EXTENTION is not set【Kernel--\>Memory Management--\>Enable Mem SLAB Extension】
+    LOSCFG\_KERNEL\_LMS=y 【Debug --\> Enable Lite Memory Sanitizer】
 
 6.  重新编译，查看串口输出。如果检测到内存问题，会输出检测结果。LMS输出的检测信息类似下图所示：
 
-    ![](figures/zh-cn_image_0305363786.png)
+    ![](figures/maintenance/LMS_detect_information.png)
 
     LMS检测信息包含下述几类信息：
 
@@ -855,6 +855,7 @@ LMS使用影子内存映射标记系统内存的状态，一共可标记为四�
 <h2 id="Shell">Shell</h2>
 参见<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md" target="_blank">Shell使用教程</a>。
 
+
 <h2 id="调度统计">调度统计</h2>
 
 ### 功能说明
@@ -863,8 +864,8 @@ LMS使用影子内存映射标记系统内存的状态，一共可标记为四�
 
 ### 使用方法
 
-1.  通过menuconfig开启该调度统计功能，即配置LOSCFG\_DEBUG\_SCHED\_STATISTICS=y，该功能默认关闭。
-2.  将以下函数注册为Shell命令。Shell命令注册方法详见<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md" target="_blank">Shell使用教程</a>中的“新增命令开发流程”。
+1.  通过menuconfig开启该调度统计功能，即配置LOSCFG\_DEBUG\_SCHED\_STATISTICS=y，该功能默认关闭，菜单路径为：Debug ---\> Enable a Debug Version ---\> Enable Debug LiteOS Kernel Resource ---\> Enable Scheduler Statistics Debugging。
+2.  将以下函数注册为Shell命令。Shell命令注册方法详见Shell使用教程中的[新增命令开发流程](/shell/README_CN.md#新增命令开发流程)。
 
     OsShellStatisticsStart---调度统计功能开启函数。
 
@@ -885,7 +886,7 @@ LMS使用影子内存映射标记系统内存的状态，一共可标记为四�
 
 图1 调用OsShellStatisticsStop后输出
 
-![](figures/zh-cn_image_0305363734.png)
+![](figures/maintenance/sched_statistics_after_stop.png)
 
 图中的mpstop是OsShellStatisticsStop注册的Shell命令，仅用于举例，实际上系统中并不存在该命令。图中各输出项说明如下表所示：
 
@@ -945,7 +946,7 @@ LMS使用影子内存映射标记系统内存的状态，一共可标记为四�
 
 图2 调用OsShellCmdDumpSched输出
 
-![](figures/zh-cn_image_0305363640.png)
+![](figures/maintenance/CPU_sched_information.png)
 
 图中的mpstat是OsShellCmdDumpSched注册的Shell命令，仅用于举例，实际上系统中并不存在该命令。图中各输出项说明如下表所示：
 
@@ -1057,12 +1058,17 @@ Huawei LiteOS提供了一套基于内核内存接口的封装接口，增加模�
 #### 使用方法
 
 1.  通过make menuconfig打开多模块内存统计功能。
+    - 目前只有bestfit内存管理算法支持该功能，需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT：
 
-    该功能依赖于LOSCFG\_MEM\_MUL\_MODULE，使用时需要在配置项中开启“Enable Memory module statistics”：
+      ```
+      Kernel ---> Memory Management ---> Dynamic Memory Management Algorithm ---> bestfit
+      ```
 
-    ```
-    Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable Memory module statistics
-    ```
+    - 该功能依赖于LOSCFG\_MEM\_MUL\_MODULE，使用时需要在配置项中开启“Enable Memory module statistics”：
+
+      ```
+      Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable Memory module statistics
+      ```
 
 2.  每个业务模块配置唯一module ID，模块代码中在内存操作时调用对应接口，并传入相应模块ID。
 3.  通过LOS\_MemMusedGet接口获取指定模块的内存使用情况，可用于模块内存占用优化分析。
@@ -1291,11 +1297,18 @@ pool addr          pool size    used size     free size    max free node size   
 
 #### 使用方法
 
-通过make menuconfig打开内存备份机制。目前只有bestfit内存管理算法支持该功能，需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT。同时该功能依赖于LOSCFG\_MEM\_HEAD\_BACKUP，使用时在配置项中开启“Enable Node Head Backup”：
+通过make menuconfig打开内存备份机制：
+- 目前只有bestfit内存管理算法支持该功能，需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT：
 
-```
-Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable Node Head Backup
-```
+  ```
+  Kernel ---> Memory Management ---> Dynamic Memory Management Algorithm ---> bestfit
+  ```
+
+- 同时该功能依赖于LOSCFG\_MEM\_HEAD\_BACKUP，使用时在配置项中开启“Enable Node Head Backup”：
+
+  ```
+  Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable Node Head Backup
+  ```
 
 #### 注意事项
 
@@ -1321,7 +1334,7 @@ Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable Node Head B
     Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable integrity check or not
     ```
 
-2.  发生踩内存后，下一次内存申请操作即触发异常，并给出被踩节点和前一节点信息，可初步分析定位是否是前一节点越界踩内存。踩内存发生范围为上一次内存申请和此次内存申请之间。异常信息可以通过执行Shell命令<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md#memcheck" target="_blank">memcheck</a>查看。
+2.  发生踩内存后，下一次内存申请操作即触发异常，并给出被踩节点和前一节点信息，可初步分析定位是否是前一节点越界踩内存。踩内存发生范围为上一次内存申请和此次内存申请之间。异常信息可以通过执行Shell命令[memcheck](/shell/README_CN.md#memcheck)查看。
 
 #### 注意事项
 
@@ -1354,7 +1367,7 @@ UINT32 Test(UINT32 argc, CHAR **args)
 
 执行上述代码后，执行Shell命令memcheck，其输出内容如下：
 
-![](figures/zh-cn_image_0305364090.png)
+![](figures/maintenance/run_memcheck.png)
 
 从上图可以看到打印了错误信息。
 
@@ -1469,13 +1482,23 @@ memset和memcpy操作动态内存，发生越界踩内存问题。
 </tbody>
 </table>
 
+>![](public_sys-resources/icon-notice.gif) **须知：**
+>错误码定义见[错误码简介](./LiteOS_Kernel_Developer_Guide.md#错误码简介)。8\~15位的所属模块为动态内存模块，值为0x01。
+
 #### 使用方法
 
-通过make menuconfig打开内存size检查的配置项LOSCFG\_BASE\_MEM\_NODE\_SIZE\_CHECK，即在menuconfig中开启“Enable size check or not”。目前只有bestfit内存管理算法支持该功能，所以还需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT。
+通过make menuconfig打开内存size检查：
+- 目前只有bestfit内存管理算法支持该功能，所以需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT：
 
-```
-Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable size check or not
-```
+  ```
+  Kernel ---> Memory Management ---> Dynamic Memory Management Algorithm ---> bestfit
+  ```
+
+- 同时该功能依赖于LOSCFG\_BASE\_MEM\_NODE\_SIZE\_CHECK，使用时在配置项中开启“Enable size check or not”：
+
+  ```
+  Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable size check or not
+  ```
 
 #### 注意事项
 
@@ -1562,7 +1585,7 @@ traceback 4 -- lr = 0x802012fc    fp = 0x0
 memcpy poolAddr2
 ```
 
-由于开启size检测，非法的memset和memcpy操作被取消，输出error信息。“runTask-\>taskName = osMain”显示了该非法操作发生在 osMain函数中，并打印寄存器lr和fp的值。此时可以打开编译后生成的 vs\_server.asm（默认生成在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名），通过对比“寄存器lr”的值，查看函数的嵌套调用。
+由于开启size检测，非法的memset和memcpy操作被取消，输出error信息。“runTask-\>taskName = osMain”显示了该非法操作发生在 osMain函数中，并打印寄存器lr和fp的值。此时可以打开编译后生成的 .asm 反汇编文件，默认生成在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名，通过对比“寄存器lr”的值，查看函数的嵌套调用。
 
 <h3 id="内存泄露检测">内存泄露检测</h3>
 
@@ -1577,12 +1600,17 @@ memcpy poolAddr2
 #### 使用方法
 
 1.  通过make menuconfig打开内存泄漏检测。
+    - 目前只有bestfit内存管理算法支持该功能，所以需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT：
 
-    目前只有bestfit内存管理算法支持该功能，需要使能LOSCFG\_KERNEL\_MEM\_BESTFIT。同时该功能依赖于LOSCFG\_MEM\_LEAKCHECK，可以在menuconfig中配置“Enable Function call stack of Mem operation recorded”：
+      ```
+      Kernel ---> Memory Management ---> Dynamic Memory Management Algorithm ---> bestfit
+      ```
 
-    ```
-    Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable Function call stack of Mem operation recorded
-    ```
+    - 同时该功能依赖于LOSCFG\_MEM\_LEAKCHECK，可以在menuconfig中配置“Enable Function call stack of Mem operation recorded”：
+
+      ```
+      Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable Function call stack of Mem operation recorded
+      ```
 
 2.  配置调用栈回溯信息。
 
@@ -1598,7 +1626,7 @@ memcpy poolAddr2
 
     系统稳定运行后，若used节点个数随时间一直增加，极大可能存在内存泄露，对数据进行对比分析，重点关注LR重复的节点是否存在内存泄露，泄漏点可通过LR信息进行回溯查找。
 
-    打印log信息如下，memused命令说明详见<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md#memused" target="_blank">memused</a>。
+    打印log信息如下，memused命令说明详见[memused](/shell/README_CN.md#memused)。
 
     ```
     Huawei LiteOS # memused
@@ -1625,7 +1653,7 @@ memcpy poolAddr2
 
 #### 功能说明
 
-队列是一种生产者消费者模型，生产者生产消息放入队列，等待被消费者使用。如果队列已满，生产者被挂起，如果队列已空，消费者被挂起。Huawei LiteOS中使用队列传递消息时，可以设置超时时间，队列的主要作用是实现任务间的异步通信。通过Shell命令<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md#queue" target="_blank">queue</a>可以查看队列的使用情况。
+队列是一种生产者消费者模型，生产者生产消息放入队列，等待被消费者使用。如果队列已满，生产者被挂起，如果队列已空，消费者被挂起。Huawei LiteOS中使用队列传递消息时，可以设置超时时间，队列的主要作用是实现任务间的异步通信。通过Shell命令[queue](/shell/README_CN.md#queue)可以查看队列的使用情况。
 
 #### 使用方法
 
@@ -1639,11 +1667,11 @@ Debug ---> Enable a Debug Version ---> Enable Debug LiteOS Kernel Resource ---> 
 
 在Shell窗口中执行命令queue，打印系统中的队列信息如下：
 
-![](figures/zh-cn_image_0305363996.png)
+![](figures/maintenance/run_queue.png)
 
-其输出项的含义见<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md#queue" target="_blank">Shell使用教程中queue命令的使用示例</a>，调试过程中主要使用上图中的标识项TaskEntry of creator，即创建队列的接口函数地址（0x0x80242df8）。在vs\_server.asm反汇编文件（默认在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名）中找到该地址，可以看到创建队列的函数名，比如这里的app\_init（0x0x80242df8），见下图。
+其输出项的含义见Shell使用教程中[queue命令使用示例](/shell/README_CN.md#输出说明-8)，调试过程中主要使用上图中的标识项TaskEntry of creator，即创建队列的接口函数地址（0x0x80242df8）。在.asm反汇编文件（默认在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名）中找到该地址，可以看到创建队列的函数名，比如这里的app\_init（0x0x80242df8），见下图。
 
-![](figures/zh-cn_image_0305363924.png)
+![](figures/maintenance/find_addr_for_queue_debug.png)
 
 
 <h3 id="互斥锁调测方法">互斥锁调测方法</h3>
@@ -1654,7 +1682,7 @@ Debug ---> Enable a Debug Version ---> Enable Debug LiteOS Kernel Resource ---> 
 
 #### 功能说明
 
-开启互斥锁死锁检测功能后，每个任务在成功获取互斥锁时，会记录该互斥锁为本任务持有，因此通过任务ID可以得知持有的互斥锁。此外，互斥锁控制块本身会记录那些因申请不到该锁而被阻塞的任务。执行Shell命令<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md#dlock" target="_blank">dlock</a>可以输出系统中所有任务持有互斥锁的信息及任务调用栈信息，再结合系统反汇编vs\_server.asm文件和代码就可以确定哪些任务发生了死锁。
+开启互斥锁死锁检测功能后，每个任务在成功获取互斥锁时，会记录该互斥锁为本任务持有，因此通过任务ID可以得知持有的互斥锁。此外，互斥锁控制块本身会记录那些因申请不到该锁而被阻塞的任务。执行Shell命令[dlock](/shell/README_CN.md#dlock)可以输出系统中所有任务持有互斥锁的信息及任务调用栈信息，再结合.asm反汇编文件和代码就可以确定哪些任务发生了死锁。
 
 #### 互斥锁死锁检测机制
 
@@ -1665,7 +1693,7 @@ Debug ---> Enable a Debug Version ---> Enable Debug LiteOS Kernel Resource ---> 
 配置宏LOSCFG\_DEBUG\_DEADLOCK，即在menuconfig配置项中开启“Enable Mutex Deadlock Debugging”，若关闭该选项，则关闭死锁检测功能。
 
 ```
-Debug->Enable Debug LiteOS Kernel Resource->Enable Mutex Deadlock Debugging
+Debug ---> Enable a Debug Version ---> Enable Debug LiteOS Kernel Resource ---> Enable Mutex Deadlock Debugging
 ```
 
 #### 注意事项
@@ -1766,11 +1794,11 @@ STATIC UINT32 MutexDlockDebug(VOID)
 
 针对以上场景出现的问题，在怀疑发生死锁后，可以参考一下步骤定位问题：
 
-1.  在Shell中运行<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md#dlock" target="_blank">dlock</a>命令检测死锁。
+1.  在Shell中运行[dlock](/shell/README_CN.md#dlock)命令检测死锁。
 
     输出结果如下图：
 
-    ![](figures/zh-cn_image_0305364086.png)
+    ![](figures/maintenance/run_dlock.png)
 
     -   “Task\_name:app\_Task, ID:0x5, holds the Mutexs below：”和“Task\_name:mutexDlock\_Task, ID:0xc, holds the Mutexs below:”这两行后面有mutex信息，表示可能是任务app\_Task（任务ID为5）和mutexDlock\_Task （任务ID为c）发生了死锁。
     -   <Mutex0 info\>：其后几行是该互斥锁的详细信息，包括“Ptr handle”为互斥锁句柄、“Owner”为锁的持有者、“Count”为该锁的引用计数、“Pended task”为阻塞在这把锁上的任务。如果该任务持有多把锁，会逐个打印这些锁的信息（Mutex0\~MutexN）。当前app\_Task和mutexDlock\_Task俩任务分别只持有一把锁。
@@ -1779,13 +1807,15 @@ STATIC UINT32 MutexDlockDebug(VOID)
 
     输出结果如下图：
 
-    ![](figures/zh-cn_image_0305363744.png)根据步骤1，任务app\_Task和mutexDlock\_Task是找到的疑似发生死锁的任务。上图中的TaskEntryAddr列为发生死锁时互斥锁pend的任务入口函数地址，如本例中为任务app\_Task（0x8026f28c）和mutexDlock\_Task（0x8026eef4）。
+    ![](figures/maintenance/run_task.png)
+
+    根据步骤1，任务app\_Task和mutexDlock\_Task是找到的疑似发生死锁的任务。上图中的TaskEntryAddr列为发生死锁时互斥锁pend的任务入口函数地址，如本例中为任务app\_Task（0x8026f28c）和mutexDlock\_Task（0x8026eef4）。
 
 3.  在反汇编文件中找到相应函数。
 
-    打开反汇编文件 vs\_server.asm（默认在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名），在vs\_server.asm中找到相应的地址，以mutexDlock\_Task（0x8026eef4）为例如下图所示，即可定位到互斥锁pend的位置及调用的接口：
+    打开 .asm反汇编文件（默认在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名），在.asm文件中找到相应的地址，以mutexDlock\_Task（0x8026eef4）为例如下图所示，即可定位到互斥锁pend的位置及调用的接口：
 
-    ![](figures/zh-cn_image_0305363868.png)
+    ![](figures/maintenance/find_addr_for_mutex_deadlock.png)
 
 4.  查看单个任务的栈调用信息。
 
@@ -1801,8 +1831,8 @@ STATIC UINT32 MutexDlockDebug(VOID)
 1.  重复上锁。
 2.  死锁，以ABBA为例进行说明：
 
-    1.  任务A持有自旋锁X，并永久等待自旋锁Y。
-    2.  任务B持有自旋锁Y，并永久等待自旋锁X。
+    1) 任务A持有自旋锁X，并永久等待自旋锁Y。
+    2) 任务B持有自旋锁Y，并永久等待自旋锁X。
 
     此时任务A和任务B死锁。
 
@@ -1811,7 +1841,10 @@ STATIC UINT32 MutexDlockDebug(VOID)
 
 #### 使用方法
 
-通过配置项LOSCFG\_KERNEL\_SMP\_LOCKDEP打开自旋锁的检测模块lockdep，开启自旋锁调测功能。
+通过配置项LOSCFG\_KERNEL\_SMP\_LOCKDEP打开自旋锁的检测模块lockdep，开启自旋锁调测功能，即在menuconfig配置项中开启“Enable Spinlock Lockdep Check”。
+```
+Kernel ---> Enable Kernel SMP ---> Enable Spinlock Lockdep Check
+```
 
 #### 死锁定位实例
 
@@ -1820,14 +1853,14 @@ STATIC UINT32 MutexDlockDebug(VOID)
     **图 1**  死锁模块打印信息<a name="f6bb63b55c1874aebb9e4a4a0cdc1f9f7"></a>  
     
 
-    ![](figures/22.png)
+    ![](figures/maintenance/deadlock_information_in_lockdep.png)
 
-2.  复制request addr的值（本例中为0x802a6528），在系统镜像的反汇编文件vs\_server.asm（默认在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名）中找到相应的地址，如下图所示，即可定位到调用spinlock的位置及调用函数（本例中为task\_fx02）。
+2.  复制request addr的值（本例中为0x802a6528），在系统镜像的.asm反汇编文件（默认在Huawei\_LiteOS/out/<platform\>目录下，其中的platform为具体的平台名）中找到相应的地址，如下图所示，即可定位到调用spinlock的位置及调用函数（本例中为task\_fx02）。
 
     **图 2**  反汇编文件中找到对应地址<a name="fdbc53a06347c4cfb9ba13da71c3bbe31"></a>  
     
 
-    ![](figures/zh-cn_image_0305364117.png)
+    ![](figures/maintenance/find_addr_for_spinlock_deadlock.png)
 
 3.  根据图一死锁打印信息中第二个蓝框的自旋锁，通过代码逻辑找到另一个任务持有该锁的情况，再结合代码，调整spinlock调用的时序，从而解决死锁问题。
 
@@ -1865,9 +1898,9 @@ STATIC UINT32 MutexDlockDebug(VOID)
 
 ### 使用方法
 
-1.  通过menuconfig开启临终遗言记录功能，即配置LOSCFG\_SHELL\_EXCINFO\_DUMP=y，该功能默认关闭。
+1.  通过menuconfig开启临终遗言记录功能，即配置LOSCFG\_SHELL\_EXCINFO\_DUMP=y，该功能默认关闭，菜单路径为：Debug ---\> Enable a Debug Version ---\> Enable Shell ---\> (Functionality of Shell ---\>） Enable Shell excInfo。
 2.  注册读写钩子函数。
-    1.  编写读写临终遗言日志的钩子函数，示例代码如下。
+    1) 编写读写临终遗言日志的钩子函数，示例代码如下。
 
         ```c
         #include "los_base.h"
@@ -1958,7 +1991,7 @@ STATIC UINT32 MutexDlockDebug(VOID)
         #endif
         ```
 
-    2.  在初始化函数如app\_init中注册钩子函数，示例代码如下。
+    2) 在初始化函数如app\_init中注册钩子函数，示例代码如下。
 
         ```c
         #ifdef LOSCFG_SHELL_EXCINFO_DUMP
@@ -2003,18 +2036,26 @@ STATIC UINT32 MutexDlockDebug(VOID)
 
 ### 使用方法
 
-1.  通过menuconfig开启魔法键功能，即配置LOSCFG\_ENABLE\_MAGICKEY=y。若关闭该选项，则魔法键失效。
+1.  通过menuconfig开启魔法键功能。
+    - 该功能依赖于Shell，所以需要先使能Shell。
+      ```
+      Debug ---> Enable a Debug Version ---> Enable Shell
+      ```
+    - 该功能需要配置LOSCFG\_ENABLE\_MAGICKEY=y，若关闭该选项，则魔法键失效，菜单路径为：
+      ```
+      Debug ---> Enable MAGIC KEY
+      ```
 
-    >![](public_sys-resources/icon-note.gif) **说明：** 
-    >可以在menuconfig中光标移动到该选项上，输入“？”，查看帮助信息：
-    >```
-    >Answer Y to enable LiteOS Magic key.
-    >  ctrl + r : Magic key check switch;
-    >  ctrl + z : Show all magic op key;
-    >  ctrl + t : Show task information;
-    >  ctrl + p : System panic;
-    >  ctrl + e : Check system memory pool.
-    >```
+      >![](public_sys-resources/icon-note.gif) **说明：** 
+      >可以在menuconfig中光标移动到该选项上，输入“？”，查看帮助信息：
+      >```
+      >Answer Y to enable LiteOS Magic key.
+      >  ctrl + r : Magic key check switch;
+      >  ctrl + z : Show all magic op key;
+      >  ctrl + t : Show task information;
+      >  ctrl + p : System panic;
+      >  ctrl + e : Check system memory pool.
+      >```
 
 2.  输入“ctrl + r ” 键，打开或者关闭魔法键检测功能。
 
@@ -2034,7 +2075,7 @@ STATIC UINT32 MutexDlockDebug(VOID)
 
 <h3 id="踩内存定位方法">踩内存定位方法</h3>
 
--   通过异常信息定位问题，参见<a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/Huawei_LiteOS_Kernel_Developer_Guide_zh.md#问题定位实例" target="_blank">异常接管定位实例</a>。
+-   通过异常信息定位问题，参见[异常接管定位实例](./LiteOS_Kernel_Developer_Guide.md#问题定位实例)。
 -   通过内存备份机制定位问题，参见[内存备份机制](#内存备份机制)。 
 -   通过内存合法性检查定位问题，参见[内存合法性检查](#内存合法性检查)。
 -   通过内存size检查定位问题，参见[内存size检查](#内存size检查)。
@@ -2046,7 +2087,7 @@ STATIC UINT32 MutexDlockDebug(VOID)
 
 调试过程中，发现一个全局变量只在一处赋值为0，但使用时打印发现变成一个非零异常值，大概率是该全局变量被踩。
 
-如果已知一个全局变量被踩内存，可在Huawei\_LiteOS/out/<platform\>/vs\_server.map文件中找到该全局变量所在的地址。注意该地址前面最近被使用的变量，排查是否前面变量操作不当引发踩内存，比如对该前面变量进行memcpy，memset操作时越界，溢出覆盖了当前全局变量。
+如果已知一个全局变量被踩内存，可在Huawei\_LiteOS/out/<platform\>/.map文件中找到该全局变量所在的地址。注意该地址前面最近被使用的变量，排查是否前面变量操作不当引发踩内存，比如对该前面变量进行memcpy，memset操作时越界，溢出覆盖了当前全局变量。
 
 这里列举一个测试的例子，在文件中定义了两全局变量，并且初始化。
 
@@ -2055,19 +2096,19 @@ UINT32 g_uwEraseMap[16] = {0};
 UINT32 g_uwEraseCount = 0;
 ```
 
-在vs\_server.map中可以找到这些全局变量在bss段对应的位置。
+在.map文件中可以找到这些全局变量在bss段对应的位置。
 
-![](figures/zh-cn_image_0305363936.png)
+![](figures/maintenance/find_global_var_in_bss.png)
 
-若g\_uwEraseMap被踩，在vs\_server.map中找到其地址，再查找该地址前面的变量，即g\_uwEraseCount。特别注意分析g\_uwEraseCount变量的使用情况，观察是否存在某处，对变量g\_uwEraseCount进行了越界操作。
+若g\_uwEraseMap被踩，在.map文件中找到其地址，再查找该地址前面的变量，即g\_uwEraseCount。特别注意分析g\_uwEraseCount变量的使用情况，观察是否存在某处，对变量g\_uwEraseCount进行了越界操作。
 
 <h4 id="task状态判断是否踩内存">task状态判断是否踩内存</h4>
 
-Shell命令<a href="https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_CN.md#task" target="_blank">task</a>“”，可以查看当前系统所有任务的状态。命令输出的stackSize、WaterLine、StackPoint、Top0fStack信息，可以作为判断任务栈是否踩内存的指标。
+Shell命令[task](/shell/README_CN.md#task)，可以查看当前系统所有任务的状态。命令输出的stackSize、WaterLine、StackPoint、Top0fStack信息，可以作为判断任务栈是否踩内存的指标。
 
 这里举例说明如何通过task命令判断是否踩内存，如下图所示，有一任务名为shellTask。
 
-![](figures/word_1201642214124858045187542.png)
+![](figures/maintenance/check_memory_corruption_by_task.png)
 
 StackSize = 0x3000（创建该任务时分配的栈大小）
 
@@ -2081,4 +2122,3 @@ MaxStackPoint = Top0fStack + StackSize = 0x80d10768（得到该任务栈最大�
 
 -   若WaterLine \> StackSize，则说明该任务踩内存。
 -   若StackPoint \> MaxStackPoint 或 StackPoint < Top0fStack，则说明该任务踩内存。
-

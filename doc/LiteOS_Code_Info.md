@@ -1,5 +1,4 @@
 
-
 ## LiteOS代码入口
 
 LiteOS入口在工程对应的main.c中，基本流程如下：
@@ -36,18 +35,19 @@ INT32 main(VOID)
 
 关于代码树中各个目录存放的源代码的相关内容简介如下：
 
-| 一级目录   | 二级目录                 | 三级目录             | 说明                                                          |
-| ---------- | ------------------------ | -------------------- | ------------------------------------------------------------  |
-| arch       | arm                      | cortex_a_r           | A核架构支持                                                   |
-|            |                          | cortex_m             | M核架构支持                                                   |
-|            | arm64                    |                      | arm64架构支持                                                 |
-| build      |                          |                      | LiteOS编译系统需要的配置及脚本                                |
-| compat     | cmsis                    |                      | liteos提供的CMSIS-RTOS 1.0和2.0接口                           |
-| components | connectivity             | agent_tiny           | agent_tiny端云互通组件，包括公共头文件、示例代码、客户端实现代码、操作系统适配层代码 |
+| 一级目录   | 二级目录                 | 三级目录             | 说明                                                         |
+| ---------- | ------------------------ | -------------------- | ------------------------------------------------------------ |
+| arch       | arm                      | cortex_a_r           | A核架构支持                                                  |
+|            |                          | cortex_m             | M核架构支持                                                  |
+|            | arm64                    |                      | arm64架构支持                                                |
+| build      |                          |                      | LiteOS编译系统需要的配置及脚本                               |
+| compat     | cmsis                    |                      | liteos提供的CMSIS-RTOS 1.0和2.0接口                          |
+| components | ai                       |                      | ai(基于mindspore)算子库实现                                  |
+|            | connectivity             | agent_tiny           | agent_tiny端云互通组件，包括公共头文件、示例代码、客户端实现代码、操作系统适配层代码 |
 |            |                          | lwm2m                | lwm2m协议实现                                                |
 |            |                          | mqtt                 | MQTT开源协议实现                                             |
 |            |                          | nb_iot               | LiteOS NB-IoT API                                            |
-|            | fs                       |                      | 文件系统，含vfs、spiffs、ramfs、kifs、fatfs、devfs           |
+|            | fs                       |                      | 文件系统，含vfs、spiffs、ramfs、littlefs、kifs、fatfs、devfs |
 |            | gui                      | lvgl                 | 开源LittlevGL的源码                                          |
 |            | lib                      | cjson                | c语言json库                                                  |
 |            | log                      |                      | 日志等级控制                                                 |
@@ -64,6 +64,7 @@ INT32 main(VOID)
 |            |                          | src                  | sensor manager的源码实现                                     |
 | demos      | agenttiny_lwm2m          |                      | lwm2m协议 demo                                               |
 |            | agenttiny_mqtt           |                      | mqtt 协议demo                                                |
+|            | ai                       |                      | ai的demo                                                     |
 |            | dtls_server              |                      | dtls协议demo                                                 |
 |            | fs                       |                      | 文件系统demo                                                 |
 |            | gui                      |                      | gui的demo                                                    |
@@ -73,6 +74,7 @@ INT32 main(VOID)
 |            | lms                      |                      | LMS的demo                                                    |
 |            | nbiot_without_atiny      |                      | NB_IoT demo                                                  |
 |            | sensorhub                | gyro                 | 基于sensorhub传感框架定时读取MPU6050陀螺仪原始数据的demo     |
+|            | trace                    |                      | Trace的demo                                                  |
 | doc        |                          |                      | 此目录存放的是LiteOS的使用文档和API说明等文档                |
 | include    |                          |                      | components各个模块所依赖的头文件                             |
 | kernel     | base                     |                      | LiteOS基础内核代码，包括任务、中断、软件定时器、队列、事件、信号量、互斥锁、tick等功能 |
