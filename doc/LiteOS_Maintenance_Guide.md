@@ -442,37 +442,37 @@ Huawei LiteOS的Trace模块为用户提供下面几种功能，接口详细信�
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >1.  LOS\_TRACE\_EASY\(TYPE, IDENTITY, params...\) 简易插桩。
->    -   一句话插桩，用户在目标源代码中插入该接口即可。
->    -   TYPE有效取值范围为\[0, 0xF\]，表示不同的事件类型。
->    -   IDENTITY类型UINTPTR，表示事件操作的主体对象。
->    -   Params类型UINTPTR，表示事件的参数。
->    -   示例：
->        ```c
->        LOS_TRACE_EASY(1, userId0, userParam1, userParam2);
->        LOS_TRACE_EASY(2, userId0);
->        LOS_TRACE_EASY(1, userId1, userParam1, userParam2);
->        LOS_TRACE_EASY(2, userId1);
->        ```
+>       -   一句话插桩，用户在目标源代码中插入该接口即可。
+>       -   TYPE有效取值范围为\[0, 0xF\]，表示不同的事件类型。
+>       -   IDENTITY类型UINTPTR，表示事件操作的主体对象。
+>       -   Params类型UINTPTR，表示事件的参数。
+>       -   示例：
+>           ```c
+>           LOS_TRACE_EASY(1, userId0, userParam1, userParam2);
+>           LOS_TRACE_EASY(2, userId0);
+>           LOS_TRACE_EASY(1, userId1, userParam1, userParam2);
+>           LOS_TRACE_EASY(2, userId1);
+>           ```
 >2.  LOS\_TRACE\(TYPE, IDENTITY, params...\) 标准插桩。
->    -   相比简易插桩，支持动态过滤事件和参数裁剪，但使用上需要用户按规则来扩展。
->    -   TYPE用于设置具体的事件类型，可以在头文件los\_trace.h中的enum LOS\_TRACE\_TYPE中自定义事件类型。定义方法和规则可以参考其他事件类型。
->    -   IDENTITY和Params的类型及含义同简易插桩。
->    -   示例：
->        ```
->        1.在enum LOS_TRACE_MASK中定义事件掩码，即模块级别的事件类型。定义规范为TRACE_#MOD#_FLAG，#MOD#表示模块名，例如：
->          TRACE_FS_FLAG = 0x2000
->        2.在enum LOS_TRACE_TYPE中定义具体事件类型。定义规范为#TYPE# = TRACE_#MOD#_FLAG | NUMBER，例如：
->          FS_READ  = TRACE_FS_FLAG | 0; // 读文件
->          FS_WRITE = TRACE_FS_FLAG | 1; // 写文件
->        3.定义事件参数。定义规范为#TYPE#_PARAMS(IDENTITY, parma1...) IDENTITY, ...
->          其中的#TYPE#就是上面2中的#TYPE#，例如：
->          #define FS_READ_PARAMS(fp, fd, flag, size)    fp, fd, flag, size
->          宏定义的参数对应于Trace缓冲区中记录的事件参数，用户可对任意参数字段进行裁剪；
->          当定义为空时，表示不追踪该类型事件：
->          #define FS_READ_PARAMS(fp, fd, flag, size) // 不追踪文件读事件
->        4.在适当位置插入代码桩。定义规范为LOS_TRACE(#TYPE#, #TYPE#_PARAMS(IDENTITY, parma1...))
->          LOS_TRACE(FS_READ, fp, fd, flag, size); // 读文件的代码桩，#TYPE#之后的入参就是上面3中的FS_READ_PARAMS函数的入参
->        ```
+>       -   相比简易插桩，支持动态过滤事件和参数裁剪，但使用上需要用户按规则来扩展。
+>       -   TYPE用于设置具体的事件类型，可以在头文件los\_trace.h中的enum LOS\_TRACE\_TYPE中自定义事件类型。定义方法和规则可以参考其他事件类型。
+>       -   IDENTITY和Params的类型及含义同简易插桩。
+>       -   示例：
+>           ```
+>           1.在enum LOS_TRACE_MASK中定义事件掩码，即模块级别的事件类型。定义规范为TRACE_#MOD#_FLAG，#MOD#表示模块名，例如：
+>             TRACE_FS_FLAG = 0x2000
+>           2.在enum LOS_TRACE_TYPE中定义具体事件类型。定义规范为#TYPE# = TRACE_#MOD#_FLAG | NUMBER，例如：
+>             FS_READ  = TRACE_FS_FLAG | 0; // 读文件
+>             FS_WRITE = TRACE_FS_FLAG | 1; // 写文件
+>           3.定义事件参数。定义规范为#TYPE#_PARAMS(IDENTITY, parma1...) IDENTITY, ...
+>             其中的#TYPE#就是上面2中的#TYPE#，例如：
+>             #define FS_READ_PARAMS(fp, fd, flag, size)    fp, fd, flag, size
+>             宏定义的参数对应于Trace缓冲区中记录的事件参数，用户可对任意参数字段进行裁剪；
+>             当定义为空时，表示不追踪该类型事件：
+>             #define FS_READ_PARAMS(fp, fd, flag, size) // 不追踪文件读事件
+>           4.在适当位置插入代码桩。定义规范为LOS_TRACE(#TYPE#, #TYPE#_PARAMS(IDENTITY, parma1...))
+>             LOS_TRACE(FS_READ, fp, fd, flag, size); // 读文件的代码桩，#TYPE#之后的入参就是上面3中的FS_READ_PARAMS函数的入参
+>           ```
 >3.  Huawei Liteos预置的Trace事件及参数均可以通过上述方式进行裁剪，参数详见kernel\\include\\los\_trace.h。
 
 #### Trace错误码
@@ -1831,8 +1831,8 @@ STATIC UINT32 MutexDlockDebug(VOID)
 1.  重复上锁。
 2.  死锁，以ABBA为例进行说明：
 
-    1.  任务A持有自旋锁X，并永久等待自旋锁Y。
-    2.  任务B持有自旋锁Y，并永久等待自旋锁X。
+    1) 任务A持有自旋锁X，并永久等待自旋锁Y。
+    2) 任务B持有自旋锁Y，并永久等待自旋锁X。
 
     此时任务A和任务B死锁。
 
@@ -1900,7 +1900,7 @@ Kernel ---> Enable Kernel SMP ---> Enable Spinlock Lockdep Check
 
 1.  通过menuconfig开启临终遗言记录功能，即配置LOSCFG\_SHELL\_EXCINFO\_DUMP=y，该功能默认关闭，菜单路径为：Debug ---\> Enable a Debug Version ---\> Enable Shell ---\> (Functionality of Shell ---\>） Enable Shell excInfo。
 2.  注册读写钩子函数。
-    1.  编写读写临终遗言日志的钩子函数，示例代码如下。
+    1) 编写读写临终遗言日志的钩子函数，示例代码如下。
 
         ```c
         #include "los_base.h"
@@ -1991,7 +1991,7 @@ Kernel ---> Enable Kernel SMP ---> Enable Spinlock Lockdep Check
         #endif
         ```
 
-    2.  在初始化函数如app\_init中注册钩子函数，示例代码如下。
+    2) 在初始化函数如app\_init中注册钩子函数，示例代码如下。
 
         ```c
         #ifdef LOSCFG_SHELL_EXCINFO_DUMP
