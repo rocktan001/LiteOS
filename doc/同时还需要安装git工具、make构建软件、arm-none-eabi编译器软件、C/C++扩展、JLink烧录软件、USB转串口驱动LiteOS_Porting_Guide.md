@@ -122,7 +122,7 @@ JLink。
 
 <h4 id="安装LiteOS-Studio">安装LiteOS Studio</h4>
 
-除了LiteOS Studio，同时还需要安装git工具、arm-none-eabi软件、make构建软件、C/C++扩展、JLink烧录软件，这些软件的安装均可参考<a href="https://liteos.gitee.io/liteos_studio/#/install" target="_blank">LiteOS Studio安装指南</a>。
+除了LiteOS Studio，同时还需要安装git工具、make构建软件、arm-none-eabi编译器软件、C/C++扩展、JLink烧录软件、USB转串口驱动，这些软件的安装均可参考<a href="https://liteos.gitee.io/liteos_studio/#/install" target="_blank">LiteOS Studio安装指南</a>。
 
 所有软件安装完毕后，需要重启计算机。
 
