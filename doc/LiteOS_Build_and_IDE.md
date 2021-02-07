@@ -1,4 +1,4 @@
-# Huawei LiteOS 编译介绍和开发工具
+# Huawei LiteOS 编译和开发工具
 
 ## 目 录
 
