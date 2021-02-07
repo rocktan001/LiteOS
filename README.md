@@ -76,6 +76,10 @@ Huawei LiteOS自开源社区发布以来，围绕NB-IoT物联网市场从技术�
 
 [LiteOS demos](./demos)目录下包含了LiteOS提供的各模块Demo及其文档。文档详细介绍了Demo的功能以及运行方法。
 
+## LiteOS API参考
+
+<a href="https://www.huawei.com/minisite/liteos/cn/api/index.html" target="_blank">API参考</a>请访问LiteOS官网。
+
 
 ## LiteOS 代码贡献必读
 
