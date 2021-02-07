@@ -167,7 +167,7 @@
 
     点击下图箭头所指的“Program Device”按钮进行烧录。烧录成功后，会在Log框中提示“...Downloading...Done”，如下图所示。
 
-    ![](figures/quick_start/quick_start/burn_stm32_in_JLink.png)
+    ![](figures/quick_start/burn_stm32_in_JLink.png)
 
 
 <h4 id="运行">运行</h4>
