@@ -1105,7 +1105,7 @@ log level [levelNum]
     TRACE_INFO = 4,
     TRACE_DEBUG = 5
     ```
--  若`log level`命令不加`levelNum`参数，则会显示系统当前的日志打印等级，并且提示使用方法。
+-  若`log level`命令不加`levelNum`参数，则提示命令的使用方法。
 
 #### 使用实例
 
