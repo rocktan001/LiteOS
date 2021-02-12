@@ -43,7 +43,7 @@ else
         $(error compiler $(COMPILE_NAME) is not in the ENV)
     endif
     LITEOS_COMPILER_EXE_PATH := $(shell where $(CC))
-    LITEOS_COMPILER_PATH := $(subst \bin\arm-none-eabi-gcc.exe,, $(LITEOS_COMPILER_EXE_PATH))
+    LITEOS_COMPILER_PATH := $(subst \bin\$(CC).exe,, $(LITEOS_COMPILER_EXE_PATH))
 endif
 
 # Generally 32 bit and 64 bit compilers has different libgcc paths.
