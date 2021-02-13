@@ -241,6 +241,10 @@ ifneq ($(LOSCFG_COMPILER_XTENSA_32), y)
 LITEOS_CXXOPTS_BASE += -Winvalid-pch
 endif
 
+ifeq ($(LOSCFG_ARCH_ARM_AARCH64), y)
+LITEOS_COPTS_BASE += -Wno-pragmas -Wno-missing-braces -Wno-parentheses
+endif
+
 ifeq ($(LOSCFG_LLTREPORT), y)
 # -fprofile-arcs may introduce false alarm on 'maybe-uninitialized'
 LITEOS_GCOV_OPTS := -fprofile-arcs -ftest-coverage -Wno-maybe-uninitialized
