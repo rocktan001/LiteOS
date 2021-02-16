@@ -35,7 +35,7 @@ Demos --->
 ## 使能Agent Lwm2m Demo
 
 1, 设置设备端IPv4地址
-在源码<a href="https://gitee.com/LiteOS/LiteOS/blob/master/targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c" target="_blank">targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c</a> 中， 如下所示， 如果mosquitto服务搭建在局域网环境中，设备的ip需要与ubuntu主机在同一网段下， 这里的示例设备端ip为"`192.168.3.200`"。
+在源码<a href="https://gitee.com/LiteOS/LiteOS/blob/master/targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c" target="_blank">targets/Cloud_STM32F429IGTx_FIRE/Src/sys_init.c</a> 中， 如下所示， 如果Leshan服务搭建在局域网环境中，设备的ip需要与ubuntu主机在同一网段下， 这里的示例设备端ip为"`192.168.3.200`"。
 ```c
 void net_init(void)
 {
