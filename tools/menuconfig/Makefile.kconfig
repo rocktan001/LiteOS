@@ -6,6 +6,7 @@
 menuconfig:
 	python  $(LITEOSTOPDIR)/tools/menuconfig/usr_config.py
 	-mv -f $(LITEOS_MENUCONFIG_H) $(LITEOS_PLATFORM_MENUCONFIG_H)
+	sh $(LITEOSTOPDIR)/components/download.sh
 
 savemenuconfig:
 	python  $(LITEOSTOPDIR)/tools/menuconfig/usr_config.py savemenuconfig
