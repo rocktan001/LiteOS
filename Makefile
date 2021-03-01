@@ -56,9 +56,6 @@ endif
 LITEOS_BUILD: $(LITEOS_MENUCONFIG_H)
 
 LITEOS_BUILD:
-	$(HIDE)if [[ "$(VERSION_NUM)" < "9.2.1" ]]; then \
-		echo -e "\033[31mInfo:The compiler version is too low. It is recommended that you use gcc-arm-none-eabi-9-2019-q4-major compiler. Otherwise, the compilation may fail.\033[0m"; \
-	fi
 	$(HIDE)echo $(LOSCFG_ENTRY_SRC)
 
 	$(HIDE)for dir in $(LITEOS_SUBDIRS); \
