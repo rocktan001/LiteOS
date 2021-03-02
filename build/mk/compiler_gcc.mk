@@ -46,9 +46,11 @@ else
     LITEOS_COMPILER_PATH := $(subst \bin\$(CC).exe,, $(LITEOS_COMPILER_EXE_PATH))
 endif
 
-GCC_VERSION = $(shell [[ $(shell echo $(VERSION_NUM) | tr -d ".") -lt 921 ]] && echo y || echo n)
-ifeq ($(GCC_VERSION), y)
-    $(error The compiler version is too early. You are advised to use the compiler version gcc-arm-none-eabi-9-2019-q4-major. Otherwise, the compilation may fail)
+ifeq ($(LOSCFG_COMPILER_ARM_NONE_EABI), y)
+    GCC_VERSION = $(shell [[ $(shell echo $(VERSION_NUM) | tr -d ".") -lt 921 ]] && echo y || echo n)
+    ifeq ($(GCC_VERSION), y)
+    $(error The compiler version is too early. You are advised to use a version later than 2019q4)
+    endif
 endif
 
 # Generally 32 bit and 64 bit compilers has different libgcc paths.
