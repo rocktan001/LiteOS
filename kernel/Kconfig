@@ -355,59 +355,6 @@ config LOSCFG_CPUP_INCLUDE_IRQ
     help
       If you wish to include irq usage for cpup.
 
-config LOSCFG_KERNEL_DYNLOAD
-    bool "Enable Dynamic Load Feature"
-    default y
-    depends on LOSCFG_KERNEL_EXTKERNEL
-    select LOSCFG_BASE_IPC_MUX
-    help
-      If you wish to build LiteOS with support for dynamic load.
-      If enbaled Nx then you can only load 4K aligned so files, otherwise a page fault may occur.
-
-config LOSCFG_KERNLE_DYN_HEAPSIZE
-    int "Dynamic load heap size in M"
-    default 2
-    depends on LOSCFG_KERNEL_NX && LOSCFG_KERNEL_DYNLOAD
-    help
-      This represents the heap size of dynamic load in M.
-
-menu "Dynamic Load Options"
-    depends on LOSCFG_KERNEL_DYNLOAD
-
-config LOSCFG_KERNEL_DYNLOAD_DYN
-    bool "Enable Dynamic Load Shared object file"
-    default y
-
-menu "Dynamic Load Shared object file Options"
-    depends on LOSCFG_KERNEL_DYNLOAD_DYN
-
-config LOSCFG_DYNLOAD_DYN_FROM_FS
-    bool "Enable Dynamic Load Shared object file from FS"
-    default y
-    depends on LOSCFG_FS_VFS
-
-config LOSCFG_DYNLOAD_DYN_FROM_MEM
-    bool "Enable Dynamic Load Shared object file from memory"
-    default y
-
-endmenu
-
-config LOSCFG_KERNEL_DYNLOAD_REL
-    bool "Enable Dynamic Load Relocatable file"
-    default y
-
-menu "Dynamic Load Relocatable file Options"
-    depends on LOSCFG_KERNEL_DYNLOAD_REL
-
-config LOSCFG_DYNLOAD_REL_FROM_FS
-    bool "Enable Dynamic Load Relocatable file from FS"
-    default y
-    depends on LOSCFG_FS_VFS
-
-endmenu
-
-endmenu
-
 config LOSCFG_KERNEL_LOWPOWER
     bool "Enable Low Power Management Framework"
     default y
@@ -455,42 +402,6 @@ config LOSCFG_KERNEL_SCATTER
     depends on LOSCFG_KERNEL_EXTKERNEL && (LOSCFG_DRIVERS_MTD_NAND || LOSCFG_DRIVERS_MTD_SPI_NOR)
     help
       If you wish to build LiteOS with support for scatter.
-
-config LOSCFG_KERNEL_PERF
-   bool "Enable Perf Feature"
-   default n
-   depends on LOSCFG_KERNEL_EXTKERNEL
-   select LOSCFG_KERNEL_RINGBUF
-   select LOSCFG_KERNEL_SMP_CALL if LOSCFG_KERNEL_SMP
-   help
-     If you wish to build LiteOS with support for perf.
-
-choice
-   prompt "Time-consuming Calc Methods"
-   depends on LOSCFG_KERNEL_PERF
-
-config LOSCFG_PERF_CALC_TIME_BY_TICK
-   bool "By Tick"
-
-config LOSCFG_PERF_CALC_TIME_BY_CYCLE
-   bool "By Cpu Cycle"
-
-endchoice
-
-config LOSCFG_PERF_HW_PMU
-   bool "Enable Hardware Pmu Events for Sampling"
-   default n
-   depends on LOSCFG_KERNEL_PERF
-
-config LOSCFG_PERF_TIMED_PMU
-   bool "Enable Hrtimer Period Events for Sampling"
-   default n
-   depends on LOSCFG_KERNEL_PERF && LOSCFG_COMPAT_LINUX
-
-config LOSCFG_PERF_SW_PMU
-   bool "Enable Software Events for Sampling"
-   default y
-   depends on LOSCFG_KERNEL_PERF
 
 config LOSCFG_KERNEL_TRACE
     bool "Enable Trace Feature"
