@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/LiteOS/LiteOS.svg?branch=develop)](https://travis-ci.org/LiteOS/LiteOS)
+[![star](https://gitee.com/LiteOS/LiteOS/badge/star.svg?theme=gvp)](https://gitee.com/LiteOS/LiteOS/stargazers)
+[![fork](https://gitee.com/LiteOS/LiteOS/badge/fork.svg?theme=gvp)](https://gitee.com/LiteOS/LiteOS/members)
 
 ## Huawei LiteOS简介
 
