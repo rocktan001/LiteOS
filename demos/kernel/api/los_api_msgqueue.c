@@ -72,7 +72,7 @@ static VOID *send_Entry(UINT32 param)
 /* task2 recv data */
 static VOID *recv_Entry(UINT32 param)
 {
-    UINT32 readbuf;
+    UINTPTR readbuf;
     UINT32 ret;
     UINT32 msgCount = 0;
 
