@@ -75,9 +75,9 @@ UINT32 Example_SwTimer(VOID)
 
     printf("Kernel swtimer demo begin.\n");
 #if (LOSCFG_BASE_CORE_SWTMR_ALIGN == YES)
-    ret = LOS_SwtmrCreate(1000, LOS_SWTMR_MODE_ONCE, Timer1_Callback, &id1, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
+    ret = LOS_SwtmrCreate(1000, LOS_SWTMR_MODE_ONCE, (SWTMR_PROC_FUNC)Timer1_Callback, &id1, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
 #else
-    ret = LOS_SwtmrCreate(1000, LOS_SWTMR_MODE_ONCE, Timer1_Callback, &id1, 1);
+    ret = LOS_SwtmrCreate(1000, LOS_SWTMR_MODE_ONCE, (SWTMR_PROC_FUNC)Timer1_Callback, &id1, 1);
 #endif
     if (ret != LOS_OK) {
         printf("Create Timer1 failed.\n");
@@ -86,9 +86,9 @@ UINT32 Example_SwTimer(VOID)
     }
 
 #if (LOSCFG_BASE_CORE_SWTMR_ALIGN == YES)
-    ret = LOS_SwtmrCreate(100, LOS_SWTMR_MODE_PERIOD, Timer2_Callback, &id2, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
+    ret = LOS_SwtmrCreate(100, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)Timer2_Callback, &id2, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
 #else
-    ret = LOS_SwtmrCreate(100, LOS_SWTMR_MODE_PERIOD, Timer2_Callback, &id2, 1);
+    ret = LOS_SwtmrCreate(100, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)Timer2_Callback, &id2, 1);
 #endif
     if (ret != LOS_OK) {
         printf("Create Timer2 failed.\n");
