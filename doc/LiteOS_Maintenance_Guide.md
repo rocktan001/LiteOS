@@ -1622,7 +1622,7 @@ memcpy poolAddr2
     >![](public_sys-resources/icon-note.gif) **说明：** 
     >宏配置LOS\_OMIT\_LR\_CNT 和LOS\_RECORD\_LR\_CNT位于los\_memory.h中。
 
-3.  使用Shell命令** memused **获取used节点数据。
+3.  使用Shell命令**memused**获取used节点数据。
 
     系统稳定运行后，若used节点个数随时间一直增加，极大可能存在内存泄露，对数据进行对比分析，重点关注LR重复的节点是否存在内存泄露，泄漏点可通过LR信息进行回溯查找。
 
