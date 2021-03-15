@@ -216,13 +216,13 @@
 
 2.  配置实际使用的开发板。
 
-    在Studio的“工程配置”** →**“目标板”窗口，列出了Huawei LiteOS当前支持的所有开发板，请根据实际使用的开发板进行选择。
+    在Studio的“工程配置”**→**“目标板”窗口，列出了Huawei LiteOS当前支持的所有开发板，请根据实际使用的开发板进行选择。
 
     ![](figures/quick_start/st32_select_board.png)
 
 3.  配置想要执行的Demo。
 
-    打开Studio的“工程配置”** →**“组件配置”窗口，在左侧的“选择组件”界面中点击想要使能或修改的组件，在右侧的“组件属性”栏勾选需要使能的组件，最后点击“确认”按钮保存。下面以使能“Kernel Task Demo”为例，介绍如何配置Demo。其他Demo的使能方法，可以参考Huawei LiteOS源码根目录下demos目录中各个子目录中的README\_CN.md。
+    打开Studio的“工程配置”**→**“组件配置”窗口，在左侧的“选择组件”界面中点击想要使能或修改的组件，在右侧的“组件属性”栏勾选需要使能的组件，最后点击“确认”按钮保存。下面以使能“Kernel Task Demo”为例，介绍如何配置Demo。其他Demo的使能方法，可以参考Huawei LiteOS源码根目录下demos目录中各个子目录中的README\_CN.md。
 
     在“选择组件”界面中，选择菜单项“**Demos → Kernel Demo**”，然后在右侧的“组件属性”栏勾选“**Enable Kernel Demo**”，在菜单项“**Kernel Demo Entry**”中选择“**DemoEntry**”（该配置项可以单独执行某个或某几个内核Demo，另一个配置项InspectEntry表示执行所有内核Demo）后，在其子菜单中选择“**Run Kernel Task Demo**”，最后点击“确认”按钮保存，如下图所示。
 
@@ -392,13 +392,13 @@ Huawei LiteOS #
 
 2.  配置QEMU模拟的开发板。
 
-    打开Studio的“工程配置”** →**“目标板”窗口，选择“realview-pbx-a9”后点击“确认”按钮保存。
+    打开Studio的“工程配置”**→**“目标板”窗口，选择“realview-pbx-a9”后点击“确认”按钮保存。
 
     ![](figures/quick_start/a9_select_board.png)
 
 3.  配置想要执行的Demo。
 
-    打开Studio的“工程配置”** →**“组件配置”窗口，在左侧的“选择组件”界面中点击想要使能或修改的组件，在右侧的“组件属性”栏勾选需要使能的组件，最后点击“确认”按钮保存。下面以使能“Kernel Task Demo”为例，介绍如何配置Demo。其他Demo的使能方法，可以参考Huawei LiteOS源码根目录下demos目录中各个子目录中的README\_CN.md。
+    打开Studio的“工程配置”**→**“组件配置”窗口，在左侧的“选择组件”界面中点击想要使能或修改的组件，在右侧的“组件属性”栏勾选需要使能的组件，最后点击“确认”按钮保存。下面以使能“Kernel Task Demo”为例，介绍如何配置Demo。其他Demo的使能方法，可以参考Huawei LiteOS源码根目录下demos目录中各个子目录中的README\_CN.md。
 
     在“选择组件”界面中，选择菜单项“**Demos → Kernel Demo**”，然后在右侧的“组件属性”栏勾选“**Enable Kernel Demo**”，在菜单项“**Kernel Demo Entry**”中选择“**DemoEntry**”（该配置项可以单独执行某个或某几个内核Demo，另一个配置项InspectEntry表示执行所有内核Demo）后，在其子菜单中选择“**Run Kernel Task Demo**”，最后点击“确认”按钮保存，如下图所示。
 
