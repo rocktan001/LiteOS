@@ -60,7 +60,7 @@ STATIC VOID MmuSetMemPage(MMU_PARAM *para)
     UINT32 pageBase;
     UINT32 pageStartIndex, pageEndIndex;
     UINT32 length, bitsCache, bitsBuf, bitsAP;
-#if defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#if defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     UINT32 bitsXn;
 #endif
     UINT32 endAddr = para->endAddr;
@@ -97,7 +97,7 @@ STATIC VOID MmuSetMemPage(MMU_PARAM *para)
         X_MMU_TWO_LEVEL_PAGE(pageBase, pageStartIndex, length, bitsCache, bitsBuf, bitsAP);
     }
 
-#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     bitsXn = MMU_EXECUTE_STATE(para->uwFlag);
     if (pageSize == MMU_64K) {
         pageBase = para->startAddr >> SHIFT_64K;
@@ -114,7 +114,7 @@ STATIC UINT32 MmuSetFirstSection(const MMU_PARAM *para, UINT32 itemStart, UINT32
     UINT32 intSave;
     UINT32 itemTemp = itemStart;
     UINT32 bitsCache, bitsBuf, bitsAP;
-#if defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#if defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     UINT32 bitsXn = MMU_EXECUTE_STATE(para->uwFlag);
 #endif
 
@@ -137,7 +137,7 @@ STATIC UINT32 MmuSetFirstSection(const MMU_PARAM *para, UINT32 itemStart, UINT32
     while (itemTemp <= itemEnd) {
 #ifdef LOSCFG_ARCH_ARM926
         SECTION_CHANGE(itemTemp, bitsCache, bitsBuf, bitsAP);
-#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
         SECTION_CHANGE(itemTemp, bitsCache, bitsBuf, bitsAP, bitsXn);
 #endif
         itemTemp += sizeof(UINTPTR);
@@ -264,7 +264,7 @@ VOID ArchRemapCached(UINTPTR physAddr, size_t size)
     para.endAddr = physAddr + size;
 #ifdef LOSCFG_ARCH_ARM926
     para.uwFlag = BUFFER_ENABLE | CACHE_ENABLE | ACCESS_PERM_RW_RW;
-#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     para.uwFlag = BUFFER_ENABLE | CACHE_ENABLE | EXEC_DISABLE | ACCESS_PERM_RW_RW;
 #endif
     para.stPage = (SENCOND_PAGE *)&g_mmuAppPage;
@@ -282,7 +282,7 @@ VOID ArchRemapNoCached(UINTPTR physAddr, size_t size)
     para.endAddr = physAddr + size;
 #ifdef LOSCFG_ARCH_ARM926
     para.uwFlag = BUFFER_DISABLE | CACHE_DISABLE | ACCESS_PERM_RW_RW;
-#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     para.uwFlag = BUFFER_DISABLE | CACHE_DISABLE | EXEC_DISABLE | ACCESS_PERM_RW_RW;
 #endif
     para.stPage = (SENCOND_PAGE *)&g_mmuAppPage;
@@ -328,7 +328,7 @@ INT32 ArchMemNoAccessSet(UINTPTR startaddr, size_t length)
     base = startaddr >> SHIFT_1M;
 #ifdef LOSCFG_ARCH_ARM926
     X_MMU_SECTION(base, base, length >> SHIFT_1M, 0, 0, 0, D_NA);
-#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     X_MMU_SECTION(base, base, length >> SHIFT_1M, 0, 0, 0, 0, D_NA);
 #endif
     dma_cache_clean(ttbBase + ((startaddr >> SHIFT_1M) * BYTES_PER_ITEM),
