@@ -68,7 +68,7 @@
 #include "test_dtls_server.h"
 #endif /* LOSCFG_DEMOS_DTLS_SERVER */
 
-#if LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
+#ifdef LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
 #include "nb_demo.h"
 #endif /* LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY */
 
@@ -89,6 +89,10 @@
 #include "client_demo.h"
 #endif /* LOSCFG_DEMOS_IPV6_CLIENT */
 
+#ifdef LOSCFG_DEMOS_FS
+#include "fs_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_AI
 #include "ai_demo.h"
 #endif
@@ -100,9 +104,6 @@
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
 static UINT32 g_atiny_tskHandle;
-#endif
-#ifdef LOSCFG_DEMOS_FS
-static UINT32 g_fs_tskHandle;
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
@@ -192,27 +193,6 @@ UINT32 creat_agenttiny_task(VOID)
 }
 #endif
 
-#ifdef LOSCFG_DEMOS_FS
-UINT32 create_fs_task(VOID)
-{
-    UINT32 ret = LOS_OK;
-    TSK_INIT_PARAM_S task_init_param;
-
-    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
-    task_init_param.usTaskPrio = USER_TASK_PRIORITY;
-    task_init_param.pcName = "main_task";
-    extern VOID fs_demo(VOID);
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)fs_demo;
-    task_init_param.uwStackSize = 0x1000;
-
-    ret = LOS_TaskCreate(&g_fs_tskHandle, &task_init_param);
-    if (ret != LOS_OK) {
-        return ret;
-    }
-    return ret;
-}
-#endif
-
 #if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(LOSCFG_DEMOS_DTLS_SERVER)
 static UINT32 g_dtls_server_tskHandle;
 UINT32 create_dtls_server_task(VOID)
@@ -287,6 +267,7 @@ UINT32 creat_ai_task(VOID)
 UINT32 DemoEntry(VOID)
 {
     UINT32 ret = LOS_OK;
+    printf("Hello, welcome to liteos demo!\n");
 
 #ifdef LOSCFG_DEMOS_AI
     printf("Hello, welcome to liteos demo!\n");
@@ -298,11 +279,7 @@ UINT32 DemoEntry(VOID)
 #endif
 
 #ifdef LOSCFG_GUI_ENABLE
-    ret = LvglDemo();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Lvgl Demo Failed.\n");
-        return ret;
-    }
+    LvglDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_LMS
@@ -354,11 +331,7 @@ UINT32 DemoEntry(VOID)
 #endif
 
 #ifdef LOSCFG_DEMOS_FS
-    ret = create_fs_task();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Fs Task Creat Fail.\n");
-        return ret;
-    }
+    FsDemoTask();
 #endif
 
 #ifdef USE_PPPOS

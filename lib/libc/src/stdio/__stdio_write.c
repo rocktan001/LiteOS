@@ -12,13 +12,7 @@ size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
 	int iovcnt = 2;
 	ssize_t cnt;
 	for (;;) {
-        // attention: need vfs support, it is just a stub interface
-#ifdef __LITEOS__
-		if (1) {
-			errno = EINVAL;
-			return -1;
-		}
-#endif
+                cnt = writev(f->fd, iov, iovcnt);
 		if (cnt == rem) {
 			f->wend = f->buf + f->buf_size;
 			f->wpos = f->wbase = f->buf;

@@ -3,12 +3,12 @@ MODULE_NAME := fs_demo
 
 LOCAL_SRCS :=
 LOCAL_SRCS_y :=
-C_DEFS :=
 
-LOCAL_SRCS_y += fs_common.c
+LOCAL_SRCS_y += fs_common.c fs_demo.c
 LOCAL_SRCS_$(LOSCFG_DEMOS_FS_FAT) += fatfs_demo.c
 LOCAL_SRCS_$(LOSCFG_DEMOS_FS_SPIF) += spiffs_demo.c
 LOCAL_SRCS_$(LOSCFG_DEMOS_FS_RAM) += ramfs_demo.c
+LOCAL_SRCS_$(LOSCFG_DEMOS_FS_LITTLEFS) += littlefs_demo.c
 
 ifeq ($(LOSCFG_DEMOS_FS), y)
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/include
@@ -16,20 +16,20 @@ endif
 
 ifeq ($(LOSCFG_DEMOS_FS_FAT), y)
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/demos/fs
-C_DEFS += -D FS_FATFS
 endif
 
 ifeq ($(LOSCFG_DEMOS_FS_SPIF), y)
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/demos/fs
-C_DEFS += -D FS_SPIFFS
 endif
 
 ifeq ($(LOSCFG_DEMOS_FS_RAM), y)
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/demos/fs
-C_DEFS += -D FS_RAMFS
 endif
 
-BOARD_DEF += $(C_DEFS)
+ifeq ($(LOSCFG_DEMOS_FS_LITTLEFS), y)
+LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/demos/fs
+LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/targets/bsp/common/fs
+endif
 
 ifeq ($(LOSCFG_PLATFORM_STM32F429IGTX), y)
 LOCAL_INCLUDE += \
@@ -44,6 +44,6 @@ LOCAL_INCLUDE += \
 endif
 
 LOCAL_SRCS = $(LOCAL_SRCS_y)
-LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_CFLAGS_INTERWORK)
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_CFLAGS_INTERWORK)
 
 include $(MODULE)

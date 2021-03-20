@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Virtual Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -35,7 +35,7 @@
 #include "sys/stat.h"
 
 #define LOS_MAX_DIR_NAME_LEN 255
-#define LOS_MAX_FILE_NAME_LEN 16
+#define LOS_MAX_FILE_NAME_LEN 32
 #define LOS_FS_MAX_NAME_LEN LOS_MAX_FILE_NAME_LEN
 #define LOS_MAX_FILES 8
 
@@ -44,10 +44,10 @@ struct mount_point;
 struct dir;
 struct dirent;
 
-// #ifdef __CC_ARM
-typedef int ssize_t;
 typedef long off_t;
-// #endif
+
+#define VFS_ERROR (-1)
+#define OK         0
 
 #if defined(__GNUC__) || defined(__CC_ARM)
 #define VFS_ERRNO_SET(err) (errno = (err))
@@ -61,6 +61,7 @@ struct file_ops {
     ssize_t (*read)(struct file *, char *, size_t);
     ssize_t (*write)(struct file *, const char *, size_t);
     off_t   (*lseek)(struct file *, off_t, int);
+    off64_t (*lseek64)(struct file *, off64_t, int);
     int     (*stat)(struct mount_point *, const char *, struct stat *);
     int     (*unlink)(struct mount_point *, const char *);
     int     (*rename)(struct mount_point *, const char *, const char *);
@@ -96,11 +97,16 @@ struct mount_point {
 #define VFS_TYPE_FILE           0
 #define VFS_TYPE_DIR            1
 
+#ifndef CONFIG_NFILE_DESCRIPTORS
+#define CONFIG_NFILE_DESCRIPTORS 256
+#endif
+
 struct file {
     struct file_ops *f_fops;
     UINT32 f_flags;
     UINT32 f_status;
     off_t f_offset;
+    off64_t f_offset64;
     struct mount_point *f_mp; /* can get private mount data here */
     UINT32 f_owner;           /* the task that openned this file */
     void *f_data;
@@ -119,25 +125,14 @@ struct dir {
     void *d_data;
 };
 
-extern int      los_open(const char *, int);
-extern int      los_close(int);
-extern ssize_t  los_read(int, char *, size_t);
-extern ssize_t  los_write(int, const void *, size_t);
-extern off_t    los_lseek(int, off_t, int);
-extern int      los_stat(const char *, struct stat *);
-extern int      los_unlink(const char *);
-extern int      los_rename(const char *, const char *);
-extern int      los_ioctl(int, int, ...);
-struct dir      *los_opendir(const char *path);
-struct dirent   *los_readdir(struct dir *dir);
-int             los_closedir(struct dir *dir);
-int             los_mkdir(const char *path, int mode);
-int             los_sync(int fd);
+struct dir    *opendir(const char *path);
+struct dirent *readdir(struct dir *dir);
+int           closedir(struct dir *dir);
 
-extern int      los_fs_register(struct file_system *);
-extern int      los_fs_unregister(struct file_system *);
-extern int      los_fs_mount(const char *, const char *, void *);
-extern int      los_fs_unmount(const char *);
-extern int      los_vfs_init(void);
+int los_vfs_init(void);
+int los_fs_register(struct file_system *fs);
+int los_fs_unregister(struct file_system *fs);
+int los_fs_mount(const char *fsname, const char *path, void *data);
+int los_fs_unmount(const char *path);
 
 #endif

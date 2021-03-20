@@ -26,14 +26,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _FS_DEMO_H
-#define _FS_DEMO_H
+#ifndef _FS_COMMON_H
+#define _FS_COMMON_H
 
 #include <stdio.h>
 #include <stdint.h>
 #include "los_task.h"
 
-#include "fcntl.h"
 #include "fs/los_vfs.h"
 
 #ifdef __cplusplus
@@ -65,10 +64,15 @@ void print_dir(const char *name, int level);
 
 void los_vfs_io(char *file_name, char *dir_name);
 
+void SpiffsDemo(void);
+void FatfsDemo(void);
+void RamfsDemo(void);
+void LittlefsDemo(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _FS_DEMO_H */
+#endif /* _FS_COMMON_H */

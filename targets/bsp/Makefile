@@ -161,6 +161,7 @@ LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/targets/bsp/drivers/st_timer \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
+    -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Hardware/Inc \
     -I $(LITEOSTOPDIR)/targets/bsp/$(LITEOS_PLATFORM)/include \
     -I $(LITEOSTOPDIR)/targets/bsp/$(HAL_DRIVER_SRC)/Inc \
     -I $(LITEOSTOPDIR)/targets/bsp/$(HAL_DRIVER_SRC)/Inc/Legacy \
@@ -185,6 +186,9 @@ LOCAL_SRCS += $(wildcard drivers/st_timer/timer.c)
 endif
 
 LOCAL_SRCS += $(wildcard common/demo_entry.c)
+ifeq ($(LOSCFG_COMPONENTS_FS_LITTLEFS), y)
+LOCAL_SRCS += common/fs/littlefs_hal.c
+endif
 
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/include
 

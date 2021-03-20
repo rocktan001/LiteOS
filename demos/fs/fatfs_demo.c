@@ -29,37 +29,37 @@
 /* Includes ----------------------------------------------------------------- */
 #include "fs_common.h"
 #include "fatfs_hal.h"
+#include "fs/los_fatfs.h"
 
 #define FATFS_PATH "/fatfs"
+#define NAME_LEN   100
 
-char fatfs_file_name[100] = {0};
-char fatfs_dir_name[100] = {0};
+static char g_demoFileName[NAME_LEN] = {0};
+static char g_demoDirName[NAME_LEN] = {0};
 
-extern int fatfs_init(int need_erase);
-extern int fatfs_unmount(const char *path, uint8_t drive);
-
-void fatfs_demo(void)
+void FatfsDemo(void)
 {
     int8_t drive;
     int ret;
 
+    printf("Fatfs file system demo task start to run.\n");
     drive = hal_fatfs_init(0);
     if (drive < 0) {
-        FS_LOG_ERR("fatfs_init failed.");
+        FS_LOG_ERR("Fatfs init failed.");
         return;
     }
 
-    ret = sprintf_s(fatfs_file_name, sizeof(fatfs_file_name), "%s/%d:/%s", FATFS_PATH, (uint8_t)drive, LOS_FILE);
+    ret = sprintf_s(g_demoFileName, sizeof(g_demoFileName), "%s/%d:/%s", FATFS_PATH, (uint8_t)drive, LOS_FILE);
     if (ret <= 0) {
-        FS_LOG_ERR("sprintf_s file name failed.");
+        FS_LOG_ERR("Execute sprintf_s file name failed.");
+    }
+    ret = sprintf_s(g_demoDirName, sizeof(g_demoDirName), "%s/%d:/%s", FATFS_PATH, (uint8_t)drive, LOS_DIR);
+    if (ret <= 0) {
+        FS_LOG_ERR("Execute sprintf_s dir name failed.");
     }
 
-    ret = sprintf_s(fatfs_dir_name, sizeof(fatfs_dir_name), "%s/%d:/%s", FATFS_PATH, (uint8_t)drive, LOS_DIR);
-    if (ret <= 0) {
-        FS_LOG_ERR("sprintf_s dir name failed.");
-    }
-
-    los_vfs_io(fatfs_file_name, fatfs_dir_name);
+    los_vfs_io(g_demoFileName, g_demoDirName);
+    printf("Fatfs file system demo task finished.\n");
 
     fatfs_unmount("/fatfs/", drive);
 }

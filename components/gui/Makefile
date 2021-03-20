@@ -1,29 +1,28 @@
 include $(LITEOSTOPDIR)/config.mk
+include $(LITEOSTOPDIR)/components/gui/gui.mk
 
-MODULE_NAME   := gui
+MODULE_NAME    := gui
 BOARD_INCLUDES :=
 
-
 LVGL_SRC = \
-    $(wildcard lvgl/src/lv_core/*.c) \
-    $(wildcard lvgl/src/lv_draw/*.c) \
-    $(wildcard lvgl/src/lv_font/*.c) \
-    $(wildcard lvgl/src/lv_gpu/*.c) \
-    $(wildcard lvgl/src/lv_hal/*.c) \
-    $(wildcard lvgl/src/lv_misc/*.c) \
-    $(wildcard lvgl/src/lv_themes/*.c) \
-    $(wildcard lvgl/src/lv_widgets/*.c)
+    $(wildcard $(LVGL_VERSION)/src/lv_core/*.c) \
+    $(wildcard $(LVGL_VERSION)/src/lv_draw/*.c) \
+    $(wildcard $(LVGL_VERSION)/src/lv_font/*.c) \
+    $(wildcard $(LVGL_VERSION)/src/lv_gpu/*.c) \
+    $(wildcard $(LVGL_VERSION)/src/lv_hal/*.c) \
+    $(wildcard $(LVGL_VERSION)/src/lv_misc/*.c) \
+    $(wildcard $(LVGL_VERSION)/src/lv_themes/*.c) \
+    $(wildcard $(LVGL_VERSION)/src/lv_widgets/*.c)
 
 LVGL_INC = \
-    -I $(LITEOSTOPDIR)components/gui/lvgl/src/lv_core/ \
-    -I $(LITEOSTOPDIR)components/gui/lvgl/src/lv_draw/ \
-    -I $(LITEOSTOPDIR)components/gui/lvgl/src/lv_font/ \
-    -I $(LITEOSTOPDIR)components/gui/lvgl/src/lv_gpu/ \
-    -I $(LITEOSTOPDIR)components/gui/lvgl/src/lv_hal/ \
-    -I $(LITEOSTOPDIR)components/gui/lvgl/src/lv_misc/ \
-    -I $(LITEOSTOPDIR)components/gui/lvgl/src/lv_themes/ \
-    -I $(LITEOSTOPDIR)components/gui/lvgl/src/lv_widgets/
-
+    -I $(LITEOSTOPDIR)/components/gui/$(LVGL_VERSION)/src/lv_core/ \
+    -I $(LITEOSTOPDIR)/components/gui/$(LVGL_VERSION)/src/lv_draw/ \
+    -I $(LITEOSTOPDIR)/components/gui/$(LVGL_VERSION)/src/lv_font/ \
+    -I $(LITEOSTOPDIR)/components/gui/$(LVGL_VERSION)/src/lv_gpu/ \
+    -I $(LITEOSTOPDIR)/components/gui/$(LVGL_VERSION)/src/lv_hal/ \
+    -I $(LITEOSTOPDIR)/components/gui/$(LVGL_VERSION)/src/lv_misc/ \
+    -I $(LITEOSTOPDIR)/components/gui/$(LVGL_VERSION)/src/lv_themes/ \
+    -I $(LITEOSTOPDIR)/components/gui/$(LVGL_VERSION)/src/lv_widgets/
 
 LITEGL_INCLUDE = $(LVGL_INC)
 
