@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
  * Description: Ai Demo Implementation
  * Author: Huawei LiteOS Team
  * Create: 2020-12-10
@@ -27,6 +27,8 @@
  * --------------------------------------------------------------------------- */
 
 #include "ai_demo.h"
+#include "los_task.h"
+
 #ifdef LOSCFG_DEMOS_AI_MNIST
 #include "mnist_demo.h"
 #endif
@@ -43,35 +45,58 @@
 #include "resnet_demo.h"
 #endif
 
-#ifdef LOSCFG_ARCH_CORTEX_A9
-#include "mnist_demo.h"
-#include "mnist_quant_demo.h"
-#include "resnet_demo.h"
-#include "mobilenet_demo.h"
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-void ai_demo_entry(void)
+#define AI_TASK_PRIORITY     5
+#define AI_DEMO_TASK_SIZE    0x6000
+STATIC UINT32 g_demoTaskId;
+
+STATIC VOID DemoTaskEntry(VOID)
 {
+    printf("Ai demo task start to run.\n");
 #ifdef LOSCFG_DEMOS_AI_MNIST
     mnist_demo();  // 84kb
-#endif
+#endif /* LOSCFG_DEMOS_AI_MNIST */
 
 #ifdef LOSCFG_DEMOS_AI_MNIST_QUANT
     mnist_quant_demo(); // 47kb
-#endif
+#endif /* LOSCFG_DEMOS_AI_MNIST_QUANT */
 
 #ifdef LOSCFG_DEMOS_AI_MOBILENET
     mobilenet_demo(); // 170kb
-#endif
+#endif /* LOSCFG_DEMOS_AI_MOBILENET */
 
 #ifdef LOSCFG_DEMOS_AI_RESNET
     resnet_demo(); // 275kb
-#endif
-
-#ifdef LOSCFG_ARCH_CORTEX_A9
-    mnist_demo();       // 84kb
-    mnist_quant_demo(); // 47kb
-    mobilenet_demo();   // 170kb
-    resnet_demo();      // 275kb
-#endif
+#endif /* LOSCFG_DEMOS_AI_RESNET */
+    printf("Ai demo task finished.\n");
 }
+
+VOID AiDemoTask(VOID)
+{
+    UINT32 ret;
+    TSK_INIT_PARAM_S taskInitParam;
+
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
+    }
+    taskInitParam.usTaskPrio = AI_TASK_PRIORITY;
+    taskInitParam.pcName = "AiDemoTask";
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
+    taskInitParam.uwStackSize = AI_DEMO_TASK_SIZE;
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Creat ai demo task failed.\n");
+    }
+}
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */

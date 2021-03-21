@@ -90,7 +90,7 @@ Demos --> LMS Demo --> Enable LMS Demo
 ......
 
 #ifdef LOSCFG_DEMOS_LMS
-    Example_LMSEntry();
+    LmsDemoTask();
 #endif
 
 ```
@@ -112,10 +112,8 @@ build data : Dec  1 2020 16:50:03
 osAppInit
 cpu 0 entering scheduler
 
-Kernel task demo begin.
-LOS_TaskLock() ok.
-Create Example_TaskLMS ok.
-Enter TaskLms Handler.
+Lms demo task start to run.
+Enter lms task handler.
 
 Huawei LiteOS # [ERR]*****  Kernel Address Sanitizer Error Detected  *****
 [ERR]sd value: 0x3
@@ -140,5 +138,7 @@ runTask->taskId = 4
 traceback 1 -- lr = 0x0800803c -- fp = 0x080015c0
 traceback 2 -- lr = 0x080038ec -- fp = 0x08007e8c
 buf is €.
-TaskLms LOS_TaskDelay Done.
+Lms task delay done.
+Lms task LOS_TaskResume successfully.
+Lms demo task finished.
 ```

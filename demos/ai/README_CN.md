@@ -48,17 +48,20 @@
 ********Hello Huawei LiteOS********
 
 LiteOS Kernel Version : 5.0.0
-build data : Dec 21 2020 15:05:54
+build data : Mar 12 2021 21:26:11
 
 **********************************
 osAppInit
 cpu 0 entering scheduler
 app init!
+Hello, welcome to liteos demo!
+Ai demo task start to run.
 mnist_quant inference Start.
 0.000000,0.000000,0.000001,0.999740,0.000000,0.000259,0.000000,0.000000,0.000000, 0.000000
 
-start = 4776216, end = 106817405, consume time = 102041189 ns
+start = 11336588, end = 111548616, consume time = 100212028 ns
 mnist_quant inference End.
+Ai demo task finished.
 
 Huawei LiteOS # 
 ```

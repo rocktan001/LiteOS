@@ -8,6 +8,6 @@ config LOSCFG_COMPONENTS_LIB_CJSON
     select LOSCFG_COMPONENTS_LIB
     default n
     help
-      Answer y to enable cJSON
+      Answer y to enable cJSON.
 
 endmenu

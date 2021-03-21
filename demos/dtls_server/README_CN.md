@@ -218,19 +218,16 @@ CLIENT_IDENTITY    psk_id，与dtls_server中设置的psk保持一致
 ```
 ********Hello Huawei LiteOS********
 
-LiteOS Kernel Version : 5.0.0-rc1
-build data : Nov 13 2020 02:40:11
+LiteOS Kernel Version : 5.0.0
+build data : Mar 12 2021 22:13:45
 
 **********************************
 osAppInit
 cpu 0 entering scheduler
-
-Huawei LiteOS # lwip test init ok.
-netif: netmask of interface set to 255. 255. 255.0
-netif: GW address of interface set to 192. 168. 3. 1
-netif_set_ipaddr: netif address being changed
-netif: added interface st IP addr 192. 168. 3. 200 netmask 255. 255. 255. 0 gw 192. 168. 3. 1
-netif: setting default interface st
+app init!
+Hello, welcome to liteos demo!
+lwip test init ok.
+Dtls server demo task start to run.
 [MBEDTLS][dtls_ssl_new:142] setting up the SSL structure
 [MBEDTLS][dtls_ssl_new:209] set SSL structure succeed
 dtls_server_task:83 dtls_accept return ret = 0, bindfd = 1, cli_fd = 0
@@ -239,4 +236,5 @@ Hi Server
 
 dtls_server_task:107 Write to client: 12 bytes written
 Hi Client
+Dtls server demo task finished.
 ```

@@ -98,9 +98,6 @@
 #endif
 
 #define USER_TASK_PRIORITY 2
-#define DTLS_TASK_PRIORITY 3
-#define IPV6_TASK_PRIORITY 4
-#define AI_TASK_PRIORITY   5
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
 static UINT32 g_atiny_tskHandle;
@@ -138,31 +135,30 @@ VOID atiny_task_entry(VOID)
 #endif
 
 #ifdef LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
-    demo_nbiot_only();
+    NBIoT_DemoEntry();
 #endif
 #endif
 
 #ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
     flash_adaptor_init();
-    demo_param_s demo_param = {
+    demo_param_s demoParam = {
         .init = NULL,
         .write_flash_info = flash_adaptor_write_mqtt_info,
         .read_flash_info = flash_adaptor_read_mqtt_info
     };
-    agent_tiny_demo_init(&demo_param);
+    AgentTinyDemoInit(&demoParam);
 #endif
-
 
 #ifndef LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
 #ifdef CONFIG_FEATURE_FOTA
     hal_init_ota();
 #endif
 #ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
-    agent_tiny_mqtt_entry();
+    AgentTinyMqttDemoEntry();
 #endif
 
 #ifdef LOSCFG_DEMOS_AGENT_TINY_LWM2M
-    agent_tiny_lwm2m_entry();
+    AgentTinyLwm2mDemoEntry();
 #endif
 #endif
 }
@@ -193,89 +189,13 @@ UINT32 creat_agenttiny_task(VOID)
 }
 #endif
 
-#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(LOSCFG_DEMOS_DTLS_SERVER)
-static UINT32 g_dtls_server_tskHandle;
-UINT32 create_dtls_server_task(VOID)
-{
-    UINT32 ret = LOS_OK;
-    TSK_INIT_PARAM_S task_init_param;
-
-    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
-    task_init_param.usTaskPrio = DTLS_TASK_PRIORITY;
-    task_init_param.pcName = "dtls_server_task";
-    extern VOID dtls_server_task(VOID);
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)dtls_server_task;
-
-    task_init_param.uwStackSize = 0x1000;
-
-    ret = LOS_TaskCreate(&g_dtls_server_tskHandle, &task_init_param);
-    if (ret != LOS_OK) {
-        return ret;
-    }
-    return ret;
-}
-#endif
-
-#ifdef LOSCFG_DEMOS_IPV6_CLIENT
-static UINT32 g_ipv6_Handle;
-UINT32 ipv6_tasks(VOID)
-{
-    UINT32 ret = LOS_OK;
-    TSK_INIT_PARAM_S task_init_param;
-
-    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
-    task_init_param.usTaskPrio = IPV6_TASK_PRIORITY;
-    task_init_param.pcName = "ipv6_task";
-
-#ifdef LOSCFG_DEMOS_IPV6_TCP_CLIENT
-    extern VOID ipv6_tcp_test(VOID);
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)ipv6_tcp_test;
-#else
-    extern VOID ipv6_udp_test(VOID);
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)ipv6_udp_test;
-#endif
-
-    task_init_param.uwStackSize = 0x1000;
-    ret = LOS_TaskCreate(&g_ipv6_Handle, &task_init_param);
-    if (ret != LOS_OK) {
-        return ret;
-    }
-    return ret;
-}
-#endif
-
-#ifdef LOSCFG_DEMOS_AI
-static UINT32 g_ai_tskHandle;
-UINT32 creat_ai_task(VOID)
-{
-    UINT32 ret = LOS_OK;
-    TSK_INIT_PARAM_S task_init_param;
-
-    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
-    task_init_param.usTaskPrio = AI_TASK_PRIORITY;
-    task_init_param.pcName = "ai_task";
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)ai_demo_entry;
-    task_init_param.uwStackSize = 0x6000;
-    ret = LOS_TaskCreate(&g_ai_tskHandle, &task_init_param);
-    if(ret != LOS_OK) {
-        return ret;
-    }
-    return ret;
-}
-#endif
-
 UINT32 DemoEntry(VOID)
 {
     UINT32 ret = LOS_OK;
     printf("Hello, welcome to liteos demo!\n");
 
 #ifdef LOSCFG_DEMOS_AI
-    printf("Hello, welcome to liteos demo!\n");
-    ret = creat_ai_task();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Ai Demo Failed.\n");
-        return ret;
-    }
+    AiDemoTask();
 #endif
 
 #ifdef LOSCFG_GUI_ENABLE
@@ -283,19 +203,11 @@ UINT32 DemoEntry(VOID)
 #endif
 
 #ifdef LOSCFG_DEMOS_LMS
-    ret = Example_LMSEntry();
-    if (ret != LOS_OK) {
-        PRINT_ERR("LMS Entry Failed.\n");
-        return ret;
-    }
+    LmsDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_TRACE
-    ret = create_trace_task();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Trace demo Failed.\n");
-        return ret;
-    }
+    TraceDemoTask();
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
@@ -307,11 +219,7 @@ UINT32 DemoEntry(VOID)
 #endif
 
 #ifdef LOSCFG_DEMOS_IPV6_CLIENT
-    ret = ipv6_tasks();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Ipv6 Task Creat Fail.\n");
-        return ret;
-    }
+    Ipv6DemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_KERNEL
@@ -334,6 +242,14 @@ UINT32 DemoEntry(VOID)
     FsDemoTask();
 #endif
 
+#ifdef LOSCFG_DEMOS_DTLS_SERVER
+    DtlsServerDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_SENSORHUB
+    SensorHubDemoTask();
+#endif
+
 #ifdef USE_PPPOS
 #include "osport.h"
     extern VOID uart_init(VOID); // this uart used for the pppos interface
@@ -346,26 +262,10 @@ UINT32 DemoEntry(VOID)
     }
 #endif
 
-#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(LOSCFG_DEMOS_DTLS_SERVER)
-    ret = create_dtls_server_task();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Dtls Server Task Creat Fail.\n");
-        return ret;
-    }
-#endif
-
-#ifdef LOSCFG_DEMOS_SENSORHUB
-    ret = MiscInit();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Sensorhub Demo Task Creat Fail.\n");
-        return ret;
-    }
-#endif
-
 #ifdef LOSCFG_SHELL
-    ShellQueueCreat();
+    (VOID)ShellQueueCreat();
     if (OsShellInit(0) != LOS_OK) {
-        PRINT_ERR("Shell Init Failed.\n");
+        PRINT_ERR("Shell init failed.\n");
     }
 #endif
 

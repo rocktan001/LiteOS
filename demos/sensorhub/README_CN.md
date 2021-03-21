@@ -22,18 +22,14 @@ Sensorhub智能传感集线器的主要功能是连接并处理来自各种传�
 开启Sensorhub Demo示例功能入口在 `targets/bsp/common/demo_entry.c`内。
 ```c
 #ifdef LOSCFG_DEMOS_SENSORHUB
-    UINT32 ret = MiscInit();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Sensorhub Demo Task Creat Fail.\n");
-        return ret;
-    }
+    SensorHubDemoTask();
 #endif
 ```
 Sensorhub Demo的实现功能在`demos\sensorhub\gyro\src\sensorhub_demo.c`中。
 ```c
-STATIC VOID MiscTask(VOID const * arg)
+STATIC VOID DemoTaskEntry(VOID)
 {
-    (VOID)(arg);
+    printf("SensorHub demo task start to run.\n");
     MX_I2C1_Init();
     SensorManagerInit();
     LOS_TaskDelay(1000);
@@ -45,71 +41,83 @@ STATIC VOID MiscTask(VOID const * arg)
     OpenGyro();
     LOS_TaskDelay(100000);
     CloseGyro();
+    printf("SensorHub demo task finished.\n");
 }
 
-UINT32 MiscInit(VOID)
+VOID SensorHubDemoTask(VOID)
 {
     UINT32 ret;
-    TSK_INIT_PARAM_S taskInitParam = {0};
+    TSK_INIT_PARAM_S taskInitParam ;
 
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)MiscTask;
-    taskInitParam.uwStackSize = STASK_STKDEPTH_MISC;
-    taskInitParam.pcName = "Misc Task";
-    taskInitParam.usTaskPrio = STASK_PRIORITY_MISC;    /* 1~7 */
-    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED; /* task is detached, the task can deleteself */
-
-    ret = LOS_TaskCreate(&g_miscTskID, &taskInitParam);
-    if (ret != LOS_OK) {
-        PRINT_ERR("Misc Task create fail\n");
-        return ret;
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
     }
-    PRINT_DEBUG("MiscTask init \n");
-    return ret;
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
+    taskInitParam.uwStackSize = SENSORHUB_TASK_STACK_SIZE;
+    taskInitParam.pcName = "SensorHubDemoTask";
+    taskInitParam.usTaskPrio = SENSORHUB_TASK_PRIORITY;  /* 1~7 */
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;   /* task is detached, the task can deleteself */
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create sensorhub demo task failed.\n");
+    }
 }
 ```
 以上所述是调用ensorhub Demo示例的主要内容，参照上述menuconfig配置之后，经编译后，固件为`out/Cloud_STM32F429IGTx_FIRE/Huawei_LiteOS.bin`。 
 ## Sensorhub Demo测试
 把编译生成的固件烧录到开发板内， 串口输出mpu6050传感器实时数据，运行效果如下所示：   
 ```
-    ********Hello Huawei LiteOS********
+********Hello Huawei LiteOS********
 
-    LiteOS Kernel Version : 5.0.0
-    build data : Dec 25 2020 21:55:13
+LiteOS Kernel Version : 5.0.0
+build data : Mar 13 2021 00:43:03
 
-    **********************************
-    osAppInit
-    cpu 0 entering scheduler
-    app init!
+**********************************
+osAppInit
+cpu 0 entering scheduler
+app init!
+Hello, welcome to liteos demo!
+SensorHub demo task start to run.
 
-    Huawei LiteOS # Get mpu6050 id = 104
-    gyro on.
-    read data
-    Acc:       532     296   15394
-    Gyro:      -58     -26     -11
-    temp:       28
-    tag 2 report
-    tag 2 report
-    read data
-    Acc:       488     282   15410
-    Gyro:      -58     -26     -11
-    temp:       28
-    tag 2 report
-    tag 2 report
-    read data
-    Acc:       510     292   15390
-    Gyro:      -57     -26     -11
-    temp:       28
-    tag 2 report
-    read data
-    Acc:       492     292   15386
-    Gyro:      -58     -27     -11
-    temp:       28
-    tag 2 report
-    tag 2 report
-    read data
-    Acc:       506     278   15386
-    Gyro:      -58     -26     -11
-    temp:       28
-    tag 2 report
-    ```
+Huawei LiteOS #
+Gypo init.
+Get mpu6050 id = 104
+Read gypo id successflly.
+Gyro on.
+Read data
+Acc:      -398     336   15566
+Gyro:      -14     -24      -3
+Temp:       30
+Tag 2 report
 
+Tag 2 report
+
+Read data
+Acc:      -392     350   15560
+Gyro:      -14     -25      -3
+Temp:       30
+Tag 2 report
+
+Tag 2 report
+
+Read data
+Acc:      2368     352   15384
+Gyro:       -7     214     -11
+Temp:       30
+Tag 2 report
+
+Read data
+Acc:      -430     268   15614
+Gyro:      -15     -23      -3
+Temp:       30
+Tag 2 report
+
+Tag 2 report
+
+Read data
+Acc:      -428     250   15570
+Gyro:      -14     -24      -3
+Temp:       30
+Tag 2 report
+```

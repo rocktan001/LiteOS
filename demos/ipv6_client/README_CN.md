@@ -184,17 +184,21 @@ recv: Hi ipv6 server
 ```
 ********Hello Huawei LiteOS********
 
-LiteOS Kernel Version : 5.0.0-rc1
-build data : Nov 27 2020 02:02:31
+LiteOS Kernel Version : 5.0.0
+build data : Mar 12 2021 22:35:09
 
 **********************************
 osAppInit
 cpu 0 entering scheduler
+app init!
+Hello, welcome to liteos demo!
 lwip test init ok.
-read from server: 14 bytes read
+Ipv6 tcp demo task start to run.
+Read from server: 14 bytes read
 > Hi ipv6 client
-write to server: 14 bytes written
+Write to server: 14 bytes written
 > Hi ipv6 server
+Ipv6 tcp demo task finished.
 ```
 
 #### Udp
@@ -211,13 +215,19 @@ recv from client: 14 bytes
 ```
 ********Hello Huawei LiteOS********
 
-LiteOS Kernel Version : 5.0.0-rc1
-build data : Nov 27 2020 02:14:43
+LiteOS Kernel Version : 5.0.0
+build data : Mar 12 2021 22:36:42
 
 **********************************
 osAppInit
 cpu 0 entering scheduler
+app init!
+Hello, welcome to liteos demo!
 lwip test init ok.
-write to server: 14 bytes written
+Ipv6 udp demo task start to run.
+
+Huawei LiteOS #
+Write to server: 14 bytes written
 > Hi ipv6 server
+Ipv6 udp demo task finished.
 ```

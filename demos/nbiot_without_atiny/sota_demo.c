@@ -26,61 +26,60 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-
-
-#include <stdio.h>
+#include "nb_demo.h"
+#include "stdio.h"
 #include "los_swtmr.h"
 #include "osdepends/atiny_osdep.h"
 #include "sota/sota.h"
 #include "sota/sota_hal.h"
 #include "ota_port.h"
-#include "board.h"
 #include "hal_spi_flash.h"
 #include "at_frame/at_main.h"
 
-#define DEVICE_VER             "V0.0"
-#define SOTA_BUF_LEN           (512+16)
-#define SOTA_MAX_TIME_OUT      5000
+#define DEVICE_VER         "V0.0"
+#define SOTA_BUF_LEN       (512+16)
+#define SOTA_MAX_TIME_OUT  5000
 
 extern int nb_send_str(const char* buf, int len);
 
-int8_t g_sota_buf[SOTA_BUF_LEN];
-uint16_t g_sota_timer;
-int read_ver(char* buf, uint32_t len)
+static int8_t g_demoSoftBuf[SOTA_BUF_LEN];
+static uint16_t g_demoSotaTimer;
+
+int ReadVerson(char* buf, uint32_t len)
 {
     (void)memcpy_s(buf, strlen(DEVICE_VER), DEVICE_VER, strlen(DEVICE_VER));
     return 0;
 }
 
-int32_t sota_cmd_match(const char *buf, char* featurestr, int len)
+static int32_t SotaCmdMatch(const char *buf, char* featurestr, int len)
 {
     if (strstr(buf, featurestr) != NULL) {
-        if (sota_parse((const int8_t *)buf, len, g_sota_buf, SOTA_BUF_LEN) == SOTA_OK) {
+        if (sota_parse((const int8_t *)buf, len, g_demoSoftBuf, SOTA_BUF_LEN) == SOTA_OK) {
             return 0;
         }
     }
     return -1;
 }
 
-int32_t sota_callback(void *arg, int8_t* buf, int32_t buflen)
+static int32_t SotaCallback(void *arg, int8_t* buf, int32_t buflen)
 {
     int ret;
-    ret = sota_process(arg, g_sota_buf, buflen);
+    ret = sota_process(arg, g_demoSoftBuf, buflen);
 
     switch (ret) {
         case SOTA_UPDATED: {
-            LOS_SwtmrStop(g_sota_timer);
+            LOS_SwtmrStop(g_demoSotaTimer);
             atiny_reboot();
             break;
         }
         case SOTA_DOWNLOADING:
         case SOTA_UPDATING: {
-            LOS_SwtmrStart(g_sota_timer);
+            LOS_SwtmrStart(g_demoSotaTimer);
             break;
         }
         case SOTA_EXIT:
         case SOTA_WRITE_FLASH_FAILED: {
-            LOS_SwtmrStop(g_sota_timer);
+            LOS_SwtmrStop(g_demoSotaTimer);
             break;
         }
         default:
@@ -90,7 +89,7 @@ int32_t sota_callback(void *arg, int8_t* buf, int32_t buflen)
 }
 
 #define LOG_BUF_SIZE (256)
-int sota_log(const char *fmt, ...)
+int SotaLog(const char *fmt, ...)
 {
     int ret;
     char str_buf[LOG_BUF_SIZE] = {0};
@@ -106,10 +105,10 @@ int sota_log(const char *fmt, ...)
     return ret;
 }
 
-void nb_sota_demo(void)
+void NBIoT_SotaDemo(void)
 {
     sota_arg_s flash_op = {
-       .get_ver = read_ver,
+       .get_ver = ReadVerson,
        .sota_send = nb_send_str,
        .sota_malloc = at_malloc,
        .sota_printf = sota_log,
@@ -131,10 +130,10 @@ void nb_sota_demo(void)
     hal_init_ota();
 #if (LOSCFG_BASE_CORE_SWTMR_ALIGN == YES)
     LOS_SwtmrCreate(SOTA_MAX_TIME_OUT, LOS_SWTMR_MODE_NO_SELFDELETE, (SWTMR_PROC_FUNC)sota_timeout_handler,
-                    &g_sota_timer, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
+                    &g_demoSotaTimer, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
 #else
-    LOS_SwtmrCreate(SOTA_MAX_TIME_OUT, LOS_SWTMR_MODE_NO_SELFDELETE, (SWTMR_PROC_FUNC)sota_timeout_handler, &g_sota_timer, 1);
+    LOS_SwtmrCreate(SOTA_MAX_TIME_OUT, LOS_SWTMR_MODE_NO_SELFDELETE, (SWTMR_PROC_FUNC)sota_timeout_handler, &g_demoSotaTimer, 1);
 #endif
     sota_init(&flash_op);
-    (void)at.oob_register("+NNMI:", strlen("+NNMI:"), sota_callback, sota_cmd_match);
+    (void)at.oob_register("+NNMI:", strlen("+NNMI:"), SotaCallback, SotaCmdMatch);
 }

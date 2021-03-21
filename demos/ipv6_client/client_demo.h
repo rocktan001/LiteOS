@@ -29,14 +29,15 @@
 #ifndef _IPV6_CLIENT_H
 #define _IPV6_CLIENT_H
 
+#include "los_typedef.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void ipv6_tcp_test(void);
-void ipv6_udp_test(void);
+VOID Ipv6DemoTask(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
