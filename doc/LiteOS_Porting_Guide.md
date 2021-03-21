@@ -19,6 +19,8 @@
     -   [增加新开发板的目录](#增加新开发板的目录)
     -   [适配外设驱动和HAL库配置文件](#适配外设驱动和HAL库配置文件)
     -   [配置系统时钟](#配置系统时钟)
+    -   [适配定时器初始化文件](#适配定时器初始化文件)
+    -   [添加GPIO初始化文件](#添加GPIO初始化文件)
     -   [适配串口初始化文件](#适配串口初始化文件)
     -   [修改链接脚本](#修改链接脚本)
     -   [适配编译配置](#适配编译配置)
@@ -66,12 +68,12 @@
 | lib                         |                          |  libc/zlib/posix接口                                          |
 | osdepends                   |                          |  LiteOS提供的部分OS适配接口                                   |
 | targets                     | bsp                      |  通用板级支持包                                               |
-|                             | Cloud_STM32F429IGTx_FIRE |  野火STM32F429（ARM Cortex M4）开发板的开发工程源码包         |
-|                             | qemu-virt-a53            |  Coretex A53的qemu开发工程源码包                              |
-|                             | realview-pbx-a9          |  Coretex A9的qemu开发工程源码包                               |
-|                             | STM32F072_Nucleo         |  STM32F072_Nucleo（ARM Cortex M0）开发板的开发工程源码包      |
-|                             | STM32F103_FIRE_Arbitrary |  野火STM32F103（ARM Cortex M3）霸道开发板的开发工程源码包     |
-|                             | STM32F769IDISCOVERY      |  STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包   |
+|                             | Cloud_STM32F429IGTx_FIRE |  野火STM32F429（ARM Cortex-M4）开发板的开发工程源码包         |
+|                             | qemu-virt-a53            |  Cortex-A53的qemu开发工程源码包                              |
+|                             | realview-pbx-a9          |  Cortex-A9的qemu开发工程源码包                               |
+|                             | STM32F072_Nucleo         |  STM32F072_Nucleo（ARM Cortex-M0）开发板的开发工程源码包      |
+|                             | STM32F103_FIRE_Arbitrary |  野火STM32F103（ARM Cortex-M3）霸道开发板的开发工程源码包     |
+|                             | STM32F769IDISCOVERY      |  STM32F769IDISCOVERY（ARM Cortex-M7）开发板的开发工程源码包   |
 |                             | ...                      |  其他开发板的开发工程源码包                                   |
 |                             | Kconfig                  |                                                               |
 |                             | Makefile                 |                                                               |
@@ -206,6 +208,12 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 **图 1**  配置串口和LED引脚<a name="fig103021431642"></a>
 ![](figures/porting/configure_serial_and_LED.png "配置串口和LED引脚")
+
+<h4 id="配置定时器">配置定时器</h4>
+仍然在“Pinout & Configuration”标签页中，在左边的“Timer”中选择“TIM3"（之所以选择TIM3，是为了方便后续移植）。可以参考下图进行设置：
+
+**图 1**  配置TIMER
+![](figures/porting/configure_timer.png "配置TIMER")
 
 <h4 id="配置烧录调试方式">配置烧录调试方式</h4>
 
@@ -359,6 +367,10 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 -   **[配置系统时钟](#配置系统时钟)**
 
+-   **[适配定时器初始化文件](#适配定时器初始化文件)**
+
+-   **[添加GPIO初始化文件](#添加GPIO初始化文件)**
+
 -   **[适配串口初始化文件](#适配串口初始化文件)**
 
 -   **[修改链接脚本](#修改链接脚本)**
@@ -375,15 +387,17 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 1.  增加新移植开发板的目录。
 2.  适配新开发板的外设驱动和HAL库配置文件。
 3.  配置系统时钟。
-4.  适配串口初始化文件。
-5.  修改链接脚本。
-6.  适配编译配置。
+4.  适配定时器初始化文件。
+5.  添加GPIO初始化文件。
+6.  适配串口初始化文件。
+7.  修改链接脚本。
+8.  适配编译配置。
 
 <h3 id="增加新开发板的目录">增加新开发板的目录</h3>
 
 正点原子STM32F407开发板使用的是STM32F4芯片，可以参考Cloud\_STM32F429IGTx\_FIRE工程代码。
 
-在LiteOS源码target目录下拷贝Cloud\_STM32F429IGTx\_FIRE目录，并将目录重命名为新开发板名，比如STM32F407\_OpenEdv。下表是STM32F407\_OpenEdv目录中的子目录和文件，只列出了和本次移植相关的内容，不相关的文件和目录可以删除。
+在LiteOS源码target目录下拷贝Cloud\_STM32F429IGTx\_FIRE目录，并将目录重命名为新开发板名，比如STM32F407\_OpenEdv。下表是STM32F407\_OpenEdv目录中的子目录和文件，只列出了和本次移植相关的内容，不相关的文件和目录可以删除(其中不相关的目录包括Driver，Hardware，Lib)。
 
 **表 1**  新增开发板目录结构
 
@@ -396,7 +410,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 </thead>
 <tbody><tr id="row1316624817544"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p15382183612550"><a name="p15382183612550"></a><a name="p15382183612550"></a>Inc</p>
 </td>
-<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p87771652145517"><a name="p87771652145517"></a><a name="p87771652145517"></a>芯片外设配置的头文件</p>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p87771652145517"><a name="p87771652145517"></a><a name="p87771652145517"></a>芯片外设配置的头文件，只需保留main.h、stm32f4xx.h、stm32f4xx_hal_conf.h、sys_init.h、system_stm32f4xx.h、tim.h、usart.h</p>
 </td>
 </tr>
 <tr id="row10166164845419"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p153821036165519"><a name="p153821036165519"></a><a name="p153821036165519"></a>include</p>
@@ -411,7 +425,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 </tr>
 <tr id="row1516734814544"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p2038353611557"><a name="p2038353611557"></a><a name="p2038353611557"></a>Src</p>
 </td>
-<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p147771452155511"><a name="p147771452155511"></a><a name="p147771452155511"></a>芯片外设配置的源文件</p>
+<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p147771452155511"><a name="p147771452155511"></a><a name="p147771452155511"></a>芯片外设配置的源文件，只需保留main.c、system_stm32f4xx.c、usart.c、sys_init.c、user_task.c、tim.c</p>
 </td>
 </tr>
 <tr id="row516754815410"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p1738383615558"><a name="p1738383615558"></a><a name="p1738383615558"></a>config.mk</p>
@@ -454,31 +468,30 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
     直接用裸机工程中的**Core\\Inc\\stm32f4xx\_hal\_conf.h**文件替换**STM32F407\_OpenEdv\\Inc\\stm32f4xx\_hal\_conf.h**即可。
 
-3.  注释随机数代码。
+3.  删除随机数代码。
 
-    目前不需要使用随机数，为减少不必要的移植工作，先注释随机数相关代码。搜索关键字“**rng**”，在STM32F407\_OpenEdv目录下找到以下几处使用，将其注释掉：
+    目前不需要使用随机数，为减少不必要的移植工作，先注释随机数相关代码。搜索关键字“**rng**”，在STM32F407\_OpenEdv目录下找到以下几处使用，将其删除：
 
     -   Src\\sys\_init.c中：
 
         ```c
-        /*
+        #include "hal_rng.h"
+        ```
+        ```c
         int atiny_random(void *output, size_t len)
         {
             return hal_rng_generate_buffer(output, len);
         }
-        */
+        
         ```
 
     -   Src\\main.c中：
 
         ```c
-        VOID HardwareInit(VOID)
-        {
-            SystemClock_Config();
-            MX_USART1_UART_Init();
-            // hal_rng_config();
-            dwt_delay_init(SystemCoreClock);
-        }
+        #include "hal_rng.h"
+        ```
+        ```c
+        hal_rng_config();
         ```
 
 4.  在STM32F407\_OpenEdv\\Src\\main.c硬件初始化函数的第一行，添加初始化HAL库的函数HAL\_Init\(\)：
@@ -489,11 +502,10 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
         HAL_Init();
         SystemClock_Config();
         MX_USART1_UART_Init();
-        // hal_rng_config();
+        删除hal_rng_config();
         dwt_delay_init(SystemCoreClock);
     }
     ```
-
 
 <h3 id="配置系统时钟">配置系统时钟</h3>
 
@@ -507,19 +519,111 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 2.  修改系统时钟配置函数SystemClock\_Config\(\)。
 
-    函数定义在STM32F407\_OpenEdv\\Src\\sys\_init.c文件中，可以直接使用裸机工程Core\\Src\\main.c中的函数实现。同时在函数结束前加上 **SystemCoreClockUpdate\(\);** 调用。
+    函数定义在STM32F407\_OpenEdv\\Src\\sys\_init.c文件中，可以直接使用裸机工程Core\\Src\\main.c中的函数实现。
 
+<h3 id="适配定时器初始化文件">适配定时器初始化文件</h3>
+
+1.  使用裸机工程的串口初始文件**Core\\Src\\tim.c**和**Core\\Inc\\tim.h**替换LiteOS源码中的**targets\\STM32F407\_OpenEdv\\Src\\tim.c**和**targets\\STM32F407\_OpenEdv\\Inc\\tim.h**。
+2.  裸机工程相对于LiteOS系统缺少相关函数（StmGetTimerCycles，StmTimerHwiCreate，StmTimerInit）声明和枚举类型Timer_t定义，在**targets\\STM32F407\_OpenEdv\\Inc\\tim.h**文件中增加如下代码：
+    ```c
+    #include "los_typedef.h"
+    typedef enum {
+        TIMER1 = 1,
+        TIMER2,
+        TIMER3,
+        TIMER4,
+        TIMER5,
+        TIMER6,
+        TIMER7,
+        TIMER8
+    } Timer_t;
+
+    UINT64 StmGetTimerCycles(Timer_t num);
+    VOID StmTimerHwiCreate(VOID);
+    VOID StmTimerInit(VOID);
+    ```
+3.  增加2中对应函数的实现，对targets\\STM32F407\_OpenEdv\\Src\\tim.c文件中增加如下代码：
+    ```c
+    #include "los_hwi.h"
+
+    #define TIMER3_RELOAD 50000
+
+    UINT64 Timer3Getcycle(VOID)
+    {
+        static UINT64 bacCycle;
+        static UINT64 cycleTimes;
+        UINT64 swCycles = htim3.Instance->CNT;
+
+        if (swCycles <= bacCycle) {
+            cycleTimes++;
+        }
+        bacCycle = swCycles;
+        return swCycles + cycleTimes * TIMER3_RELOAD;
+    }
+
+    VOID StmTimerInit(VOID)
+    {
+        MX_TIM3_Init();
+    }
+
+    VOID StmTimerHwiCreate(VOID)
+    {
+        UINT32 ret;
+
+        ret = LOS_HwiCreate(TIM_IRQ, 0, 0, TIM3_IRQHandler, 0); // 16: cortex-m irq num shift
+        if (ret != 0) {
+            printf("ret of TIM3 LOS_HwiCreate = %#x\n", ret);
+            return;
+        }
+        HAL_TIM_Base_Start_IT(&htim3);
+    }
+
+    UINT64 StmGetTimerCycles(Timer_t num)
+    {
+        UINT64 cycles = 0;
+
+        switch (num) {
+            case 3:
+                cycles = Timer3Getcycle();
+                break;
+            default:
+                printf("Wrong number of TIMER.\n");
+        }
+        return cycles;
+    }
+    ```
+
+<h3 id="添加GPIO初始化文件">添加GPIO初始化文件</h3>
+
+1.  使用裸机工程的串口初始化文件**Core\\Src\\gpio.c**和**Core\\Inc\\gpio.h**复制到**targets\\STM32F407\_OpenEdv\\Src\\** 和 **targets\\STM32F407\_OpenEdv\\Inc\\** 目录下。
+2.  在STM32F407\_OpenEdv的Makefile文件中USER_SRC变量新增Src/gpio.c，即将gpio编译进工程内。
+    ```makefile
+    USER_SRC = \
+        os_adapt/os_adapt.c \
+        Src/main.c \
+        Src/system_stm32f4xx.c \
+        Src/tim.c \
+        Src/usart.c \
+        Src/sys_init.c \
+        Src/user_task.c \
+        Src/gpio.c
+    ```
+3.  在targets\\STM32F407\_OpenEdv\\Inc\\gpio.h文件中新增如下代码以避免相关宏定义缺少报错。
+    ```c
+    #include "stm32f4xx_hal.h"
+
+    ```
 
 <h3 id="适配串口初始化文件">适配串口初始化文件</h3>
 
 1.  使用裸机工程的串口初始化文件**Core\\Src\\usart.c**和**Core\\Inc\\usart.h**替换LiteOS源码中的**targets\\STM32F407\_OpenEdv\\Src\\usart.c**和**targets\\STM32F407\_OpenEdv\\Inc\\usart.h**。
-2.  在targets\\STM32F407\_OpenEdv\\Inc\\usart.h中增加对STM32F4系列芯片的HAL驱动头文件的引用：
+2.  在**targets\\STM32F407\_OpenEdv\\Inc\\usart.h**中增加对STM32F4系列芯片的HAL驱动头文件的引用：
 
     ```c
     #include "stm32f4xx_hal.h"
     ```
 
-3.  在targets\\STM32F407\_OpenEdv\\Src\\usart.c文件尾部添加如下两个函数定义：
+3.  在**targets\\STM32F407\_OpenEdv\\Src\\usart.c**文件尾部添加如下函数定义：
 
     ```c
     __attribute__((used)) int _write(int fd, char *ptr, int len)
@@ -527,17 +631,12 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
         (void)HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, 0xFFFF);
         return len;
     }
-    int uart_write(const char *buf, int len, int timeout)
-    {
-        (void)HAL_UART_Transmit(&huart1, (uint8_t *)buf, len, 0xFFFF);
-        return len;
-    }
     ```
 
 
 <h3 id="修改链接脚本">修改链接脚本</h3>
 
-STM32F407\_OpenEdv\\liteos.ld是新开发板的链接脚本，需要根据开发板实际情况修改stack，flash，ram的值，可以参考裸机工程链接脚本STM32F407ZGTx\_FLASH.ld中的设定值进行设置。
+**STM32F407\_OpenEdv\\liteos.ld**是新开发板的链接脚本，需要根据开发板实际情况修改stack，flash，ram的值，可以参考裸机工程链接脚本**STM32F407ZGTx\_FLASH.ld**中的设定值进行设置。
 
 -   stack在链接脚本中对应的是“\_estack”变量。
 -   flash 对应的是“FLASH”变量。
@@ -583,20 +682,88 @@ STM32F407\_OpenEdv\\liteos.ld是新开发板的链接脚本，需要根据开发
 1.  将所有“**Cloud\_STM32F429IGTx\_FIRE**”替换成“**STM32F407\_OpenEdv**”。
 2.  STM32F407\_OpenEdv目录结构相对于Cloud\_STM32F429IGTx\_FIRE工程的目录少了一些文件和子目录，需要在Makefile中删除对这些目录文件的引用，即删除如下内容：
 
-    ```makefile
-    HARDWARE_SRC =  \
-            ${wildcard $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Src/*.c}
-            C_SOURCES += $(HARDWARE_SRC)
+	```makefile
+    ifeq ($(LOSCFG_DEMOS_SENSORHUB), y)
+        BSP_DRIVER_SRC = \
+        Drivers/i2c/i2c.c \
+        Drivers/mpu6050/mpu6050.c
+        C_SOURCES += $(BSP_DRIVER_SRC)
+    endif
     ```
-
+	```makefile
+    ifeq ($(LOSCFG_COMPONENTS_FS), y)
+        ifeq ($(LOSCFG_FATFS_USE_SD_CARD), y)
+            FS_SRC += \
+                Src/fatfs_sd_hal.c \
+                Src/stm324x9i_eval_sd.c \
+                Src/sd_diskio.c
+        endif
+        ifeq ($(LOSCFG_FATFS_USE_SPI_FLASH), y)
+            FS_SRC += \
+                Src/fatfs_spi_hal.c
+        endif
+        ifeq ($(LOSCFG_COMPONENTS_FS_SPIFFS), y)
+            FS_SRC += \
+                Src/spiffs_hal.c
+        endif
+        C_SOURCES += $(FS_SRC)
+    endif
+    ```
     ```makefile
-    HARDWARE_INC = \
-            -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Inc
-            BOARD_INCLUDES += $(HARDWARE_INC)
+    BSP_INC = \
+        --I $(LITEOSTOPDIR)/targets/TM32F407_OpenEdv/Drivers/BSP/STM324x9I_EVAL \
+	HARDWARE_INC = \
+        -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Inc
+        BOARD_INCLUDES += $(HARDWARE_INC)
+	HARDWARE_SRC =  \
+        ${wildcard Hardware/Src/*.c}
+        C_SOURCES += $(HARDWARE_SRC)
+	USER_SRC = \
+        Src/flash_adaptor.c \
+    ```
+    ```makefile
+    BSP_DRIVER_INC = \
+       -I $(LITEOSTOPDIR)/targets/TM32F407_OpenEdv/Drivers/i2c \
+       -I $(LITEOSTOPDIR)/targets/TM32F407_OpenEdv/Drivers/mpu6050
+    BOARD_INCLUDES += $(BSP_DRIVER_INC)
     ```
 
 3.  搜索关键字“**STM32F429**”，替换为“**STM32F407**”。
 4.  如果需要添加自己的源文件，可以将该源文件添加到“**USER\_SRC**”变量中。
+
+<h4 id="修改bspMakefile文件">修改targets\bsp\Makefile文件</h4>
+
+仿照LOSCFG_PLATFORM_STM32F429IGTX，在targets\bsp\Makefile文件中增加STM32F4对应的HAL编译：
+
+```makefile
+else ifeq ($(LOSCFG_PLATFORM_STM32F407ZGTX), y)
+STM32F407ZGTX_HAL_SRC = \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_eth.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sd.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_sdmmc.c \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sdram.c
+    LOCAL_SRCS = $(STM32F407ZGTX_HAL_SRC)
+```
 
 <h4 id="添加新开发板到系统配置中">添加新开发板到系统配置中</h4>
 
@@ -615,11 +782,27 @@ STM32F407\_OpenEdv\\liteos.ld是新开发板的链接脚本，需要根据开发
 2.  新增STM32F407\_OpenEdv.config。
 
     在tools\\build\\config文件夹下复制Cloud\_STM32F429IGTx\_FIRE.config文件，并重命名为STM32F407\_OpenEdv.config，同时将文件内容中的“**Cloud\_STM32F429IGTx\_FIRE**”改为“**STM32F407\_OpenEdv**”，将“**LOSCFG\_PLATFORM\_STM32F429IGTX**”改为“**LOSCFG\_PLATFORM\_STM32F407ZGTX**”。
+3.  修改targets\Kconfig以添加menuconfig选项。
 
-3.  修改.config。
+    a. 仿照config LOSCFG_PLATFORM_STM32F429IGTX添加：
+    ```
+    config LOSCFG_PLATFORM_STM32F407ZGTX
+    bool "STM32F407_OpenEdv"
+    select LOSCFG_USING_BOARD_LD
+    select LOSCFG_ARCH_CORTEX_M4
+    ```
+    b. choice条目下面的help追加STM32F407_OpenEdv。
+
+    c. config LOSCFG_PLATFORM下面新增：
+    ```
+    default "STM32F407_OpenEdv"         if LOSCFG_PLATFORM_STM32F407ZGTX
+    ```
+    >![](public_sys-resources/icon-note.gif) **说明：**
+    >STM32F407_OpenEdv应该是[增加新开发板的目录](#增加新开发板的目录)中新增的开发板目录名称。 
+
+4.  修改.config。
 
     复制tools\\build\\config\\STM32F407\_OpenEdv.config文件到LiteOS根目录下，并重命名为.config以替换根目录下原有的.config文件。
-
 
 <h3 id="在LiteOS-Studio上验证">在LiteOS Studio上验证</h3>
 
@@ -714,6 +897,7 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
 3.  在硬件初始化函数HardwareInit\(\)中增加对LED灯的初始化：
 
     ```c
+    #include "gpio.h"
     MX_GPIO_Init();
     ```
 
@@ -753,3 +937,4 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
 
 1.  在gitee网站上的<a href="https://gitee.com/LiteOS/LiteOS/issues" target="_blank">LiteOS项目</a>中提出issue。
 2.  在<a href="https://bbs.huaweicloud.com/forum/forum-729-1.html" target="_blank">Huawei LiteOS官方论坛</a>上提问。
+
