@@ -27,28 +27,39 @@
  * --------------------------------------------------------------------------- */
 
 #include "fs_common.h"
+#include "los_typedef.h"
 
 #define SPIFFS_PATH "/spiffs"
+#define NAME_LEN     100
 
-char spiffs_file_name[100] = {0};
-char spiffs_dir_name[100] = {0};
+static char g_demoFileName[NAME_LEN] = {0};
+static char g_demoDirName[NAME_LEN] = {0};
 
 extern int hal_spiffs_init(int need_erase);
 extern int spiffs_unmount(const char *path);
 
-void spiffs_demo(void)
+void SpiffsDemo(void)
 {
     int ret = 0;
 
+    printf("Spiffs file system demo task start to run.\n");
     ret = hal_spiffs_init(0);
     if (ret == LOS_NOK) {
-        FS_LOG_ERR("spiffs_init failed.");
+        FS_LOG_ERR("Spiffs init failed.");
         return;
     }
-    sprintf(spiffs_file_name, "%s/%s", SPIFFS_PATH, LOS_FILE);
-    sprintf(spiffs_dir_name, "%s/%s", SPIFFS_PATH, LOS_DIR);
 
-    los_vfs_io(spiffs_file_name, spiffs_dir_name);
+    ret = sprintf_s(g_demoFileName, sizeof(g_demoFileName), "%s/%s", SPIFFS_PATH, LOS_FILE);
+    if (ret <= 0) {
+        FS_LOG_ERR("Execute sprintf_s file name failed.");
+    }
+    ret = sprintf_s(g_demoDirName, sizeof(g_demoDirName), "%s/%s", SPIFFS_PATH, LOS_DIR);
+    if (ret <= 0) {
+        FS_LOG_ERR("Execute sprintf_s dir name failed.");
+    }
+
+    los_vfs_io(g_demoFileName, g_demoDirName);
+    printf("Spiffs file system demo task finished.\n");
 
     spiffs_unmount("/spiffs/");
 }

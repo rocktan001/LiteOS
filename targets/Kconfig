@@ -27,11 +27,14 @@ config LOSCFG_PLATFORM_STM32F429IGTX
     bool "Cloud_STM32F429IGTx_FIRE"
     select LOSCFG_USING_BOARD_LD
     select LOSCFG_ARCH_CORTEX_M4
+    select LOSCFG_HW_SD_CARD
+    select LOSCFG_HW_SPI_FLASH
 
 config LOSCFG_PLATFORM_STM32F769IDISCOVERY
     bool "STM32F769IDISCOVERY"
     select LOSCFG_USING_BOARD_LD
     select LOSCFG_ARCH_CORTEX_M7
+    select LOSCFG_HW_SD_CARD
 
 config LOSCFG_PLATFORM_STM32L431_BearPi
     bool "STM32L431_BearPi"
@@ -68,3 +71,10 @@ endchoice
 
 config LOSCFG_USING_BOARD_LD
     bool
+
+config LOSCFG_HW_SD_CARD
+    bool
+
+config LOSCFG_HW_SPI_FLASH
+    bool
+

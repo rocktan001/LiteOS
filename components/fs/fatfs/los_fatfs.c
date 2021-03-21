@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Fat Fs Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -364,6 +364,11 @@ static off_t fatfs_op_lseek(struct file *file, off_t off, int whence)
         return ret_to_errno(res);
 }
 
+static off64_t fatfs_op_lseek64(struct file *file, off64_t off, int whence)
+{
+    return (off64_t)fatfs_op_lseek(file, (off_t)off, whence);
+}
+
 int fatfs_op_stat(struct mount_point *mp, const char *path_in_mp, struct stat *stat)
 {
     FRESULT res;
@@ -500,6 +505,7 @@ static struct file_ops fatfs_ops = {
     fatfs_op_read,
     fatfs_op_write,
     fatfs_op_lseek,
+    fatfs_op_lseek64,
     fatfs_op_stat,
     fatfs_op_unlink,
     fatfs_op_rename,

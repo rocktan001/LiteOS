@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: Lvgl Demo
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: Fs Common HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,20 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#define LV_USE_DEMO_WIDGETS
+#ifndef _FS_DEMO_H
+#define _FS_DEMO_H
 
-#include "los_task.h"
-#include "lvgl_demo.h"
-
-#include "lvgl.h"
-#include "stm32f7xx.h"
-#include "stm32f769i_discovery.h"
-#include "tft/tft.h"
-#include "touchpad/touchpad.h"
-
-#ifdef LV_USE_DEMO_WIDGETS
-#include "widgets/lv_demo_widgets.h"
-#endif
+#include "los_typedef.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -47,65 +37,12 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define DELAY_5MS 5
-
-#define LVGL_TASK_STACK_SIZE  0x2000
-#define LVGL_TASK_PRIORITY    5
-STATIC UINT32 g_demoTaskId;
-
-STATIC VOID EnableCache(VOID)
-{
-    /* Enable I-Cache */
-    SCB_EnableICache();
-
-    /* Enable D-Cache */
-    SCB_EnableDCache();
-}
-
-STATIC VOID DemoTaskEntry(VOID)
-{
-    printf("Lvgl demo task start to run.\n");
-    /* Enable the CPU Cache */
-    EnableCache();
-
-    lv_init();
-
-    tft_init();
-    touchpad_init();
-
-#ifdef LV_USE_DEMO_WIDGETS
-    lv_demo_widgets();
-#endif
-
-    while (1) {
-        lv_task_handler();
-        LOS_Msleep(DELAY_5MS);
-    }
-    printf("Lvgl demo task finshed.\n");
-}
-
-VOID LvglDemoTask(VOID)
-{
-    UINT32 ret;
-    TSK_INIT_PARAM_S taskInitParam;
-
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
-    if (ret != EOK) {
-        return;
-    }
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
-    taskInitParam.uwStackSize = LVGL_TASK_STACK_SIZE;
-    taskInitParam.pcName = "LvglDemoTask";
-    taskInitParam.usTaskPrio = LVGL_TASK_PRIORITY;
-    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
-    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
-    if (ret != LOS_OK) {
-        printf("Create lvgl demo task failed.\n");
-    }
-}
+VOID FsDemoTask(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
+#endif /* _FS_DEMO_H */

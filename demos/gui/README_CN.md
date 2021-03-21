@@ -22,18 +22,15 @@ Demos  --->
 
 ```c
 #ifdef LOSCFG_GUI_ENABLE
-    ret = LvglDemo();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Lvgl Demo Failed.\n");
-        return ret;
-    }
+    LvglDemoTask();
 #endif
 ```
-在`demos/gui/lvgl_demo.c`内创建上述`LvglDemo`任务， 用户可在`LvglTaskEntry`丰富lvgl的显示功能。
+在`demos/gui/lvgl_demo.c`内创建上述`LvglDemoTask`任务， 用户可在`LvglTaskEntry`丰富lvgl的显示功能。
 
 ```c
-STATIC VOID LvglTaskEntry(VOID)
+STATIC VOID DemoTaskEntry(VOID)
 {
+    printf("Lvgl demo task start to run.\n");
     /* Enable the CPU Cache */
     EnableCache();
 
@@ -48,28 +45,29 @@ STATIC VOID LvglTaskEntry(VOID)
 
     while (1) {
         lv_task_handler();
-        LOS_Msleep(LVGL_TASK_POLL_PERIOD);
+        LOS_Msleep(DELAY_5MS);
     }
+    printf("Lvgl demo task finshed.\n");
 }
 
-UINT32 LvglDemo(VOID)
+VOID LvglDemoTask(VOID)
 {
     UINT32 ret;
-    UINT32 taskId;
-    TSK_INIT_PARAM_S lvglTask;
+    TSK_INIT_PARAM_S taskInitParam;
 
-    (VOID)memset_s(&lvglTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
-    lvglTask.pfnTaskEntry = (TSK_ENTRY_FUNC)LvglTaskEntry;
-    lvglTask.uwStackSize = LVGL_TASK_STACK_SIZE;
-    lvglTask.pcName = "Lvgl_Task";
-    lvglTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
-    lvglTask.uwResved = LOS_TASK_STATUS_DETACHED;
-
-    ret = LOS_TaskCreate(&taskId, &lvglTask);
-    if (ret != LOS_OK) {
-        return ret;
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
     }
-    return ret;
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
+    taskInitParam.uwStackSize = LVGL_TASK_STACK_SIZE;
+    taskInitParam.pcName = "LvglDemoTask";
+    taskInitParam.usTaskPrio = LVGL_TASK_PRIORITY;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create lvgl demo task failed.\n");
+    }
 }
 ```
 `STM32F769IDISCOVERY`开发板的GUI Demo示例默认使能了`lvgl触控`功能, 其实现方法在 `targets/STM32F769IDISCOVERY/Drivers/touchpad/touchpad.c`中。代码展示如下：

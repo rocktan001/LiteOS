@@ -26,29 +26,30 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "fs/los_ramfs.h"
 #include "fs_common.h"
+#include "fs/los_ramfs.h"
 
 #define RAMFS_PATH        "/ramfs"
-#define RAMFS_SIEZ        (2 * 1024)
+#define RAMFS_SIZE        (2 * 1024)
 #define DEMO_BUF_LEN      128
 
-void ramfs_demo(void)
+void RamfsDemo(void)
 {
     int ret;
     char bufWrite[] = "this is a demo write to file";
     char bufRead[DEMO_BUF_LEN];
-    struct dir *testdir = NULL;
+    struct dir *testDir = NULL;
     int bufLen;
 
+    printf("Ramfs file system demo task start to run.\n");
     ret = ramfs_init();
     if (ret == LOS_NOK) {
-        FS_LOG_ERR("ramfs_init failed.");
+        FS_LOG_ERR("Ramfs init failed.");
         return;
     }
-    ret = ramfs_mount(RAMFS_PATH, RAMFS_SIEZ);
+    ret = ramfs_mount(RAMFS_PATH, RAMFS_SIZE);
     if (ret == LOS_NOK) {
-        FS_LOG_ERR("ramfs_mount failed.");
+        FS_LOG_ERR("Ramfs mount failed.");
         return;
     }
 
@@ -67,9 +68,9 @@ void ramfs_demo(void)
     read_file("/ramfs/test.txt", bufRead, bufLen);
     printf("%s\n", bufRead);
 
-    ret = open_dir("/ramfs/dir", &testdir);
+    ret = open_dir("/ramfs/dir", &testDir);
     if (ret != LOS_OK) {
-        FS_LOG_ERR("failed to open dir");
+        FS_LOG_ERR("Open dir /ramfs/dir failed.");
         return;
     }
 
@@ -77,16 +78,18 @@ void ramfs_demo(void)
     write_file("/ramfs/dir/test02.txt", bufWrite, bufLen);
     write_file("/ramfs/dir/test03.txt", bufWrite, bufLen);
 
-    ret = read_dir("/ramfs/dir", testdir);
+    ret = read_dir("/ramfs/dir", testDir);
     if (ret != LOS_OK) {
-        FS_LOG_ERR("failed to read dir");
+        FS_LOG_ERR("Read dir /ramfs/dir failed.");
         return;
     }
 
-    ret = los_closedir(testdir);
+    ret = closedir(testDir);
     if (ret != LOS_OK) {
-        FS_LOG_ERR("failed to close dir");
+        FS_LOG_ERR("Close dir /ramfs/dir failed.");
         return;
     }
+    printf("Ramfs file system demo task finished.\n");
+
     los_fs_unmount("/ramfs");
 }

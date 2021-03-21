@@ -232,6 +232,11 @@ static off_t spiffs_op_lseek(struct file *file, off_t off, int whence)
     return res < 0 ? ret_to_errno(res) : res;
 }
 
+static off64_t spiffs_op_lseek64(struct file *filep, off64_t offset, int whence)
+{
+    return (off64_t)spiffs_op_lseek(filep, (off_t)offset, whence);
+}
+
 int spiffs_op_stat(struct mount_point *mp, const char *path_in_mp, struct stat *stat)
 {
     spiffs_stat s = {0};
@@ -333,6 +338,7 @@ static struct file_ops spiffs_ops = {
     spiffs_op_read,
     spiffs_op_write,
     spiffs_op_lseek,
+    spiffs_op_lseek64,
     spiffs_op_stat,
     spiffs_op_unlink,
     spiffs_op_rename,

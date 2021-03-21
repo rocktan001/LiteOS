@@ -1,18 +1,17 @@
 include $(LITEOSTOPDIR)/config.mk
-MODULE_NAME := gui_demo
+include $(LITEOSTOPDIR)/components/gui/gui.mk
 
-LVGL_DIR = $(LITEOSTOPDIR)/components/gui/lvgl
-LVGL_DEMO_DIR = $(LITEOSTOPDIR)/demos/gui
+MODULE_NAME := gui_demo
 
 BOARD_INCLUDES += \
     -I $(LITEOSTOPDIR)/targets/bsp/drivers \
     -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver/Inc \
     -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers
 
+BOARD_INCLUDES += $(COMPONENTS_GUI_INCLUDE)
 LVGL_DEMO_INCLUDE := \
-    -I$(LVGL_DEMO_DIR) \
-    -I$(LVGL_DEMO_DIR)/widgets \
-    -I$(LVGL_DIR)
+    -I $(LITEOSTOPDIR)/demos/gui \
+    -I $(LITEOSTOPDIR)/demos/gui/widgets
 BOARD_INCLUDES += $(LVGL_DEMO_INCLUDE)
 
 # C includes
@@ -25,8 +24,8 @@ HAL_DRIVER_INC := \
 BOARD_INCLUDES += $(HAL_DRIVER_INC)
 
 LVGL_DEMO_SRC = \
-    $(wildcard $(LVGL_DEMO_DIR)/*.c) \
-    $(wildcard $(LVGL_DEMO_DIR)/widgets/*.c)
+    $(wildcard *.c) \
+    $(wildcard widgets/*.c)
 
 C_SOURCES += $(LVGL_DEMO_SRC)
 

@@ -256,24 +256,72 @@ int fatfs_unmount(const char *path, uint8_t drive);
    Components --> FileSystem --> Enable FATFS
    ```
 
+## LITELEFS
+
+Littlefs是一种为微控制器设计的，适用于小内存设备的文件系统。它提供了掉电保护机制，如果掉电，文件系统将退回到上一个已知的良好状态。此外，它还提供了动态块的擦写均衡机制，可有效延长flash的使用寿命。
+
+#### 初始化LITELEFS
+
+```c
+int littlefs_init(void);;
+```
+-  返回值：
+
+    **LOS_ERR_OK**：成功
+
+    **LOS_NOK**：失败
+
+#### 挂载LITELEFS
+```c
+int littlefs_mount(const char *path, const struct lfs_config *lfs_cfg)
+```
+-  path：LITELEFS的挂载路径
+-  lfs_cfg: LITELEFS初始化配置结构体
+-  返回值：
+
+    **LFS_ERR_OK**：成功
+
+    **其他**：失败
+
+#### 卸载LITELEFS
+```c
+int littlefs_unmount(const char *path)；
+```
+-  path：LITELEFS的挂载路径
+-  返回值：
+
+    **LFS_ERR_OK**：成功
+
+    **其他**：失败
+
+### 注意事项
+
+- LITELEFS文件系统支持的操作有：`los_open`，`los_close`，`los_read`，`los_write`，`los_lseek`，`los_stat`，`los_ulink`，`los_rename`，`los_sync`，`los_opendir`，`los_readdir`，`los_closedir`，`los_mkdir`。
+- LITELEFS文件系统目前仅支持STM32F429开发板。
+- LITELEFS需使能文件系统和FATFS：
+   ```
+   Components --> FileSystem --> Enable LITTLEFS
+   ```
+
+
 ## 文件系统的使用
 
 LiteOS的文件系统提供一套demo来演示文件系统的一些基本操作。
 
 - 对于不同开发板，目前文件系统的支持情况如下：
 
-  |开发板|RAMFS|FATFS|SPIFFS|
+  |开发板|RAMFS|FATFS|SPIFFS|LITTLEFS\
   |:---:|:---:|:---:|:---:|
-  |STM32F429|支持|支持|支持|
-  |STM32F769|支持|支持|不支持|
-  |STM32L431|支持|不支持|不支持|
+  |STM32F429|支持|支持|支持|支持|
+  |STM32F769|支持|支持|不支持|不支持|
+  |STM32L431|支持|不支持|不支持|不支持|
 
 - 其中STM32F429的FAT文件系统支持两种介质，SPI Flash或SD Card，可以选择，默认为SD Card。
 而STM32F769的FAT文件系统目前暂时只支持SD Card。
 
 - SD Card为介质时，需要在开发板上插入SD卡，否则会挂载失败。
 
-- 在STM32F429上，三种文件系统可同时挂载。在STM32F769上，也可同时挂载RAMFS和FATFS。
+- 在STM32F429上，RAMFS、FATFS SD Card类型、SPIFFS或LITTLEFS三种文件系统可同时挂载。在STM32F769上，也可同时挂载RAMFS和FATFS。
 
 - 通过menuconfig使能demo后，编译LiteOS源码，生成系统镜像文件Huawei_LiteOS.bin，并将.bin文件烧写到开发板，复位重启开发板后，demo即启动。
 
@@ -425,4 +473,22 @@ void los_vfs_io(char *file_name, char *dir_name);
 - 使能SPIFFS demo
   ```
   Demos --> FileSystem Demo --> Enable Spiffs FileSystem Demo
+  ```
+
+### LITTLEFS demo
+
+<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/fs/littlefs_demo.c" target="_blank">littlefs_demo.c</a>文件提供了一套littlefs的例程。
+
+通过调用`hal_littlefs_init`初始化SPIFFS并挂载`/littlefs`目录，然后调用`los_vfs_io`函数进行文件和目录的读写操作，最后调用`littlefs_unmount`卸载`/littlefs`目录。
+
+#### 使能方法
+
+通过`make menuconfig`打开配置，使能LITTLEFS demo，LITTLEFS demo依赖LITTLEFS组件,使能demo时自动使能LITTLEFS组件。
+- 使能LITTLEFS demo
+  ```
+  Demos --> FileSystem Demo --> Enable Littlefs FileSystem Demo
+  ```
+- LITTLEFS组件位于
+  ```
+  Components --> FileSystem --> Enable LITTLEFS
   ```

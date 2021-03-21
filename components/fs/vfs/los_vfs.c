@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Virtual Fs Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -26,41 +26,58 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include "fs/los_vfs.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "los_config.h"
-#include "los_mux.h"
 #include "errno.h"
 #include "fcntl.h"
-#include "fs/los_vfs.h"
+#include "los_mux.h"
+#include "limits.h"
 
-struct file files[LOS_MAX_FILES];
-UINT32 fs_mutex = LOS_ERRNO_MUX_PTR_NULL;
-struct mount_point *mount_points = NULL;
-struct file_system *file_systems = NULL;
+#define LOS_FCNTL (O_NONBLOCK | O_NDELAY | O_APPEND | O_SYNC | FASYNC)
 
-static int _file_2_fd(struct file *file)
+struct file g_files[LOS_MAX_FILES];
+uint32_t g_fsMutex;
+struct mount_point *g_mountPoints = NULL;
+struct file_system *g_fileSystems = NULL;
+
+static int file_2_fd(struct file *file)
 {
-    return file - files;
+    if (file == NULL) {
+        return -1;
+    }
+    return file - g_files;
 }
 
-static struct file *_fd_2_file(int fd)
+static struct file *fd_2_file(int fd)
 {
-    return &files[fd];
+    return &g_files[fd];
 }
 
 static struct file *los_file_get(void)
 {
     int i;
-
-    /* protected by fs_mutex */
+    /* protected by g_fsMutex */
     for (i = 0; i < LOS_MAX_FILES; i++) {
-        if (files[i].f_status == FILE_STATUS_NOT_USED) {
-            files[i].f_status = FILE_STATUS_INITING;
-            return &files[i];
+        if (g_files[i].f_status == FILE_STATUS_NOT_USED) {
+            g_files[i].f_status = FILE_STATUS_INITING;
+            return &g_files[i];
         }
+    }
+
+    return NULL;
+}
+
+static struct file *los_file_get_new(int fd)
+{
+    if ((fd < 0) || (fd >= LOS_MAX_FILES)) {
+        return NULL;
+    }
+    if (g_files[fd].f_status == FILE_STATUS_NOT_USED) {
+        g_files[fd].f_status = FILE_STATUS_INITING;
+        return &g_files[fd];
     }
 
     return NULL;
@@ -68,36 +85,34 @@ static struct file *los_file_get(void)
 
 static void los_file_put(struct file *file)
 {
+    if (file == NULL) {
+        return;
+    }
     file->f_flags = 0;
     file->f_fops = NULL;
     file->f_data = NULL;
     file->f_mp = NULL;
     file->f_offset = 0;
-    file->f_owner = (UINT32)-1;
-
+    file->f_owner = (uint32_t)-1;
     file->f_status = FILE_STATUS_NOT_USED;
 }
 
-struct mount_point *los_mp_find(const char *path, const char **path_in_mp)
+static struct mount_point *los_mp_find(const char *path, const char **path_in_mp)
 {
-    struct mount_point *mp = mount_points;
+    struct mount_point *mp = g_mountPoints;
     struct mount_point *best_mp = NULL;
     int best_matches = 0;
-
     if (path == NULL) {
         return NULL;
     }
-
     if (path_in_mp != NULL) {
         *path_in_mp = NULL;
     }
-
-    while (mp != NULL) {
-        const char *m_path = mp->m_path; /* mount point path */
-        const char *i_path = path;       /* input path */
+    while ((mp != NULL) && (mp->m_path != NULL)) {
+        const char *m_path = mp->m_path;
+        const char *i_path = path;
+        const char *t = NULL;
         int matches = 0;
-        const char *t;
-
         do {
             while (*m_path == '/') {
                 m_path++;
@@ -107,36 +122,17 @@ struct mount_point *los_mp_find(const char *path, const char **path_in_mp)
             }
 
             t = strchr(m_path, '/');
-
             if (t == NULL) {
-                /*
-                 * m_path now is as follows:
-                 * 1) string like "abc"
-                 * 2) empty string "\0"
-                 * if it is empty string, means current mp matched
-                 */
-
                 t = strchr(m_path, '\0');
-
-                if (t == m_path) {
-                    break;
-                }
             }
-
-            if (strncmp(m_path, i_path, t - m_path) != 0) {
+            if ((t == m_path) || (t == NULL)) {
+                break;
+            }
+            if (strncmp(m_path, i_path, (size_t)(t - m_path)) != 0) {
                 goto next; /* this mount point do not match, check next */
             }
 
-            /*
-             * if m_path is "abc", i_path maybe:
-             * 1) "abc"
-             * 2) "abc/"
-             * 3) "abcd..."
-             * if it is not 1) or 2), this mp does not match, just goto next one
-             */
-
             i_path += (t - m_path);
-
             if ((*i_path != '\0') && (*i_path != '/')) {
                 goto next;
             }
@@ -148,6 +144,7 @@ struct mount_point *los_mp_find(const char *path, const char **path_in_mp)
         if (matches > best_matches) {
             best_matches = matches;
             best_mp = mp;
+
             while (*i_path == '/') {
                 i_path++;
             }
@@ -156,94 +153,63 @@ struct mount_point *los_mp_find(const char *path, const char **path_in_mp)
                 *path_in_mp = i_path;
             }
         }
-
     next:
         mp = mp->m_next;
     }
-
     return best_mp;
 }
 
-int los_open(const char *path, int flags)
+static int los_open(const char *path, int flags)
 {
     struct file *file = NULL;
     int fd = -1;
     const char *path_in_mp = NULL;
-    struct mount_point *mp;
+    struct mount_point *mp = NULL;
 
-    if (path == NULL) {
-        VFS_ERRNO_SET(EINVAL);
+    if ((path == NULL) || (path[strlen(path) - 1] == '/')) {
         return fd;
     }
-
-    /* can not open dir */
-
-    if (path[strlen(path) - 1] == '/') {
-        VFS_ERRNO_SET(EINVAL);
-        return fd;
-    }
-
     /* prevent fs/mp being removed while opening */
-
-    if (LOS_OK != LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER)) {
-        VFS_ERRNO_SET(EAGAIN);
+    if (LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER) != LOS_OK) {
         return fd;
     }
 
     file = los_file_get();
-
-    if (file == NULL) {
-        VFS_ERRNO_SET(ENFILE);
-        goto err_post_exit;
-    }
-
     mp = los_mp_find(path, &path_in_mp);
 
-    if ((mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0') || (mp->m_fs->fs_fops->open == NULL)) {
-        VFS_ERRNO_SET(ENOENT);
-        goto err_post_exit;
-    };
+    (void)LOS_MuxPost(g_fsMutex);
 
-    if (LOS_OK != LOS_MuxPend(mp->m_mutex, LOS_WAIT_FOREVER)) {
-        VFS_ERRNO_SET(EAGAIN);
-        goto err_post_exit;
+    if ((file == NULL) || (mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0') ||
+        (mp->m_fs->fs_fops == NULL) || (mp->m_fs->fs_fops->open == NULL)) {
+        return fd;
     }
 
-    LOS_MuxPost(fs_mutex);
+    if ((LOS_MuxPend(mp->m_mutex, LOS_WAIT_FOREVER) != LOS_OK)) {
+        los_file_put(file);
+        return fd;
+    }
 
-    file->f_flags = flags;
+    file->f_flags = (uint32_t)flags;
     file->f_offset = 0;
     file->f_data = NULL;
     file->f_fops = mp->m_fs->fs_fops;
     file->f_mp = mp;
     file->f_owner = LOS_CurTaskIDGet();
-
     if (file->f_fops->open(file, path_in_mp, flags) == 0) {
         mp->m_refs++;
-        fd = _file_2_fd(file);
+        fd = file_2_fd(file);
         file->f_status = FILE_STATUS_READY; /* file now ready to use */
     } else {
         los_file_put(file);
     }
-
-    LOS_MuxPost(mp->m_mutex);
-
-    return fd;
-
-err_post_exit:
-
-    LOS_MuxPost(fs_mutex);
-
-    if ((fd < 0) && (file != NULL)) {
-        los_file_put(file);
-    }
+    (void)LOS_MuxPost(mp->m_mutex);
 
     return fd;
 }
 
 /* attach to a file and then set new status */
 
-static struct file *_los_attach_file(int fd, UINT32 status)
+static struct file *_los_attach_file(int fd, uint32_t status)
 {
     struct file *file = NULL;
 
@@ -252,54 +218,55 @@ static struct file *_los_attach_file(int fd, UINT32 status)
         return file;
     }
 
-    file = _fd_2_file(fd);
+    file = fd_2_file(fd);
 
-/*
-* Prevent file closed after the checking of:
-*
-*     if (file->f_status == FILE_STATUS_READY)
-*
-* Because our files are not privated to one task, it may be operated
-* by every task.
-* So we should take the mutex of current mount point before operating it,
-* but for now we don't know if this file is valid (FILE_STATUS_READY), if
-* this file is not valid, the f_mp may be incorrect. so
-* we must check the status first, but this file may be closed/removed
-* after the checking if the senquence is not correct.
-*
-* Consider the following code:
-*
-* los_attach_file (...)
-* {
-*     if (file->f_status == FILE_STATUS_READY)
-*     {
-*         while (LOS_MuxPend (file->f_mp->m_mutex, LOS_WAIT_FOREVER) != LOS_OK);
-*
-*         return file;
-*     }
-* }
-*
-* It is not safe:
-*
-* If current task is interrupted by an IRQ just after the checking and then
-* a new task is swapped in and the new task just closed this file.
-*
-* So <fs_mutex> is acquire first and then check if it is valid: if not, just
-* return NULL (which means fail); If yes, the mutex for current mount point
-* is qcquired. And the close operation will also set task to
-* FILE_STATUS_CLOSING to prevent other tasks operate on this file (and also
-* prevent other tasks pend on the mutex of this mount point for this file).
-* At last <fs_mutex> is released. And return the file handle (struct file *).
-*
-* As this logic used in almost all the operation routines, this routine is
-* made to reduce the redundant code.
-*/
+    /*
+     * Prevent file closed after the checking of:
+     *
+     * if (file->f_status == FILE_STATUS_READY)
+     *
+     * Because our g_files are not privated to one task, it may be operated
+     * by every task.
+     * So we should take the mutex of current mount point before operating it,
+     * but for now we don't know if this file is valid (FILE_STATUS_READY), if
+     * this file is not valid, the f_mp may be incorrect. so
+     * we must check the status first, but this file may be closed/removed
+     * after the checking if the senquence is not correct.
+     *
+     * Consider the following code:
+     *
+     * los_attach_file (...)
+     * {
+     * if (file->f_status == FILE_STATUS_READY)
+     * {
+     * while (LOS_MuxPend (file->f_mp->m_mutex, LOS_WAIT_FOREVER) != LOS_OK);
+     *
+     * return file;
+     * }
+     * }
+     *
+     * It is not safe:
+     *
+     * If current task is interrupted by an IRQ just after the checking and then
+     * a new task is swapped in and the new task just closed this file.
+     *
+     * So <g_fsMutex> is acquire first and then check if it is valid: if not, just
+     * return NULL (which means fail); If yes, the mutex for current mount point
+     * is qcquired. And the close operation will also set task to
+     * FILE_STATUS_CLOSING to prevent other tasks operate on this file (and also
+     * prevent other tasks pend on the mutex of this mount point for this file).
+     * At last <g_fsMutex> is released. And return the file handle (struct file *).
+     *
+     * As this logic used in almost all the operation routines, this routine is
+     * made to reduce the redundant code.
+     */
 
-    while (LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER) != LOS_OK) {};
+    while (LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER) != LOS_OK) {
+    };
 
     if (file->f_status == FILE_STATUS_READY) {
-        while (LOS_MuxPend(file->f_mp->m_mutex, LOS_WAIT_FOREVER) != LOS_OK);
-
+        while (LOS_MuxPend(file->f_mp->m_mutex, LOS_WAIT_FOREVER) != LOS_OK) {
+        };
         if (status != FILE_STATUS_READY) {
             file->f_status = status;
         }
@@ -308,7 +275,7 @@ static struct file *_los_attach_file(int fd, UINT32 status)
         file = NULL;
     }
 
-    LOS_MuxPost(fs_mutex);
+    (void)LOS_MuxPost(g_fsMutex);
 
     return file;
 }
@@ -320,21 +287,23 @@ static struct file *los_attach_file(int fd)
 
 static struct file *los_attach_file_with_status(int fd, int status)
 {
-    return _los_attach_file(fd, status);
+    return _los_attach_file(fd, (uint32_t)status);
 }
 
-static UINT32 los_detach_file(struct file *file)
+static uint32_t los_detach_file(struct file *file)
 {
+    if ((file == NULL) || (file->f_mp == NULL)) {
+        return (uint32_t)VFS_ERROR;
+    }
     return LOS_MuxPost(file->f_mp->m_mutex);
 }
 
-int los_close(int fd)
+static int los_close(int fd)
 {
     struct file *file;
     int ret = -1;
 
     file = los_attach_file_with_status(fd, FILE_STATUS_CLOSING);
-
     if (file == NULL) {
         return ret;
     }
@@ -349,16 +318,16 @@ int los_close(int fd)
         file->f_mp->m_refs--;
     }
 
-    los_detach_file(file);
+    (void)los_detach_file(file);
 
     los_file_put(file);
 
     return ret;
 }
 
-ssize_t los_read(int fd, char *buff, size_t bytes)
+static ssize_t los_read(int fd, char *buff, size_t bytes)
 {
-    struct file *file;
+    struct file *file = NULL;
     ssize_t ret = (ssize_t)-1;
 
     if ((buff == NULL) || (bytes == 0)) {
@@ -367,7 +336,6 @@ ssize_t los_read(int fd, char *buff, size_t bytes)
     }
 
     file = los_attach_file(fd);
-
     if (file == NULL) {
         return ret;
     }
@@ -382,14 +350,14 @@ ssize_t los_read(int fd, char *buff, size_t bytes)
 
     /* else ret will be -1 */
 
-    los_detach_file(file);
+    (void)los_detach_file(file);
 
     return ret;
 }
 
-ssize_t los_write(int fd, const void *buff, size_t bytes)
+static ssize_t los_write(int fd, const void *buff, size_t bytes)
 {
-    struct file *file;
+    struct file *file = NULL;
     ssize_t ret = -1;
 
     if ((buff == NULL) || (bytes == 0)) {
@@ -398,7 +366,6 @@ ssize_t los_write(int fd, const void *buff, size_t bytes)
     }
 
     file = los_attach_file(fd);
-
     if (file == NULL) {
         return ret;
     }
@@ -412,18 +379,17 @@ ssize_t los_write(int fd, const void *buff, size_t bytes)
     }
 
     /* else ret will be -1 */
-    los_detach_file(file);
+    (void)los_detach_file(file);
 
     return ret;
 }
 
-off_t los_lseek(int fd, off_t off, int whence)
+static off_t los_lseek(int fd, off_t off, int whence)
 {
     struct file *file;
     off_t ret = -1;
 
     file = los_attach_file(fd);
-
     if (file == NULL) {
         return ret;
     }
@@ -434,12 +400,32 @@ off_t los_lseek(int fd, off_t off, int whence)
         ret = file->f_fops->lseek(file, off, whence);
     }
 
-    los_detach_file(file);
+    (void)los_detach_file(file);
 
     return ret;
 }
 
-int los_stat(const char *path, struct stat *stat)
+static off64_t los_lseek64(int fd, off64_t off, int whence)
+{
+    struct file *file;
+    off64_t ret = -1;
+
+    file = los_attach_file(fd);
+    if ((file == NULL) || (file->f_fops == NULL)) {
+        return ret;
+    }
+    if (file->f_fops->lseek64 == NULL) {
+        ret = file->f_offset64;
+    } else {
+        ret = file->f_fops->lseek64(file, off, whence);
+    }
+
+    (void)los_detach_file(file);
+
+    return ret;
+}
+
+static int los_stat(const char *path, struct stat *stat)
 {
     struct mount_point *mp = NULL;
     const char *path_in_mp = NULL;
@@ -450,16 +436,15 @@ int los_stat(const char *path, struct stat *stat)
         return ret;
     }
 
-    if (LOS_OK != LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER)) {
+    if (LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER) != LOS_OK) {
         VFS_ERRNO_SET(EAGAIN);
         return ret;
     }
 
     mp = los_mp_find(path, &path_in_mp);
-
     if ((mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0')) {
         VFS_ERRNO_SET(ENOENT);
-        LOS_MuxPost(fs_mutex);
+        (void)LOS_MuxPost(g_fsMutex);
         return ret;
     }
 
@@ -469,14 +454,14 @@ int los_stat(const char *path, struct stat *stat)
         VFS_ERRNO_SET(ENOTSUP);
     }
 
-    LOS_MuxPost(fs_mutex);
+    (void)LOS_MuxPost(g_fsMutex);
 
     return ret;
 }
 
-int los_unlink(const char *path)
+static int los_unlink(const char *path)
 {
-    struct mount_point *mp;
+    struct mount_point *mp = NULL;
     const char *path_in_mp = NULL;
     int ret = -1;
 
@@ -485,27 +470,25 @@ int los_unlink(const char *path)
         return ret;
     }
 
-    LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER); /* prevent the file open/rename */
+    (void)LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER); /* prevent the file open/rename */
 
     mp = los_mp_find(path, &path_in_mp);
-
     if ((mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0') || (mp->m_fs->fs_fops->unlink == NULL)) {
         VFS_ERRNO_SET(ENOENT);
-        goto out;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
     ret = mp->m_fs->fs_fops->unlink(mp, path_in_mp);
 
-out:
-    LOS_MuxPost(fs_mutex);
-
+    (void)LOS_MuxPost(g_fsMutex);
     return ret;
 }
 
-int los_rename(const char *old, const char *new)
+static int los_rename(const char *old, const char *new)
 {
-    struct mount_point *mp_old;
-    struct mount_point *mp_new;
+    struct mount_point *mp_old = NULL;
+    struct mount_point *mp_new = NULL;
     const char *path_in_mp_old = NULL;
     const char *path_in_mp_new = NULL;
     int ret = -1;
@@ -515,31 +498,34 @@ int los_rename(const char *old, const char *new)
         return ret;
     }
 
-    LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER); /* prevent file open/unlink */
+    (void)LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER); /* prevent file open/unlink */
 
     mp_old = los_mp_find(old, &path_in_mp_old);
 
     if (path_in_mp_old == NULL) {
         VFS_ERRNO_SET(EINVAL);
-        goto out;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
     if ((mp_old == NULL) || (*path_in_mp_old == '\0') || (mp_old->m_fs->fs_fops->unlink == NULL)) {
         VFS_ERRNO_SET(EINVAL);
-        goto out;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
     mp_new = los_mp_find(new, &path_in_mp_new);
-
     if ((mp_new == NULL) || (path_in_mp_new == NULL) || (*path_in_mp_new == '\0') ||
         (mp_new->m_fs->fs_fops->unlink == NULL)) {
         VFS_ERRNO_SET(EINVAL);
-        goto out;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
     if (mp_old != mp_new) {
         VFS_ERRNO_SET(EXDEV);
-        goto out;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
     if (mp_old->m_fs->fs_fops->rename != NULL) {
@@ -548,17 +534,15 @@ int los_rename(const char *old, const char *new)
         VFS_ERRNO_SET(ENOTSUP);
     }
 
-out:
-    LOS_MuxPost(fs_mutex);
-
+    (void)LOS_MuxPost(g_fsMutex);
     return ret;
 }
 
-int los_ioctl(int fd, int func, ...)
+static int los_ioctl(int fd, int func, ...)
 {
     va_list ap;
     unsigned long arg;
-    struct file *file;
+    struct file *file = NULL;
     int ret = -1;
 
     va_start(ap, func);
@@ -566,7 +550,6 @@ int los_ioctl(int fd, int func, ...)
     va_end(ap);
 
     file = los_attach_file(fd);
-
     if (file == NULL) {
         return ret;
     }
@@ -577,18 +560,17 @@ int los_ioctl(int fd, int func, ...)
         VFS_ERRNO_SET(ENOTSUP);
     }
 
-    los_detach_file(file);
+    (void)los_detach_file(file);
 
     return ret;
 }
 
-int los_sync(int fd)
+static int los_sync(int fd)
 {
     struct file *file;
     int ret = -1;
 
     file = los_attach_file(fd);
-
     if (file == NULL) {
         return ret;
     }
@@ -599,17 +581,17 @@ int los_sync(int fd)
         VFS_ERRNO_SET(ENOTSUP);
     }
 
-    los_detach_file(file);
+    (void)los_detach_file(file);
 
     return ret;
 }
 
-struct dir *los_opendir(const char *path)
+static struct dir *los_opendir(const char *path)
 {
-    struct mount_point *mp;
+    struct mount_point *mp = NULL;
     const char *path_in_mp = NULL;
     struct dir *dir = NULL;
-    int ret = -1;
+    uint32_t ret;
 
     if (path == NULL) {
         VFS_ERRNO_SET(EINVAL);
@@ -617,7 +599,6 @@ struct dir *los_opendir(const char *path)
     }
 
     dir = (struct dir *)malloc(sizeof(struct dir));
-
     if (dir == NULL) {
         PRINT_ERR("fail to malloc memory in VFS, <malloc.c> is needed,"
             "make sure it is added\n");
@@ -625,7 +606,7 @@ struct dir *los_opendir(const char *path)
         return NULL;
     }
 
-    if (LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER) != LOS_OK) {
+    if (LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER) != LOS_OK) {
         VFS_ERRNO_SET(EAGAIN);
         free(dir);
         return NULL;
@@ -634,24 +615,18 @@ struct dir *los_opendir(const char *path)
     mp = los_mp_find(path, &path_in_mp);
     if ((mp == NULL) || (path_in_mp == NULL)) {
         VFS_ERRNO_SET(ENOENT);
-        LOS_MuxPost(fs_mutex);
+        (void)LOS_MuxPost(g_fsMutex);
         free(dir);
         return NULL;
     }
 
     ret = LOS_MuxPend(mp->m_mutex, LOS_WAIT_FOREVER);
 
-    LOS_MuxPost(fs_mutex);
+    (void)LOS_MuxPost(g_fsMutex);
 
-    if (ret != LOS_OK) {
-        VFS_ERRNO_SET(EAGAIN);
-        free(dir);
-        return NULL;
-    }
-
-    if (mp->m_fs->fs_fops->opendir == NULL) {
+    if ((ret != LOS_OK) || (mp->m_fs->fs_fops->opendir == NULL)) {
         VFS_ERRNO_SET(ENOTSUP);
-        LOS_MuxPost(mp->m_mutex);
+        (void)LOS_MuxPost(mp->m_mutex);
         free(dir);
         return NULL;
     }
@@ -659,8 +634,7 @@ struct dir *los_opendir(const char *path)
     dir->d_mp = mp;
     dir->d_offset = 0;
 
-    ret = mp->m_fs->fs_fops->opendir(dir, path_in_mp);
-
+    ret = (uint32_t)mp->m_fs->fs_fops->opendir(dir, path_in_mp);
     if (ret == 0) {
         mp->m_refs++;
     } else {
@@ -668,14 +642,14 @@ struct dir *los_opendir(const char *path)
         dir = NULL;
     }
 
-    LOS_MuxPost(mp->m_mutex);
+    (void)LOS_MuxPost(mp->m_mutex);
 
     return dir;
 }
 
-struct dirent *los_readdir(struct dir *dir)
+static struct dirent *los_readdir(struct dir *dir)
 {
-    struct mount_point *mp;
+    struct mount_point *mp = NULL;
     struct dirent *ret = NULL;
 
     if (dir == NULL) {
@@ -700,26 +674,26 @@ struct dirent *los_readdir(struct dir *dir)
         VFS_ERRNO_SET(ENOTSUP);
     }
 
-    LOS_MuxPost(mp->m_mutex);
+    (void)LOS_MuxPost(mp->m_mutex);
 
     return ret;
 }
 
-int los_closedir(struct dir *dir)
+static int los_closedir(struct dir *dir)
 {
-    struct mount_point *mp;
+    struct mount_point *mp = NULL;
     int ret = -1;
 
     if (dir == NULL) {
         VFS_ERRNO_SET(EBADF);
-        return -1;
+        return ret;
     }
 
     mp = dir->d_mp;
 
     if (LOS_MuxPend(mp->m_mutex, LOS_WAIT_FOREVER) != LOS_OK) {
         VFS_ERRNO_SET(EAGAIN);
-        return -1;
+        return ret;
     }
 
     if (dir->d_mp->m_fs->fs_fops->closedir != NULL) {
@@ -735,14 +709,14 @@ int los_closedir(struct dir *dir)
         VFS_ERRNO_SET(EBADF);
     }
 
-    LOS_MuxPost(mp->m_mutex);
+    (void)LOS_MuxPost(mp->m_mutex);
 
     return ret;
 }
 
-int los_mkdir(const char *path, int mode)
+static int los_mkdir(const char *path, int mode)
 {
-    struct mount_point *mp;
+    struct mount_point *mp = NULL;
     const char *path_in_mp = NULL;
     int ret = -1;
 
@@ -750,25 +724,24 @@ int los_mkdir(const char *path, int mode)
 
     if (path == NULL) {
         VFS_ERRNO_SET(EINVAL);
-        return -1;
+        return ret;
     }
 
-    if (LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER) != LOS_OK) {
+    if (LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER) != LOS_OK) {
         VFS_ERRNO_SET(EAGAIN);
-        return -1;
+        return ret;
     }
 
     mp = los_mp_find(path, &path_in_mp);
-
     if ((mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0')) {
         VFS_ERRNO_SET(ENOENT);
-        LOS_MuxPost(fs_mutex);
-        return -1;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
-    ret = LOS_MuxPend(mp->m_mutex, LOS_WAIT_FOREVER);
+    ret = (int)LOS_MuxPend(mp->m_mutex, LOS_WAIT_FOREVER);
 
-    LOS_MuxPost(fs_mutex);
+    (void)LOS_MuxPost(g_fsMutex);
 
     if (ret != LOS_OK) {
         VFS_ERRNO_SET(EAGAIN);
@@ -782,8 +755,124 @@ int los_mkdir(const char *path, int mode)
         ret = -1;
     }
 
-    LOS_MuxPost(mp->m_mutex);
+    (void)LOS_MuxPost(mp->m_mutex);
 
+    return ret;
+}
+
+static int los_dup(int fd)
+{
+    struct file *file1 = NULL;
+    struct file *file2 = NULL;
+    const char *mpath = NULL;
+    struct mount_point *mp = NULL;
+
+    if ((fd < 0) || (fd > LOS_MAX_FILES)) {
+        VFS_ERRNO_SET(EBADF);
+        return LOS_NOK;
+    }
+
+    file1 = los_attach_file(fd);
+    if (file1 == NULL) {
+        return LOS_NOK;
+    }
+
+    file2 = los_file_get();
+    if (file2 == NULL) {
+        VFS_ERRNO_SET(ENFILE);
+        return LOS_NOK;
+    }
+
+    file2->f_flags = file1->f_flags;
+    file2->f_status = file1->f_status;
+    file2->f_offset = file1->f_offset;
+    file2->f_owner = file1->f_owner;
+    file2->f_data = file1->f_data;
+    file2->f_fops = file1->f_fops;
+    file2->f_mp = file1->f_mp;
+
+    if ((file1->f_mp == NULL) || (file1->f_mp->m_path == NULL)) {
+        return LOS_NOK;
+    }
+    mp = los_mp_find(file1->f_mp->m_path, &mpath);
+    if ((mp == NULL) || (file1->f_fops == NULL)) {
+        return LOS_NOK;
+    }
+    return file1->f_fops->open(file2, mpath, file1->f_flags);
+}
+
+static int los_dup2(int oldFd, int newFd)
+{
+    struct file *file1 = NULL;
+    struct file *file2 = NULL;
+    const char *mpath = NULL;
+    struct mount_point *mp = NULL;
+
+    file1 = los_attach_file(oldFd);
+    if (file1 == NULL) {
+        return LOS_NOK;
+    }
+
+    file2 = los_attach_file(newFd);
+    if (file2 != NULL) {
+        (void)los_close(newFd);
+        return LOS_NOK;
+    }
+
+    file2 = los_file_get_new(newFd);
+    if (file2 == NULL) {
+        VFS_ERRNO_SET(ENFILE);
+        PRINT_ERR("files no free!\n");
+
+        return LOS_NOK;
+    }
+    if (oldFd == newFd) {
+        return oldFd;
+    }
+
+    file2->f_flags = file1->f_flags;
+    file2->f_status = file1->f_status;
+    file2->f_offset = file1->f_offset;
+    file2->f_owner = file1->f_owner;
+    file2->f_data = file1->f_data;
+    file2->f_fops = file1->f_fops;
+    file2->f_mp = file1->f_mp;
+
+    if ((file1->f_mp == NULL) || (file1->f_mp->m_path == NULL)) {
+        return LOS_NOK;
+    }
+    mp = los_mp_find(file1->f_mp->m_path, &mpath);
+    if ((mp == NULL) || (file1->f_fops == NULL)) {
+        return LOS_NOK;
+    }
+    file1->f_fops->open(file2, mpath, file1->f_flags);
+    return newFd;
+}
+
+static int los_vfcntl(struct file *filep, int cmd, va_list ap)
+{
+    int ret;
+    int fd;
+    uint32_t flags;
+
+    if ((filep == NULL) || (filep->f_fops == NULL)) {
+        return -EBADF;
+    }
+
+    if (cmd == F_DUPFD) {
+        fd = file_2_fd(filep);
+        ret = los_dup(fd);
+    } else if (cmd == F_GETFL) {
+        ret = (int)(filep->f_flags);
+    } else if (cmd == F_SETFL) {
+        flags = (uint32_t)va_arg(ap, int);
+        flags &= LOS_FCNTL;
+        filep->f_flags &= ~LOS_FCNTL;
+        filep->f_flags |= flags;
+        ret = LOS_OK;
+    } else {
+        ret = -ENOSYS;
+    }
     return ret;
 }
 
@@ -793,24 +882,20 @@ static int los_fs_name_check(const char *name)
     int len = 0;
 
     do {
-        ch = *name++;
+        ch = *(name++);
 
         if (ch == '\0') {
             break;
         }
 
-        if ((('a' <= ch) && (ch <= 'z')) || (('A' <= ch) && (ch <= 'Z')) || (('0' <= ch) && (ch <= '9')) ||
+        if (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')) || ((ch >= '0') && (ch <= '9')) ||
             (ch == '_') || (ch == '-')) {
             len++;
-
             if (len == LOS_FS_MAX_NAME_LEN) {
                 return LOS_NOK;
             }
-
             continue;
         }
-
-        return LOS_NOK;
     } while (1);
 
     return len == 0 ? LOS_NOK : LOS_OK;
@@ -820,7 +905,7 @@ static struct file_system *los_fs_find(const char *name)
 {
     struct file_system *fs;
 
-    for (fs = file_systems; fs != NULL; fs = fs->fs_next) {
+    for (fs = g_fileSystems; fs != NULL; fs = fs->fs_next) {
         if (strncmp(fs->fs_name, name, LOS_FS_MAX_NAME_LEN) == 0) {
             break;
         }
@@ -839,46 +924,48 @@ int los_fs_register(struct file_system *fs)
         return LOS_NOK;
     }
 
-    if (LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER) != LOS_OK) {
+    if (LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER) != LOS_OK) {
         return LOS_NOK;
     }
 
     if (los_fs_find(fs->fs_name) != NULL) {
-        LOS_MuxPost(fs_mutex);
+        (void)LOS_MuxPost(g_fsMutex);
         return LOS_NOK;
     }
 
-    fs->fs_next = file_systems;
-    file_systems = fs;
+    fs->fs_next = g_fileSystems;
+    g_fileSystems = fs;
 
-    LOS_MuxPost(fs_mutex);
+    (void)LOS_MuxPost(g_fsMutex);
 
     return LOS_OK;
 }
 
 int los_fs_unregister(struct file_system *fs)
 {
-    struct file_system *prev;
+    struct file_system *prev = NULL;
     int ret = LOS_OK;
 
     if (fs == NULL) {
         return LOS_NOK;
     }
 
-    if (LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER) != LOS_OK) {
+    if (LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER) != LOS_OK) {
         return LOS_NOK;
     }
 
     if (fs->fs_refs > 0) {
-        goto out;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
-    if (file_systems == fs) {
-        file_systems = fs->fs_next;
-        goto out;
+    if (g_fileSystems == fs) {
+        g_fileSystems = fs->fs_next;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
-    prev = file_systems;
+    prev = g_fileSystems;
 
     while (prev != NULL) {
         if (prev->fs_next == fs) {
@@ -894,74 +981,72 @@ int los_fs_unregister(struct file_system *fs)
         prev->fs_next = fs->fs_next;
     }
 
-out:
-    LOS_MuxPost(fs_mutex);
-
+    (void)LOS_MuxPost(g_fsMutex);
     return ret;
 }
 
 int los_fs_mount(const char *fsname, const char *path, void *data)
 {
-    struct file_system *fs;
-    struct mount_point *mp;
+    struct file_system *fs = NULL;
+    struct mount_point *mp = NULL;
     const char *tmp = NULL;
+    int ret;
+    if ((fsname == NULL) || (path == NULL) || (path[0] != '/')) {
+        return LOS_NOK;
+    }
+    (void)LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER);
 
-    if ((fsname == NULL) || (path == NULL) || (path[0] != '/') || (path[0] == '\0')) {
+    fs = los_fs_find(fsname);
+    if (fs == NULL) {
+        (void)LOS_MuxPost(g_fsMutex);
         return LOS_NOK;
     }
 
-    LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER);
-
-    fs = los_fs_find(fsname);
-
-    if (fs == NULL) {
-        goto err_post_exit;
-    }
-
     mp = los_mp_find(path, &tmp);
-
     if ((mp != NULL) && (tmp != NULL) && (*tmp == '\0')) {
-        goto err_post_exit;
+        (void)LOS_MuxPost(g_fsMutex);
+        return LOS_NOK;
     }
 
     mp = malloc(sizeof(struct mount_point));
     if (mp == NULL) {
         PRINT_ERR("fail to malloc memory in VFS, <malloc.c> is needed,"
             "make sure it is added\n");
-        goto err_post_exit;
+        (void)LOS_MuxPost(g_fsMutex);
+        return LOS_NOK;
     }
 
-    memset(mp, 0, sizeof(struct mount_point));
+    ret = memset_s(mp, sizeof(struct mount_point), 0, sizeof(struct mount_point));
+    if (ret != LOS_OK) {
+        free(mp);
+        (void)LOS_MuxPost(g_fsMutex);
+        return LOS_NOK;
+    }
 
     mp->m_fs = fs;
     mp->m_path = path;
     mp->m_data = data;
     mp->m_refs = 0;
 
-    if (LOS_OK != LOS_MuxCreate(&mp->m_mutex)) {
-        goto err_free_exit;
+    if (LOS_MuxCreate(&mp->m_mutex) != LOS_OK) {
+        free(mp);
+        (void)LOS_MuxPost(g_fsMutex);
+        return LOS_NOK;
     }
 
-    mp->m_next = mount_points;
-    mount_points = mp;
+    mp->m_next = g_mountPoints;
+    g_mountPoints = mp;
 
     fs->fs_refs++;
-
-    LOS_MuxPost(fs_mutex);
+    (void)LOS_MuxPost(g_fsMutex);
 
     return LOS_OK;
-
-err_free_exit:
-    free(mp);
-err_post_exit:
-    LOS_MuxPost(fs_mutex);
-    return LOS_NOK;
 }
 
 int los_fs_unmount(const char *path)
 {
-    struct mount_point *mp;
-    struct mount_point *prev;
+    struct mount_point *mp = NULL;
+    struct mount_point *prev = NULL;
     const char *tmp = NULL;
     int ret = LOS_NOK;
 
@@ -969,18 +1054,18 @@ int los_fs_unmount(const char *path)
         return ret;
     }
 
-    LOS_MuxPend(fs_mutex, LOS_WAIT_FOREVER);
+    (void)LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER);
 
     mp = los_mp_find(path, &tmp);
-
     if ((mp == NULL) || (tmp == NULL) || (*tmp != '\0') || (mp->m_refs != 0)) {
-        goto post_exit;
+        (void)LOS_MuxPost(g_fsMutex);
+        return ret;
     }
 
-    if (mount_points == mp) {
-        mount_points = mp->m_next;
+    if (g_mountPoints == mp) {
+        g_mountPoints = mp->m_next;
     } else {
-        for (prev = mount_points; prev != NULL; prev = prev->m_next) {
+        for (prev = g_mountPoints; prev != NULL; prev = prev->m_next) {
             if (prev->m_next != mp) {
                 continue;
             }
@@ -990,26 +1075,16 @@ int los_fs_unmount(const char *path)
         }
     }
 
-    LOS_MuxDelete(mp->m_mutex);
-
+    (void)LOS_MuxDelete(mp->m_mutex);
     mp->m_fs->fs_refs--;
-
     free(mp);
-
-    ret = LOS_OK;
-
-post_exit:
-    LOS_MuxPost(fs_mutex);
-    return ret;
+    (void)LOS_MuxPost(g_fsMutex);
+    return LOS_OK;
 }
 
 int los_vfs_init(void)
 {
-    if (fs_mutex != LOS_ERRNO_MUX_PTR_NULL) {
-        return LOS_OK;
-    }
-
-    if (LOS_MuxCreate(&fs_mutex) == LOS_OK) {
+    if (LOS_MuxCreate(&g_fsMutex) == LOS_OK) {
         return LOS_OK;
     }
 
@@ -1019,62 +1094,69 @@ int los_vfs_init(void)
 }
 
 
-#ifndef WITH_LINUX
-
-#define MAP_TO_POSIX_RET(ret) ((ret) < 0 ? -1 : (ret))
+static int MapToPosixRet(int ret)
+{
+    return ((ret) < 0 ? -1 : (ret));
+}
 
 int open(const char *path, int flags, ...)
 {
     int ret = los_open(path, flags);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 int close(int fd)
 {
     int ret = los_close(fd);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 ssize_t read(int fd, void *buff, size_t bytes)
 {
     ssize_t ret = los_read(fd, buff, bytes);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 ssize_t write(int fd, const void *buff, size_t bytes)
 {
     ssize_t ret = los_write(fd, buff, bytes);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 off_t lseek(int fd, off_t off, int whence)
 {
     off_t ret = los_lseek(fd, off, whence);
-    return MAP_TO_POSIX_RET(ret);
+    return ret;
+}
+
+off64_t lseek64(int fd, off64_t off, int whence)
+{
+    off64_t ret = los_lseek64(fd, off, whence);
+    return ret;
 }
 
 int stat(const char *path, struct stat *stat)
 {
     int ret = los_stat(path, stat);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 int unlink(const char *path)
 {
     int ret = los_unlink(path);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 int rename(const char *oldpath, const char *newpath)
 {
     int ret = los_rename(oldpath, newpath);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 int fsync(int fd)
 {
     int ret = los_sync(fd);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 struct dir *opendir(const char *path)
@@ -1090,12 +1172,186 @@ struct dirent *readdir(struct dir *dir)
 int closedir(struct dir *dir)
 {
     int ret = los_closedir(dir);
-    return MAP_TO_POSIX_RET(ret);
+    return MapToPosixRet(ret);
 }
 
 int mkdir(const char *path, mode_t mode)
 {
-    int ret = los_mkdir(path, mode);
-    return MAP_TO_POSIX_RET(ret);
+    int ret = los_mkdir(path, (int)mode);
+    return MapToPosixRet(ret);
 }
-#endif
+
+int rmdir(const char *path)
+{
+    int ret = los_unlink(path);
+    return MapToPosixRet(ret);
+}
+
+int dup(int fd)
+{
+    int ret = los_dup(fd);
+    return MapToPosixRet(ret);
+}
+
+int dup2(int oldFd, int newFd)
+{
+    int ret = los_dup2(oldFd, newFd);
+    return MapToPosixRet(ret);
+}
+
+int lstat(const char *path, struct stat *buffer)
+{
+    return stat(path, buffer);
+}
+
+int fstat(int fd, struct stat *buf)
+{
+    struct file *filep;
+    filep = los_attach_file(fd);
+    if ((filep == NULL) || (filep->f_mp == NULL) || (filep->f_mp->m_path == NULL)) {
+        return VFS_ERROR;
+    }
+    return stat(filep->f_mp->m_path, buf);
+}
+
+int fcntl(int fd, int cmd, ...)
+{
+    struct file *filep = NULL;
+    va_list ap;
+    int ret;
+    va_start(ap, cmd);
+
+    if ((uint32_t)fd < CONFIG_NFILE_DESCRIPTORS) {
+        filep = los_attach_file(fd);
+        ret = los_vfcntl(filep, cmd, ap);
+    } else {
+        ret = -EBADF;
+    }
+
+    va_end(ap);
+
+    if (ret < 0) {
+        set_errno(-ret);
+        ret = VFS_ERROR;
+    }
+    return ret;
+}
+
+int ioctl(int fd, int func, ...)
+{
+    int ret;
+    va_list ap;
+    va_start(ap, func);
+    ret = los_ioctl(fd, func, ap);
+    va_end(ap);
+    return ret;
+}
+
+ssize_t readv(int fd, const struct iovec *iov, int iovcnt)
+{
+    int i;
+    int ret;
+    char *buf = NULL;
+    char *curBuf = NULL;
+    char *readBuf = NULL;
+    size_t bufLen = 0;
+    size_t bytesToRead;
+    ssize_t totalBytesRead;
+    size_t totalLen;
+
+    if (iov == NULL) {
+        return VFS_ERROR;
+    }
+
+    for (i = 0; i < iovcnt; ++i) {
+        if ((SSIZE_MAX - bufLen) < iov[i].iov_len) {
+            return VFS_ERROR;
+        }
+        bufLen += iov[i].iov_len;
+    }
+    if (bufLen == 0) {
+        return VFS_ERROR;
+    }
+    totalLen = bufLen * sizeof(char);
+    buf = (char *)malloc(totalLen);
+    if (buf == NULL) {
+        return VFS_ERROR;
+    }
+
+    totalBytesRead = read(fd, buf, bufLen);
+    if ((size_t)totalBytesRead < totalLen) {
+        totalLen = (size_t)totalBytesRead;
+    }
+    curBuf = buf;
+    for (i = 0; i < iovcnt; ++i) {
+        readBuf = (char *)iov[i].iov_base;
+        bytesToRead = iov[i].iov_len;
+
+        size_t lenToRead = totalLen < bytesToRead ? totalLen : bytesToRead;
+        ret = memcpy_s(readBuf, bytesToRead, curBuf, lenToRead);
+        if (ret != LOS_OK) {
+            free(buf);
+            return VFS_ERROR;
+        }
+        if (totalLen < (size_t)bytesToRead) {
+            break;
+        }
+        curBuf += bytesToRead;
+        totalLen -= bytesToRead;
+    }
+    free(buf);
+    return totalBytesRead;
+}
+
+ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
+{
+    int i;
+    int ret;
+    char *buf = NULL;
+    char *curBuf = NULL;
+    char *writeBuf = NULL;
+    size_t bufLen = 0;
+    size_t bytesToWrite;
+    ssize_t totalBytesWritten;
+    size_t totalLen;
+
+    if (iov == NULL) {
+        return VFS_ERROR;
+    }
+
+    for (i = 0; i < iovcnt; ++i) {
+        if ((SSIZE_MAX - bufLen) < iov[i].iov_len) {
+            set_errno(EINVAL);
+            return VFS_ERROR;
+        }
+        bufLen += iov[i].iov_len;
+    }
+    if (bufLen == 0) {
+        return VFS_ERROR;
+    }
+    totalLen = bufLen * sizeof(char);
+    buf = (char *)malloc(totalLen);
+    if (buf == NULL) {
+        return VFS_ERROR;
+    }
+    curBuf = buf;
+    for (i = 0; i < iovcnt; ++i) {
+        writeBuf = (char *)iov[i].iov_base;
+        bytesToWrite = iov[i].iov_len;
+        if (((ssize_t)totalLen <= 0) || ((ssize_t)bytesToWrite <= 0)) {
+            break;
+        }
+        ret = memcpy_s(curBuf, totalLen, writeBuf, bytesToWrite);
+        if (ret != LOS_OK) {
+            free(buf);
+            return VFS_ERROR;
+        }
+        curBuf += bytesToWrite;
+        totalLen -= bytesToWrite;
+    }
+
+    totalBytesWritten = write(fd, buf, bufLen);
+    free(buf);
+
+    return totalBytesWritten;
+}

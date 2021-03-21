@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Ram Fs Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -318,6 +318,10 @@ static off_t ramfs_lseek(struct file *file, off_t off, int whence)
     return file->f_offset;
 }
 
+static off64_t ramfs_lseek64(struct file *filep, off64_t offset, int whence)
+{
+  return (off64_t)ramfs_lseek(filep, (off_t)offset, whence);
+}
 static void ramfs_del(struct ramfs_element *e)
 {
     struct ramfs_element *dir;
@@ -542,6 +546,7 @@ static struct file_ops ramfs_ops = {
     ramfs_read,
     ramfs_write,
     ramfs_lseek,
+    ramfs_lseek64,
     NULL,           /* stat not supported */
     ramfs_unlink,
     ramfs_rename,

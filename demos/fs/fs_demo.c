@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: Lvgl Demo
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Fs Common Interface Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-03-07
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,20 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#define LV_USE_DEMO_WIDGETS
-
-#include "los_task.h"
-#include "lvgl_demo.h"
-
-#include "lvgl.h"
-#include "stm32f7xx.h"
-#include "stm32f769i_discovery.h"
-#include "tft/tft.h"
-#include "touchpad/touchpad.h"
-
-#ifdef LV_USE_DEMO_WIDGETS
-#include "widgets/lv_demo_widgets.h"
-#endif
+#include "fs_demo.h"
+#include "fs_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -47,44 +35,31 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define DELAY_5MS 5
+#define FS_TASK_PRIORITY     2
+#define FS_TASK_STACK_SIZE   0x1000
 
-#define LVGL_TASK_STACK_SIZE  0x2000
-#define LVGL_TASK_PRIORITY    5
 STATIC UINT32 g_demoTaskId;
-
-STATIC VOID EnableCache(VOID)
-{
-    /* Enable I-Cache */
-    SCB_EnableICache();
-
-    /* Enable D-Cache */
-    SCB_EnableDCache();
-}
 
 STATIC VOID DemoTaskEntry(VOID)
 {
-    printf("Lvgl demo task start to run.\n");
-    /* Enable the CPU Cache */
-    EnableCache();
-
-    lv_init();
-
-    tft_init();
-    touchpad_init();
-
-#ifdef LV_USE_DEMO_WIDGETS
-    lv_demo_widgets();
+#ifdef LOSCFG_DEMOS_FS_SPIF
+    SpiffsDemo();
 #endif
 
-    while (1) {
-        lv_task_handler();
-        LOS_Msleep(DELAY_5MS);
-    }
-    printf("Lvgl demo task finshed.\n");
+#ifdef LOSCFG_DEMOS_FS_FAT
+    FatfsDemo();
+#endif
+
+#ifdef LOSCFG_DEMOS_FS_RAM
+    RamfsDemo();
+#endif
+
+#ifdef LOSCFG_DEMOS_FS_LITTLEFS
+    LittlefsDemo();
+#endif
 }
 
-VOID LvglDemoTask(VOID)
+VOID FsDemoTask(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
@@ -93,14 +68,13 @@ VOID LvglDemoTask(VOID)
     if (ret != EOK) {
         return;
     }
+    taskInitParam.usTaskPrio = FS_TASK_PRIORITY;
+    taskInitParam.pcName = "FsDemoTask";
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
-    taskInitParam.uwStackSize = LVGL_TASK_STACK_SIZE;
-    taskInitParam.pcName = "LvglDemoTask";
-    taskInitParam.usTaskPrio = LVGL_TASK_PRIORITY;
-    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    taskInitParam.uwStackSize = FS_TASK_STACK_SIZE;
     ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
     if (ret != LOS_OK) {
-        printf("Create lvgl demo task failed.\n");
+        printf("Create fs demo task failed.\n");
     }
 }
 

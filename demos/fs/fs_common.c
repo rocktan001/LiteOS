@@ -26,33 +26,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include "unistd.h"
 #include "fs_common.h"
+#include "fcntl.h"
+#include "los_task.h"
 
 static char s_ucaWriteBuffer[] = "hello world";
 static char s_ucaReadBuffer[100];
-
-void fs_demo(void)
-{
-    printf("Huawei LiteOS File System Demo.\n");
-
-#if defined(FS_SPIFFS)
-    printf("Spi Flash File System Demo.\n\n");
-    extern void spiffs_demo(void);
-    spiffs_demo();
-#endif
-
-#if defined(FS_FATFS)
-    printf("Fat File System Demo.\n\n");
-    extern void fatfs_demo(void);
-    fatfs_demo();
-#endif
-
-#if defined(FS_RAMFS)
-    printf("Ram System Demo.\n\n");
-    extern void ramfs_demo(void);
-    ramfs_demo();
-#endif
-}
 
 int write_file(const char *name, char *buff, int len)
 {
@@ -60,21 +40,21 @@ int write_file(const char *name, char *buff, int len)
     int ret;
 
     if ((name == NULL) || (buff == NULL) || (len <= 0)) {
-        FS_LOG_ERR("invalid parameter.");
+        FS_LOG_ERR("Invalid parameter.");
         return -1;
     }
-    fd = los_open(name, O_CREAT | O_WRONLY | O_TRUNC);
+    fd = open(name, O_CREAT | O_WRONLY | O_TRUNC, 644);
     if (fd < 0) {
-        FS_LOG_ERR("los_open file %s failed.", name);
+        FS_LOG_ERR("Open file %s failed.", name);
         return -1;
     }
-    ret = los_write(fd, buff, len);
+    ret = write(fd, buff, len);
     if (ret < 0) {
-        FS_LOG_ERR("los_write file %s failed.", name);
-        los_close(fd);
+        FS_LOG_ERR("Write file %s failed.", name);
+        close(fd);
         return -1;
     }
-    los_close(fd);
+    close(fd);
     return 0;
 }
 
@@ -84,21 +64,21 @@ int read_file(const char *name, char *buff, int len)
     int ret;
 
     if ((name == NULL) || (buff == NULL) || (len <= 0)) {
-        FS_LOG_ERR("invalid parameter.");
+        FS_LOG_ERR("Invalid parameter.");
         return -1;
     }
-    fd = los_open(name, O_RDONLY);
+    fd = open(name, O_RDONLY);
     if (fd < 0) {
-        FS_LOG_ERR("los_open file %s failed.", name);
+        FS_LOG_ERR("Open file %s failed.", name);
         return -1;
     }
-    ret = los_read(fd, buff, len);
+    ret = read(fd, buff, len);
     if (ret <= 0) {
-        FS_LOG_ERR("los_read file %s failed.", name);
-        los_close(fd);
+        FS_LOG_ERR("Read file %s failed.", name);
+        close(fd);
         return -1;
     }
-    los_close(fd);
+    close(fd);
     return 0;
 }
 
@@ -108,25 +88,25 @@ int open_dir(const char *name, struct dir **dir)
     int counter = 3;
 
     if ((name == NULL) || (dir == NULL)) {
-        FS_LOG_ERR("invalid parameter.");
+        FS_LOG_ERR("Invalid parameter.");
         return -1;
     }
 
     do {
-        *dir = los_opendir(name);
+        *dir = opendir(name);
         if (*dir == NULL) {
-            FS_LOG_ERR("los_opendir %s failed, ret=%d.", name, ret);
-            ret = los_mkdir(name, 0);
+            FS_LOG_ERR("Open dir %s failed.", name);
+            ret = mkdir(name, 0);
             if (ret != 0) {
-                FS_LOG_ERR("los_mkdir %s failed, ret=%d.", name, ret);
+                FS_LOG_ERR("Create dir %s failed.", name);
             } else {
-                FS_LOG_ERR("los_mkdir %s successfully.", name);
+                FS_LOG_ERR("Create dir %s successfully.", name);
             }
         }
     } while ((*dir == NULL) && (--counter > 0));
 
     if (counter <= 0) {
-        FS_LOG_ERR("los_opendir/los_mkdir %s failed, ret=%d.", name, ret);
+        FS_LOG_ERR("Open or create dir %s failed.", name);
         return -1;
     }
     return 0;
@@ -137,22 +117,23 @@ int read_dir(const char *name, struct dir *dir)
     int flag = 1;
     struct dirent *pDirent = NULL;
 
+    dir = opendir(name);
     if ((name == NULL) || (dir == NULL)) {
-        FS_LOG_ERR("invalid parameter.");
+        FS_LOG_ERR("Invalid parameter.");
         return -1;
     }
 
     while (1) {
-        pDirent = los_readdir(dir);
+        pDirent = readdir(dir);
         if ((pDirent == NULL) || (pDirent->name[0] == '\0')) {
             if (flag == 1) {
-                FS_LOG_ERR("los_readdir %s failed.", name);
+                FS_LOG_ERR("Read dir %s failed.", name);
                 return -1;
             } else
                 break;
         }
         flag = 0;
-        printf("los_readdir %s: name=%s, type=%d, size=%d\n", name, pDirent->name, pDirent->type, pDirent->size);
+        printf("Read dir %s: name=%s, type=%d, size=%d.\n", name, pDirent->name, pDirent->type, pDirent->size);
     }
     return 0;
 }
@@ -171,13 +152,13 @@ void los_vfs_io(char *file_name, char *dir_name)
      *************************/
     ret = write_file(file_name, s_ucaWriteBuffer, wrlen);
     if (ret < 0) {
-        (void)los_unlink(file_name);
+        (void)unlink(file_name);
         return;
     }
 
     ret = read_file(file_name, s_ucaReadBuffer, rdlen);
     if (ret < 0) {
-        (void)los_unlink(file_name);
+        (void)unlink(file_name);
         return;
     }
     printf("*********** readed %d data ***********\r\n%s\r\n"
@@ -190,31 +171,31 @@ void los_vfs_io(char *file_name, char *dir_name)
     sprintf(file_name, "%s/%s", (char *)dir_name, LOS_FILE);
     ret = open_dir(dir_name, &pDir);
     if (ret < 0) {
-        (void)los_unlink(file_name);
+        (void)unlink(file_name);
         return;
     }
 
     ret = write_file(file_name, s_ucaWriteBuffer, wrlen);
     if (ret < 0) {
-        (void)los_closedir(pDir);
-        (void)los_unlink(file_name);
+        (void)closedir(pDir);
+        (void)unlink(file_name);
         return;
     }
 
     ret = read_dir(dir_name, pDir);
     if (ret < 0) {
-        (void)los_closedir(pDir);
-        (void)los_unlink(file_name);
+        (void)closedir(pDir);
+        (void)unlink(file_name);
         return;
     }
 
-    ret = los_closedir(pDir);
+    ret = closedir(pDir);
     if (ret < 0) {
-        FS_LOG_ERR("los_closedir %s failed.", dir_name);
-        (void)los_unlink(file_name); // remove file_name
+        FS_LOG_ERR("Close dir %s failed.", dir_name);
+        (void)unlink(file_name); // remove file_name
         return;
     }
-    (void)los_unlink(file_name);     // remove file_name
+    (void)unlink(file_name);     // remove file_name
 }
 
 void make_dir(const char *name)
@@ -235,7 +216,7 @@ void make_dir(const char *name)
             count++;
             if (count > 2) {
                 tmp_dir[i] = 0;
-                (void)los_mkdir(tmp_dir, 0);
+                (void)mkdir(tmp_dir, 0);
                 tmp_dir[i] = '/';
             }
         }
@@ -250,14 +231,14 @@ void print_dir(const char *name, int level)
         return;
     }
 
-    struct dir *dir = los_opendir(name);
+    struct dir *dir = opendir(name);
     if (dir == NULL) {
-        FS_LOG_ERR("los_opendir %s failed", name);
+        FS_LOG_ERR("Open dir %s failed.", name);
         return;
     }
 
     while (1) {
-        struct dirent *dirent = los_readdir(dir);
+        struct dirent *dirent = readdir(dir);
         if ((dirent == NULL) || (dirent->name[0] == 0)) {
             break;
         }
@@ -272,8 +253,8 @@ void print_dir(const char *name, int level)
         }
     }
 
-    if (los_closedir(dir) < 0) {
-        FS_LOG_ERR("los_closedir %s failed", name);
+    if (closedir(dir) < 0) {
+        FS_LOG_ERR("Close dir %s failed.", name);
         return;
     }
 }

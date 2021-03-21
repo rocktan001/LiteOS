@@ -1,4 +1,5 @@
 include $(LITEOSTOPDIR)/config.mk
+include $(LITEOSTOPDIR)/components/fs/fs.mk
 
 MODULE_NAME     := $(notdir $(CURDIR))
 LOCAL_SRCS_y    :=
@@ -57,6 +58,16 @@ ifeq ($(LOSCFG_COMPONENTS_FS_SPIFFS), y)
 LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/components/fs/spiffs/spiffs_git/src \
     -I $(LITEOSTOPDIR)/components/fs/spiffs/spiffs_git/src/default
+endif
+
+# littlefs
+LOCAL_DIRS_$(LOSCFG_COMPONENTS_FS_LITTLEFS) += littlefs
+LOCAL_DIRS_$(LOSCFG_COMPONENTS_FS_LITTLEFS) += littlefs/$(LITTLEFD_VERSION)
+
+ifeq ($(LOSCFG_COMPONENTS_FS_LITTLEFS), y)
+LOCAL_INCLUDE += \
+    -I $(LITEOSTOPDIR)/components/fs/littlefs \
+    -I $(LITEOSTOPDIR)/components/fs/littlefs/$(LITTLEFD_VERSION)
 endif
 
 LOCAL_SRCS_y += $(foreach dir, $(LOCAL_DIRS_y), $(wildcard $(dir)/*.c))
