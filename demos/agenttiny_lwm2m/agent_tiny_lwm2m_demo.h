@@ -36,6 +36,6 @@
 #include "atiny_lwm2m/agenttiny.h"
 #include "osdepends/atiny_osdep.h"
 
-void agent_tiny_lwm2m_entry(void);
+void AgentTinyLwm2mDemoEntry(void);
 
 #endif /* _AGENT_TINY_LWM2M_DEMO_H */

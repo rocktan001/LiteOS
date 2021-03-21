@@ -115,8 +115,8 @@ static char g_mqtt_ca_crt[] =
 #define array_size(a) (sizeof(a) / sizeof(*(a)))
 #endif
 
-static mqtt_client_s *g_phandle = NULL;
-static demo_param_s g_demo_param;
+static mqtt_client_s *g_demoHandle = NULL;
+static demo_param_s g_demoParam;
 
 static int create_profile_data(cJSON *profile_data[], int value)
 {
@@ -261,13 +261,13 @@ static void app_data_report(void)
     int cnt = 0;
 
     while (1) {
-        if (g_phandle != NULL) {
+        if (g_demoHandle != NULL) {
             cJSON *profile_data[1] = {0};
             if (create_profile_data(profile_data, cnt) == ATINY_OK) {
                 char *msg = NULL;
                 msg = create_json_data(profile_data, 1);
                 if (msg != NULL) {
-                    int ret = atiny_mqtt_data_send(g_phandle, msg, strnlen(msg, MAX_LEN), MQTT_QOS_LEAST_ONCE);
+                    int ret = atiny_mqtt_data_send(g_demoHandle, msg, strnlen(msg, MAX_LEN), MQTT_QOS_LEAST_ONCE);
                     ATINY_LOG(LOG_INFO, "report ret:%d, cnt %d", ret, cnt);
                     if (ret == ATINY_OK) {
                         ATINY_LOG(LOG_DEBUG, "report data %s\n", msg);
@@ -276,7 +276,7 @@ static void app_data_report(void)
                 }
             }
         } else {
-            ATINY_LOG(LOG_ERR, "g_phandle null");
+            ATINY_LOG(LOG_ERR, "g_demoHandle null");
         }
         (void)LOS_TaskDelay(10 * 1000);
         cnt++;
@@ -371,7 +371,7 @@ static int send_msg_resp(int mid, int errcode, int has_more, cJSON *body)
         goto EXIT;
     }
 
-    ret = atiny_mqtt_data_send(g_phandle, str_msg, strnlen(str_msg, MAX_LEN), MQTT_QOS_LEAST_ONCE);
+    ret = atiny_mqtt_data_send(g_demoHandle, str_msg, strnlen(str_msg, MAX_LEN), MQTT_QOS_LEAST_ONCE);
     if (str_msg == NULL) {
         ATINY_LOG(LOG_ERR, "atiny_mqtt_data_send fail ret %d",  ret);
     }
@@ -494,19 +494,19 @@ static int demo_cmd_ioctl(mqtt_cmd_e cmd, void *arg, int32_t len)
             result = demo_rcv_msg(arg, len);
             break;
         case MQTT_SAVE_SECRET_INFO:
-            if (g_demo_param.write_flash_info == NULL) {
+            if (g_demoParam.write_flash_info == NULL) {
                 result = ATINY_ERR;
                 ATINY_LOG(LOG_ERR, "write_flash_info null");
             } else {
-                result = g_demo_param.write_flash_info(arg, len);
+                result = g_demoParam.write_flash_info(arg, len);
             }
             break;
         case MQTT_READ_SECRET_INFO:
-            if (g_demo_param.read_flash_info == NULL) {
+            if (g_demoParam.read_flash_info == NULL) {
                 result = ATINY_ERR;
                 ATINY_LOG(LOG_ERR, "read_flash_info null");
             } else {
-                result = g_demo_param.read_flash_info(arg, len);
+                result = g_demoParam.read_flash_info(arg, len);
             }
             break;
         default:
@@ -515,13 +515,23 @@ static int demo_cmd_ioctl(mqtt_cmd_e cmd, void *arg, int32_t len)
     return result;
 }
 
-void agent_tiny_mqtt_entry(void)
+void AgentTinyMqttDemoEntry(void)
 {
     UINT32 ret;
     mqtt_param_s atiny_params;
     mqtt_device_info_s device_info;
-    if (g_demo_param.init != NULL) {
-        g_demo_param.init();
+
+    ret = memset_s(&atiny_params, sizeof(mqtt_param_s), 0, sizeof(mqtt_param_s));
+    if (ret != EOK) {
+        return;
+    }
+    ret = memset_s(&device_info, sizeof(mqtt_device_info_s), 0, sizeof(mqtt_device_info_s));
+    if (ret != EOK) {
+        return;
+    }
+
+    if (g_demoParam.init != NULL) {
+        g_demoParam.init();
     }
     atiny_params.server_ip = DEFAULT_SERVER_IPV4;
     atiny_params.server_port = DEFAULT_SERVER_PORT;
@@ -543,7 +553,7 @@ void agent_tiny_mqtt_entry(void)
     atiny_params.info.security_type = MQTT_SECURITY_TYPE_NONE;
 #endif /* LOSCFG_COMPONENTS_SECURITY_MBEDTLS */
     atiny_params.cmd_ioctl = demo_cmd_ioctl;
-    if (atiny_mqtt_init(&atiny_params, &g_phandle) != ATINY_OK) {
+    if (atiny_mqtt_init(&atiny_params, &g_demoHandle) != ATINY_OK) {
         return;
     }
     ret = creat_report_task();
@@ -561,13 +571,13 @@ void agent_tiny_mqtt_entry(void)
     device_info.u.d_info.productid = AGENT_TINY_DEMO_PRODUCTID;
     device_info.u.d_info.nodeid = AGENT_TINY_DEMO_NODEID;
 #endif
-    (void)atiny_mqtt_bind(&device_info, g_phandle);
+    (void)atiny_mqtt_bind(&device_info, g_demoHandle);
     return;
 }
 
-void agent_tiny_demo_init(const demo_param_s *param)
+void AgentTinyDemoInit(const demo_param_s *param)
 {
-    g_demo_param = *param;
+    g_demoParam = *param;
 }
 
 #ifdef __cplusplus

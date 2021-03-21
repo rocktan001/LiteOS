@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
  * Description: Ai Demo HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2020-12-10
@@ -35,7 +35,9 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void ai_demo_entry(void);
+#include "los_typedef.h"
+
+VOID AiDemoTask(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

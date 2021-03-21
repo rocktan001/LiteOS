@@ -29,13 +29,15 @@
 #ifndef _TRACE_DEMO_H
 #define _TRACE_DEMO_H
 
+#include "los_typedef.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern UINT32 create_trace_task(VOID);
+VOID TraceDemoTask(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

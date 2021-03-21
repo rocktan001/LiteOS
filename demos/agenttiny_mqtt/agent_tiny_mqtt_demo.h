@@ -44,8 +44,8 @@ typedef struct {
     int (*read_flash_info)(void *buffer, uint32_t len);
 } demo_param_s;
 
-void agent_tiny_demo_init(const demo_param_s *param);
-void agent_tiny_mqtt_entry(void);
+void AgentTinyDemoInit(const demo_param_s *param);
+void AgentTinyMqttDemoEntry(void);
 
 #ifdef __cplusplus
 #if __cplusplus

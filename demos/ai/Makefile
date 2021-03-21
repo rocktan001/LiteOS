@@ -24,7 +24,7 @@ LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/demos/ai/utils \
     -I $(LITEOSTOPDIR)/components/ai/include
 
-LOCAL_CFLAGS += -Wno-error
+LOCAL_CFLAGS += -Wno-error -w
 LOCAL_CFLAGS += -Wno-pointer-sign
 LOCAL_CFLAGS += -Wno-discarded-qualifiers
 LOCAL_CFLAGS += -Wno-unused-variable

@@ -4,6 +4,9 @@ config LOSCFG_DEMOS_DTLS_SERVER
     bool "Enable Dtls Server Demo"
     select LOSCFG_COMPONENTS_SECURITY
     select LOSCFG_COMPONENTS_SECURITY_MBEDTLS
+    select LOSCFG_COMPONENTS_NETWORK
+    select LOSCFG_COMPONENTS_NET_LWIP
+    select LOSCFG_COMPONENTS_NET_SAL
     default n
     help
       Answer y to enable dtls server demo.

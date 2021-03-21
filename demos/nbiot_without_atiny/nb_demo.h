@@ -29,13 +29,16 @@
 #ifndef _NB_DEMO_H
 #define _NB_DEMO_H
 
+#include "los_typedef.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void demo_nbiot_only(void);
+VOID NBIoT_SotaDemo(VOID);
+VOID NBIoT_DemoEntry(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

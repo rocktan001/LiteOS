@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Test Dtls Server
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -26,17 +26,29 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#ifndef LOSCFG_LWIP_IPV4
+#error This demo needs to enable Components "Components-->Network-->Enable Network-->Enable Lwip-->Enable Ipv4"
+#endif
+
 #include "test_dtls_server.h"
 #include "dtls_interface.h"
 #include "osdepends/atiny_osdep.h"
 #include "sal/atiny_socket.h"
 
-#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS) && defined(LOSCFG_DEMOS_DTLS_SERVER)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #define SERVER_PSK      "11223344556677881122334455667788"
 #define SERVER_IDENTITY "testserver1"
 #define SERVER_PORT     "5658"
 #define DTLS_SERVER_DEBUG
+
+#define DTLS_TASK_PRIORITY          3
+#define DTLS_SERVER_DEMO_TASK_SIZE  0x1000
+STATIC UINT32 g_demoTaskId;
 
 #ifdef DTLS_SERVER_DEBUG
 #define LOG(fmt, arg...) do {                                   \
@@ -46,12 +58,13 @@
 #define LOG(fmt, arg...)
 #endif
 
-void dtls_server_task(void)
+STATIC VOID DemoTaskEntry(VOID)
 {
     int ret;
     mbedtls_ssl_context *ssl = NULL;
     dtls_establish_info_s establish_info;
 
+    printf("Dtls server demo task start to run.\n");
     mbedtls_net_context *bind_ctx = atiny_malloc(sizeof(mbedtls_net_context));
     mbedtls_net_context *cli_ctx = atiny_malloc(sizeof(mbedtls_net_context));
     if ((bind_ctx == NULL) || (cli_ctx == NULL)) {
@@ -107,6 +120,7 @@ void dtls_server_task(void)
         LOG("Write to client: %d bytes written\n%s\n", ret, hello);
         LOS_TaskDelay(2000);
     } while (0);
+    printf("Dtls server demo task finished.\n");
 
     if (ssl != NULL) {
         dtls_ssl_destroy(ssl);
@@ -114,4 +128,27 @@ void dtls_server_task(void)
     mbedtls_net_free(bind_ctx);
 }
 
-#endif
+VOID DtlsServerDemoTask(VOID)
+{
+    UINT32 ret;
+    TSK_INIT_PARAM_S taskInitParam;
+
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
+    }
+    taskInitParam.usTaskPrio = DTLS_TASK_PRIORITY;
+    taskInitParam.pcName = "DtlsServerDemoTask";
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
+    taskInitParam.uwStackSize = DTLS_SERVER_DEMO_TASK_SIZE;
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create dtls server demo task failed.\n");
+    }
+}
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */

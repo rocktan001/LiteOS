@@ -3,7 +3,8 @@ menu "Trace Demo"
 config LOSCFG_DEMOS_TRACE
     bool "Enable Trace Demo"
     default n
-    depends on LOSCFG_KERNEL_TRACE
+    select LOSCFG_KERNEL_EXTKERNEL
+    select LOSCFG_KERNEL_TRACE
     help
       Answer y to enable trace demo.
 
