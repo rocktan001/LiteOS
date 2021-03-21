@@ -32,11 +32,10 @@
 #include "at_frame/at_api.h"
 #endif
 
-//#define DEFAULT_SERVER_IP "180.101.147.115" /*dianxin*/
-//#define DEFAULT_SERVER_IP "2000::1"
 #define DEFAULT_SERVER_IP "192.168.3.98" /* local ipv4 */
 
-#define LWM2M_LIFE_TIME     50000
+#define LWM2M_LIFE_TIME  50000
+#define TASK_STACK_SIZD  0x1000
 
 char *g_endpoint_name = "44440003";
 #ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
@@ -51,22 +50,22 @@ unsigned char g_psk_bs_value[] = {0x68,0xda,0x7a,0xea,0xf6,0x12,0xfd,0x95,0xbb,0
 #endif
 
 static void *g_phandle = NULL;
-static atiny_device_info_t g_device_info;
-static atiny_param_t g_atiny_params;
+static atiny_device_info_t g_demoDeviceInfo;
+static atiny_param_t g_demoAtinyParams;
 
-void ack_callback(atiny_report_type_e type, int cookie, data_send_status_e status)
+void AckCallback(atiny_report_type_e type, int cookie, data_send_status_e status)
 {
     ATINY_LOG(LOG_DEBUG, "type:%d cookie:%d status:%d\n", type, cookie, status);
 }
 
-static void app_data_report(void)
+static void AppDataReport(void)
 {
     uint8_t buf[5] = {0, 1, 6, 5, 9};
     data_report_t report_data;
     int ret = 0;
     int cnt = 0;
     report_data.buf = buf;
-    report_data.callback = ack_callback;
+    report_data.callback = AckCallback;
     report_data.cookie = 0;
     report_data.len = sizeof(buf);
     report_data.type = APP_DATA;
@@ -82,16 +81,16 @@ static void app_data_report(void)
     }
 }
 
-static UINT32 creat_report_task(void)
+static UINT32 CreateReportTask(void)
 {
     UINT32 ret = LOS_OK;
     TSK_INIT_PARAM_S task_init_param;
     UINT32 taskHandle;
 
     task_init_param.usTaskPrio = 1;
-    task_init_param.pcName = "app_data_report";
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)app_data_report;
-    task_init_param.uwStackSize = 0x1000;
+    task_init_param.pcName = "AppDataReport";
+    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)AppDataReport;
+    task_init_param.uwStackSize = TASK_STACK_SIZD;
 
     ret = LOS_TaskCreate(&taskHandle, &task_init_param);
     if (ret != LOS_OK) {
@@ -101,13 +100,13 @@ static UINT32 creat_report_task(void)
     return ret;
 }
 
-void agent_tiny_lwm2m_entry(void)
+void AgentTinyLwm2mDemoEntry(void)
 {
     UINT32 ret = LOS_OK;
-    atiny_param_t *atiny_params;
+    atiny_param_t *atiny_params = NULL;
     atiny_security_param_t *iot_security_param = NULL;
     atiny_security_param_t *bs_security_param = NULL;
-    atiny_device_info_t *device_info = &g_device_info;
+    atiny_device_info_t *device_info = &g_demoDeviceInfo;
 
 #ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
     device_info->endpoint_name = g_endpoint_name_s;
@@ -120,7 +119,7 @@ void agent_tiny_lwm2m_entry(void)
 #else
     device_info->manufacturer = "Agent_Tiny";
 #endif
-    atiny_params = &g_atiny_params;
+    atiny_params = &g_demoAtinyParams;
     atiny_params->server_params.binding = "UQ";
     // atiny_params->server_params.life_time = LWM2M_LIFE_TIME;
     atiny_params->server_params.life_time = 20;
@@ -164,7 +163,7 @@ void agent_tiny_lwm2m_entry(void)
         return;
     }
 
-    ret = creat_report_task();
+    ret = CreateReportTask();
     if (ret != LOS_OK) {
         return;
     }

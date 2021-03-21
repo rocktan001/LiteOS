@@ -5,6 +5,6 @@ config LOSCFG_DEMOS_LMS
     default n
     depends on LOSCFG_KERNEL_LMS
     help
-      Answer y to enable LMS demo
+      Answer y to enable LMS demo.
 
 endmenu

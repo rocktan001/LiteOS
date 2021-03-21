@@ -37,11 +37,10 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-static UINT32 demoTaskLmsId;
+#define LMS_TASK_PRIORITY 4
+STATIC UINT32 g_demoTaskId;
 
-#define TSK_PRIOR_LMS 4
-
-static UINT32 LMS_Case_HeapOverflow(VOID)
+STATIC UINT32 LMS_Case_HeapOverflow(VOID)
 {
     CHAR *buf = NULL;
     CHAR tmp;
@@ -58,21 +57,21 @@ static UINT32 LMS_Case_HeapOverflow(VOID)
     return ret;
 }
 
-static UINT32 Example_TaskLMS(VOID)
+STATIC UINT32 DemoTaskEntry(VOID)
 {
     UINT32 ret;
-    printf("Enter TaskLms Handler.\n");
+
+    printf("Lms demo task start to run.\n");
     /* task delay 5 ticks, task will be suspend */
     ret = LOS_TaskDelay(5);
     if (ret != LOS_OK) {
-        printf("Delay Task Failed.\n");
+        printf("Task delay failed.\n");
         return LOS_NOK;
     }
     LMS_Case_HeapOverflow();
 
     /* task resumed */
-    printf("TaskLms LOS_TaskDelay Done.\n");
-
+    printf("Lms task delay done.\n");
 
     /* suspend self */
     ret = LOS_TaskSuspend(demoTaskLmsId);
@@ -80,44 +79,40 @@ static UINT32 Example_TaskLMS(VOID)
         return LOS_NOK;
     }
 
-    printf("TaskLms LOS_TaskResume ok.\n");
+    printf("Lms task LOS_TaskResume successfully.\n");
 
     /* delete self */
     if (LOS_TaskDelete(demoTaskLmsId) != LOS_OK) {
-        printf("Delete TaskLms failed.\n");
+        printf("Delete lms task failed.\n");
         return LOS_NOK;
     }
+    printf("Lms demo task finished.\n");
 
     return LOS_OK;
 }
 
-UINT32 Example_LMSEntry(VOID)
+VOID LmsDemoTask(VOID)
 {
     UINT32 ret;
-    TSK_INIT_PARAM_S stInitParam;
+    TSK_INIT_PARAM_S taskInitParam;
 
     /* lock task shcedue */
-    printf("\nKernel task demo begin.\n");
     LOS_TaskLock();
 
-    printf("LOS_TaskLock() ok.\n");
-
-    stInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)Example_TaskLMS;
-    stInitParam.usTaskPrio = TSK_PRIOR_LMS;
-    stInitParam.pcName = "LMS_NAME";
-    stInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
+    }
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
+    taskInitParam.usTaskPrio = LMS_TASK_PRIORITY;
+    taskInitParam.pcName = "LmsDemoTask";
+    taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     /* create LMS prio task */
-    ret = LOS_TaskCreate(&demoTaskLmsId, &stInitParam);
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
     if (ret != LOS_OK) {
         LOS_TaskUnlock();
-
-        printf("Example_TaskLMS failed.\n");
-        return LOS_NOK;
+        printf("Create lms demo task failed.\n");
     }
-
-    printf("Create Example_TaskLMS ok.\n");
-
-    return ret;
 }
 
 #ifdef __cplusplus

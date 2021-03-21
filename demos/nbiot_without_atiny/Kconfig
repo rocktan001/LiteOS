@@ -2,6 +2,7 @@ menu "NB-IoT Demo Without Atiny"
 
 config LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
     bool "Enable NB-IoT Demo"
+    select LOSCFG_COMPONNETS_NET_AT
     default n
     help
         Answer y to enable nbiot demo without atiny.

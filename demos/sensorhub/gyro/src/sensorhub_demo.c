@@ -39,24 +39,25 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define STASK_PRIORITY_MISC   4
-#define STASK_STKDEPTH_MISC   0x800
-#define Item1_SAMPLE_INTERVAL 3000 // LiteOS ticks
-#define Item2_SAMPLE_INTERVAL 6000
+#define Item1_SAMPLE_INTERVAL     3000 // LiteOS ticks
+#define Item2_SAMPLE_INTERVAL     6000
+#define SENSORHUB_TASK_PRIORITY   4
+#define SENSORHUB_TASK_STACK_SIZE 0x800
 
-STATIC SensorItem g_gyroItem1 = {
+STATIC UINT32 g_demoTaskId;
+
+STATIC SensorItem g_demoGyroItem1 = {
     .id = 1, // 1: gyro item 1
 };
-STATIC SensorItem g_gyroItem2 = {
+STATIC SensorItem g_demoGyroItem2 = {
     .id = 2, // 2: gyro item 2
 };
-STATIC UINT32 g_miscTskID;
 
 STATIC VOID SensorReport(UINT32 arg, const INT8 *data, UINT32 len)
 {
     (VOID)(len);
     (VOID)(data);
-    PRINTK("tag %u report\r\n", arg);
+    printf("Tag %u report\r\n", arg);
 }
 
 STATIC VOID OpenGyro(VOID)
@@ -65,19 +66,19 @@ STATIC VOID OpenGyro(VOID)
 
     // period is LiteOS ticks
     para.period = Item1_SAMPLE_INTERVAL;
-    SensorItemEnable(&g_gyroItem1, &para, g_gyroItem1.id, 0);
+    SensorItemEnable(&g_demoGyroItem1, &para, g_demoGyroItem1.id, 0);
 
     para.period = Item2_SAMPLE_INTERVAL;
-    SensorItemEnable(&g_gyroItem2, &para, g_gyroItem2.id, 0);
+    SensorItemEnable(&g_demoGyroItem2, &para, g_demoGyroItem2.id, 0);
 }
 
 STATIC VOID CloseGyro(VOID)
 {
     CloseParam para;
-    SensorItemDisable(&g_gyroItem1, &para, g_gyroItem1.id, 0);
+    SensorItemDisable(&g_demoGyroItem1, &para, g_demoGyroItem1.id, 0);
     // keep item2 working for 40000 ticks
     LOS_TaskDelay(40000);
-    SensorItemDisable(&g_gyroItem2, &para, g_gyroItem2.id, 0);
+    SensorItemDisable(&g_demoGyroItem2, &para, g_demoGyroItem2.id, 0);
 }
 
 STATIC VOID InitGyro(VOID)
@@ -93,13 +94,13 @@ STATIC VOID InitGyro(VOID)
     }
 
     // init item
-    SensorItemInit(&g_gyroItem1, NULL, TAG_GYRO, SensorReport, TAG_GYRO);
-    SensorItemInit(&g_gyroItem2, NULL, TAG_GYRO, SensorReport, TAG_GYRO);
+    SensorItemInit(&g_demoGyroItem1, NULL, TAG_GYRO, SensorReport, TAG_GYRO);
+    SensorItemInit(&g_demoGyroItem2, NULL, TAG_GYRO, SensorReport, TAG_GYRO);
 }
 
-STATIC VOID MiscTask(VOID const * arg)
+STATIC VOID DemoTaskEntry(VOID)
 {
-    (VOID)(arg);
+    printf("SensorHub demo task start to run.\n");
     MX_I2C1_Init();
     SensorManagerInit();
     LOS_TaskDelay(1000);
@@ -111,26 +112,27 @@ STATIC VOID MiscTask(VOID const * arg)
     OpenGyro();
     LOS_TaskDelay(100000);
     CloseGyro();
+    printf("SensorHub demo task finished.\n");
 }
 
-UINT32 MiscInit(VOID)
+VOID SensorHubDemoTask(VOID)
 {
     UINT32 ret;
-    TSK_INIT_PARAM_S taskInitParam = {0};
+    TSK_INIT_PARAM_S taskInitParam ;
 
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)MiscTask;
-    taskInitParam.uwStackSize = STASK_STKDEPTH_MISC;
-    taskInitParam.pcName = "Misc Task";
-    taskInitParam.usTaskPrio = STASK_PRIORITY_MISC;    /* 1~7 */
-    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED; /* task is detached, the task can deleteself */
-
-    ret = LOS_TaskCreate(&g_miscTskID, &taskInitParam);
-    if (ret != LOS_OK) {
-        PRINT_ERR("Misc Task create fail\n");
-        return ret;
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
     }
-    PRINT_DEBUG("MiscTask init \n");
-    return ret;
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
+    taskInitParam.uwStackSize = SENSORHUB_TASK_STACK_SIZE;
+    taskInitParam.pcName = "SensorHubDemoTask";
+    taskInitParam.usTaskPrio = SENSORHUB_TASK_PRIORITY;  /* 1~7 */
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;   /* task is detached, the task can deleteself */
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create sensorhub demo task failed.\n");
+    }
 }
 
 #ifdef __cplusplus

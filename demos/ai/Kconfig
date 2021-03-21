@@ -12,12 +12,10 @@ config LOSCFG_DEMOS_AI_MNIST
     depends on LOSCFG_DEMOS_AI
     default n
 
-
 config LOSCFG_DEMOS_AI_MNIST_QUANT
     bool "Mnist Quant Modle"
     depends on LOSCFG_DEMOS_AI
     default n
-
 
 config LOSCFG_DEMOS_AI_MOBILENET
     bool "Mobilenet Modle"

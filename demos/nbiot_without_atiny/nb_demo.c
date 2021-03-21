@@ -26,8 +26,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include <stdio.h>
+#ifndef LOSCFG_COMPONENTS_NET_AT_BC95
+#error This demo needs to enable Components "Components-->Network-->Enable Network-->Enable AT-->Choose AT Device (Enable bc95)"
+#endif
+
+#include "stdio.h"
+#include "nb_demo.h"
+
+#ifdef LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT
 #include "nb_iot/los_nb_api.h"
+#endif
 
 #define TELECON_IP          "119.3.250.80"
 #define OCEAN_IP            "139.159.140.34"
@@ -36,18 +44,16 @@
 #define DEV_PSKID           "868744031131026"
 #define DEV_PSK             "d1e1be0c05ac5b8c78ce196412f0cdb0"
 
-void demo_nbiot_only(void)
+VOID NBIoT_DemoEntry(VOID)
 {
-#if defined(LOSCFG_COMPONENTS_NET_AT_BC95) && defined(LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY)
 #if LOSCFG_DEMOS_NBIOT_DTLS
     sec_param_s sec;
     sec.setpsk = 1;
     sec.pskid = DEV_PSKID;
     sec.psk = DEV_PSK;
 #endif
-    printf("\r\n=====================================================");
-    printf("\r\nSTEP1: Init NB Module( NB Init )");
-    printf("\r\n=====================================================\r\n");
+
+    printf("NB-IoT demo task start to run.\n");
 #if LOSCFG_DEMOS_NBIOT_DTLS
     los_nb_init((const int8_t *)TELECON_IP, (const int8_t *)SECURITY_PORT, &sec);
 #else
@@ -55,22 +61,11 @@ void demo_nbiot_only(void)
 #endif
 
 #if defined(WITH_SOTA)
-    extern void nb_sota_demo(void);
-    nb_sota_demo();
+    NBIoT_SotaDemo();
 #endif
-    printf("\r\n=====================================================");
-    printf("\r\nSTEP2: Register Command( NB Notify )");
-    printf("\r\n=====================================================\r\n");
-
-    printf("\r\n=====================================================");
-    printf("\r\nSTEP3: Report Data to Server( NB Report )");
-    printf("\r\n=====================================================\r\n");
     while (1) {
         los_nb_report("22", 2); // "22" is a random string, 2 is the string length
         LOS_TaskDelay(60000);
     }
-
-#else
-    printf("Please checkout if open LOSCFG_COMPONNETS_NET_AT and select LOSCFG_COMPONENTS_NET_AT_BC95\n");
-#endif
+    printf("NB-IoT demo task start to run.\n");
 }

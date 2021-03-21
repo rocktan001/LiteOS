@@ -2,6 +2,8 @@ menu "Ipv6 Client Demo"
 
 config LOSCFG_DEMOS_IPV6_CLIENT
     bool "Enable Ipv6 Client Demo"
+    select LOSCFG_COMPONENTS_NETWORK
+    select LOSCFG_COMPONENTS_NET_LWIP
     default n
     help
       Answer y to enable ipv6 client demo.

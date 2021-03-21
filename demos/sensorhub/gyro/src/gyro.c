@@ -43,10 +43,10 @@ extern "C" {
 #define DEFAULT_INTERVAL 5000
 #define INVALID_TIMER_ID 0xFFFF
 
-STATIC INT32 g_gyroSensorData[SENSOR_DATA_LEN];
-STATIC INT16 g_accel[SENSOR_DATA_LEN];
-STATIC INT16 g_gyro[SENSOR_DATA_LEN];
-STATIC INT16 g_tempDate = 0;
+STATIC INT32 g_demoGyroSensorData[SENSOR_DATA_LEN];
+STATIC INT16 g_demoAccel[SENSOR_DATA_LEN];
+STATIC INT16 g_demoGyro[SENSOR_DATA_LEN];
+STATIC INT16 g_demoTempDate = 0;
 
 STATIC Mpu6050Priv g_gyroPriv = {
     .gyroTimerId = INVALID_TIMER_ID,
@@ -61,12 +61,12 @@ STATIC VOID GypoTimerFunc(VOID const * arg)
 STATIC INT32 GyroInit(SensorType *sensor)
 {
     (VOID)(sensor);
-    PRINT_DEBUG("gypo init.\n");
+    printf("Gypo init.\n");
     MpuSensorInit();
     if (MpuSensorGetId() == LOS_OK) { // 1 read ok
-        PRINT_DEBUG("gypo read id ok.\n");
+        printf("Read gypo id successflly.\n");
     } else {
-        PRINT_DEBUG("gypo read id fail.\n");
+        printf("Read gypo id failed.\n");
         return LOS_NOK;
     }
     return LOS_OK;
@@ -87,7 +87,7 @@ STATIC INT32 GyroOpen(SensorType *sensor, OpenParam *para)
         ret = LOS_SwtmrDelete(gyro->gyroTimerId);
         gyro->gyroTimerId = INVALID_TIMER_ID;
         if (ret != LOS_OK) {
-            PRINT_ERR("delete a timer failed!\n");
+            printf("Delete software timer failed.\n");
             return LOS_NOK;
         }
     }
@@ -96,18 +96,18 @@ STATIC INT32 GyroOpen(SensorType *sensor, OpenParam *para)
     ret = LOS_SwtmrCreate(sensor->interval, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)GypoTimerFunc, &gyro->gyroTimerId,
         (UINT32)sensor);
     if (ret != LOS_OK) {
-        PRINT_ERR("creat a timer failed!\n");
+        printf("Create software timer failed.\n");
         return LOS_NOK;
     }
 
     ret = LOS_SwtmrStart(gyro->gyroTimerId);
     if (ret != LOS_OK) {
-        PRINT_ERR("start timer err\n");
+        printf("Start software timer failed.\n");
     }
 
     g_gyroPeriod = sensor->interval;
 
-    PRINTK("gyro on.\n");
+    printf("Gyro on.\n");
     return LOS_OK;
 }
 
@@ -116,7 +116,7 @@ STATIC INT32 GyroClose(SensorType *sensor)
     UINT32 ret;
 
     if (sensor->sensorStat == SENSOR_STAT_CLOSE) {
-        PRINT_DEBUG("gyro has been closed\n");
+        printf("Gyro has been closed.\n");
         return LOS_OK;
     }
 
@@ -125,30 +125,30 @@ STATIC INT32 GyroClose(SensorType *sensor)
 
     ret = LOS_SwtmrStop(gyro->gyroTimerId);
     if (ret != LOS_OK) {
-        PRINT_ERR("gyro timer stop err\n");
+        printf("Gyro stop software timer failed.\n");
         return LOS_NOK;
     }
 
-    PRINTK("gyro off.\n");
+    printf("Gyro off.\n");
     return LOS_OK;
 }
 
 STATIC INT32 GyroReadData(SensorType *sensor)
 {
-    PRINTK("read data\n");
-    MpuSensorGetData(g_accel, MPU6050_AACEL_DATA_TYPE);
-    PRINTK("Acc:  %8d%8d%8d\n", g_accel[0], g_accel[1], g_accel[2]); // 0: x, 1: y, 2: z
+    printf("Read data\n");
+    MpuSensorGetData(g_demoAccel, MPU6050_AACEL_DATA_TYPE);
+    printf("Acc:  %8d%8d%8d\n", g_demoAccel[0], g_demoAccel[1], g_demoAccel[2]); // 0: x, 1: y, 2: z
 
-    MpuSensorGetData(g_gyro, MPU6050_GYRO_DATA_TYPE);
-    PRINTK("Gyro: %8d%8d%8d\n", g_gyro[0], g_gyro[1], g_gyro[2]); // 0: x, 1: y, 2: z
+    MpuSensorGetData(g_demoGyro, MPU6050_GYRO_DATA_TYPE);
+    printf("Gyro: %8d%8d%8d\n", g_demoGyro[0], g_demoGyro[1], g_demoGyro[2]); // 0: x, 1: y, 2: z
 
-    MpuSensorGetData(&g_tempDate, MPU6050_TEMP_DATA_TYPE);
-    PRINTK("temp: %8d\n", g_tempDate); // temperature °C
+    MpuSensorGetData(&g_demoTempDate, MPU6050_TEMP_DATA_TYPE);
+    printf("Temp: %8d\n", g_demoTempDate); // temperature °C
 
     INT32 *data = (INT32 *)sensor->sensorData;
-    data[0] = g_gyro[0]; // 0: x
-    data[1] = g_gyro[1]; // 1: y
-    data[2] = g_gyro[2]; // 2: z
+    data[0] = g_demoGyro[0]; // 0: x
+    data[1] = g_demoGyro[1]; // 1: y
+    data[2] = g_demoGyro[2]; // 2: z
 
     return LOS_OK;
 }
@@ -162,8 +162,8 @@ STATIC struct SensorOperation g_gyroOps = {
 
 STATIC SensorType g_sensorGyro = {
     .sensorOp = &g_gyroOps,
-    .sensorData = &g_gyroSensorData,
-    .sensorDataLen = sizeof(g_gyroSensorData),
+    .sensorData = &g_demoGyroSensorData,
+    .sensorDataLen = sizeof(g_demoGyroSensorData),
     .priv = &g_gyroPriv,
     .tag = TAG_GYRO,
     .cmd = CMD_GYRO_DATA_REQ,

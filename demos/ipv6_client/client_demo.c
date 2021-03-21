@@ -27,19 +27,26 @@
  * --------------------------------------------------------------------------- */
 
 #if !defined(LOSCFG_COMPONENTS_NET_LWIP) || !defined(LOSCFG_LWIP_IPV6)
-#error This module needs to be enable "Components/Network/Enable Network/Enable Lwip/Enable Ipv6"
-#else
+#error This demo needs to enable Components "Components-->Network-->Enable Network-->Enable Lwip-->Enable Ipv6"
+#endif
+
 #include "lwip/sockets.h"
 #include "los_task.h"
 #include "los_base.h"
 #include "los_sys.h"
 #include "client_demo.h"
 
-#define SERVER_ADDR "2000::4639:c4ff:fe94:5d44"
-#define SERVER_PORT 1883
-#define BUFFER_SIZE 128
+#define SERVER_ADDR             "2000::4639:c4ff:fe94:5d44"
+#define SERVER_PORT             1883
+#define BUFFER_SIZE             128
 
-void ipv6_tcp_test(void)
+#define IPV6_TASK_PRIORITY      4
+#define IPV6_TASK_STACK_SIZE    0x1000
+
+STATIC UINT32 g_demoTaskId;
+
+#ifdef LOSCFG_DEMOS_IPV6_TCP_CLIENT
+STATIC VOID TcpDemoTaskEntry(VOID)
 {
     struct sockaddr_in6 server_addr;
     char msg[128];
@@ -48,18 +55,19 @@ void ipv6_tcp_test(void)
     int ret = 0;
     int i = 0;
 
+    printf("Ipv6 tcp demo task start to run.\n");
 DO_TASK:
     do {
         client_fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
         if (client_fd < 0) {
-            printf("client_fd is %d\n", client_fd);
+            printf("Create socket failed.\n");
             return;
         }
 
         server_addr.sin6_family = AF_INET6;
         server_addr.sin6_port = htons(SERVER_PORT);
         if (inet_pton(AF_INET6, SERVER_ADDR, &server_addr.sin6_addr) <= 0) {
-            printf("inet_pton error!!!\n");
+            printf("Execute inet_pton failed.\n");
             return;
         }
 
@@ -68,7 +76,7 @@ DO_TASK:
             close(client_fd);
             LOS_TaskDelay(200);
             if (i > 10) {
-                printf("[%d]socket connect error=%d(%s)!!!\n",i, errno, strerror(errno));
+                printf("Socket connect failed, try again.\n");
                 i++;
                 goto DO_TASK;
             }
@@ -76,48 +84,76 @@ DO_TASK:
     } while (ret < 0);
 
     while ((rbytes = read(client_fd, msg, sizeof(msg))) > 0) {
-        printf("read from server: %d bytes read\n> %s\n", rbytes, msg);
+        printf("Read from server: %d bytes read\n> %s\n", rbytes, msg);
         char wbuf[32] = "Hi ipv6 server";
         rbytes = write(client_fd, wbuf, strlen(wbuf));
         if (rbytes > 0) {
             printf("write to server: %d bytes written\n> %s\n", rbytes, wbuf);
         }
     }
+    printf("Ipv6 tcp demo task finished.\n");
     close(client_fd);
 }
+#endif
 
-void ipv6_udp_test(void)
+#ifdef LOSCFG_DEMOS_IPV6_UDP_CLIENT
+STATIC VOID UdpDemoTaskEntry(VOID)
 {
     struct sockaddr_in6 server_addr;
     char msg[128] = "Hi ipv6 server";
     int rbytes = -1;
 
+    printf("Ipv6 udp demo task start to run.\n");
     int client_fd = socket(AF_INET6, SOCK_DGRAM, 17);
     if (client_fd < 0) {
-        printf("client_fd is %d\n", client_fd);
+        printf("Create socket failed.\n");
         return;
     }
 
     server_addr.sin6_family = AF_INET6;
     server_addr.sin6_port = htons(SERVER_PORT);
     if (inet_pton(AF_INET6, SERVER_ADDR, &server_addr.sin6_addr) <= 0) {
-        printf("inet_pton error!!!\n");
+        printf("Execute inet_pton failed.\n");
         return;
     }
 
     if (connect(client_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        printf("socket connect error=%d(%s)!!!\n", errno, strerror(errno));
+        printf("Socket connect failed.\n");
         return;
     }
 
     LOS_TaskDelay(1500);
     rbytes = write(client_fd, msg, strlen(msg));
     if (rbytes > 0) {
-        printf("write to server: %d bytes written\n> %s\n", rbytes, msg);
+        printf("Write to server: %d bytes written\n> %s\n", rbytes, msg);
     } else {
-        printf("write faile\n");
+        printf("Write faile\n");
     }
+    printf("Ipv6 udp demo task finished.\n");
     close(client_fd);
 }
-
 #endif
+
+VOID Ipv6DemoTask(VOID)
+{
+    UINT32 ret;
+    TSK_INIT_PARAM_S taskInitParam;
+
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
+    }
+    taskInitParam.usTaskPrio = IPV6_TASK_PRIORITY;
+    taskInitParam.pcName = "Ipv6DemoTask";
+#ifdef LOSCFG_DEMOS_IPV6_TCP_CLIENT
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)TcpDemoTaskEntry;
+#endif
+#ifdef LOSCFG_DEMOS_IPV6_UDP_CLIENT
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)UdpDemoTaskEntry;
+#endif
+    taskInitParam.uwStackSize = IPV6_TASK_STACK_SIZE;
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create ipv6 demo task failed.\n");
+    }
+}

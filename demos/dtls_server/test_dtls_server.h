@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Test Dtls Server HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -41,7 +41,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void dtls_server_task(void);
+VOID DtlsServerDemoTask(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
