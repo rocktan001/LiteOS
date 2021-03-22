@@ -52,5 +52,5 @@ Kernel task demo ok.
 Huawei LiteOS #
 ```
 
-For more information about the shell function, see  [Shell User Guide](https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_EN.md).
+For more information about the shell function, see  [Shell User Guide](/shell/doc_en/README_EN.md).
 
