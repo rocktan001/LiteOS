@@ -614,7 +614,7 @@ Create a local branch based on the LiteOS remote master branch and switch to the
 git checkout -b master origin/master
 ```
 
-2\) Develop on your local branch. After the development is complete, run the **git add** and **git commit** commands to add and commit code, respectively, to the local repository. For details about the commit messages, see <a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/LiteOS_Commit_Message.md" target="_blank">LiteOS Commit Message Rules</a>.
+2\) Develop on your local branch. After the development is complete, run the **git add** and **git commit** commands to add and commit code, respectively, to the local repository. For details about the commit messages, see [LiteOS Commit Message Rules](#Commitmessage).
 
 3\) Run the **git push origin master** command to commit the code to the master branch of your Gitee account.
 
@@ -762,4 +762,4 @@ If you are interested in being Huawei LiteOS ecosystem partners, send an email t
 
 If you are interested in contributing to the open-source community, download the open-source code from <a href="https://gitee.com/LiteOS/LiteOS" target="_blank">Gitee</a> or <a href="https://github.com/LiteOS/LiteOS" target="_blank">GitHub</a>.
 
-If you have any questions, feel free to visit the <a href="https://bbs.huaweicloud.com/forum/forum-729-1.html" target="_blank">LiteOS forum</a> or <a href="http://www.huawei.com/liteos" target="_blank">Huawei LiteOS official website</a> for more details.
+If you have any questions, feel free to visit the <a href="https://bbs.huaweicloud.com/forum/forum-729-1.html" target="_blank">LiteOS forum</a> or <a href="https://www.huawei.com/minisite/liteos/en/index.html" target="_blank">Huawei LiteOS official website</a> for more details.
