@@ -33,10 +33,26 @@
 #include "ota_port.h"
 #endif /* CONFIG_FEATURE_FOTA */
 
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
+#include "sys_init.h"
+#endif /* LOSCFG_COMPONENTS_NET_LWIP */
+
 #ifdef LOSCFG_COMPONNETS_NET_AT
 #include "nb_iot/los_nb_api.h"
 #include "at_frame/at_api.h"
 #endif /* LOSCFG_COMPONNETS_NET_AT */
+
+#ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
+#include "esp8266.h"
+#endif /* LOSCFG_COMPONENTS_NET_AT_ESP8266 */
+
+#ifdef LOSCFG_COMPONENTS_NET_AT_BG36
+#include "bg36.h"
+#endif /* LOSCFG_COMPONENTS_NET_AT_BG36 */
+
+#ifdef LOSCFG_COMPONENTS_NET_AT_SIM900A
+#include "sim900a.h"
+#endif /* LOSCFG_COMPONENTS_NET_AT_SIM900A */
 
 #ifdef LOSCFG_COMPONENTS_NET_AT_BC95
 #include "bc95.h"
@@ -100,38 +116,29 @@
 #define USER_TASK_PRIORITY 2
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
-static UINT32 g_atiny_tskHandle;
+#define USER_TASK_PRIORITY          2
+#define AGENT_DEMO_TASK_SIZE        0x1000
+#define AGENT_DEMO_TASK_MQTT_SIZE   0x2000
+STATIC UINT32 g_atinyTaskId;
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
-extern void hieth_hw_init(void);
-extern void net_init(void);
-VOID atiny_task_entry(VOID)
+STATIC VOID AtinyDemoTaskEntry(VOID)
 {
-#if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
     hieth_hw_init();
     net_init();
 #endif
+
 #ifdef LOSCFG_COMPONNETS_NET_AT
 #ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
-    extern at_adaptor_api esp8266_interface;
-    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_ESP8266============================\n");
-    at_api_register(&esp8266_interface);
-
+    Esp8266Register();
 #elif defined LOSCFG_COMPONENTS_NET_AT_BG36
-    extern at_adaptor_api emtc_bg36_interface;
-    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BG36============================\n");
-    at_api_register(&emtc_bg36_interface);
-
+    Bg36Register();
 #elif defined LOSCFG_COMPONENTS_NET_AT_SIM900A
-    extern at_adaptor_api sim900a_interface;
-    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_SIM900A============================\n");
-    at_api_register(&sim900a_interface);
-
+    Sim900aRegister();
 #elif defined LOSCFG_COMPONENTS_NET_AT_BC95
-    extern at_adaptor_api bc95_interface;
-    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BC95============================\n");
-    at_api_register(&bc95_interface);
+    Bc95Register();
 #endif
 
 #ifdef LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
@@ -165,27 +172,29 @@ VOID atiny_task_entry(VOID)
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
-UINT32 creat_agenttiny_task(VOID)
+VOID AgenttinyDemoTask(VOID)
 {
-    UINT32 ret = LOS_OK;
-    TSK_INIT_PARAM_S task_init_param;
+    UINT32 ret;
+    TSK_INIT_PARAM_S taskInitParam;
 
-    memset(&task_init_param, 0, sizeof(TSK_INIT_PARAM_S));
-    task_init_param.usTaskPrio = USER_TASK_PRIORITY;
-    task_init_param.pcName = "agenttiny_task";
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)atiny_task_entry;
-
-#if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
-    task_init_param.uwStackSize = 0x2000; /* fota use mbedtls bignum to verify signature consuming more stack */
-#else
-    task_init_param.uwStackSize = 0x1000;
-#endif
-
-    ret = LOS_TaskCreate(&g_atiny_tskHandle, &task_init_param);
-    if (ret != LOS_OK) {
-        return ret;
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
     }
-    return ret;
+
+    taskInitParam.usTaskPrio = USER_TASK_PRIORITY;
+    taskInitParam.pcName = "AgenttinyDemoTask";
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)AtinyDemoTaskEntry;
+#if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
+    /* fota use mbedtls bignum to verify signature consuming more stack */
+    taskInitParam.uwStackSize = AGENT_DEMO_TASK_MQTT_SIZE;
+#else
+    taskInitParam.uwStackSize = AGENT_DEMO_TASK_SIZE;
+#endif
+    ret = LOS_TaskCreate(&g_atinyTaskId, &taskInitParam);
+    if (ret != LOS_OK) {
+        PRINT_ERR("Create agenttiny demo task failed.\n");
+    }
 }
 #endif
 
@@ -211,11 +220,7 @@ UINT32 DemoEntry(VOID)
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
-    ret = creat_agenttiny_task();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Agenttiny Task Creat Fail.\n");
-        return ret;
-    }
+    AgenttinyDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_IPV6_CLIENT

@@ -67,4 +67,6 @@ typedef struct emtc_socket_info_t {
 #define QUERYCFATT              "AT+CGATT?\r"
 #define AT_DATAF_PREFIX         "+QIURC:"
 
+void Bg36Register(void);
+
 #endif /* _EMTC_BG36_H */

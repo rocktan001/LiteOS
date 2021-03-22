@@ -27,6 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "esp8266.h"
+#include "at_frame/at_api.h"
 
 int esp8266_cmd(int8_t *cmd, int32_t len, const char *suffix, char *resp_buf, int *resp_len)
 {
@@ -410,3 +411,9 @@ at_adaptor_api esp8266_interface = {
     .recv_cb = esp8266_recv_cb, /* operation for events, not implements yet */
     .deinit = esp8266_deinit,
 };
+
+void Esp8266Register(void)
+{
+    printf("\r\n=============agent_tiny_entry LOSCFG_COMPONENTS_NET_AT_ESP8266============================\n");
+    at_api_register(&esp8266_interface);
+}

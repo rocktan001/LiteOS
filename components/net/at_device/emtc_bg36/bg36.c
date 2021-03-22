@@ -29,6 +29,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "bg36.h"
+#include "at_frame/at_api.h"
 
 #define MAX_BG36_SOCK_NUM 11
 
@@ -393,3 +394,9 @@ at_adaptor_api emtc_bg36_interface = {
     .recv_cb = NULL,
     .deinit = NULL,
 };
+
+void Bg36Register(void)
+{
+    printf("\r\n=============agent_tiny_entry LOSCFG_COMPONENTS_NET_AT_BG36============================\n");
+    at_api_register(&emtc_bg36_interface);
+}

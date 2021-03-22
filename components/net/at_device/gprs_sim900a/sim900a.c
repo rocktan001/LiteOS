@@ -27,6 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "sim900a.h"
+#include "at_frame/at_api.h"
 
 at_adaptor_api sim900a_interface;
 char prefix_name[15];
@@ -312,3 +313,9 @@ at_adaptor_api sim900a_interface = {
     .recv_cb = sim900a_recv_cb, /* receive event handle, no available by now */
     .deinit = sim900a_deinit,
 };
+
+void Sim900aRegister(void)
+{
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_SIM900A============================\n");
+    at_api_register(&sim900a_interface);
+}
