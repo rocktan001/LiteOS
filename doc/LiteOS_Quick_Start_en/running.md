@@ -12,7 +12,7 @@
 
     By default, the shell component of Huawei LiteOS is enabled. You can enter a supported shell command in the serial port tool, select  **Add a carriage return to anew line**, and click  **Send**  to run the shell command.
 
-    For more information about the shell function, see  [Shell User Guide](https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_EN.md).
+    For more information about the shell function, see  [Shell User Guide](/shell/doc_en/README_EN.md).
 
     To check whether the shell component is enabled, run the  **make menuconfig**  command on Linux. If yes,  **Enable Shell**  is configured.
 
