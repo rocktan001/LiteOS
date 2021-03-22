@@ -30,6 +30,7 @@
 #include <ctype.h>
 #include "bc95.h"
 #include "at_hal.h"
+#include "at_frame/at_api.h"
 
 at_adaptor_api bc95_interface;
 extern char rbuf[AT_DATA_LEN];
@@ -761,4 +762,9 @@ void nb_step(void)
     if (nb_cmd_rcv_data(sockinfo[g_data_ind_info.link_idx].socket, g_data_ind_info.data_len) == AT_OK) {
         g_data_ind_info.valid_flag = false;
     }
+}
+
+void Bc95Register(void)
+{
+    at_api_register(&bc95_interface);
 }

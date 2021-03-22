@@ -65,4 +65,6 @@
 #define AT_DATAF_PREFIX_MULTI   "\r\n+RECEIVE"
 #define SIM900A_DELAY           LOS_TaskDelay
 
+void Sim900aRegister(void);
+
 #endif /* _SIM900A_H */

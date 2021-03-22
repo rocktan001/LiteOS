@@ -88,4 +88,6 @@ int32_t nb_cmd_match(const char *buf, char *featurestr, int len);
 void nb_step(void);
 void nb_reattach(void);
 
+void Bc95Register(void);
+
 #endif /* _BC95_H */
