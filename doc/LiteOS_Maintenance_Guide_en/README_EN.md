@@ -1,6 +1,5 @@
-# Huawei LiteOS Help Center \(HUAWEI CLOUD\)
+# Huawei LiteOS Maintenance and Test Guide
 
--   [Maintenance and Test Guide](maintenance-and-test-guide.md)
     -   [CPU Usage](cpu-usage.md)
         -   [Overview](overview.md)
         -   [Development Guidelines](development-guidelines.md)
