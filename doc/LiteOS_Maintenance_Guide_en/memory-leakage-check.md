@@ -38,7 +38,7 @@ During memory application and release, the function call stack is recorded in th
 
     After the system runs stably, if the number of used nodes keeps increasing, there is a very large probability that memory leaks. Compare and analyze the data, and check whether nodes with repeated LR information have memory leakage. The memory leakage can be backtracked based on the LR information.
 
-    The log information is displayed as follows \(for details about the **memused** command, see  [memused](memused.md#EN-US_TOPIC_0312409048)\):
+    The log information is displayed as follows \(for details about the **memused** command, see  [memused](/shell/doc_en/memused.md)\):
 
     ```
     Huawei LiteOS # memused
