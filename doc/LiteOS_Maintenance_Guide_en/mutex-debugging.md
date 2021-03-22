@@ -6,7 +6,7 @@ The multi-task system uses mutexes to achieve resource exclusion so that other t
 
 ## Function Description<a name="en-us_topic_0175230292_section13598163943816"></a>
 
-After the function  [dlock](dlock.md#EN-US_TOPIC_0312409053)  of detecting the mutex is enabled, after a task acquires a mutex, it is the owner of the mutex. Therefore, the task ID can be used to obtain information about the mutex. In addition, the mutex control block itself records the tasks that are blocked because the tasks fail to acquire the mutex. The  **dlock**  command displays information about the mutex and task call stacks of all tasks in the system. You can determine which tasks encounter deadlocks based on the .asm disassembly file and code.
+After the function  [dlock](/shell/doc_en/dlock.md)  of detecting the mutex is enabled, after a task acquires a mutex, it is the owner of the mutex. Therefore, the task ID can be used to obtain information about the mutex. In addition, the mutex control block itself records the tasks that are blocked because the tasks fail to acquire the mutex. The  **dlock**  command displays information about the mutex and task call stacks of all tasks in the system. You can determine which tasks encounter deadlocks based on the .asm disassembly file and code.
 
 ## Mutex Deadlock Debugging Mechanism<a name="en-us_topic_0175230292_section119655371167"></a>
 

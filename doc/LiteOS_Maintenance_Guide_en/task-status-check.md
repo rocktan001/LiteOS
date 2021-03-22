@@ -1,6 +1,6 @@
 # Task Status Check<a name="EN-US_TOPIC_0312244450"></a>
 
-After Huawei LiteOS runs normally, run the  [**task**](task.md#EN-US_TOPIC_0312409045)  command to view status of all tasks. Values of  **stackSize**,  **WaterLine**,  **StackPoint**, and  **Top0fStack**  can be used to determine whether a task stack causes illegal memory access.
+After Huawei LiteOS runs normally, run the  [**task**](/shell/doc_en/task.md)  command to view status of all tasks. Values of  **stackSize**,  **WaterLine**,  **StackPoint**, and  **Top0fStack**  can be used to determine whether a task stack causes illegal memory access.
 
 The following use a task named  **shellTask**  as an example describes how to use the  **task**  command to determine whether memory is overwritten:
 

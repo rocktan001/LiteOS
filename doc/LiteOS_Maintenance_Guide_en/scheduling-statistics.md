@@ -7,7 +7,7 @@ This function is used to collect CPU scheduling information, including the start
 ## How to Use<a name="en-us_topic_0291635259_section2071256204815"></a>
 
 1.  Run  **make menuconfig**  and choose  **Debug**  \>  **Enable a Debug Version**  \>  **Enable Debug LiteOS Kernel Resource**  \>  **Enable Scheduler Statistics Debugging**  to enable the scheduling statistics function, that is, configure  **LOSCFG\_DEBUG\_SCHED\_STATISTICS=y**. This function is disabled by default.
-2.  Register the following functions as shell commands: For details about how to register the shell commands, see  [Development Process of Adding a Shell Command](development-guide.md#section13835461177).
+2.  Register the following functions as shell commands: For details about how to register the shell commands, see  [Development Process of Adding a Shell Command](/shell/doc_en/development-guide.md#development-process-of-adding-a-shell-command).
 
     OsShellStatisticsStart is the function for enabling the scheduling statistics.
 
