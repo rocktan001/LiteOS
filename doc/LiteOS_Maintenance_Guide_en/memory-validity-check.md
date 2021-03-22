@@ -18,7 +18,7 @@ When this function is enabled, memory validity check is added to the dynamic mem
     Debug  ---> Enable a Debug Version ---> Enable MEM Debug ---> Enable integrity check or not
     ```
 
-2.  After memory overwriting occurs, the next memory application operation triggers an exception and the information about the overwritten node and the previous node will be provided. A preliminary analysis can be performed to determine whether the memory overwriting is caused by the overflow of the previous node. The memory overwriting occurs between the previous and the current memory application. You can run the shell command  [memcheck](memcheck.md#EN-US_TOPIC_0312409047)  to view exception information.
+2.  After memory overwriting occurs, the next memory application operation triggers an exception and the information about the overwritten node and the previous node will be provided. A preliminary analysis can be performed to determine whether the memory overwriting is caused by the overflow of the previous node. The memory overwriting occurs between the previous and the current memory application. You can run the shell command  [memcheck](/shell/doc_en/memcheck.md)  to view exception information.
 
 ## Precautions<a name="en-us_topic_0175230365_section4175643316212"></a>
 
