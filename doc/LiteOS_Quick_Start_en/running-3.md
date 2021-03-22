@@ -8,7 +8,7 @@ By default, the shell component of Huawei LiteOS is enabled. You can enter a sup
 
 ![](figures/st32_studio_run_shell.png)
 
-For more information about the shell function, see  [Shell User Guide](https://gitee.com/LiteOS/LiteOS/blob/master/shell/README_EN.md).
+For more information about the shell function, see  [Shell User Guide](/shell/doc_en/README_EN.md).
 
 Check whether the shell component is enabled, as shown in the following figure. If yes, the  **Enable full functionality of shell**  option is configured.
 
