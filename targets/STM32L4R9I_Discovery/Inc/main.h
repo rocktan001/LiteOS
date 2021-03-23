@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Main Process
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Main HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-27
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,46 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "main.h"
+#ifndef _MAIN_H
+#define _MAIN_H
+
 #include "sys_init.h"
-#include "los_base.h"
-#include "los_task_pri.h"
-#include "los_typedef.h"
-#include "los_sys.h"
-#include "hal_rng.h"
-#include "timer.h"
 
-VOID board_config(VOID)
-{
-    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
-}
-
-VOID HardwareInit(VOID)
-{
-    SystemClock_Config();
-    MX_USART1_UART_Init();
-    StmTimerInit();
-    hal_rng_config();
-    dwt_delay_init(SystemCoreClock);
-}
-
-INT32 main(VOID)
-{
-    board_config();
-    HardwareInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-
-    return 0;
-}
+#endif /* _MAIN_H */

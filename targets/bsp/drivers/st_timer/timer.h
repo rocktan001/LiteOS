@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: LiteOS timer driver
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -29,15 +29,15 @@
 #ifndef _TIMER_H
 #define _TIMER_H
 
+#include "platform.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#include "platform.h"
-
-VOID TimerInit(VOID);
+VOID TimerInitialize(VOID);
 VOID TimerHwiCreate (VOID);
 UINT64 GetTimerCpupCycles(VOID);
 UINT64 GetTimerCycles(Timer_t num);
@@ -47,4 +47,5 @@ UINT64 GetTimerCycles(Timer_t num);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+
+#endif /* _TIMER_H */

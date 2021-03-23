@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Main Process
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-03
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -27,13 +27,10 @@
  * --------------------------------------------------------------------------- */
 
 #include "main.h"
-#include "sys_init.h"
-#include "los_base.h"
 #include "los_task_pri.h"
-#include "los_typedef.h"
-#include "los_sys.h"
-#include "hal_rng.h"
+#include "gpio.h"
 #include "timer.h"
+#include "usart.h"
 
 VOID board_config(VOID)
 {
@@ -42,11 +39,11 @@ VOID board_config(VOID)
 
 VOID HardwareInit(VOID)
 {
+    HAL_Init();
     SystemClock_Config();
-    MX_USART1_UART_Init();
-    StmTimerInit();
-    hal_rng_config();
-    dwt_delay_init(SystemCoreClock);
+    MX_GPIO_Init();
+    MX_USART2_UART_Init();
+    TimerInitialize();
 }
 
 INT32 main(VOID)
@@ -67,5 +64,5 @@ INT32 main(VOID)
 
     OsStart();
 
-    return 0;
+    return LOS_OK;
 }

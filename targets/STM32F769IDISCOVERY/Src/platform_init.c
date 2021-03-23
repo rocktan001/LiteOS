@@ -482,7 +482,7 @@ void HardwareInit(void)
     SystemClock_Config();
 
     UART_Config(115200);
-    TimerInit();
+    StmTimerInit();
 
     /* Initialize the SDRAM */
     BSP_SDRAM_Init();
