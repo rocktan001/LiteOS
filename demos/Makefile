@@ -14,5 +14,6 @@ MODULE_$(LOSCFG_DEMOS_LMS) += lms
 MODULE_$(LOSCFG_DEMOS_TRACE) += trace
 MODULE_$(LOSCFG_DEMOS_IPV6_CLIENT) += ipv6_client
 MODULE_$(LOSCFG_DEMOS_AI) += ai
+MODULE_y += language
 
 include $(MODULE)

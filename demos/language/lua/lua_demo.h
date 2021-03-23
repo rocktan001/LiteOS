@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Demo Entry HeadFile
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Lua Demo Implementation
  * Author: Huawei LiteOS Team
- * Create: 2020-12-10
+ * Create: 2021-02-20
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,8 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _DEMO_ENTRY_H
-#define _DEMO_ENTRY_H
+#ifndef _LUA_DEMO_H
+#define _LUA_DEMO_H
+
+#include "los_typedef.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,7 +37,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID DemoEntry(VOID);
+VOID LuaDemoTask(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -43,4 +45,4 @@ VOID DemoEntry(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _DEMO_ENTRY_H */
+#endif

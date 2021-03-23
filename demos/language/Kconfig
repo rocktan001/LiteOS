@@ -1,0 +1,5 @@
+menu "Language Demo"
+
+source "demos/language/lua/Kconfig"
+
+endmenu

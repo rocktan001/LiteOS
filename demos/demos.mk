@@ -59,3 +59,5 @@ ifeq ($(LOSCFG_DEMOS_AI), y)
 include $(LITEOSTOPDIR)/demos/ai/ai.mk
 DEMOS_INCLUDE += $(DEMOS_AI_INCLUDE)
 endif
+include $(LITEOSTOPDIR)/demos/language/language.mk
+DEMOS_INCLUDE += $(DEMOS_LANGUAGE_INCLUDE)

@@ -115,5 +115,5 @@ VOID app_init(VOID)
     BSP_LED_Init(LED2);
     UserTask();
     UserButtonIrqConfig();
-    (VOID)DemoEntry();
+    DemoEntry();
 }
