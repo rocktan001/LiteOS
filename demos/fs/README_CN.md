@@ -3,6 +3,7 @@
 ## VFS
 VFS是Virtual File System（虚拟文件系统）的缩写，是LiteOS文件系统的统一接口，其他文件系统基于VFS提供的接口实现。
 
+VFS实现的标准接口有`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`sync`，`opendir`，`readdir`，`closedir`，`mkdir`，`rmdir`，`dup`，`dup2`，`fcntl`，`ioctl`等，具体文件系统支持的接口在下文中有说明。
 ### VFS提供的接口
 
 #### 初始化VFS
@@ -17,7 +18,7 @@ int los_vfs_init (void);
 
 #### 注册文件系统
 ```c
-int los_fs_register(struct file_system *);
+int los_fs_register(struct file_system *fs);
 ```
 -  file_system：对应注册文件系统的结构体指针
    ```c
@@ -36,7 +37,7 @@ int los_fs_register(struct file_system *);
 
 #### 注销文件系统
 ```c
-int los_fs_unregister(struct file_system *);
+int los_fs_unregister(struct file_system *fs);
 ```
 -  file_system：对应注册文件系统的结构体指针
    ```c
@@ -77,25 +78,6 @@ int los_fs_unmount(const char *path);
 
     **LOS_NOK**：失败
 
-#### 文件操作的接口
-
-```c
-int             los_open(const char *, int);
-int             los_close(int);
-ssize_t         los_read(int, char *, size_t);
-ssize_t         los_write(int, const void *, size_t);
-off_t           los_lseek(int, off_t, int);
-int             los_stat(const char *, struct stat *);
-int             los_unlink(const char *);
-int             los_rename(const char *, const char *);
-int             los_ioctl(int, int, ...);
-dir             *los_opendir(const char *path);
-struct dirent   *los_readdir(struct dir *dir);
-int             los_closedir(struct dir *dir);
-int             los_mkdir(const char *path, int mode);
-int             los_sync(int fd);
-```
-
 ## RAMFS
 RAMFS是基于内存的文件系统。在RAMFS中，文件存储在内存中，所有的读/写操作均发生在内存中，由于访问内存比存储器快，从而可以提升文件读写效率。一般可用RAMFS来存储临时文件或者修改频繁的数据。LiteOS的RAMFS基于虚拟文件系统层（VFS)，不能格式化。
 
@@ -126,7 +108,7 @@ RAMFS是基于内存的文件系统。在RAMFS中，文件存储在内存中，�
 
 ### 注意事项
 
--  RAMFS文件系统支持的操作有：`los_open`，`los_close`，`los_read`，`los_write`，`los_lseek`，`los_stat`，`los_ulink`，`los_rename`，`los_opendir`，`los_readdir`，`los_closedir`，`los_mkdir`。
+-  RAMFS文件系统支持的操作有：`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`opendir`，`readdir`，`closedir`，`mkdir`。
 -  RAMFS只能挂载一次，挂载成功后，后面不能继续挂载到其他目录。
 -  RAMFS需要根据设备内存大小来调整挂载的大小，如超出系统剩余内存，会挂载失败。
 -  RAMFS需使能文件系统和RAMFS：
@@ -189,7 +171,7 @@ int spiffs_unmount(const char *path);
 
 ### 注意事项
 
--  SPIFFS文件系统支持的操作有：`los_open`，`los_close`，`los_read`，`los_write`，`los_lseek`，`los_stat`，`los_ulink`，`los_rename`，`los_sync`，`los_opendir`，`los_readdir`，`los_closedir`。
+-  SPIFFS文件系统支持的操作有：`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`sync`，`opendir`，`readdir`，`closedir`。
 -  SPIFFS文件系统目前仅支持STM32F429开发板。
 -  SPIFFS需使能文件系统和SPIFFS：
    ```
@@ -248,7 +230,7 @@ int fatfs_unmount(const char *path, uint8_t drive);
 
 ### 注意事项
 
-- FATFS文件系统支持的操作有：`los_open`，`los_close`，`los_read`，`los_write`，`los_lseek`，`los_stat`，`los_ulink`，`los_rename`，`los_sync`，`los_opendir`，`los_readdir`，`los_closedir`，`los_mkdir`。
+- FATFS文件系统支持的操作有：`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`sync`，`opendir`，`readdir`，`closedir`，`mkdir`。
 - FATFS文件系统目前仅支持STM32F429和STM32F769开发板。
 - FATFSFATFS需使能文件系统和FATFS：
    ```
@@ -296,7 +278,7 @@ int littlefs_unmount(const char *path)；
 
 ### 注意事项
 
-- LITELEFS文件系统支持的操作有：`los_open`，`los_close`，`los_read`，`los_write`，`los_lseek`，`los_stat`，`los_ulink`，`los_rename`，`los_sync`，`los_opendir`，`los_readdir`，`los_closedir`，`los_mkdir`。
+- LITELEFS文件系统支持的操作有：`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`sync`，`opendir`，`readdir`，`closedir`，`mkdir`。
 - LITELEFS文件系统目前仅支持STM32F429开发板。
 - LITELEFS需使能文件系统和FATFS：
    ```
