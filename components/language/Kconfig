@@ -1,0 +1,5 @@
+menu "Language"
+
+source "components/language/lua/Kconfig"
+
+endmenu

@@ -32,5 +32,5 @@
 VOID app_init(VOID)
 {
     printf("app init!\n");
-    (VOID)DemoEntry();
+    DemoEntry();
 }

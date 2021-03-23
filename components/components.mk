@@ -44,3 +44,5 @@ ifeq ($(LOSCFG_COMPONENTS_AI), y)
 include $(LITEOSTOPDIR)/components/ai/ai.mk
 COMPONENTS_INCLUDE += $(COMPONENTS_AI_INCLUDE)
 endif
+include $(LITEOSTOPDIR)/components/language/language.mk
+COMPONENTS_INCLUDE += $(COMPONENTS_LANGUAGE_INCLUDE)

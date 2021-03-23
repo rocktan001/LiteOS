@@ -113,7 +113,9 @@
 #include "ai_demo.h"
 #endif
 
-#define USER_TASK_PRIORITY 2
+#ifdef LOSCFG_DEMOS_LUA
+#include "lua_demo.h"
+#endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
@@ -198,9 +200,8 @@ VOID AgenttinyDemoTask(VOID)
 }
 #endif
 
-UINT32 DemoEntry(VOID)
+VOID DemoEntry(VOID)
 {
-    UINT32 ret = LOS_OK;
     printf("Hello, welcome to liteos demo!\n");
 
 #ifdef LOSCFG_DEMOS_AI
@@ -255,16 +256,8 @@ UINT32 DemoEntry(VOID)
     SensorHubDemoTask();
 #endif
 
-#ifdef USE_PPPOS
-#include "osport.h"
-    extern VOID uart_init(VOID); // this uart used for the pppos interface
-    uart_init();
-    extern VOID *main_ppp(UINT32 args);
-    ret = task_create("main_ppp", main_ppp, 0x1500, NULL, NULL, 2);
-    if (ret != LOS_OK) {
-        PRINT_ERR("Main_ppp Task Creat Fail.\n");
-        return ret;
-    }
+#ifdef LOSCFG_DEMOS_LUA
+    LuaDemoTask();
 #endif
 
 #ifdef LOSCFG_SHELL
@@ -273,6 +266,4 @@ UINT32 DemoEntry(VOID)
         PRINT_ERR("Shell init failed.\n");
     }
 #endif
-
-    return ret;
 }

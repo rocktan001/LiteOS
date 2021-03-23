@@ -1,0 +1,6 @@
+DEMOS_LANGUAGE_INCLUDE :=
+
+ifeq ($(LOSCFG_DEMOS_LUA), y)
+include $(LITEOSTOPDIR)/demos/language/lua/lua.mk
+DEMOS_LANGUAGE_INCLUDE += $(DEMOS_LUA_INCLUDE)
+endif

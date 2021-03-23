@@ -64,5 +64,5 @@ VOID app_init(VOID)
 {
     printf("Hello, welcome to liteos!\n");
     LedTaskCreate();
-    (VOID)DemoEntry();
+    DemoEntry();
 }
