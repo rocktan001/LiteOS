@@ -85,7 +85,7 @@ This document describes the LiteOS programming specifications, document writing 
 
 * Comply with the BSD-3 open-source license agreement.
 
-* [Huawei LiteOS IPR Policy](./doc/LiteOS_Contribute_Guide_en.md#Protocols)
+* [Huawei LiteOS IPR Policy](./doc/LiteOS_Contribute_Guide_en.md#protocols)
 
 ## Contacting Us
 
