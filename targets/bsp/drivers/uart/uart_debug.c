@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Uart Module Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -46,7 +46,11 @@ INT32 uart_putc(CHAR c)
 UINT8 uart_getc(VOID)
 {
     UINT8 ch = 0;
+#ifdef LOSCFG_PLATFORM_STM32L4R9AIIB
+    HAL_UART_Receive(&huart2, &ch, sizeof(UINT8), 0);
+#else
     HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
+#endif
     (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
     return ch;
 }
@@ -63,10 +67,23 @@ INT32 ShellQueueCreat(VOID)
 
 INT32 uart_hwiCreate(VOID)
 {
+#ifdef LOSCFG_PLATFORM_STM32L4R9AIIB
+    if (huart2.Instance == NULL) {
+        return LOS_NOK;
+    }
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
+    __HAL_UART_CLEAR_FLAG(&huart2, UART_FLAG_TC);
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    __HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE);
+#else
+    if (huart1.Instance == NULL) {
+        return LOS_NOK;
+    }
     HAL_NVIC_EnableIRQ(USART1_IRQn);
     __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_TC);
     (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+#endif
     return LOS_OK;
 }
 
@@ -86,7 +103,7 @@ UINT8 uart_read(VOID)
 
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 {
-#ifdef LOSCFG_PLATFORM_STM32F072_Nucleo
+#if defined (LOSCFG_PLATFORM_STM32F072_Nucleo) || defined (LOSCFG_PLATFORM_STM32L4R9AIIB)
     (VOID)HAL_UART_Transmit(&huart2, (UINT8 *)buf, len, DEFAULT_TIMEOUT);
 #else
     (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)buf, len, DEFAULT_TIMEOUT);
@@ -97,7 +114,14 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 VOID UartPuts(const CHAR *s, UINT32 len, BOOL isLock)
 {
     UINT32 i;
+    if (s == NULL) {
+        return;
+    }
     for (i = 0; i < len; i++) {
+        /*
+         * Only system uart output needs to add extra '\r' to improve
+         * the compatibility.
+         */
         if (*(s + i) == '\n') {
             uart_putc('\r');
         }

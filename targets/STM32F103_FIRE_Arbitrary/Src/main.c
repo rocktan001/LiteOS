@@ -46,7 +46,7 @@ VOID HardwareInit(VOID)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_USART1_UART_Init();
-    TimerInit();
+    StmTimerInit();
     dwt_delay_init(SystemCoreClock);
 }
 

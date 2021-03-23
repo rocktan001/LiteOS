@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Main Process
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Targets Stm32l4r9 Common HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-03
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,46 +26,22 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "main.h"
-#include "sys_init.h"
-#include "los_base.h"
-#include "los_task_pri.h"
-#include "los_typedef.h"
-#include "los_sys.h"
-#include "hal_rng.h"
-#include "timer.h"
+/**
+ * @defgroup atiny_adapter Agenttiny Adapter
+ * @ingroup agent
+ */
 
-VOID board_config(VOID)
-{
-    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
-}
+#ifndef _COMMON_H
+#define _COMMON_H
 
-VOID HardwareInit(VOID)
-{
-    SystemClock_Config();
-    MX_USART1_UART_Init();
-    StmTimerInit();
-    hal_rng_config();
-    dwt_delay_init(SystemCoreClock);
-}
+#include <stdbool.h>
+#include <stdint.h>
+#include "osdepends/atiny_osdep.h"
 
-INT32 main(VOID)
-{
-    board_config();
-    HardwareInit();
+#define OK 0
+#define ERR -1
 
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
+#define HAL_OTA_LOG(fmt, ...) \
+(void)printf("[%s:%d][%lu]" fmt "\r\n",  __FUNCTION__, __LINE__, (uint32_t) atiny_gettime_ms(),  ##__VA_ARGS__)
 
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-
-    return 0;
-}
+#endif /* _COMMON_H */

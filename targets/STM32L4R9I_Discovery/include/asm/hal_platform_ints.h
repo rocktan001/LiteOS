@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Main Process
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Platform Interrupt HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2020-12-10
+ * Create: 2021-02-03
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,41 +26,66 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "main.h"
-#include "sys_init.h"
-#include "los_base.h"
-#include "los_task_pri.h"
+#ifndef _HAL_PLATFORM_INTS_H
+#define _HAL_PLATFORM_INTS_H
+
+#include "stm32l4r9xx.h"
 #include "los_typedef.h"
-#include "los_sys.h"
-#include "uart.h"
-#include "timer.h"
+#include "tim.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-VOID HardwareInit(VOID)
-{
-    HAL_Init();
-    SystemClock_Config();
-    MX_USART2_UART_Init();
-    StmTimerInit();
-    dwt_delay_init(SystemCoreClock);
+#define CPUP_TIMER                      3
+#define TIM_IRQ                         (TIM3_IRQn + 16)
+
+/**
+ * Maximum number of supported hardware devices that generate hardware interrupts.
+ * The maximum number of exceptions and interrupts is: 240(IRQ) + 16.
+ */
+#define OS_HWI_MAX_NUM                  LOSCFG_PLATFORM_HWI_LIMIT
+
+/**
+ * Maximum interrupt number.
+ */
+#define OS_HWI_MAX                      (OS_HWI_MAX_NUM - 1)
+
+/**
+ * Minimum interrupt number.
+ */
+#define OS_HWI_MIN                      0
+
+/**
+ * Maximum usable interrupt number.
+ */
+#define OS_USER_HWI_MAX                 OS_HWI_MAX
+
+/**
+ * Minimum usable interrupt number.
+ */
+#define OS_USER_HWI_MIN                 OS_HWI_MIN
+
+#define OS_TICK_INT_NUM                 (SysTick_IRQn + 16) // 16: cortem-m irq shift
+
+#define NUM_HAL_INTERRUPT_UART          (USART2_IRQn + 16)  // 16: cortem-m irq shift
+
+#define IO_ADDRESS(x)                   (x)
+
+#define HAL_READ_UINT8(addr, data)      READ_UINT8(data, addr)
+
+#define HAL_WRITE_UINT8(addr, data)     WRITE_UINT8(data, addr)
+
+#define HAL_READ_UINT32(addr, data)     READ_UINT32(data, addr)
+
+#define HAL_WRITE_UINT32(addr, data)    WRITE_UINT32(data, addr)
+
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-INT32 main(VOID)
-{
-    HardwareInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                    "\nLiteOS Kernel Version : %s\n"
-                    "build data : %s %s\n\n"
-                    "**********************************\n",
-                    HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-
-    return 0;
-}
+#endif /* _HAL_PLATFORM_INTS_H */

@@ -86,7 +86,7 @@ VOID HardwareInit(VOID)
     LCD_ShowString(10, 170, 240, 16, 16, "This is LiteOS kernel demo.");
 
     MX_USART1_UART_Init();
-    TimerInit();
+    StmTimerInit();
 }
 
 INT32 main(VOID)

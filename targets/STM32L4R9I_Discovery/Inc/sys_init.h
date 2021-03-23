@@ -1,8 +1,27 @@
+/**
+  ******************************************************************************
+  * @file    sys_init.h
+  * @brief   This file provides code for the configuration
+  *          of the System Clock instances.
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  */
+
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Main Process
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Sys Init HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-03
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,46 +45,33 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "main.h"
-#include "sys_init.h"
-#include "los_base.h"
-#include "los_task_pri.h"
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef _SYS_H
+#define _SYS_H
+
+/* Includes ------------------------------------------------------------------*/
+
+/* Includes LiteOS------------------------------------------------------------------*/
 #include "los_typedef.h"
-#include "los_sys.h"
-#include "hal_rng.h"
-#include "timer.h"
 
-VOID board_config(VOID)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+uint32_t HAL_GetTick(void);
+void SystemClock_Config(void);
+void _Error_Handler(char *, int);
+
+STATIC INLINE VOID Error_Handler(VOID)
 {
-    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+    _Error_Handler(__FILE__, __LINE__);
 }
-
-VOID HardwareInit(VOID)
-{
-    SystemClock_Config();
-    MX_USART1_UART_Init();
-    StmTimerInit();
-    hal_rng_config();
-    dwt_delay_init(SystemCoreClock);
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-INT32 main(VOID)
-{
-    board_config();
-    HardwareInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-
-    return 0;
-}
+#endif /* _SYS_H */

@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: LiteOS timer driver
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -43,7 +43,7 @@ VOID TimerHwiCreate (VOID)
     StmTimerHwiCreate();
 }
 
-VOID TimerInit(VOID)
+VOID TimerInitialize(VOID)
 {
     StmTimerInit();
 }

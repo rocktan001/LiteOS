@@ -81,8 +81,8 @@ STM32F407ZGTX_HAL_SRC = \
     drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_eth.c \
     drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c
     LOCAL_SRCS = $(STM32F407ZGTX_HAL_SRC)
-else ifeq ($(LOSCFG_PLATFORM_STM32L431_BearPi), y)
-STM32L431_BearPi_HAL_SRC = \
+else ifeq ($(findstring $(LOSCFG_PLATFORM_STM32L431_BearPi)$(LOSCFG_PLATFORM_STM32L4R9AIIB)$(LOSCFG_PLATFORM_STM32L496ZGT6)$(LOSCFG_PLATFORM_STM32L476RGT6),y), y)
+STM32L4_HAL_SRC = \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim_ex.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc.c \
@@ -105,7 +105,8 @@ STM32L431_BearPi_HAL_SRC = \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rng.c
-    LOCAL_SRCS = $(STM32L431_BearPi_HAL_SRC)
+    LOCAL_SRCS = $(STM32L4_HAL_SRC)
+
 else ifeq ($(LOSCFG_PLATFORM_STM32F103_FIRE_ARBITRARY), y)
 STM32F103VETX_HAL_SRC = \
     drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c \

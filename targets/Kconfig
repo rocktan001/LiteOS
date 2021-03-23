@@ -8,7 +8,7 @@ config LOSCFG_PLATFORM
     default "STM32F072_Nucleo"          if LOSCFG_PLATFORM_STM32F072_Nucleo
     default "realview-pbx-a9"           if LOSCFG_PLATFORM_PBX_A9
     default "qemu-virt-a53"             if LOSCFG_PLATFORM_QEMU_VIRT_A53
-
+    default "STM32L4R9I_Discovery"      if LOSCFG_PLATFORM_STM32L4R9AIIB
 choice
     prompt "Target"
     default LOSCFG_PLATFORM_STM32F429IGTX
@@ -22,6 +22,7 @@ choice
       STM32F072_Nucleo
       realview-pbx-a9
       qemu-virt-a53
+      STM32L4R9I_Discovery
 
 config LOSCFG_PLATFORM_STM32F429IGTX
     bool "Cloud_STM32F429IGTx_FIRE"
@@ -66,6 +67,11 @@ config LOSCFG_PLATFORM_QEMU_VIRT_A53
     select LOSCFG_USING_BOARD_LD
     select LOSCFG_ARCH_CORTEX_A53
     select LOSCFG_ARCH_ARM_AARCH64
+
+config LOSCFG_PLATFORM_STM32L4R9AIIB
+    bool "STM32L4R9I_Discovery"
+    select LOSCFG_USING_BOARD_LD
+    select LOSCFG_ARCH_CORTEX_M4
 
 endchoice
 
