@@ -1,6 +1,8 @@
 [![star](https://gitee.com/LiteOS/LiteOS/badge/star.svg?theme=gvp)](https://gitee.com/LiteOS/LiteOS/stargazers)
 [![fork](https://gitee.com/LiteOS/LiteOS/badge/fork.svg?theme=gvp)](https://gitee.com/LiteOS/LiteOS/members)
 
+[View English](README_EN.md)
+
 ## Huawei LiteOS简介
 
 Huawei LiteOS是华为面向物联网领域开发的一个基于实时内核的轻量级操作系统。本项目属于<a href="https://www.huaweicloud.com/product/liteos.html" target="_blank">华为物联网操作系统[Huawei LiteOS]</a>源码，现有基础内核包括不可裁剪的极小内核和可裁剪的其他模块。极小内核包含任务管理、内存管理、异常管理、系统时钟和中断管理。可裁剪模块包括信号量、互斥锁、队列管理、事件管理、软件定时器等。除了基础内核，Huawei LiteOS还提供了增强内核，包括C++支持、低功耗以及维测模块。低功耗通过支持Tickless机制、run-stop休眠唤醒，可以大大降低系统功耗。维测部分包含了获取CPU占用率、Trace事件跟踪、Shell命令行等功能。
