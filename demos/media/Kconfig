@@ -1,0 +1,5 @@
+menu "Media Demo"
+
+source "demos/media/opus/Kconfig"
+
+endmenu

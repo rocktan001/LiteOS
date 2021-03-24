@@ -113,8 +113,16 @@
 #include "ai_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_ICONV
+#include "iconv_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_LUA
 #include "lua_demo.h"
+#endif
+
+#ifdef LOSCFG_DEMOS_OPUS
+#include "opus_demo.h"
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
@@ -256,8 +264,16 @@ VOID DemoEntry(VOID)
     SensorHubDemoTask();
 #endif
 
+#ifdef LOSCFG_DEMOS_ICONV
+    IconvDemoTask();
+#endif
+
 #ifdef LOSCFG_DEMOS_LUA
     LuaDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_OPUS
+    OpusDemoTask();
 #endif
 
 #ifdef LOSCFG_SHELL

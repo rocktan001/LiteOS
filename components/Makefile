@@ -13,6 +13,8 @@ MODULE_$(LOSCFG_COMPONENTS_OTA) += ota
 MODULE_$(LOSCFG_COMPONENTS_SECURITY) += security
 MODULE_$(LOSCFG_COMPONENTS_SENSORHUB) += sensorhub
 MODULE_$(LOSCFG_COMPONENTS_AI) += ai
+MODULE_y += utility
+MODULE_y += media
 MODULE_y += language
 
 include $(MODULE)
