@@ -1,0 +1,6 @@
+DEMOS_UTILITY_INCLUDE :=
+
+ifeq ($(LOSCFG_DEMOS_ICONV), y)
+include $(LITEOSTOPDIR)/demos/utility/iconv/iconv.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_ICONV_INCLUDE)
+endif

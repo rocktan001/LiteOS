@@ -11,5 +11,6 @@ source "components/net/Kconfig"
 #source "components/ota/Kconfig"
 source "components/security/Kconfig"
 source "components/sensorhub/Kconfig"
+source "components/utility/Kconfig"
 
 endmenu

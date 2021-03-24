@@ -13,5 +13,6 @@ source "demos/lms/Kconfig"
 source "demos/nbiot_without_atiny/Kconfig"
 source "demos/sensorhub/Kconfig"
 source "demos/trace/Kconfig"
+source "demos/utility/Kconfig"
 
 endmenu

@@ -205,6 +205,12 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_AI), y)
         LITEOS_BASELIB += -lai_demo
     endif
+    ifeq ($(LOSCFG_COMPONENTS_ICONV), y)
+        LITEOS_BASELIB += -liconv
+    endif
+    ifeq ($(LOSCFG_DEMOS_ICONV), y)
+        LITEOS_BASELIB += -liconv_demo
+    endif
     ifeq ($(LOSCFG_DEMOS_LUA), y)
         LITEOS_BASELIB += -llua_demo
     endif

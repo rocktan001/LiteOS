@@ -1,0 +1,5 @@
+menu "Utility Demo"
+
+source "demos/utility/iconv/Kconfig"
+
+endmenu
