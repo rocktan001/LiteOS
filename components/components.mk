@@ -48,5 +48,8 @@ endif
 include $(LITEOSTOPDIR)/components/utility/utility.mk
 COMPONENTS_INCLUDE += $(COMPONENTS_UTILITY_INCLUDE)
 
+include $(LITEOSTOPDIR)/components/media/media.mk
+COMPONENTS_INCLUDE += $(COMPONENTS_MEDIA_INCLUDE)
+
 include $(LITEOSTOPDIR)/components/language/language.mk
 COMPONENTS_INCLUDE += $(COMPONENTS_LANGUAGE_INCLUDE)

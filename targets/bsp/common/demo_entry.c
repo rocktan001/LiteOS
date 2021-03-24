@@ -121,6 +121,10 @@
 #include "lua_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_OPUS
+#include "opus_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #define AGENT_DEMO_TASK_SIZE        0x1000
@@ -266,6 +270,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_LUA
     LuaDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_OPUS
+    OpusDemoTask();
 #endif
 
 #ifdef LOSCFG_SHELL

@@ -172,6 +172,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_LUA), y)
         LITEOS_BASELIB += -llua
     endif
+    ifeq ($(LOSCFG_COMPONENTS_OPUS), y)
+        LITEOS_BASELIB += -lopus
+    endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
     endif
@@ -213,6 +216,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_LUA), y)
         LITEOS_BASELIB += -llua_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_OPUS), y)
+        LITEOS_BASELIB += -lopus_demo
     endif
 endif
 

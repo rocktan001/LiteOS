@@ -1,0 +1,6 @@
+COMPONENTS_MEDIA_INCLUDE :=
+
+ifeq ($(LOSCFG_COMPONENTS_OPUS), y)
+include $(LITEOSTOPDIR)/components/media/opus/opus.mk
+COMPONENTS_MEDIA_INCLUDE += $(COMPONENTS_OPUS_INCLUDE)
+endif
