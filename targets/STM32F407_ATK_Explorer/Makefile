@@ -9,7 +9,7 @@ ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 
 LOCAL_SRCS += $(ASSRCS)
 
-USER_SRC =  \
+USER_SRC = \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/os_adapt/os_adapt.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/main.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/system_stm32f4xx.c \

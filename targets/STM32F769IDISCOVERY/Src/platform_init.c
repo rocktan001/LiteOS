@@ -72,10 +72,12 @@
 
 
 UART_HandleTypeDef huart1;
+
+#ifdef LOSCFG_GUI_ENABLE
 static osSemaphoreId vSyncEvent;
 static uint32_t cptFlip;
 static uint32_t gScreen[2];
-
+#endif
 
 
 #ifdef __GNUC__
@@ -297,7 +299,7 @@ __weak void MPU_Config(void)
 
 }
 
-
+#ifdef LOSCFG_GUI_ENABLE
 /**
   * @brief  Line Event callback.
   * @param  hltdc: pointer to a LTDC_HandleTypeDef structure that contains
@@ -378,6 +380,7 @@ __weak void LCD_WaitVSync(void)
   osSemaphoreWait(vSyncEvent, 1000);
 
 }
+#endif
 
 void KeyWord_Button_init(void)
 {

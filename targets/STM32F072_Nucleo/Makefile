@@ -6,7 +6,7 @@ MODULE_NAME := $(LITEOS_PLATFORM)
 
 -include $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/config.mk
 
-USER_SRC =  \
+USER_SRC = \
     os_adapt/os_adapt.c \
     Src/main.c \
     Src/stm32f0xx_it.c \
@@ -40,13 +40,13 @@ USER_INC = \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc
     BOARD_INCLUDES += $(USER_INC)
 
-C_DEFS +=  \
+C_DEFS += \
     -DUSE_HAL_DRIVER \
     -DNDEBUG \
     -D__LITEOS__ \
     -D_ALL_SOURCE 
 
-ASM_SOURCES =  \
+ASM_SOURCES = \
     ${wildcard los_startup_gcc.S}
 
 BOARD_SRCS += $(ASM_SOURCES)
