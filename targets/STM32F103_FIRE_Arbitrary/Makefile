@@ -7,7 +7,7 @@ ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 
 LOCAL_SRCS += $(ASSRCS)
 
-USER_SRC =  \
+USER_SRC = \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/os_adapt/os_adapt.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/main.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/system_stm32f1xx.c \
@@ -42,14 +42,14 @@ USER_INC = \
     BOARD_INCLUDES += $(USER_INC)
 
 # C defines
-C_DEFS +=  \
+C_DEFS += \
     -DUSE_HAL_DRIVER \
     -DSTM32F103xE \
     -DNDEBUG \
     -D__LITEOS__ \
     -D_ALL_SOURCE
 
-ASM_SOURCES =  \
+ASM_SOURCES = \
         ${wildcard $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/los_startup_gcc.S}
 
 BOARD_SRCS += $(ASM_SOURCES)

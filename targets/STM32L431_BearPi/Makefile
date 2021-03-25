@@ -9,12 +9,12 @@ ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 
 LOCAL_SRCS += $(ASSRCS)
 
-HARDWARE_SRC =  \
+HARDWARE_SRC = \
     ${wildcard $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Hardware/Src/*.c} \
     ${wildcard $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Hardware/LCD/*.c}
     C_SOURCES += $(HARDWARE_SRC)
 
-USER_SRC =  \
+USER_SRC = \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/os_adapt/os_adapt.c \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/gpio.c \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/Huawei_IoT_QR_Code.c \
@@ -73,13 +73,13 @@ USER_INC = \
     BOARD_INCLUDES += $(USER_INC)
 
 # C defines
-C_DEFS =  \
+C_DEFS = \
     -D USE_HAL_DRIVER \
     -D NDEBUG \
     -D __LITEOS__ \
     -D _ALL_SOURCE
 
-ASM_SOURCES =  \
+ASM_SOURCES = \
     ${wildcard $(LITEOSTOPDIR)/targets/STM32L431_BearPi/los_startup_gcc.S}
 
 BOARD_SRCS += $(ASM_SOURCES)
