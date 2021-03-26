@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS Kernel Event Demo Implementation
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: LiteOS Kernel Test Event Demo Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_event.h"
+#if LOS_KERNEL_DEBUG_EVENT
+#include "los_debug_event.h"
 #include "los_task.h"
-#include "los_api_event.h"
-#include "los_inspect_entry.h"
+#include "los_event.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,89 +37,76 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/* task pid */
+#define TASK_PRIOR      4
+#define DELAY_INTERVAL1 1000
+#define DELAY_INTERVAL2 2500
+#define EVENT_NUM       LOS_KERNEL_EVENT_ID
+
 STATIC UINT32 g_demoTaskId;
-/* event control struct */
-STATIC EVENT_CB_S  g_demoEvent;
+STATIC EVENT_CB_S g_demoEvent;
 
-/* wait event type */
-#define EVENT_WAIT              0x00000001
-#define EVENT_READ_OVERTIME     100
-#define TASK_PRIOR              5
-
-/* example task entry function */
 STATIC VOID ReadTaskEntry(VOID)
 {
     UINT32 event;
-    UINT32 ret;
-
-    /*
-     * timeout, WAITMODE to read event, timeout is 100 ticks,
-     * if timeout, wake task directly
-     */
-    printf("Read event task wait event 0x%x.\n", EVENT_WAIT);
-
-    event = LOS_EventRead(&g_demoEvent, EVENT_WAIT, LOS_WAITMODE_AND, EVENT_READ_OVERTIME);
-    if (event == EVENT_WAIT) {
-        printf("Read the event : 0x%x.\n", event);
-        ret = InspectStatusSetById(LOS_INSPECT_EVENT, LOS_INSPECT_STU_SUCCESS);
-        if (ret != LOS_OK) {
-            printf("Set inspect status failed.\n");
+    INT32 i;
+    for (i = 0; i < LOS_KERNEL_EVENT_CYCLE_TIMES; i++) {
+        event = LOS_EventRead(&g_demoEvent, EVENT_NUM, LOS_WAITMODE_AND, LOS_KERNEL_EVENT_OVERTIME);
+        if (event == EVENT_NUM) {
+            printf("Read the event : 0x%x.\n", event);
+        } else {
+            printf("Read the event timeout.\n");
         }
-    } else {
-        printf("Read the event timeout.\n");
-        ret = InspectStatusSetById(LOS_INSPECT_EVENT, LOS_INSPECT_STU_ERROR);
-        if (ret != LOS_OK) {
-            printf("Set inspect status failed.\n");
-        }
+        LOS_TaskDelay(DELAY_INTERVAL1);
     }
-    return;
 }
 
-UINT32 EventDemo(VOID)
+UINT32 EventDebug(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    printf("Kernel event demo start to run.\n");
+    printf("\nKernel debug event start to run.\n");
+    LOS_TaskLock();
     /* event init */
     ret = LOS_EventInit(&g_demoEvent);
     if (ret != LOS_OK) {
         printf("Init the event failed.\n");
-        return LOS_NOK;
+        return ret;
     }
+    printf("Init the event successfully.\n");
 
     /* create task */
     ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return ret;
     }
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)ReadTaskEntry;
-    taskInitParam.pcName = "EventDemoReadTask";
-    taskInitParam.usTaskPrio = TASK_PRIOR;
-    taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    taskInitParam.pfnTaskEntry  = (TSK_ENTRY_FUNC)ReadTaskEntry;
+    taskInitParam.usTaskPrio    = TASK_PRIOR;
+    taskInitParam.pcName        = "DebugEventReadTask";
+    taskInitParam.uwStackSize   = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    taskInitParam.uwResved      = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create read event task failed.\n");
+        LOS_TaskUnlock();
         return LOS_NOK;
     }
 
-    /* write event */
     printf("Write event.\n");
-    ret = LOS_EventWrite(&g_demoEvent, EVENT_WAIT);
-    if (ret != LOS_OK) {
-        printf("Write the event failed.\n");
-        return LOS_NOK;
-    }
+    LOS_EventWrite(&g_demoEvent, EVENT_NUM);
+    LOS_TaskUnlock();
 
-    /* clear event */
-    printf("Current event id : %d\n", g_demoEvent.uwEventID);
-    LOS_EventClear(&g_demoEvent, ~g_demoEvent.uwEventID);
-    printf("Current event id : %d\n", g_demoEvent.uwEventID);
+    LOS_TaskDelay(DELAY_INTERVAL2);
+    printf("Clear the event flag.\n");
+    LOS_EventClear(&g_demoEvent, ~EVENT_NUM);
+    LOS_TaskDelay(DELAY_INTERVAL2);
 
-    return LOS_OK;
+    LOS_EventDestroy(&g_demoEvent);
+    printf("Delete the event successfully.\n");
+
+    return ret;
 }
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

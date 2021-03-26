@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS Kernel Task Demo Implementation
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: LiteOS Kernel Test Mutex Demo Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,9 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_api_task.h"
+#if LOS_KERNEL_DEBUG_MUTEX
+#include "los_debug_mutex.h"
 #include "los_task.h"
-#include "los_inspect_entry.h"
+#include "los_mux.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -36,141 +37,109 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define HI_TASK_PRIOR       4
-#define LO_TASK_PRIOR       5
-#define DELAY_INTERVAL1     5
-#define DELAY_INTERVAL2     10
-#define DELAY_INTERVAL3     40
+#define HI_TASK_PRIOR   4
+#define LO_TASK_PRIOR   5
+#define DELAY_INTERVAL  1000
 
 STATIC UINT32 g_demoTaskHiId;
 STATIC UINT32 g_demoTaskLoId;
+STATIC UINT32 g_demoMux01;
+STATIC BOOL g_demoDoneFlag = FALSE;
 
-STATIC UINT32 HiTaskEntry(VOID)
+STATIC VOID TaskHiEntry(VOID)
 {
     UINT32 ret;
+    INT32 i;
 
-    printf("Enter high priority task handler.\n");
-
-    /* task delay 5 ticks, task will be suspend */
-    ret = LOS_TaskDelay(DELAY_INTERVAL1);
-    if (ret != LOS_OK) {
-        printf("Delay task failed.\n");
-        return LOS_NOK;
-    }
-
-    /* task resumed */
-    printf("High priority task LOS_TaskDelay successfully.\n");
-
-    /* suspend self */
-    ret = LOS_TaskSuspend(g_demoTaskHiId);
-    if (ret != LOS_OK) {
-        printf("Suspend high priority task failed.\n");
-        ret = InspectStatusSetById(LOS_INSPECT_TASK, LOS_INSPECT_STU_ERROR);
-        if (ret != LOS_OK) {
-            printf("Set inspect status failed.\n");
+    for (i = 0; i < LOS_KERNEL_MUTEX_CYCLE_TIMES; i++) {
+        ret = LOS_MuxPend(g_demoMux01, LOS_KERNEL_MUTEX_OVERTIME);
+        if (ret == LOS_OK) {
+            printf("High priority task get the mutex successfully.\n");
+            LOS_TaskDelay(DELAY_INTERVAL);
+            printf("High priority task release the mutex.\n");
+            LOS_MuxPost(g_demoMux01);
+        } else {
+            printf("High priority task get the mutex timeout.\n");
         }
-        return LOS_NOK;
     }
-
-    printf("High priority task LOS_TaskResume successfully.\n");
-
-    ret = InspectStatusSetById(LOS_INSPECT_TASK, LOS_INSPECT_STU_SUCCESS);
-    if (ret != LOS_OK) {
-        printf("Set inspect status failed.\n");
-    }
-
-    /* delete self */
-    if (LOS_TaskDelete(g_demoTaskHiId) != LOS_OK) {
-        printf("Delete high priority task failed.\n");
-        return LOS_NOK;
-    }
-
-    return LOS_OK;
 }
 
-STATIC UINT32 LoTaskEntry(VOID)
+STATIC VOID TaskLoEntry(VOID)
 {
     UINT32 ret;
+    INT32 i;
 
-    printf("Enter low priority task handler.\n");
-
-    /* task delay 10 ticks, task will be suspend */
-    ret = LOS_TaskDelay(DELAY_INTERVAL2);
-    if (ret != LOS_OK) {
-        printf("Delay low priority task failed.\n");
-        return LOS_NOK;
-    }
-
-    printf("High priority task LOS_TaskSuspend successfully.\n");
-
-    /* resumed task g_demoTaskHiId */
-    ret = LOS_TaskResume(g_demoTaskHiId);
-    if (ret != LOS_OK) {
-        printf("Resume high priority task failed.\n");
-        ret = InspectStatusSetById(LOS_INSPECT_TASK, LOS_INSPECT_STU_ERROR);
-        if (LOS_OK != ret) {
-            printf("Set inspect status failed.\n");
+    for (i = 0; i < LOS_KERNEL_MUTEX_CYCLE_TIMES; i++) {
+        ret = LOS_MuxPend(g_demoMux01, LOS_KERNEL_MUTEX_OVERTIME);
+        if (ret == LOS_OK) {
+            printf("Low priority task get the mutex successfully.\n");
+            LOS_TaskDelay(DELAY_INTERVAL);
+            printf("Low priority task release the mutex.\n");
+            LOS_MuxPost(g_demoMux01);
+        } else {
+            printf("Low priority task get the mutex timeout.\n");
         }
-        return LOS_NOK;
     }
 
-    /* delete self */
-    if (LOS_TaskDelete(g_demoTaskLoId) != LOS_OK) {
-        printf("Delete low priority task failed.\n");
-        return LOS_NOK;
-    }
-
-    return LOS_OK;
+    LOS_MuxDelete(g_demoMux01);
+    printf("Delete the mutex successfully.\n");
+    g_demoDoneFlag = TRUE;
 }
 
-UINT32 TaskDemo(VOID)
+UINT32 MutexDebug(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    printf("\nKernel task demo start to run.\n");
-    /* lock task schedule */
+    printf("\nKernel debug mutex start to run.\n");
     LOS_TaskLock();
+    printf("Mutex init.\n");
+    ret = LOS_MuxCreate(&g_demoMux01);
+    if (ret != LOS_OK) {
+        printf("Create the mutex failed.\n");
+        return ret;
+    }
+    printf("Create the mutex successfully.\n");
 
     /* create task */
     ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return ret;
     }
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)HiTaskEntry;
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)TaskHiEntry;
     taskInitParam.usTaskPrio = HI_TASK_PRIOR;
-    taskInitParam.pcName = "TaskDemoHiTask";
+    taskInitParam.pcName = "DebugMutexTaskHiTask";
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskHiId, &taskInitParam);
     if (ret != LOS_OK) {
-        LOS_TaskUnlock();
         printf("Create high priority task failed.\n");
+        LOS_TaskUnlock();
         return LOS_NOK;
     }
-    printf("Create high priority task successfully.\n");
-
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LoTaskEntry;
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)TaskLoEntry;
     taskInitParam.usTaskPrio = LO_TASK_PRIOR;
-    taskInitParam.pcName = "TaskDemoLoTask";
+    taskInitParam.pcName = "DebugMutexTaskLoTask";
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskLoId, &taskInitParam);
     if (ret != LOS_OK) {
-        /* delete high prio task */
+        printf("Create low priority task failed.\n");
         if (LOS_OK != LOS_TaskDelete(g_demoTaskHiId)) {
             printf("Delete high priority task failed.\n");
         }
         LOS_TaskUnlock();
-        printf("Create low priority task failed.\n");
         return LOS_NOK;
     }
-    printf("Create low priority task successfully.\n");
-
-    /* unlock task schedule */
     LOS_TaskUnlock();
-    LOS_TaskDelay(DELAY_INTERVAL3);
 
+    while (!g_demoDoneFlag) {
+        LOS_TaskDelay(DELAY_INTERVAL);
+    }
+    
     return ret;
 }
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

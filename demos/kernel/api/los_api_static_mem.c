@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: LiteOS Kernel Static Memory Demo
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: LiteOS Kernel Static Memory Demo Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,9 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include <stdio.h>
-#include "los_membox.h"
 #include "los_api_static_mem.h"
+#include <stdio.h>
+#include "los_printf.h"
+#include "los_membox.h"
 #include "los_inspect_entry.h"
 
 #ifdef __cplusplus
@@ -37,21 +38,24 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-static UINT32 g_demoBoxMem[144];
-UINT32 Example_StaticMem(VOID)
+#define MEM_USE_BUFF    828
+
+STATIC UINT32 g_demoBoxMem[144];
+
+UINT32 StaticMemDemo(VOID)
 {
     UINT32 *mem = NULL;
-    UINT32 blksize = 3;
-    UINT32 boxsize = 48;
+    const UINT32 blksize = 3;
+    const UINT32 boxsize = 48;
     UINT32 ret;
 
-    printf("Kernel static memory demo begin.\n");
+    printf("Kernel static memory demo start to run.\n");
     ret = LOS_MemboxInit(&g_demoBoxMem[0], boxsize, blksize);
     if (ret != LOS_OK) {
         printf("Mem box init failed.\n");
         return LOS_NOK;
     } else {
-        printf("Mem box init ok.\n");
+        printf("Mem box init successfully.\n");
     }
 
     /* membox alloc */
@@ -60,9 +64,9 @@ UINT32 Example_StaticMem(VOID)
         printf("Mem box alloc failed.\n");
         return LOS_NOK;
     }
-    printf("Mem box alloc ok.\n");
+    printf("Mem box alloc successfully.\n");
     /* assignment */
-    *mem = 828;
+    *mem = MEM_USE_BUFF;
     printf("*mem = %d.\n", *mem);
     /* clear mem context */
     LOS_MemboxClr(g_demoBoxMem, mem);
@@ -70,16 +74,16 @@ UINT32 Example_StaticMem(VOID)
     /* membox free */
     ret = LOS_MemboxFree(g_demoBoxMem, mem);
     if (ret == LOS_OK) {
-        printf("Mem box free ok.\n");
-        ret = LOS_InspectStatusSetById(LOS_INSPECT_SMEM, LOS_INSPECT_STU_SUCCESS);
+        printf("Mem box free successfully.\n");
+        ret = InspectStatusSetById(LOS_INSPECT_SMEM, LOS_INSPECT_STU_SUCCESS);
         if (ret != LOS_OK) {
-            printf("Set InspectStatus Err.\n");
+            printf("Set inspect status failed.\n");
         }
     } else {
         printf("Mem box free failed.\n");
-        ret = LOS_InspectStatusSetById(LOS_INSPECT_SMEM, LOS_INSPECT_STU_ERROR);
+        ret = InspectStatusSetById(LOS_INSPECT_SMEM, LOS_INSPECT_STU_ERROR);
         if (ret != LOS_OK) {
-            printf("Set InspectStatus Err.\n");
+            printf("Set inspect status failed.\n");
         }
     }
 

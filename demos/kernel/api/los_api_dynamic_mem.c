@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: LiteOS Kernel Dynamic Memory Demo
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: LiteOS Kernel Dynamic Memory Demo Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,10 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include <stdlib.h>
-#include "los_config.h"
-#include "los_memory.h"
 #include "los_api_dynamic_mem.h"
+#include "los_memory.h"
 #include "los_inspect_entry.h"
 
 #ifdef __cplusplus
@@ -39,58 +37,60 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifdef LOSCFG_ARCH_CORTEX_A53
-#define MEM_DYN_SIZE  2048
+#define MEM_DYN_SIZE    2048
 #endif
 #ifdef LOSCFG_ARCH_CORTEX_A9
-#define MEM_DYN_SIZE  1024
+#define MEM_DYN_SIZE    1024
 #endif
 #ifdef LOSCFG_ARCH_ARM_CORTEX_M
-#define MEM_DYN_SIZE  512
+#define MEM_DYN_SIZE    512
 #endif
 
-static UINT32 g_demoDynMem[MEM_DYN_SIZE / 4];
+#define MEM_USE_SIZE    4
+#define MEM_USE_BUFF    828
 
-UINT32 Example_Dyn_Mem(VOID)
+STATIC UINT32 g_demoDynMem[MEM_DYN_SIZE / 4];
+
+UINT32 DynMemDemo(VOID)
 {
     UINT32 *mem = NULL;
     UINT32 ret;
-    printf("Kernel dynamic memory demo begin.\n");
+    printf("Kernel dynamic memory demo start to run.\n");
     ret = LOS_MemInit(g_demoDynMem, MEM_DYN_SIZE);
-    if (ret == LOS_OK) {
-        printf("Mempool init ok.\n");
-    } else {
+    if (ret != LOS_OK) {
         printf("Mempool init failed.\n");
         return LOS_NOK;
     }
+    printf("Mempool init successfully.\n");
 
     /* mem alloc */
-    mem = (UINT32 *)LOS_MemAlloc(g_demoDynMem, 4);
+    mem = (UINT32 *)LOS_MemAlloc(g_demoDynMem, MEM_USE_SIZE);
     if (mem == NULL) {
         printf("Mem alloc failed.\n");
         return LOS_NOK;
     }
-    printf("Mem alloc ok.\n");
+    printf("Mem alloc successfully.\n");
 
     /* assignment */
-    *mem = 828;
+    *mem = MEM_USE_BUFF;
     printf("*mem = %d.\n", *mem);
 
     /* mem free */
     ret = LOS_MemFree(g_demoDynMem, mem);
-    if (ret == LOS_OK) {
-        printf("Mem free ok.\n");
-        ret = LOS_InspectStatusSetById(LOS_INSPECT_DMEM, LOS_INSPECT_STU_SUCCESS);
-        if (ret != LOS_OK) {
-            printf("Set Inspect Status Err.\n");
-        }
-    } else {
+    if (ret != LOS_OK) {
         printf("Mem free failed.\n");
-        ret = LOS_InspectStatusSetById(LOS_INSPECT_DMEM, LOS_INSPECT_STU_ERROR);
+        ret = InspectStatusSetById(LOS_INSPECT_DMEM, LOS_INSPECT_STU_ERROR);
         if (ret != LOS_OK) {
-            printf("Set Inspect Status Err.\n");
+            printf("Set inspect status failed.\n");
         }
         return LOS_NOK;
     }
+    printf("Mem free successfully.\n");
+    ret = InspectStatusSetById(LOS_INSPECT_DMEM, LOS_INSPECT_STU_SUCCESS);
+    if (ret != LOS_OK) {
+        printf("Set inspect status failed.\n");
+    }
+
     return LOS_OK;
 }
 

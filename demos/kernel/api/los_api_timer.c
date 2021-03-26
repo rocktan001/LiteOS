@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: LiteOS Kernel Timer Demo
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: LiteOS Kernel Timer Demo Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,11 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include <stdio.h>
-#include "los_swtmr.h"
-#include "time.h"
-#include "los_sys.h"
 #include "los_api_timer.h"
+#include "los_sys.h"
+#include "los_swtmr.h"
 #include "los_inspect_entry.h"
 
 #ifdef __cplusplus
@@ -39,10 +37,17 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-static UINT32 g_demoTimerCount1 = 0;
-static UINT32 g_demoTimerCount2 = 0;
+#define DELAY_INTERVAL1     200
+#define DELAY_INTERVAL2     1000
+#define SWTMR_INTERVAL1     1000
+#define SWTMR_INTERVAL2     100
 
-static VOID Timer1_Callback(UINT32 arg)
+STATIC UINT32 g_demoTimerCount1 = 0;
+STATIC UINT32 g_demoTimerCount2 = 0;
+STATIC UINT16 g_demoswtmrId1;
+STATIC UINT16 g_demoswtmrId2;
+
+STATIC VOID Timer1Callback(UINT32 arg)
 {
     UINT32 tickLast1;
 
@@ -52,7 +57,7 @@ static VOID Timer1_Callback(UINT32 arg)
     printf("LOS_TickCountGet tickLast1 = %d.\n", tickLast1);
 }
 
-static VOID Timer2_Callback(UINT32 arg)
+STATIC VOID Timer2Callback(UINT32 arg)
 {
     UINT32 ret;
     UINT32 tickLast2;
@@ -61,90 +66,103 @@ static VOID Timer2_Callback(UINT32 arg)
     g_demoTimerCount2++;
     printf("LOS_TickCountGet g_demoTimerCount2 = %d.\n", g_demoTimerCount2);
     printf("LOS_TickCountGet tickLast2 = %d.\n", tickLast2);
-    ret = LOS_InspectStatusSetById(LOS_INSPECT_TIMER, LOS_INSPECT_STU_SUCCESS);
+    ret = InspectStatusSetById(LOS_INSPECT_TIMER, LOS_INSPECT_STU_SUCCESS);
     if (ret != LOS_OK) {
-        printf("Set Inspect Status Err.\n");
+        printf("Set inspect status failed.\n");
     }
 }
 
-UINT32 Example_SwTimer(VOID)
+STATIC VOID RunSwtmr1(VOID)
 {
-    UINT16 id1;
-    UINT16 id2; // timer id
     UINT32 ret;
 
-    printf("Kernel swtimer demo begin.\n");
-#if (LOSCFG_BASE_CORE_SWTMR_ALIGN == YES)
-    ret = LOS_SwtmrCreate(1000, LOS_SWTMR_MODE_ONCE, (SWTMR_PROC_FUNC)Timer1_Callback, &id1, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
-#else
-    ret = LOS_SwtmrCreate(1000, LOS_SWTMR_MODE_ONCE, (SWTMR_PROC_FUNC)Timer1_Callback, &id1, 1);
-#endif
+    ret = LOS_SwtmrStart(g_demoswtmrId1);
     if (ret != LOS_OK) {
-        printf("Create Timer1 failed.\n");
+        printf("Start software timer1 failed.\n");
     } else {
-        printf("Create Timer1 ok.\n");
+        printf("Start software timer1 successfully.\n");
     }
+    (VOID)LOS_TaskDelay(DELAY_INTERVAL1);
 
-#if (LOSCFG_BASE_CORE_SWTMR_ALIGN == YES)
-    ret = LOS_SwtmrCreate(100, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)Timer2_Callback, &id2, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
-#else
-    ret = LOS_SwtmrCreate(100, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)Timer2_Callback, &id2, 1);
-#endif
+    ret = LOS_SwtmrStop(g_demoswtmrId1);
     if (ret != LOS_OK) {
-        printf("Create Timer2 failed.\n");
+        printf("Stop software timer1 failed.\n");
     } else {
-        printf("Create Timer2 ok.\n");
+        printf("Stop software timer1 successfully.\n");
     }
-
-    ret = LOS_SwtmrStart(id1);
+    ret = LOS_SwtmrStart(g_demoswtmrId1);
     if (ret != LOS_OK) {
-        printf("Start Timer1 failed.\n");
-    } else {
-        printf("Start Timer1 ok.\n");
+        printf("Start software timer1 failed.\n");
     }
-
-    (VOID)LOS_TaskDelay(200);
-
-    ret = LOS_SwtmrStop(id1);
-    if (ret != LOS_OK) {
-        printf("Stop Timer1 failed.\n");
-    } else {
-        printf("Stop Timer1 ok.\n");
-    }
-
-    ret = LOS_SwtmrStart(id1);
-    if (ret != LOS_OK) {
-        printf("Start Timer1 failed.\n");
-    }
-
-    (VOID)LOS_TaskDelay(1000);
+    (VOID)LOS_TaskDelay(DELAY_INTERVAL2);
 
     /* the timer that mode is once, kernel will delete it automatically when timer is timeout */
-    ret = LOS_SwtmrDelete(id1);
+    ret = LOS_SwtmrDelete(g_demoswtmrId1);
     if (ret != LOS_OK) {
-        printf("Delete Timer1 failed.\n");
+        printf("Delete software timer1 failed.\n");
     } else {
-        printf("Delete Timer1 ok.\n");
+        printf("Delete software timer1 successfully.\n");
     }
+}
 
-    ret = LOS_SwtmrStart(id2);
+STATIC VOID RunSwtmr2(VOID)
+{
+    UINT32 ret;
+
+    ret = LOS_SwtmrStart(g_demoswtmrId2);
     if (ret != LOS_OK) {
-        printf("Start Timer2 failed.\n");
+        printf("Start software timer2 failed.\n");
     } else {
-        printf("Start Timer2 ok.\n");
+        printf("Start software timer2 successfully.\n");
     }
+    (VOID)LOS_TaskDelay(DELAY_INTERVAL2);
 
-    (VOID)LOS_TaskDelay(1000);
-
-    ret = LOS_SwtmrStop(id2);
+    ret = LOS_SwtmrStop(g_demoswtmrId2);
     if (ret != LOS_OK) {
-        printf("Stop Timer2 failed.\n");
+        printf("Stop software timer2 failed.\n");
+    }
+    ret = LOS_SwtmrDelete(g_demoswtmrId2);
+    if (ret != LOS_OK) {
+        printf("Delete software timer2 failed.\n");
+    }
+}
+
+UINT32 SwTimerDemo(VOID)
+{
+    UINT32 ret;
+
+    printf("Kernel swtimer demo start to run.\n");
+
+    /* create software timer */
+#if (LOSCFG_BASE_CORE_SWTMR_ALIGN == YES)
+    ret = LOS_SwtmrCreate(SWTMR_INTERVAL1, LOS_SWTMR_MODE_ONCE, (SWTMR_PROC_FUNC)Timer1Callback,
+                          &g_demoswtmrId1, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
+#else
+    ret = LOS_SwtmrCreate(SWTMR_INTERVAL1, LOS_SWTMR_MODE_ONCE, (SWTMR_PROC_FUNC)Timer1Callback,
+                          &g_demoswtmrId1, 1);
+#endif
+    if (ret != LOS_OK) {
+        printf("Create software timer1 failed.\n");
+    } else {
+        printf("Create software timer1 successfully.\n");
     }
 
-    ret = LOS_SwtmrDelete(id2);
+#if (LOSCFG_BASE_CORE_SWTMR_ALIGN == YES)
+    ret = LOS_SwtmrCreate(SWTMR_INTERVAL2, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)Timer2Callback,
+                          &g_demoswtmrId2, 1, OS_SWTMR_ROUSES_ALLOW, OS_SWTMR_ALIGN_SENSITIVE);
+#else
+    ret = LOS_SwtmrCreate(SWTMR_INTERVAL2, LOS_SWTMR_MODE_PERIOD, (SWTMR_PROC_FUNC)Timer2Callback,
+                          &g_demoswtmrId2, 1);
+#endif
     if (ret != LOS_OK) {
-        printf("Delete Timer2 failed.\n");
+        printf("Create software timer2 failed.\n");
+    } else {
+        printf("Create software timer2 successfully.\n");
     }
+
+    /* run software timer */
+    RunSwtmr1();
+    RunSwtmr2();
 
     return LOS_OK;
 }

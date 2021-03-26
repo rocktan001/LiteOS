@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: LiteOS Kernel Message Queue Demo HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -29,18 +29,15 @@
 #ifndef _LOS_API_MSGQUEUE_H
 #define _LOS_API_MSGQUEUE_H
 
+#include "los_typedef.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-typedef VOID *(*SEND_ENTRY)(VOID *arg);
-typedef VOID *(*RECV_ENTRY)(VOID *arg);
-
-#define API_MSG_NUM 5
-
-extern UINT32 Example_MsgQueue(VOID);
+UINT32 MsgQueueDemo(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

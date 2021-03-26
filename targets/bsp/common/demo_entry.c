@@ -236,20 +236,10 @@ VOID DemoEntry(VOID)
     Ipv6DemoTask();
 #endif
 
-#ifdef LOSCFG_DEMOS_KERNEL
 #ifdef LOSCFG_DEMOS_KERNEL_ENTRY
-    ret = KernelDemoEntry();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Kernel Demo Task Creat Fail.\n");
-        return ret;
-    }
+    KernelDemoTask();
 #elif defined(LOSCFG_DEMOS_KERNEL_INSPECT_ENTRY)
-    ret = KernelDemoInspectEntry();
-    if (ret != LOS_OK) {
-        PRINT_ERR("Kernel Demo Inspect Task Creat Fail.\n");
-        return ret;
-    }
-#endif
+    KernelInspectDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_FS

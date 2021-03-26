@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: LiteOS Kernel Semaphore Demo HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -29,13 +29,15 @@
 #ifndef _LOS_API_SEM_H
 #define _LOS_API_SEM_H
 
+#include "los_typedef.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern UINT32 Example_Semphore(VOID);
+UINT32 SemphoreDemo(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
