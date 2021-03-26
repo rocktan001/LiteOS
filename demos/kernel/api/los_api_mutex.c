@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: LiteOS Kernel Mutex Demo
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: LiteOS Kernel Mutex Demo Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,14 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include "los_api_mutex.h"
 #include "los_mux.h"
 #include "los_task.h"
-#include "los_api_mutex.h"
 #include "los_inspect_entry.h"
-
-#ifdef LOSCFG_LIB_LIBC
-#include "string.h"
-#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -41,20 +37,25 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#define HI_TASK_PRIOR       4
+#define LO_TASK_PRIOR       5
+#define DELAY_INTERVAL1     100
+#define DELAY_INTERVAL2     300
+#define MUTEX_OVERTIME      10
+
 /* mux handle id */
-static UINT32 g_demoMux01;
-
+STATIC UINT32 g_demoMux01;
 /* task pid */
-static UINT32 g_demoTaskId01;
-static UINT32 g_demoTaskId02;
+STATIC UINT32 g_demoTask1Id;
+STATIC UINT32 g_demoTask2Id;
 
-static VOID Example_MutexTask1(VOID)
+STATIC VOID MutexTask1Entry(VOID)
 {
     UINT32 ret;
 
     printf("Task1 try to get mutex, wait 10 ticks.\n");
     /* get mux */
-    ret = LOS_MuxPend(g_demoMux01, 10);
+    ret = LOS_MuxPend(g_demoMux01, MUTEX_OVERTIME);
     if (ret == LOS_OK) {
         printf("Task1 get mutex g_demoMux01.\n");
         /* release mux */
@@ -65,12 +66,12 @@ static VOID Example_MutexTask1(VOID)
         /* LOS_WAIT_FOREVER type get mux, LOS_MuxPend return until has been get mux */
         ret = LOS_MuxPend(g_demoMux01, LOS_WAIT_FOREVER);
         if (ret == LOS_OK) {
-            printf("Task1 wait forever, got mutex g_demoMux01 ok.\n");
+            printf("Task1 wait forever, got mutex g_demoMux01 successfully.\n");
             /* release mux */
             LOS_MuxPost(g_demoMux01);
-            ret = LOS_InspectStatusSetById(LOS_INSPECT_MUTEX, LOS_INSPECT_STU_SUCCESS);
+            ret = InspectStatusSetById(LOS_INSPECT_MUTEX, LOS_INSPECT_STU_SUCCESS);
             if (LOS_OK != ret) {
-                printf("Set Inspect Status Err \n");
+                printf("Set inspect status failed.\n");
             }
             return;
         }
@@ -78,11 +79,11 @@ static VOID Example_MutexTask1(VOID)
     return;
 }
 
-static VOID Example_MutexTask2(VOID)
+STATIC VOID MutexTask2Entry(VOID)
 {
     UINT32 ret;
 
-    printf("Task2 try to get mutex, wait forever.\n");
+    printf("Task2 try to get the mutex, wait forever.\n");
     /* get mux */
     ret = LOS_MuxPend(g_demoMux01, LOS_WAIT_FOREVER);
     if (ret != LOS_OK) {
@@ -93,7 +94,7 @@ static VOID Example_MutexTask2(VOID)
     printf("Task2 get mutex g_demoMux01 and suspend 100 ticks.\n");
 
     /* task delay 100 ticks */
-    LOS_TaskDelay(100);
+    LOS_TaskDelay(DELAY_INTERVAL1);
 
     printf("Task2 resumed and post the g_demoMux01.\n");
     /* release mux */
@@ -101,48 +102,55 @@ static VOID Example_MutexTask2(VOID)
     return;
 }
 
-UINT32 Example_MutexLock(VOID)
+UINT32 MutexLockDemo(VOID)
 {
     UINT32 ret;
-    TSK_INIT_PARAM_S stTask1;
-    TSK_INIT_PARAM_S stTask2;
+    TSK_INIT_PARAM_S taskInitParam;
+
+    printf("Kernel mutex demo start to run.\n");
+
+    LOS_TaskLock();
+    /* create task */
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return ret;
+    }
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)MutexTask1Entry;
+    taskInitParam.pcName = "MutexLockDemoTask1";
+    taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    taskInitParam.usTaskPrio = LO_TASK_PRIOR;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    ret = LOS_TaskCreate(&g_demoTask1Id, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create mutex task1 failed.\n");
+        LOS_TaskUnlock();
+        return LOS_NOK;
+    }
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)MutexTask2Entry;
+    taskInitParam.pcName = "MutexLockDemoTask2";
+    taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    taskInitParam.usTaskPrio = HI_TASK_PRIOR;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    ret = LOS_TaskCreate(&g_demoTask2Id, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create mutex task2 failed.\n");
+        if (LOS_OK != LOS_TaskDelete(g_demoTask1Id)) {
+            printf("Delete mutex task1 failed.\n");
+        }
+        LOS_TaskUnlock();
+        return LOS_NOK;
+    }
 
     /* create mux */
-    printf("Kernel mutex demo begin.\n");
-    LOS_MuxCreate(&g_demoMux01);
-
-    /* lock task schedue */
-    LOS_TaskLock();
-
-    /* create task1 */
-    memset(&stTask1, 0, sizeof(TSK_INIT_PARAM_S));
-    stTask1.pfnTaskEntry = (TSK_ENTRY_FUNC)Example_MutexTask1;
-    stTask1.pcName       = "MutexTsk1";
-    stTask1.uwStackSize  = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    stTask1.usTaskPrio   = 5;
-    ret = LOS_TaskCreate(&g_demoTaskId01, &stTask1);
+    ret = LOS_MuxCreate(&g_demoMux01);
     if (ret != LOS_OK) {
-        printf("Create task1 failed.\n");
+        printf("Creat the mutex failed.\n");
         return LOS_NOK;
     }
-
-    /* create task2 */
-    memset(&stTask2, 0, sizeof(TSK_INIT_PARAM_S));
-    stTask2.pfnTaskEntry = (TSK_ENTRY_FUNC)Example_MutexTask2;
-    stTask2.pcName       = "MutexTsk2";
-    stTask2.uwStackSize  = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    stTask2.usTaskPrio   = 4;
-    ret = LOS_TaskCreate(&g_demoTaskId02, &stTask2);
-    if (ret != LOS_OK) {
-        printf("Create task2 failed.\n");
-        return LOS_NOK;
-    }
-
-    /* unlock task schedue */
     LOS_TaskUnlock();
-    /* task delay 300 ticks */
-    LOS_TaskDelay(300);
 
+    /* task delay 300 ticks */
+    LOS_TaskDelay(DELAY_INTERVAL2);
     /* delete mux */
     LOS_MuxDelete(g_demoMux01);
 

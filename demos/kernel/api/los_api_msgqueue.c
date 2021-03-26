@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: LiteOS Kernel Message Queue Demo
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: LiteOS Kernel Message Queue Demo Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,14 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_base.h"
-#include "los_task.h"
-#include "los_swtmr.h"
-#include "los_hwi.h"
-#include "los_queue.h"
-#include "los_event.h"
-#include "los_typedef.h"
 #include "los_api_msgqueue.h"
+#include "los_task.h"
+#include "los_queue.h"
 #include "los_inspect_entry.h"
 
 #ifdef __cplusplus
@@ -42,19 +37,28 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-static UINT32 g_demoQueue;
+#define API_MSG_NUM         5
+#define BUFF_OVERWRITE_NUM  2
+#define QUEUE_MSGLEN        24
+#define QUEUE_SIZE          5
+#define DELAY_INTERVAL1     50
+#define DELAY_INTERVAL2     500
+#define TASK_PRIOR          9
 
-static CHAR g_demoBuf[] = "test is message x";
+STATIC UINT32 g_demoTask1Id;
+STATIC UINT32 g_demoTask2Id;
+STATIC UINT32 g_demoQueue;
+STATIC CHAR g_demoBuf[] = "test is message x";
 
 /* task1 send data */
-static VOID *send_Entry(UINT32 param)
+STATIC VOID SendTaskEntry(UINT32 param)
 {
     UINT32 i = 0;
     UINT32 ret;
     UINT32 len = sizeof(g_demoBuf);
 
     while (i < API_MSG_NUM) {
-        g_demoBuf[len - 2] = '0' + i;
+        g_demoBuf[len - BUFF_OVERWRITE_NUM] = '0' + i;
         i++;
 
         /* write g_demoBuf data to queue */
@@ -63,95 +67,93 @@ static VOID *send_Entry(UINT32 param)
             printf("Send message failed, error: %x.\n", ret);
         }
 
-        LOS_TaskDelay(50);
+        LOS_TaskDelay(DELAY_INTERVAL1);
     }
-
-    return NULL;
 }
 
-/* task2 recv data */
-static VOID *recv_Entry(UINT32 param)
+/* task2 Receive data */
+STATIC VOID ReceiveTaskEntry(UINT32 param)
 {
-    UINTPTR readbuf;
     UINT32 ret;
+    UINTPTR readBuf;
     UINT32 msgCount = 0;
 
     while (1) {
         /* read data from queue to readbuf */
-        ret = LOS_QueueRead(g_demoQueue, &readbuf, 24, 0);
+        ret = LOS_QueueRead(g_demoQueue, &readBuf, QUEUE_MSGLEN, 0);
         if (ret != LOS_OK) {
-            printf("Recv message failed, error: %x.\n", ret);
+            printf("Receive message failed, error: %x.\n", ret);
             break;
         } else {
-            printf("Recv message : %s.\n", (CHAR *)readbuf);
+            printf("Receive message : %s.\n", readBuf);
             msgCount++;
         }
 
-        (VOID)LOS_TaskDelay(50);
+        (VOID)LOS_TaskDelay(DELAY_INTERVAL1);
     }
 
     /* delete queue */
-    while (LOS_QueueDelete(g_demoQueue) != LOS_OK) {
-        (VOID)LOS_TaskDelay(1);
+    if (LOS_QueueDelete(g_demoQueue) != LOS_OK) {
+        printf("Delete the queue failed.\n");
     }
-
-    printf("Delete the queue ok.\n");
+    printf("Delete the queue successfully.\n");
 
     if (API_MSG_NUM == msgCount) {
-        ret = LOS_InspectStatusSetById(LOS_INSPECT_MSG, LOS_INSPECT_STU_SUCCESS);
+        ret = InspectStatusSetById(LOS_INSPECT_MSG, LOS_INSPECT_STU_SUCCESS);
         if (ret != LOS_OK) {
-            printf("Set Inspect Status Err.\n");
+            printf("Set inspect status failed.\n");
         }
     } else {
-        ret = LOS_InspectStatusSetById(LOS_INSPECT_MSG, LOS_INSPECT_STU_ERROR);
+        ret = InspectStatusSetById(LOS_INSPECT_MSG, LOS_INSPECT_STU_ERROR);
         if (ret != LOS_OK) {
-            printf("Set Inspect Status Err.\n");
+            printf("Set inspect status failed.\n");
         }
     }
-
-    return NULL;
 }
 
-UINT32 Example_MsgQueue(VOID)
+UINT32 MsgQueueDemo(VOID)
 {
     UINT32 ret;
-    UINT32 task1, task2;
-    TSK_INIT_PARAM_S stInitParam1;
+    TSK_INIT_PARAM_S taskInitParam;
 
-    /* create task1 */
-    printf("Kernel message queue demo begin.\n");
-    stInitParam1.pfnTaskEntry = (TSK_ENTRY_FUNC)send_Entry;
-    stInitParam1.usTaskPrio = 9;
-    stInitParam1.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    stInitParam1.pcName = "sendQueue";
-    LOS_TaskLock(); // lock task schedue
-    ret = LOS_TaskCreate(&task1, &stInitParam1);
-    if (ret != LOS_OK) {
-        printf("Create task1 failed, error : %x.\n", ret);
+    printf("Kernel message queue demo start to run.\n");
+
+    LOS_TaskLock();
+    /* create task */
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
         return ret;
     }
-
-    /* create task2 */
-    stInitParam1.pfnTaskEntry = (TSK_ENTRY_FUNC)recv_Entry;
-    ret = LOS_TaskCreate(&task2, &stInitParam1);
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)SendTaskEntry;
+    taskInitParam.usTaskPrio = TASK_PRIOR;
+    taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    taskInitParam.pcName = "MsgQueueDemoSendTask";
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    ret = LOS_TaskCreate(&g_demoTask1Id, &taskInitParam);
     if (ret != LOS_OK) {
-        printf("Create task2 failed, error : %x.\n", ret);
+        printf("Create queue sending Task failed.\n");
+        return ret;
+    }
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)ReceiveTaskEntry;
+    taskInitParam.pcName = "MsgQueueDemoReceiveTask";
+    ret = LOS_TaskCreate(&g_demoTask2Id, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create queue receiving Task failed.\n");
+        if (LOS_OK != LOS_TaskDelete(g_demoTask1Id)) {
+            printf("Delete queue sending Task failed.\n");
+        }
         return ret;
     }
 
     /* create queue */
-    ret = LOS_QueueCreate("queue", 5, &g_demoQueue, 0, 24);
+    ret = LOS_QueueCreate("queue", QUEUE_SIZE, &g_demoQueue, 0, QUEUE_MSGLEN);
     if (ret != LOS_OK) {
-        printf("Create queue failed, error : %x.\n", ret);
+        printf("Create the queue failed.\n");
     }
+    printf("Create the queue successfully.\n");
 
-    printf("Create the queue ok.\n");
-    LOS_TaskUnlock(); // unlock task schedue
-
-    LOS_TaskDelay(500);
-
-    LOS_TaskDelete(task1);
-    LOS_TaskDelete(task2);
+    LOS_TaskUnlock();
+    LOS_TaskDelay(DELAY_INTERVAL2);
 
     return LOS_OK;
 }

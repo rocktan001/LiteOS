@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: LiteOS Kernel Systick Demo
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: LiteOS Kernel Systick Demo Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,9 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include "los_api_systick.h"
 #include "los_sys.h"
 #include "los_task.h"
-#include "los_api_systick.h"
 #include "los_inspect_entry.h"
 
 #ifdef __cplusplus
@@ -37,24 +37,34 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID Example_TransformTime(VOID)
+#define DEMO_NUM_OF_MS      1000
+#define DEMO_NUM_OF_TICK    1000
+#define DELAY_INTERVAL      200
+#define USE_TICK            200
+
+STATIC VOID TransformTime(VOID)
 {
     UINT32 ms;
     UINT32 tick;
-    tick = LOS_MS2Tick(10000);
+
+    tick = LOS_MS2Tick(DEMO_NUM_OF_MS);
     printf("LOS_MS2Tick tick = %d.\n", tick);
-    ms = LOS_Tick2MS(100);
+    ms = LOS_Tick2MS(DEMO_NUM_OF_TICK);
     printf("LOS_Tick2MS ms = %d.\n", ms);
 }
 
-UINT32 Example_GetTick(VOID)
+UINT32 GetTickDemo(VOID)
 {
     UINT32 ret;
     UINT32 cyclePerTick;
     UINT64 tickCount1;
     UINT64 tickCount2;
 
-    printf("Kernel systick demo begin.\n");
+    printf("Kernel systick demo start to run.\n");
+
+    /* conversion between tick and time */
+    TransformTime();
+
     cyclePerTick  = LOS_CyclePerTickGet();
     if (cyclePerTick != 0) {
         printf("LOS_CyclePerTickGet = %d.\n", cyclePerTick);
@@ -64,22 +74,22 @@ UINT32 Example_GetTick(VOID)
     if (tickCount1 != 0) {
         printf("LOS_TickCountGet = %d.\n", (UINT32)tickCount1);
     }
-    LOS_TaskDelay(200);
+    LOS_TaskDelay(DELAY_INTERVAL);
     tickCount2 = LOS_TickCountGet();
     if (tickCount2 != 0) {
         printf("LOS_TickCountGet after delay = %d.\n", (UINT32)tickCount2);
     }
 
-    if ((tickCount2 - tickCount1) >= 200) {
-        ret = LOS_InspectStatusSetById(LOS_INSPECT_SYSTIC, LOS_INSPECT_STU_SUCCESS);
+    if ((tickCount2 - tickCount1) >= USE_TICK) {
+        ret = InspectStatusSetById(LOS_INSPECT_SYSTIC, LOS_INSPECT_STU_SUCCESS);
         if (ret != LOS_OK) {
-            printf("Set InspectStatus Err.\n");
+            printf("Set inspect status failed.\n");
         }
         return LOS_OK;
     } else {
-        ret = LOS_InspectStatusSetById(LOS_INSPECT_SYSTIC, LOS_INSPECT_STU_ERROR);
+        ret = InspectStatusSetById(LOS_INSPECT_SYSTIC, LOS_INSPECT_STU_ERROR);
         if (ret != LOS_OK) {
-            printf("Set InspectStatus Err.\n");
+            printf("Set inspect status failed.\n");
         }
         return LOS_NOK;
     }

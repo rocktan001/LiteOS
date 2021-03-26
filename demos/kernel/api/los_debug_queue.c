@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS Kernel Semaphore Demo Implementation
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: LiteOS Kernel Test Queue Demo Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_api_sem.h"
-#include "los_sem.h"
+#if LOS_KERNEL_DEBUG_QUEUE
+#include "los_debug_queue.h"
 #include "los_task.h"
-#include "los_inspect_entry.h"
+#include "los_queue.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,130 +37,117 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/* task priority */
-#define TASK_PRIOR          5
-#define DELAY_INTERVAL1     20
-#define DELAY_INTERVAL2     40
+#define HI_TASK_PRIOR   4
+#define LO_TASK_PRIOR   5
+#define DELAY_INTERVAL  1000
+#define QUEUE_SIZE      LOS_KERNEL_QUEUE_SIZE
+#define QUEUE_MSGLEN    LOS_KERNEL_QUEUE_MESSAGELEN
 
-/* task pid */
 STATIC UINT32 g_demoTask1Id;
 STATIC UINT32 g_demoTask2Id;
-/* semaphore id */
-STATIC UINT32 g_demoSemId;
+STATIC UINT32 g_demoQueueId;
+STATIC BOOL g_demoDoneFlag = FALSE;
 
-STATIC VOID Task1Entry(VOID)
+STATIC VOID SendTaskEntry(VOID)
 {
     UINT32 ret;
+    CHAR sendMsgBuf[] = LOS_KERNEL_QUEUE_MESSAGE;
+    UINT32 msgLen = sizeof(sendMsgBuf);
+    INT32 i;
 
-    printf("Task1 try get semphore g_demoSemId, timeout 10 ticks.\n");
-    /* get semaphore, timeout is 10 ticks */
-    ret = LOS_SemPend(g_demoSemId, 10);
-    /* get semaphore ok */
-    if (ret == LOS_OK) {
-        LOS_SemPost(g_demoSemId);
-        return;
-    }
-    /* timeout, get semaphore fail */
-    if (ret == LOS_ERRNO_SEM_TIMEOUT) {
-        printf("Task1 timeout and try get semphore g_demoSemId wait forever.\n");
-        /* get semaphore wait forever, LOS_SemPend return until has been get semaphore */
-        ret = LOS_SemPend(g_demoSemId, LOS_WAIT_FOREVER);
-        if (ret == LOS_OK) {
-            printf("Task1 wait_forever and got semphore g_demoSemId successfully.\n");
-            LOS_SemPost(g_demoSemId);
-            ret = InspectStatusSetById(LOS_INSPECT_SEM, LOS_INSPECT_STU_SUCCESS);
-            if (ret != LOS_OK) {
-                printf("Set inspect status failed.\n");
-            }
-            return;
+    for (i = 0; i < LOS_KERNEL_QUEUE_CYCLE_TIMES; i++) {
+        ret = LOS_QueueWriteCopy(g_demoQueueId, sendMsgBuf, msgLen, LOS_KERNEL_QUEUE_OVERTIME);
+        if (ret != LOS_OK) {
+            printf("Send message failed, error: %x.\n", ret);
+        } else {
+            printf("Send message ok, message: %s\n", sendMsgBuf);
         }
+        LOS_TaskDelay(LOS_KERNEL_QUEUE_SENDINTERVAL);
     }
-    return;
 }
 
-STATIC VOID Task2Entry(VOID)
+STATIC VOID ReceiveTaskEntry(VOID)
 {
     UINT32 ret;
-    printf("Task2 try get semaphore g_demoSemId wait forever.\n");
-    /* wait forever get semaphore */
-    ret = LOS_SemPend(g_demoSemId, LOS_WAIT_FOREVER);
-    if (ret == LOS_OK) {
-        printf("Task2 get semaphore g_demoSemId and then delay 20ticks.\n");
+    CHAR readBuf[QUEUE_MSGLEN] = {0};
+    UINT32 readLen = QUEUE_MSGLEN;
+    QUEUE_INFO_S queueInfo;
+    INT32 i;
+
+    for (i = 0; i < LOS_KERNEL_QUEUE_CYCLE_TIMES; i++) {
+        readLen = QUEUE_MSGLEN;
+        ret = LOS_QueueReadCopy(g_demoQueueId, readBuf, &readLen, LOS_KERNEL_QUEUE_OVERTIME);
+        if (ret != LOS_OK) {
+            printf("Receive message failed, error: %x.\n", ret);
+        } else {
+            printf("Receive message : %s.\n", (CHAR *)readBuf);
+        }
+
+        LOS_QueueInfoGet(g_demoQueueId, &queueInfo);
+        printf("\tQueue size : %u\n\tCurrent queue usage : %u\n", QUEUE_SIZE, queueInfo.usReadableCnt);
+        LOS_TaskDelay(LOS_KERNEL_QUEUE_RECEIVEINTERVAL);
     }
 
-    /* task delay 20 ticks */
-    LOS_TaskDelay(DELAY_INTERVAL1);
-
-    printf("Task2 post semaphore g_demoSemId.\n");
-    /* release semaphore */
-    LOS_SemPost(g_demoSemId);
-
-    return;
+    LOS_QueueDelete(g_demoQueueId);
+    printf("Delete the queue successfully.\n");
+    g_demoDoneFlag = TRUE;
 }
 
-UINT32 SemphoreDemo(VOID)
+UINT32 QueueDebug(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    printf("Kernel semaphore demo start to run.\n");
-
+    printf("\nKernel debug queue start to run.\n");
     LOS_TaskLock();
     /* create task */
     ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return ret;
     }
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)Task1Entry;
-    taskInitParam.pcName = "SemphoreDemoTask1";
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)SendTaskEntry;
+    taskInitParam.pcName = "DebugQueueSendTask";
+    taskInitParam.usTaskPrio = LO_TASK_PRIOR;
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    taskInitParam.usTaskPrio = TASK_PRIOR;
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTask1Id, &taskInitParam);
     if (ret != LOS_OK) {
-        printf("Create semaphore task1 failed.\n");
+        printf("Create queue sending Task failed.\n");
         LOS_TaskUnlock();
         return LOS_NOK;
     }
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)Task2Entry;
-    taskInitParam.pcName = "SemphoreDemoTask2";
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)ReceiveTaskEntry;
+    taskInitParam.pcName = "DebugQueueReceiveTask";
+    taskInitParam.usTaskPrio = HI_TASK_PRIOR;
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    taskInitParam.usTaskPrio = (TASK_PRIOR - 1);
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTask2Id, &taskInitParam);
     if (ret != LOS_OK) {
-        printf("Create semaphore task2 failed.\n");
-        /* delete task1 */
+        printf("Create queue receiving Task failed.\n");
         if (LOS_OK != LOS_TaskDelete(g_demoTask1Id)) {
-            printf("Delete semaphore task1 failed.\n");
+            printf("Delete queue sending Task failed.\n");
         }
         LOS_TaskUnlock();
         return LOS_NOK;
     }
 
-    /* create semaphore */
-    ret = LOS_SemCreate(0, &g_demoSemId);
+    /* create queue */
+    ret = LOS_QueueCreate("demoQueue", QUEUE_SIZE, &g_demoQueueId, 0, QUEUE_MSGLEN);
     if (ret != LOS_OK) {
-        printf("Creat the semaphore failed.\n");
-        return LOS_NOK;
+        LOS_TaskUnlock();
+        printf("Create the queue failed, error : %x.\n", ret);
+        return ret;
     }
-
+    printf("Create the queue successfully.\n");
     LOS_TaskUnlock();
-    /* post semaphore */
-    ret = LOS_SemPost(g_demoSemId);
-    if (ret != LOS_OK) {
-        printf("Post the semaphore failed.\n");
-        return LOS_NOK;
+
+    while (!g_demoDoneFlag) {
+        LOS_TaskDelay(DELAY_INTERVAL);
     }
-
-    /* task delay 40 ticks */
-    LOS_TaskDelay(DELAY_INTERVAL2);
-
-    /* delete semaphore */
-    LOS_SemDelete(g_demoSemId);
 
     return ret;
 }
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

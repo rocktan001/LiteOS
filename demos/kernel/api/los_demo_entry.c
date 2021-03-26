@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: LiteOS Kernel Demo Entry
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: LiteOS Kernel Demo Entry Implementation Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,91 +26,119 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include "los_demo_entry.h"
+#include "los_task.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#include "los_demo_entry.h"
-#include "los_task.h"
-#include <string.h>
+#define LOWEST_PRIORITY     30
+#define DELAY_INTERVAL      100
 
-static UINT32 g_DemoTaskId;
+STATIC UINT32 g_demoTaskId;
 
-static LITE_OS_SEC_TEXT VOID LOS_Demo_Tskfunc(VOID)
+STATIC VOID DemoTaskEntry(VOID)
 {
-#ifdef LOS_KERNEL_DEMO_ALL
-#else /* LOS_KERNEL_DEMO_ALL */
-
-/* only test some function */
 #ifdef LOS_KERNEL_DEMO_TASK
-    Example_TskCaseEntry();
-    printf("Kernel task demo ok.\n\n");
+    TaskDemo();
+    printf("Kernel task demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_MEM_DYNAMIC
-    Example_Dyn_Mem();
-    printf("Kernel dynamic memory demo ok.\n\n");
+    DynMemDemo();
+    printf("Kernel dynamic memory demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_MEM_STATIC
-    Example_StaticMem();
-    printf("Kernel static memory demo ok.\n\n");
+    StaticMemDemo();
+    printf("Kernel static memory demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_INTERRUPT
-    Example_Interrupt();
-    printf("Kernel interrupt demo ok.\n\n");
+    InterruptDemo();
+    printf("Kernel interrupt demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_QUEUE
-    Example_MsgQueue();
-    printf("Kernel message queue demo ok.\n\n");
+    MsgQueueDemo();
+    printf("Kernel message queue demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_EVENT
-    Example_SndRcvEvent();
-    printf("Kernel event demo ok.\n\n");
+    EventDemo();
+    printf("Kernel event demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_MUTEX
-    Example_MutexLock();
-    printf("Kernel mutex demo ok.\n\n");
+    MutexLockDemo();
+    printf("Kernel mutex demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_SEMPHORE
-    Example_Semphore();
-    printf("Kernel semaphore demo ok.\n\n");
+    SemphoreDemo();
+    printf("Kernel semaphore demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_SYSTICK
-    Example_GetTick();
-    printf("Kernel systick demo ok.\n\n");
+    GetTickDemo();
+    printf("Kernel systick demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_SWTIMER
-    Example_SwTimer();
-    printf("Kernel swtimer demo ok.\n\n");
+    SwTimerDemo();
+    printf("Kernel software timer demo finished.\n\n");
 #endif
 #ifdef LOS_KERNEL_DEMO_LIST
-    Example_List();
-    printf("Kernel list demo ok.\n\n");
+    ListDemo();
+    printf("Kernel list demo finished.\n\n");
 #endif
-#endif /* LOS_KERNEL_DEMO_ALL */
-
-    while (1) {
-        (VOID)LOS_TaskDelay(100);
-    }
 }
 
-UINT32 KernelDemoEntry(VOID)
+STATIC VOID DebugTaskEntry(VOID)
+{
+#ifdef LOS_KERNEL_DEBUG_TASK
+    TaskDebug();
+    printf("Kernel debug task finished.\n\n");
+#endif
+#ifdef LOS_KERNEL_DEBUG_QUEUE
+    QueueDebug();
+    printf("Kernel debug queue finished.\n\n");
+#endif
+#ifdef LOS_KERNEL_DEBUG_EVENT
+    EventDebug();
+    printf("Kernel debug event finished.\n\n");
+#endif
+#ifdef LOS_KERNEL_DEBUG_MUTEX
+    MutexDebug();
+    printf("Kernel debug mutex finished.\n\n");
+#endif
+#ifdef LOS_KERNEL_DEBUG_SEMPHORE
+    SemphoreDebug();
+    printf("Kernel debug semphore finished.\n\n");
+#endif
+}
+
+STATIC VOID KernelDemoTaskEntry(VOID)
+{
+    LOS_TaskDelay(DELAY_INTERVAL);
+    DemoTaskEntry();
+    DebugTaskEntry();
+    LOS_TaskDelay(DELAY_INTERVAL);
+}
+
+VOID KernelDemoTask(VOID)
 {
     UINT32 ret;
-    TSK_INIT_PARAM_S stTaskInitParam;
+    TSK_INIT_PARAM_S taskInitParam;
 
-    (VOID)memset((VOID *)(&stTaskInitParam), 0, sizeof(TSK_INIT_PARAM_S));
-    stTaskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LOS_Demo_Tskfunc;
-    stTaskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    stTaskInitParam.pcName = "KernelApiDemo";
-    stTaskInitParam.usTaskPrio = 30;
-    ret = LOS_TaskCreate(&g_DemoTaskId, &stTaskInitParam);
-    if (ret != LOS_OK) {
-        printf("Api demo test task create failed.\n");
-        return ret;
+    /* create task */
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
     }
-    return ret;
+    taskInitParam.pfnTaskEntry  = (TSK_ENTRY_FUNC)KernelDemoTaskEntry;
+    taskInitParam.pcName        = "KernelDemoTask";
+    taskInitParam.usTaskPrio    = LOWEST_PRIORITY;
+    taskInitParam.uwStackSize   = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    taskInitParam.uwResved      = LOS_TASK_STATUS_DETACHED;
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
+    if (ret != LOS_OK) {
+        printf("Create kernel demo task failed.\n");
+    }
 }
 
 #ifdef __cplusplus

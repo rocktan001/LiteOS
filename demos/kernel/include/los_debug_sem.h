@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS Kernel Mutex Demo HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: LiteOS Kernel Test Semphore Demo HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,8 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_API_MUTEX_H
-#define _LOS_API_MUTEX_H
+#ifndef _LOS_DEBUG_SEMPHORE_H
+#define _LOS_DEBUG_SEMPHORE_H
 
 #include "los_typedef.h"
 
@@ -37,7 +37,9 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-UINT32 MutexLockDemo(VOID);
+#if LOS_KERNEL_DEBUG_SEMPHORE
+UINT32 SemphoreDebug(VOID);
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -45,4 +47,4 @@ UINT32 MutexLockDemo(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _LOS_API_MUTEX_H */
+#endif /* _LOS_DEBUG_SEMPHORE_H */

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: LiteOS Kernel Demo Entry HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -53,7 +53,29 @@
 #include "los_api_systick.h"
 /* dlist */
 #include "los_api_list.h"
+/* test task schedule */
+#include "los_debug_task.h"
+/* test queue */
+#include "los_debug_queue.h"
+/* test event */
+#include "los_debug_event.h"
+/* test mutex */
+#include "los_debug_mutex.h"
+/* test semphore */
+#include "los_debug_sem.h"
 
-extern UINT32 KernelDemoEntry(VOID);
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+VOID KernelDemoTask(VOID);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _LOS_DEMO_ENTRY_H */

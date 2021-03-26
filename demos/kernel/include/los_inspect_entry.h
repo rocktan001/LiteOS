@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: LiteOS Kernel Demo Inspect Entry HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -31,12 +31,18 @@
 
 #include "los_typedef.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
 /* LiteOS Inspect status. */
 typedef enum {
     LOS_INSPECT_STU_START         =  0xFF,
     LOS_INSPECT_STU_ERROR         =  0x01,
     LOS_INSPECT_STU_SUCCESS       =  0x00,
-} enInspectStu;
+} InspectStu;
 
 /* LiteOS Inspect result. */
 typedef enum {
@@ -52,17 +58,23 @@ typedef enum {
     LOS_INSPECT_TIMER,
     LOS_INSPECT_LIST,
     LOS_INSPECT_BUFF
-} enInspectId;
+} InspectId;
 
-typedef struct os_Inspect_def {
-    enInspectId InspectId;
-    enInspectStu Status;
-    UINT32 (*Inspectfunc)(VOID);
+typedef struct {
+    InspectId inspectId;
+    InspectStu status;
+    UINT32 (*InspectFunc)(VOID);
     CHAR name[20];
-} osInspect_Def;
+} InspectDef;
 
-extern UINT32 KernelDemoInspectEntry(VOID);
-extern UINT32 LOS_InspectByID(enInspectId InspectId);
-extern UINT32 LOS_InspectStatusSetById(enInspectId InspectId, enInspectStu InspectStu);
+VOID KernelInspectDemoTask(VOID);
+UINT32 InspectByID(InspectId inspectId);
+UINT32 InspectStatusSetById(InspectId inspectId, InspectStu inspectStu);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _LOS_INSPECT_ENTRY_H */
