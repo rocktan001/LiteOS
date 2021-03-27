@@ -1,5 +1,7 @@
 menu "Utility Demo"
 
+source "demos/utility/bidireference/Kconfig"
 source "demos/utility/iconv/Kconfig"
+source "demos/utility/iniparser/Kconfig"
 
 endmenu
