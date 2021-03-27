@@ -117,6 +117,12 @@
 #include "iconv_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_INIPARSER
+#include "iniparser_demo.h"
+#endif /* LOSCFG_DEMOS_INIPARSER */
+#ifdef LOSCFG_DEMOS_BIDIREFERENCE
+#include "bidireference_demo.h"
+#endif
 #ifdef LOSCFG_DEMOS_LUA
 #include "lua_demo.h"
 #endif
@@ -262,8 +268,16 @@ VOID DemoEntry(VOID)
     LuaDemoTask();
 #endif
 
+#ifdef LOSCFG_DEMOS_BIDIREFERENCE
+    BidiRefDemoTask();
+#endif
+
 #ifdef LOSCFG_DEMOS_OPUS
     OpusDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_INIPARSER
+    IniparserDemoTask();
 #endif
 
 #ifdef LOSCFG_SHELL

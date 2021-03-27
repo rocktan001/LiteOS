@@ -74,7 +74,7 @@ STATIC UINT32 DemoTaskEntry(VOID)
     printf("Lms task delay done.\n");
 
     /* suspend self */
-    ret = LOS_TaskSuspend(demoTaskLmsId);
+    ret = LOS_TaskSuspend(g_demoTaskId);
     if (ret != LOS_OK) {
         return LOS_NOK;
     }
@@ -82,7 +82,7 @@ STATIC UINT32 DemoTaskEntry(VOID)
     printf("Lms task LOS_TaskResume successfully.\n");
 
     /* delete self */
-    if (LOS_TaskDelete(demoTaskLmsId) != LOS_OK) {
+    if (LOS_TaskDelete(g_demoTaskId) != LOS_OK) {
         printf("Delete lms task failed.\n");
         return LOS_NOK;
     }
