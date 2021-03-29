@@ -179,6 +179,12 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_NET_SAL), y)
         LITEOS_BASELIB += -lsal
     endif
+    ifeq ($(LOSCFG_COMPONENTS_INIPARSER), y)
+        LITEOS_BASELIB += -liniparser
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_BIDIREFERENCE), y)
+        LITEOS_BASELIB += -lbidireference
+    endif
     ifeq ($(LOSCFG_COMPONENTS_LUA), y)
         LITEOS_BASELIB += -llua
     endif
@@ -223,6 +229,12 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_ICONV), y)
         LITEOS_BASELIB += -liconv_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_INIPARSER), y)
+        LITEOS_BASELIB += -liniparser_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_BIDIREFERENCE), y)
+        LITEOS_BASELIB += -lbidireference_demo
     endif
     ifeq ($(LOSCFG_DEMOS_LUA), y)
         LITEOS_BASELIB += -llua_demo

@@ -1,5 +1,8 @@
 menu "Utility"
 
+source "components/utility/bidireference/Kconfig"
+
 source "components/utility/iconv/Kconfig"
+source "components/utility/iniparser/Kconfig"
 
 endmenu

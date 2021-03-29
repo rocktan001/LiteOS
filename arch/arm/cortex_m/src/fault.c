@@ -277,8 +277,6 @@ UINTPTR  CalculateTargetAddress(UINTPTR bl)
         return LoopUntilEntry(tmpBL);
     } else if ((*(UINT32 *)(bl - BL_CMD_OFFSET) & BL_INS) == BL_INS) {
         tmpBL = bl - BL_CMD_OFFSET;
-        CalculateBLTargetAddress (tmpBL);
-
         return CalculateBLTargetAddress (tmpBL);
     }
 
