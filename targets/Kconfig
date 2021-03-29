@@ -9,6 +9,7 @@ config LOSCFG_PLATFORM
     default "realview-pbx-a9"           if LOSCFG_PLATFORM_PBX_A9
     default "qemu-virt-a53"             if LOSCFG_PLATFORM_QEMU_VIRT_A53
     default "STM32L4R9I_Discovery"      if LOSCFG_PLATFORM_STM32L4R9AIIB
+    default "STM32L496_Nucleo"          if LOSCFG_PLATFORM_STM32L496ZGT6
     default "STM32L476_NB476"           if LOSCFG_PLATFORM_STM32L476RGT6
 choice
     prompt "Target"
@@ -24,6 +25,7 @@ choice
       realview-pbx-a9
       qemu-virt-a53
       STM32L4R9I_Discovery
+      STM32L496_Nucleo
       STM32L476_NB476
 
 config LOSCFG_PLATFORM_STM32F429IGTX
@@ -75,6 +77,10 @@ config LOSCFG_PLATFORM_STM32L476RGT6
     select LOSCFG_USING_BOARD_LD
     select LOSCFG_ARCH_CORTEX_M4
 
+config LOSCFG_PLATFORM_STM32L496ZGT6
+    bool "STM32L496_Nucleo"
+    select LOSCFG_USING_BOARD_LD
+    select LOSCFG_ARCH_CORTEX_M4
 
 config LOSCFG_PLATFORM_STM32L4R9AIIB
     bool "STM32L4R9I_Discovery"
