@@ -48,6 +48,8 @@ UINT8 uart_getc(VOID)
     UINT8 ch = 0;
 #ifdef LOSCFG_PLATFORM_STM32L4R9AIIB
     HAL_UART_Receive(&huart2, &ch, sizeof(UINT8), 0);
+#elif defined (LOSCFG_PLATFORM_STM32L496ZGT6)
+    HAL_UART_Receive(&hlpuart1, &ch, sizeof(UINT8), 0);
 #else
     HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
 #endif
@@ -75,6 +77,14 @@ INT32 uart_hwiCreate(VOID)
     __HAL_UART_CLEAR_FLAG(&huart2, UART_FLAG_TC);
     (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
     __HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE);
+#elif defined (LOSCFG_PLATFORM_STM32L496ZGT6)
+    if (hlpuart1.Instance == NULL) {
+        return LOS_NOK;
+    }
+     HAL_NVIC_EnableIRQ(LPUART1_IRQn);
+     __HAL_UART_CLEAR_FLAG(&hlpuart1, UART_FLAG_TC);
+     (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+     __HAL_UART_ENABLE_IT(&hlpuart1, UART_IT_RXNE);
 #else
     if (huart1.Instance == NULL) {
         return LOS_NOK;
@@ -105,6 +115,8 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 {
 #if defined (LOSCFG_PLATFORM_STM32F072_Nucleo) || defined (LOSCFG_PLATFORM_STM32L4R9AIIB)
     (VOID)HAL_UART_Transmit(&huart2, (UINT8 *)buf, len, DEFAULT_TIMEOUT);
+#elif defined (LOSCFG_PLATFORM_STM32L496ZGT6)
+    (VOID)HAL_UART_Transmit(&hlpuart1, (UINT8 *)buf, len, DEFAULT_TIMEOUT);
 #else
     (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)buf, len, DEFAULT_TIMEOUT);
 #endif

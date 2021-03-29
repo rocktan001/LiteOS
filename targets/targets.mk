@@ -68,6 +68,11 @@ else ifeq ($(LOSCFG_PLATFORM_STM32L4R9AIIB), y)
     TIMER_TYPE := arm/timer/arm_cortex_m
     LITEOS_CMACRO_TEST += -DSTM32L4R9xx
     HAL_DRIVER_TYPE := STM32L4xx_HAL_Driver
+######################### STM32L496ZGT6 Options###############################
+else ifeq ($(LOSCFG_PLATFORM_STM32L496ZGT6), y)
+    TIMER_TYPE := arm/timer/arm_cortex_m
+    LITEOS_CMACRO_TEST += -DSTM32L496xx
+    HAL_DRIVER_TYPE := STM32L4xx_HAL_Driver
 
 endif
 
