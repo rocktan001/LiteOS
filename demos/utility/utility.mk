@@ -8,6 +8,12 @@ ifeq ($(LOSCFG_DEMOS_INIPARSER), y)
 include $(LITEOSTOPDIR)/demos/utility/iniparser/iniparser.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_INIPARSER_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_JSON_C), y)
+include $(LITEOSTOPDIR)/demos/utility/json-c/json-c.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_JSON_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_DEMOS_BIDIREFERENCE), y)
 include $(LITEOSTOPDIR)/demos/utility/bidireference/bidireference.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_BIDIREFERENCE_INCLUDE)
