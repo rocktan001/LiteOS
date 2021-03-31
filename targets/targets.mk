@@ -182,6 +182,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_INIPARSER), y)
         LITEOS_BASELIB += -liniparser
     endif
+    ifeq ($(LOSCFG_COMPONENTS_JSON_C), y)
+        LITEOS_BASELIB += -ljson-c
+    endif
     ifeq ($(LOSCFG_COMPONENTS_BIDIREFERENCE), y)
         LITEOS_BASELIB += -lbidireference
     endif
@@ -190,6 +193,10 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_COMPONENTS_OPUS), y)
         LITEOS_BASELIB += -lopus
+    endif
+    ifeq ($(LOSCFG_COMPONENTS_LIBXML2), y)
+        LITEOS_BASELIB += -lxml2
+        LITEOS_BASELIB += -lz
     endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
@@ -230,6 +237,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_ICONV), y)
         LITEOS_BASELIB += -liconv_demo
     endif
+    ifeq ($(LOSCFG_DEMOS_JSON_C), y)
+        LITEOS_BASELIB += -ljson-c_demo
+    endif
     ifeq ($(LOSCFG_DEMOS_INIPARSER), y)
         LITEOS_BASELIB += -liniparser_demo
     endif
@@ -241,6 +251,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_OPUS), y)
         LITEOS_BASELIB += -lopus_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_LIBXML2), y)
+        LITEOS_BASELIB += -lxml2_demo
     endif
 endif
 
