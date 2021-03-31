@@ -120,6 +120,11 @@
 #ifdef LOSCFG_DEMOS_INIPARSER
 #include "iniparser_demo.h"
 #endif /* LOSCFG_DEMOS_INIPARSER */
+
+#ifdef LOSCFG_DEMOS_JSON_C
+#include "json_c_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_BIDIREFERENCE
 #include "bidireference_demo.h"
 #endif
@@ -129,6 +134,10 @@
 
 #ifdef LOSCFG_DEMOS_OPUS
 #include "opus_demo.h"
+#endif
+
+#ifdef LOSCFG_DEMOS_LIBXML2
+#include "libxml2_demo.h"
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
@@ -276,9 +285,18 @@ VOID DemoEntry(VOID)
     OpusDemoTask();
 #endif
 
+#ifdef LOSCFG_DEMOS_LIBXML2
+    Libxml2DemoTask();
+#endif
+
 #ifdef LOSCFG_DEMOS_INIPARSER
     IniparserDemoTask();
 #endif
+
+#ifdef LOSCFG_DEMOS_JSON_C
+    JsonDemoTask();
+#endif
+
 
 #ifdef LOSCFG_SHELL
     (VOID)ShellQueueCreat();

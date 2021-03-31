@@ -18,3 +18,7 @@ ifeq ($(LOSCFG_DEMOS_BIDIREFERENCE), y)
 include $(LITEOSTOPDIR)/demos/utility/bidireference/bidireference.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_BIDIREFERENCE_INCLUDE)
 endif
+ifeq ($(LOSCFG_DEMOS_LIBXML2), y)
+include $(LITEOSTOPDIR)/demos/utility/libxml2/libxml2.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_LIBXML2_INCLUDE)
+endif

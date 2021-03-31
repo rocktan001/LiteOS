@@ -18,3 +18,7 @@ ifeq ($(LOSCFG_COMPONENTS_BIDIREFERENCE), y)
 include $(LITEOSTOPDIR)/components/utility/bidireference/bidireference.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_BIDIREFERENCE_INCLUDE)
 endif
+ifeq ($(LOSCFG_COMPONENTS_LIBXML2), y)
+include $(LITEOSTOPDIR)/components/utility/libxml2/libxml2.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_LIBXML2_INCLUDE)
+endif
