@@ -1,5 +1,6 @@
 menu "Media Demo"
 
+source "demos/media/libpng/Kconfig"
 source "demos/media/opus/Kconfig"
 
 endmenu

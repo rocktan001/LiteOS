@@ -125,6 +125,9 @@
 #include "json_c_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_LIBPNG
+#include "libpng_demo.h"
+#endif
 #ifdef LOSCFG_DEMOS_BIDIREFERENCE
 #include "bidireference_demo.h"
 #endif
@@ -273,6 +276,9 @@ VOID DemoEntry(VOID)
     IconvDemoTask();
 #endif
 
+#ifdef LOSCFG_DEMOS_LIBPNG
+    LibpngDemoTask();
+#endif
 #ifdef LOSCFG_DEMOS_LUA
     LuaDemoTask();
 #endif

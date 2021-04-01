@@ -185,6 +185,10 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_JSON_C), y)
         LITEOS_BASELIB += -ljson-c
     endif
+    ifeq ($(LOSCFG_COMPONENTS_LIBPNG), y)
+        LITEOS_BASELIB += -lpng
+        LITEOS_BASELIB += -lz
+    endif
     ifeq ($(LOSCFG_COMPONENTS_BIDIREFERENCE), y)
         LITEOS_BASELIB += -lbidireference
     endif
@@ -242,6 +246,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_INIPARSER), y)
         LITEOS_BASELIB += -liniparser_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_LIBPNG), y)
+        LITEOS_BASELIB += -lpng_demo
     endif
     ifeq ($(LOSCFG_DEMOS_BIDIREFERENCE), y)
         LITEOS_BASELIB += -lbidireference_demo
