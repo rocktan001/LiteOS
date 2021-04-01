@@ -1,5 +1,6 @@
 include $(LITEOSTOPDIR)/config.mk
 
+MODULE_$(LOSCFG_COMPONENTS_LIBPNG) += libpng
 MODULE_$(LOSCFG_COMPONENTS_OPUS) += opus
 
 include $(MODULE)
