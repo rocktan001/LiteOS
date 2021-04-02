@@ -1,6 +1,4 @@
 include $(LITEOSTOPDIR)/config.mk
-include $(LITEOSTOPDIR)/components/components.mk
-include $(LITEOSTOPDIR)/demos/demos.mk
 
 MODULE_NAME := $(LITEOS_PLATFORM)
 
@@ -22,7 +20,7 @@ ifeq ($(LOSCFG_COMPONENTS_FS), y)
 C_SOURCES += $(FS_SRC)
 endif
 
-BSP_DRIVER_SRC =  \
+BSP_DRIVER_SRC = \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/ft5336/ft5336.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/ft6x06/ft6x06.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/Components/otm8009a/otm8009a.c \
@@ -30,7 +28,7 @@ BSP_DRIVER_SRC =  \
     ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/BSP/STM32F769I-Discovery/*.c}
 C_SOURCES += $(BSP_DRIVER_SRC)
 
-USER_SRC =  \
+USER_SRC = \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/os_adapt/os_adapt.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/main.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/user_task.c \
@@ -97,13 +95,12 @@ endif
 
 ###########################################add support for lvgl########################################################
 ifeq ($(LOSCFG_GUI_ENABLE), y)
-LITEGL_INCLUDE += $(COMPONENTS_INCLUDE)
 LITEGL_INCLUDE += $(DEMOS_INCLUDE)
 LVGl_GUI_INC = \
     -I $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers
     LITEGL_INCLUDE += $(LVGl_GUI_INC)
 
-LVGL_DRIVER_SRC =  \
+LVGL_DRIVER_SRC = \
     ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/tft/*.c} \
     ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Drivers/touchpad/*.c}
     C_SOURCES += $(LVGL_DRIVER_SRC)
@@ -115,7 +112,7 @@ C_DEFS += -DLV_CONF_INCLUDE_SIMPLE
 endif
 #######################################################################################################################
 
-ASM_SOURCES =  \
+ASM_SOURCES = \
     ${wildcard $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/los_startup_gcc.S}
 
 BOARD_SRCS += $(ASM_SOURCES)
@@ -128,5 +125,5 @@ LOCAL_INCLUDE += $(BOARD_INCLUDES)
 
 LOCAL_CFLAGS += -Wno-unused-function
 
-LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_FLAGS := $(LITEOS_CFLAGS_INTERWORK) $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 include $(MODULE)

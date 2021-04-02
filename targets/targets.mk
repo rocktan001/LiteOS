@@ -68,7 +68,7 @@ else ifeq ($(LOSCFG_PLATFORM_STM32L4R9AIIB), y)
     TIMER_TYPE := arm/timer/arm_cortex_m
     LITEOS_CMACRO_TEST += -DSTM32L4R9xx
     HAL_DRIVER_TYPE := STM32L4xx_HAL_Driver
-######################### STM32L496ZGT6 Options###############################
+######################### STM32L4R96ZGT6 Options###############################
 else ifeq ($(LOSCFG_PLATFORM_STM32L496ZGT6), y)
     TIMER_TYPE := arm/timer/arm_cortex_m
     LITEOS_CMACRO_TEST += -DSTM32L496xx
@@ -189,6 +189,9 @@ ifneq ($(OS), Linux)
         LITEOS_BASELIB += -lpng
         LITEOS_BASELIB += -lz
     endif
+    ifeq ($(LOSCFG_COMPONENTS_FREETYPE), y)
+        LITEOS_BASELIB += -lfreetype
+    endif
     ifeq ($(LOSCFG_COMPONENTS_BIDIREFERENCE), y)
         LITEOS_BASELIB += -lbidireference
     endif
@@ -252,6 +255,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_BIDIREFERENCE), y)
         LITEOS_BASELIB += -lbidireference_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_FREETYPE), y)
+        LITEOS_BASELIB += -lfreetype_demo
     endif
     ifeq ($(LOSCFG_DEMOS_LUA), y)
         LITEOS_BASELIB += -llua_demo

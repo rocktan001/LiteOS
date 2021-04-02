@@ -1,10 +1,11 @@
 menu "Utility"
 
 source "components/utility/bidireference/Kconfig"
-
+source "components/utility/freetype/Kconfig"
 source "components/utility/iconv/Kconfig"
 source "components/utility/iniparser/Kconfig"
 source "components/utility/json-c/Kconfig"
 source "components/utility/libxml2/Kconfig"
 
 endmenu
+
