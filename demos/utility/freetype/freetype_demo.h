@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Esp8266 At Device HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: FreeType Demo HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-02-24
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,45 +26,23 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ESP8266_H
-#define _ESP8266_H
+#ifndef _FREETYPE_DEMO_H
+#define _FREETYPE_DEMO_H
 
-#include "at_frame/at_main.h"
+#include "los_typedef.h"
 
-#define WIFI_SSID                 "HWTEST"
-#define WIFI_PASSWD               ""
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#define AT_MODU_NAME              "ESP8266"
-#define AT_USART_PORT             2
-#define AT_BUARDRATE              115200
-#define AT_CMD_TIMEOUT            10000 // ms
-#define AT_MAX_LINK_NUM           4
+VOID FreeTypeDemoTask(VOID);
 
-#define AT_LINE_END               "\r\n"
-#define AT_CMD_BEGIN              "\r\n"
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#define MAX_AT_USERDATA_LEN       (1024)
-
-#define AT_CMD_RST                "AT+RST"
-#define AT_CMD_ECHO_OFF           "ATE0"
-#define AT_CMD_CWMODE             "AT+CWMODE_CUR"
-#define AT_CMD_JOINAP             "AT+CWJAP_CUR"
-#define AT_CMD_MUX                "AT+CIPMUX"
-#define AT_CMD_CONN               "AT+CIPSTART"
-#define AT_CMD_SEND               "AT+CIPSEND"
-#define AT_CMD_CLOSE              "AT+CIPCLOSE"
-#define AT_CMD_CHECK_IP           "AT+CIPSTA_CUR?"
-#define AT_CMD_CHECK_MAC          "AT+CIPSTAMAC_CUR?"
-#define AT_CMD_SHOW_DINFO         "AT+CIPDINFO"
-
-#define AT_DATAF_PREFIX           "\r\n+IPD"
-
-typedef enum {
-    STA = 1,
-    AP,
-    ATA_AP,
-} enum_net_mode;
-
-void Esp8266Register(void);
-
-#endif /* _ESP8266_H */
+#endif /* _FREETYPE_DEMO_H */

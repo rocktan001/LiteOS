@@ -128,9 +128,15 @@
 #ifdef LOSCFG_DEMOS_LIBPNG
 #include "libpng_demo.h"
 #endif
+
 #ifdef LOSCFG_DEMOS_BIDIREFERENCE
 #include "bidireference_demo.h"
 #endif
+
+#ifdef LOSCFG_DEMOS_FREETYPE
+#include "freetype_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_LUA
 #include "lua_demo.h"
 #endif
@@ -279,6 +285,7 @@ VOID DemoEntry(VOID)
 #ifdef LOSCFG_DEMOS_LIBPNG
     LibpngDemoTask();
 #endif
+
 #ifdef LOSCFG_DEMOS_LUA
     LuaDemoTask();
 #endif
@@ -303,6 +310,9 @@ VOID DemoEntry(VOID)
     JsonDemoTask();
 #endif
 
+#ifdef LOSCFG_DEMOS_FREETYPE
+    FreeTypeDemoTask();
+#endif
 
 #ifdef LOSCFG_SHELL
     (VOID)ShellQueueCreat();

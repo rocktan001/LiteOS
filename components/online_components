@@ -1,4 +1,5 @@
 BidireferenceC-8.0.0 &#& components/utility/bidireference &#& LOSCFG_COMPONENTS_BIDIREFERENCE=y &#& sh download_bidi.sh BidireferenceC-8.0.0
+freetype-2.4.0 &#& components/utility/freetype            &#& LOSCFG_COMPONENTS_FREETYPE=y      &#& git clone -b VER-2-4-0  https://github.com/freetype/freetype.git freetype-2.4.0
 iniparser-4.1  &#& components/utility/iniparser           &#& LOSCFG_COMPONENTS_INIPARSER=y     &#& git clone -b v4.1 https://github.com/ndevilla/iniparser.git iniparser-4.1
 json-c-0.13.1  &#& components/utility/json-c              &#& LOSCFG_COMPONENTS_JSON_C=y        &#& git clone -b json-c-0.13.1-20180305 https://github.com/json-c/json-c.git json-c-0.13.1
 libiconv-1.14  &#& components/utility/iconv               &#& LOSCFG_COMPONENTS_ICONV=y         &#& git clone -b libiconv-1.14 https://github.com/winlibs/libiconv.git libiconv-1.14
