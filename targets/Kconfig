@@ -11,6 +11,7 @@ config LOSCFG_PLATFORM
     default "STM32L4R9I_Discovery"      if LOSCFG_PLATFORM_STM32L4R9AIIB
     default "STM32L496_Nucleo"          if LOSCFG_PLATFORM_STM32L496ZGT6
     default "STM32L476_NB476"           if LOSCFG_PLATFORM_STM32L476RGT6
+    default "STM32L552_Nucleo"          if LOSCFG_PLATFORM_STM32L552ZET6Q
 choice
     prompt "Target"
     default LOSCFG_PLATFORM_STM32F429IGTX
@@ -27,6 +28,7 @@ choice
       STM32L4R9I_Discovery
       STM32L496_Nucleo
       STM32L476_NB476
+      STM32L552_Nucleo
 
 config LOSCFG_PLATFORM_STM32F429IGTX
     bool "Cloud_STM32F429IGTx_FIRE"
@@ -86,6 +88,11 @@ config LOSCFG_PLATFORM_STM32L4R9AIIB
     bool "STM32L4R9I_Discovery"
     select LOSCFG_USING_BOARD_LD
     select LOSCFG_ARCH_CORTEX_M4
+
+config LOSCFG_PLATFORM_STM32L552ZET6Q
+    bool "STM32L552_Nucleo"
+    select LOSCFG_USING_BOARD_LD
+    select LOSCFG_ARCH_CORTEX_M33
 
 endchoice
 

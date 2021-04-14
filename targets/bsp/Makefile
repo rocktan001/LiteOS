@@ -144,6 +144,24 @@ STM32F072RBTX_HAL_SRC = \
     drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.c \
     drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.c
     LOCAL_SRCS = $(STM32F072RBTX_HAL_SRC)
+else ifeq ($(LOSCFG_PLATFORM_STM32L552ZET6Q), y)
+STM32L552ZET6Q_HAL_SRC = \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_i2c.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_flash.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_flash_ex.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_rcc.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_rcc_ex.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_gpio.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_pwr.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_pwr_ex.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_tim_ex.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_cortex.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_uart.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_uart_ex.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_tim.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal.c \
+    drivers/STM32L5xx_HAL_Driver/Src/stm32l5xx_hal_dma.c
+    LOCAL_SRCS = $(STM32L552ZET6Q_HAL_SRC)
 endif
 
 LOCAL_SRCS += \

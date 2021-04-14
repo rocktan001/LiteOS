@@ -17,6 +17,9 @@ ifeq ($(LOSCFG_ARCH_CORTEX_M0), y)
 # cortex m0 not support fpu;
 else ifeq ($(LOSCFG_ARCH_CORTEX_M3), y)
 LITEOS_FLOAT_OPTS       := -mfloat-abi=softfp
+else ifeq ($(LOSCFG_ARCH_CORTEX_M33), y)
+LITEOS_FPU_OPTS         := -mfpu=fpv5-d16
+LITEOS_FLOAT_OPTS       := -mfloat-abi=softfp
 else
 LITEOS_FLOAT_OPTS       := -mfloat-abi=hard
 LITEOS_FPU_OPTS         := -mfpu=$(LOSCFG_ARCH_FPU)
@@ -27,6 +30,8 @@ endif
 # for v6m, use thumb/v6-m/nofp/libgcc.a
 ifdef LOSCFG_ARCH_CORTEX_M0
 LITEOS_GCCLIB           := thumb/v6-m/nofp
+else ifeq ($(LOSCFG_ARCH_CORTEX_M33), y)
+LITEOS_GCCLIB           := thumb/v8-m.main+fp/$(subst -mfloat-abi=,,$(LITEOS_FLOAT_OPTS))
 else
 LITEOS_GCCLIB           := thumb/v7e-m+fp/$(subst -mfloat-abi=,,$(LITEOS_FLOAT_OPTS))
 endif
