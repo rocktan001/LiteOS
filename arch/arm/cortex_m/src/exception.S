@@ -27,9 +27,16 @@
  * --------------------------------------------------------------------------- */
 
     .syntax unified
-    .arch armv7-m
+#if defined(LOSCFG_ARCH_CORTEX_M0)
+    .arch armv6-m
+#else
+#if defined(LOSCFG_ARCH_CORTEX_M33)
+    .arch armv8-m.main
+#else
+    .arch armv7e-m
+#endif
+#endif
     .thumb
-    .fpu vfpv4
     .section .text
 
 
