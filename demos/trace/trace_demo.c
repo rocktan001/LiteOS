@@ -333,8 +333,10 @@ STATIC VOID DemoTaskEntry(VOID)
 
     DeadLockCheckDemo();
 
+#ifdef LOSCFG_RECORDER_MODE_OFFLINE
     LOS_TraceStop();
     LOS_TraceRecordDump(FALSE);
+#endif
 
     printf("Trace demo task finished.\n");
 }
