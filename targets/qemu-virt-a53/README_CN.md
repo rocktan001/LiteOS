@@ -80,7 +80,7 @@ $ apt-get install gcc-aarch64-linux-gnu
     ```
 - 编译后使用如下命令运行QEMU：
     ```
-    $ qemu-system-aarch64 -machine virt -kernel -cpu cortex-a53 out/qemu-virt-a53/Huawei_LiteOS.elf -nographic
+    $ qemu-system-aarch64 -machine virt -cpu cortex-a53 -kernel out/qemu-virt-a53/Huawei_LiteOS.elf -nographic
     ```
 - 关闭Kernel SMP后LiteOS启动打印信息如下所示：
     ```
