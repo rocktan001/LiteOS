@@ -54,6 +54,13 @@ Huawei LiteOS自开源社区发布以来，围绕NB-IoT物联网市场从技术�
 该文档详细讲解了LiteOS各模块开发及其实现原理。用户可以通过阅读该文档学习各模块的使用。
 
 
+## LiteOS 组件开发指南
+
+<a href="https://gitee.com/LiteOS/LiteOS_Components/tree/master" target="_blank">LiteOS组件开发指南</a>
+
+该文档详细介绍了LiteOS组件的构成以及完整的开发流程。用户可以通过阅读该文档了解LiteOS组件框架和开发流程。
+
+
 ## LiteOS 维测指南
 
 [LiteOS维测指南](./doc/LiteOS_Maintenance_Guide.md)
