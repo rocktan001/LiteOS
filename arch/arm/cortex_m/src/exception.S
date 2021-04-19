@@ -27,14 +27,10 @@
  * --------------------------------------------------------------------------- */
 
     .syntax unified
-#if defined(LOSCFG_ARCH_CORTEX_M0)
-    .arch armv6-m
-#else
 #if defined(LOSCFG_ARCH_CORTEX_M33)
     .arch armv8-m.main
 #else
     .arch armv7e-m
-#endif
 #endif
     .thumb
     .section .text
@@ -258,7 +254,9 @@ ExcInMSP:
     PUSH  {R3}
     MRS   R12, PRIMASK /* store message-->exc: disable int */
     PUSH  {R4-R12} /* store message-->exc: {R4-R12} */
+#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_CORTEX_M0)
     VPUSH {D8-D15}
+#endif
     B     HandleEntry
 
 NoFloatInMsp:
@@ -303,12 +301,16 @@ HwiActiveCheckNext:
 
     MRS   R12, PRIMASK
     PUSH  {R4-R12}
+#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_CORTEX_M0)
     VPUSH {D8-D15}
+#endif
 
     /* copy auto saved task register */
     LDMFD   R3!, {R4-R11} /* R4-R11 store PSP reg(auto push when exc in task) */
+#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_CORTEX_M0)
     VLDMIA  R3!, {D8-D15}
     VSTMDB  R2!, {D8-D15}
+#endif
     STMFD   R2!, {R4-R11}
     B       HandleEntry
 
