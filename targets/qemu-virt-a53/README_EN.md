@@ -93,7 +93,7 @@ apt-get install gcc-aarch64-linux-gnu
 - After the build, run the following command to run QEMU:
 
     ```
-    qemu-system-aarch64 -machine virt -kernel -cpu cortex-a53 out/qemu-virt-a53/Huawei_LiteOS.elf -nographic
+    qemu-system-aarch64 -machine virt -cpu cortex-a53 -kernel out/qemu-virt-a53/Huawei_LiteOS.elf -nographic
     ```
 
 - After Kernel SMP is disabled, the following information is displayed when LiteOS is started:
