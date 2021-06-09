@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description:  Exception Implementation
  * Author: Huawei LiteOS Team
  * Create: 2020-06-24
@@ -27,18 +27,21 @@
  * --------------------------------------------------------------------------- */
 
 #include "los_exc.h"
+#include "los_printf_pri.h"
+#include "los_task_pri.h"
 #ifdef LOSCFG_SHELL_EXCINFO_DUMP
 #include "time.h"
 #endif
-#include "los_printf_pri.h"
-#include "los_task_pri.h"
 #ifdef LOSCFG_EXC_INTERACTION
+#include "hisoc/uart.h"
 #include "los_swtmr_pri.h"
 #include "los_hwi_pri.h"
+#endif
 #ifdef LOSCFG_SHELL
+#include "shcmd.h"
 #include "shell_pri.h"
 #endif
-#endif
+#include "los_exc_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -155,18 +158,45 @@ VOID OsRecordExcInfoTime(VOID)
 #define NOW_TIME_LENGTH 24
     time_t t;
     struct tm *tmTime = NULL;
-    CHAR nowTime[NOW_TIME_LENGTH];
+    CHAR nowTime[NOW_TIME_LENGTH] = {0};
 
     (VOID)time(&t);
     tmTime = localtime(&t);
     if (tmTime == NULL) {
         return;
     }
-    (VOID)memset_s(nowTime, sizeof(nowTime), 0, sizeof(nowTime));
     (VOID)strftime(nowTime, NOW_TIME_LENGTH, "%Y-%m-%d %H:%M:%S", tmTime);
 #undef NOW_TIME_LENGTH
-    WriteExcInfoToBuf("%s \n", nowTime);
+    PrintExcInfo("%s \n", nowTime);
 }
+
+#ifdef LOSCFG_SHELL
+INT32 OsShellCmdReadExcInfo(INT32 argc, const CHAR **argv)
+{
+    LogReadWriteFunc hook = NULL;
+    UINT32 recordSpace = OsGetExcInfoLen();
+
+    (VOID)argc;
+    (VOID)argv;
+
+    CHAR *buf = (CHAR*)LOS_MemAlloc((void *)OS_SYS_MEM_ADDR, recordSpace + 1);
+    if (buf == NULL) {
+        return LOS_NOK;
+    }
+    (void)memset_s(buf, recordSpace + 1, 0, recordSpace + 1);
+
+    hook = OsGetExcInfoRW();
+    if (hook != NULL) {
+        hook(OsGetExcInfoDumpAddr(), recordSpace, 1, buf);
+    }
+    PRINTK("%s\n", buf);
+    (VOID)LOS_MemFree((void *)OS_SYS_MEM_ADDR, buf);
+
+    return LOS_OK;
+}
+
+SHELLCMD_ENTRY(readExcInfo_shellcmd, CMD_TYPE_EX, "excInfo", 0, (CmdCallBackFunc)OsShellCmdReadExcInfo);
+#endif
 #endif
 
 #ifdef LOSCFG_EXC_INTERACTION
@@ -225,14 +255,17 @@ VOID LOS_Panic(const CHAR *fmt, ...)
 
 VOID LOS_BackTrace(VOID)
 {
+#ifdef LOSCFG_BACKTRACE
     LosTaskCB *runTask = OsCurrTaskGet();
     PrintExcInfo("runTask->taskName = %s\n""runTask->taskId = %u\n",
         runTask->taskName, runTask->taskId);
     ArchBackTrace();
+#endif
 }
 
 VOID LOS_TaskBackTrace(UINT32 taskID)
 {
+#ifdef LOSCFG_BACKTRACE
     LosTaskCB *taskCB = NULL;
 
     if (taskID >= g_taskMaxNum) {
@@ -249,6 +282,9 @@ VOID LOS_TaskBackTrace(UINT32 taskID)
     PRINTK("TaskName = %s\n""TaskId = 0x%x\n",
         taskCB->taskName, taskCB->taskId);
     ArchBackTraceWithSp(taskCB->stackPointer);
+#else
+    (VOID)taskID;
+#endif
 }
 
 #ifdef __GNUC__

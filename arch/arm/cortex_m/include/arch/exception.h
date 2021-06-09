@@ -26,6 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ---------------------------------------------------------------------------- */
 
+/**
+ * @defgroup los_exc Exception
+ * @ingroup kernel
+ */
+
 #ifndef _ARCH_EXCEPTION_H
 #define _ARCH_EXCEPTION_H
 
@@ -41,8 +46,6 @@ extern "C" {
 #define OS_STACK_INIT       0xCACACACA
 /* Bit32 stack top magic number. */
 #define OS_STACK_MAGIC_WORD 0xCCCCCCCC
-
-extern CHAR _estack;
 
 typedef enum {
     OS_EXC_TYPE_CONTEXT     = 0,
@@ -93,8 +96,7 @@ typedef struct tagExcInfoCallBackArray {
  */
 typedef struct tagExcContext {
     // handler save
-#if ((defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
-     (defined (__FPU_USED) && (__FPU_USED == 1U)))
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     UINT32 S16;
     UINT32 S17;
     UINT32 S18;
@@ -131,8 +133,7 @@ typedef struct tagExcContext {
     UINT32 LR;
     UINT32 PC;
     UINT32 xPSR;
-#if ((defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
-     (defined (__FPU_USED) && (__FPU_USED == 1U)))
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     UINT32 S0;
     UINT32 S1;
     UINT32 S2;
@@ -158,7 +159,7 @@ typedef VOID (* EXC_PROC_FUNC)(UINT32, ExcContext *);
 VOID OsExcHandleEntry(UINT32 excType, UINT32 faultAddr, UINT32 pid, const ExcContext *excBufAddr);
 
 /**
- * @ingroup  los_hwi
+ * @ingroup  los_exc
  * @brief: Exception initialization.
  *
  * @par Description:
@@ -330,7 +331,7 @@ typedef struct tagExcInfo {
 
 extern UINT32 g_curNestCount;
 
-VOID OsExcInfoDisplay(const ExcInfo *exc, ExcContext *excBufAddr);
+VOID OsExcInfoDisplay(const ExcInfo *exc, const ExcContext *excBufAddr);
 
 /**
  * @ingroup los_exc
@@ -360,38 +361,12 @@ STATIC INLINE VOID ArchHaltCpu(VOID)
     __asm__ __volatile__("swi 0");
 }
 
-STATIC INLINE UINTPTR ArchGetSp(VOID)
-{
-    UINTPTR regSp;
-
-    __asm__ __volatile__("mov %0, sp\n" : "=r"(regSp));
-
-    return regSp;
-}
-
-STATIC INLINE UINTPTR ArchGetPsp(VOID)
-{
-    UINTPTR regPsp;
-
-    __asm__ __volatile__("MRS %0, psp\n" : "=r"(regPsp));
-
-    return regPsp;
-}
-
-STATIC INLINE UINTPTR ArchGetMsp(VOID)
-{
-    UINTPTR regMsp;
-
-    __asm__ __volatile__("MRS %0, msp\n" : "=r"(regMsp));
-
-    return regMsp;
-}
-
 VOID ArchBackTrace(VOID);
 VOID ArchBackTraceWithSp(const VOID *stackPointer);
 
 #ifdef __cplusplus
 #if __cplusplus
+}
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 

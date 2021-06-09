@@ -9,7 +9,7 @@ int printf(const char *restrict fmt, ...)
 	va_start(ap, fmt);
 #if defined(LOSCFG_FS_VFS)
 	ret = vfprintf(stdout, fmt, ap);
-#elif defined(LOSCFG_PLATFORM_UART_WITHOUT_VFS)
+#elif defined(LOSCFG_DRIVERS_UART) || defined(LOSCFG_DRIVERS_SIMPLE_UART)
 	UartVprintf(fmt, ap);
 #else
 	ret = -1;

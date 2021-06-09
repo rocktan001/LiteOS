@@ -42,15 +42,22 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-// max size of each class
+/**
+ * @ingroup los_slab
+ * total size of each slab class.
+ */
 #define SLAB_MEM_ALLOCATOR_SIZE     512U
 
 #define SLAB_BASIC_NEED_SIZE        0x1000
 
+/**
+ * @ingroup los_slab
+ * slab bucket size type.
+ */
 #ifdef LOSCFG_KERNEL_MEM_SLAB_AUTO_EXPANSION_MODE
 enum SlabBucketSizeType {
-    SLAB_BUCKET_SIZE_HALF_OF_HEAP    = 0x1UL,   /* a half of heap size slab mem can use */
-    SLAB_BUCKET_SIZE_QUARTER_OF_HEAP,           /* one quarter of heap size slab mem can use */
+    SLAB_BUCKET_SIZE_HALF_OF_HEAP    = 0x1UL,   /**< a half of heap size slab mem can use */
+    SLAB_BUCKET_SIZE_QUARTER_OF_HEAP,           /**< one quarter of heap size slab mem can use */
     SLAB_BUCKET_SIZE_TYPE_MAX
 };
 

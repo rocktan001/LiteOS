@@ -28,7 +28,6 @@
 
 #include "stdlib.h"
 #include "los_memory.h"
-#include "string.h"
 
 /*
  * Allocates the requested memory and returns a pointer to it. The requested

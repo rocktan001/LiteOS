@@ -132,6 +132,7 @@ extern "C" {
  * The error code is not in use temporarily.
  *
  * Value: 0x02001d08
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_MUX_OVERFLOW              LOS_ERRNO_OS_ERROR(LOS_MOD_MUX, 0x08)
 
@@ -150,6 +151,7 @@ extern "C" {
  * The error code is not in use temporarily.
  *
  * Value: 0x02001d0A
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_MUX_GET_COUNT_ERR         LOS_ERRNO_OS_ERROR(LOS_MOD_MUX, 0x0A)
 
@@ -158,6 +160,7 @@ extern "C" {
  * The error code is not in use temporarily.
  *
  * Value: 0x02001d0B
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_MUX_REG_ERROR             LOS_ERRNO_OS_ERROR(LOS_MOD_MUX, 0x0B)
 
@@ -169,6 +172,7 @@ extern "C" {
  * Value: 0x02001d0C.
  *
  * Solution: Pend the mutex in a vailid task.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_MUX_PEND_IN_SYSTEM_TASK   LOS_ERRNO_OS_ERROR(LOS_MOD_MUX, 0x0C)
 

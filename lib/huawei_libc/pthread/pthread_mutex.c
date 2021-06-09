@@ -35,7 +35,7 @@
 #include "los_mux_debug_pri.h"
 #include "los_task_pri.h"
 #include "los_mp_pri.h"
-#if (LOSCFG_BASE_CORE_SWTMR == YES)
+#ifdef LOSCFG_BASE_CORE_SWTMR
 #include "los_exc.h"
 #include "los_swtmr_pri.h"
 #endif
@@ -273,7 +273,7 @@ int pthread_mutex_destroy(pthread_mutex_t *mutex)
     return ENOERR;
 }
 
-UINT32 OsMuxPreCheck(pthread_mutex_t *mutex, LosTaskCB *runTask)
+UINT32 OsMuxPreCheck(const pthread_mutex_t *mutex, const LosTaskCB *runTask)
 {
     if (mutex == NULL) {
         return EINVAL;
@@ -462,7 +462,8 @@ STATIC INT32 OsMuxPostForPosix(pthread_mutex_t *mutex)
     /* Whether a task block the mutex lock. */
     ret = OsMuxPostOp(runTask, (MuxBaseCB *)muxPosted);
     SCHEDULER_UNLOCK(intSave);
-    if (ret == MUX_SCHEDULE) {
+    if ((ret == MUX_SCHEDULE) ||
+        (mutex->stAttr.protocol == PTHREAD_PRIO_PROTECT)) {
         LOS_MpSchedule(OS_MP_CPU_ALL);
         LOS_Schedule();
     }

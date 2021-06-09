@@ -26,7 +26,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "string.h"
 #include "los_hwi.h"
 #include "uart.h"
 
@@ -42,11 +41,11 @@ int do_uart_getc(void)
     static int num = 0;
     static int pos = 0;
     char ch;
-    HalIrqMask(NUM_HAL_INTERRUPT_UART);
+    (void)HalIrqMask(NUM_HAL_INTERRUPT_UART);
     if (buf == NULL) {
         buf = (char *)malloc(INPUT_BUF_SIZE);
         if (buf == NULL) {
-            HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
+            (void)HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
             return EOF;
         }
         pos = 0;
@@ -73,7 +72,7 @@ int do_uart_getc(void)
 
     num--;
     ret = buf[pos++];
-    HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
+    (void)HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
     return ret;
 }
 #endif

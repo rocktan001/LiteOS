@@ -50,7 +50,7 @@ extern "C" {
 
 /* The size of this structure must be smaller than or equal to the size specified by OS_TSK_STACK_ALIGN (16 bytes). */
 typedef struct {
-#if !defined(LOSCFG_ARCH_FPU_DISABLE)
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     UINT64 D[FP_REGS_NUM];  /* D0-D31 */
     UINT32 regFPSCR;        /* FPSCR */
     UINT32 regFPEXC;        /* FPEXC */
@@ -66,7 +66,7 @@ STATIC INLINE VOID *ArchCurrTaskGet(VOID)
     return (VOID *)(UINTPTR)ARM_SYSREG_READ(TPIDRPRW);
 }
 
-STATIC INLINE VOID ArchCurrTaskSet(VOID *val)
+STATIC INLINE VOID ArchCurrTaskSet(const VOID *val)
 {
     ARM_SYSREG_WRITE(TPIDRPRW, (UINT32)(UINTPTR)val);
 }

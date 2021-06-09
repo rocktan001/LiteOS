@@ -25,11 +25,16 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
+
+/**
+ * @defgroup mmu
+ * @ingroup kernel
+ */
+
 #ifndef _ARCH_MMU_H
 #define _ARCH_MMU_H
 
 #include "los_typedef.h"
-#include "los_toolchain.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -43,9 +48,9 @@ extern "C" {
 #define BUFFERABLE     1
 #define EXECUTABLE     0
 #define NON_EXECUTABLE 1
-#define ACCESS_RW      3 /* ap = 0 ap1 = 0b11 */
-#define ACCESS_RO      7 /* ap = 1 ap1 = 0b11 */
-#define ACCESS_NA      0 /* ap = 0 ap1 = 0 */
+#define ACCESS_RW      3U /* ap = 0 ap1 = 0b11 */
+#define ACCESS_RO      7U /* ap = 1 ap1 = 0b11 */
+#define ACCESS_NA      0U /* ap = 0 ap1 = 0 */
 #define D_MANAGER      0
 #define D_CLIENT       1
 #define D_NA           2
@@ -99,13 +104,13 @@ extern "C" {
 #define BUFFER_DISABLE 0
 
 /**
- * @ingroup mmu_config
+ * @ingroup mmu
  * Set it non-executable.
  */
 #define EXEC_DISABLE (1U << 3)
 
 /**
- * @ingroup mmu_config
+ * @ingroup mmu
  * Set it executable.
  */
 #define EXEC_ENABLE 0
@@ -122,7 +127,7 @@ extern "C" {
  */
 #define SECOND_PAGE 0
 
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
 #define MMU_SHAREABLE 1
 #else
 #define MMU_SHAREABLE 0
@@ -294,7 +299,7 @@ struct MMUFirstLevelReserved {
     k = (tableBase) + MMU_DESC_OFFSET(vBase);                           \
     for (j = (aBase), i = 0; i < (size); ++i, ++j, k += MMU_DESC_LEN) { \
         (baseAddress) = j;                                              \
-        *(UINTPTR *)k = desc.word;                                      \
+        *(UINTPTR *)(UINTPTR)k = desc.word;                             \
     }                                                                   \
 } while (0)
 
@@ -304,7 +309,7 @@ struct MMUFirstLevelReserved {
     for (j = (aBase), i = 0; i < (size); ++i, ++j) {                        \
         (baseAddress) = j;                                                  \
         for (n = 0; n < (MMU_64K / MMU_4K); ++n, k += MMU_DESC_LEN) {       \
-            *(UINTPTR *)k = desc.word;                                      \
+            *(UINTPTR *)(UINTPTR)k = desc.word;                             \
         }                                                                   \
     }                                                                       \
 } while (0)
@@ -315,7 +320,7 @@ struct MMUFirstLevelReserved {
     desc.section.s = (MMU_SHAREABLE);                            \
     X_MMU_SET_BCX(desc.section, (buff), (cache), (exeNever));    \
     X_MMU_SET_AP_ALL(desc.section, (access));                    \
-    (*(UINTPTR *)(item)) = desc.word;                            \
+    (*(UINTPTR *)(UINTPTR)(item)) = desc.word;                   \
 } while (0)
 
 #define X_MMU_SECTION(aBase, vBase, size, cache, buff, access, exeNever, sdomain) do { \

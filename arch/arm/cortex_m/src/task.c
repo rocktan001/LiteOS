@@ -69,42 +69,8 @@ LITE_OS_SEC_TEXT_INIT VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOI
     OsStackInit(topStack, stackSize);
     taskContext = (TaskContext *)(((UINTPTR)topStack + stackSize) - sizeof(TaskContext));
 
-#if ((defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
-     (defined (__FPU_USED) && (__FPU_USED == 1U)))
-    taskContext->S16 = 0xAA000010;
-    taskContext->S17 = 0xAA000011;
-    taskContext->S18 = 0xAA000012;
-    taskContext->S19 = 0xAA000013;
-    taskContext->S20 = 0xAA000014;
-    taskContext->S21 = 0xAA000015;
-    taskContext->S22 = 0xAA000016;
-    taskContext->S23 = 0xAA000017;
-    taskContext->S24 = 0xAA000018;
-    taskContext->S25 = 0xAA000019;
-    taskContext->S26 = 0xAA00001A;
-    taskContext->S27 = 0xAA00001B;
-    taskContext->S28 = 0xAA00001C;
-    taskContext->S29 = 0xAA00001D;
-    taskContext->S30 = 0xAA00001E;
-    taskContext->S31 = 0xAA00001F;
-    taskContext->S0  = 0xAA000000;
-    taskContext->S1  = 0xAA000001;
-    taskContext->S2  = 0xAA000002;
-    taskContext->S3  = 0xAA000003;
-    taskContext->S4  = 0xAA000004;
-    taskContext->S5  = 0xAA000005;
-    taskContext->S6  = 0xAA000006;
-    taskContext->S7  = 0xAA000007;
-    taskContext->S8  = 0xAA000008;
-    taskContext->S9  = 0xAA000009;
-    taskContext->S10 = 0xAA00000A;
-    taskContext->S11 = 0xAA00000B;
-    taskContext->S12 = 0xAA00000C;
-    taskContext->S13 = 0xAA00000D;
-    taskContext->S14 = 0xAA00000E;
-    taskContext->S15 = 0xAA00000F;
-    taskContext->FPSCR = 0x00000000;
-    taskContext->NO_NAME = 0xAA000011;
+#ifdef LOSCFG_ARCH_FPU_ENABLE
+    taskContext->excReturn = 0xFFFFFFFD;
 #endif
 
     taskContext->R4  = 0x04040404L;

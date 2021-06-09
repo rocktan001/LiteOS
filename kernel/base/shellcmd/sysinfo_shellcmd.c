@@ -74,7 +74,7 @@ UINT32 OsShellCmdSemCntGet(VOID)
     intSave = LOS_IntLock();
     for (loop = 0; loop < LOSCFG_BASE_IPC_SEM_LIMIT; loop++) {
         semNode = GET_SEM(loop);
-        if (semNode->semStat == OS_SEM_USED) {
+        if (semNode->semStat == LOS_USED) {
             semCnt++;
         }
     }
@@ -94,7 +94,7 @@ UINT32 OsShellCmdMuxCntGet(VOID)
     intSave = LOS_IntLock();
     for (loop = 0; loop < LOSCFG_BASE_IPC_MUX_LIMIT; loop++) {
         muxNode = GET_MUX(loop);
-        if (muxNode->muxStat == OS_MUX_USED) {
+        if (muxNode->muxStat == LOS_USED) {
             muxCnt++;
         }
     }
@@ -114,7 +114,7 @@ UINT32 OsShellCmdQueueCntGet(VOID)
     intSave = LOS_IntLock();
     queueCB = g_allQueue;
     for (loop = 0; loop < LOSCFG_BASE_IPC_QUEUE_LIMIT; loop++, queueCB++) {
-        if (queueCB->queueState == OS_QUEUE_INUSED) {
+        if (queueCB->queueState == LOS_USED) {
             queueCnt++;
         }
     }

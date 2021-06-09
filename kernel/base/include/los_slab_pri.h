@@ -133,12 +133,12 @@ extern BOOL OsSlabAllocatorFree(OsSlabAllocator *allocator, VOID* ptr);
 extern BOOL OsSlabAllocatorEmpty(const OsSlabAllocator *allocator);
 extern VOID OsSlabAllocatorGetSlabInfo(const OsSlabAllocator *allocator, UINT32 *itemSize,
     UINT32 *itemCnt, UINT32 *curUsage);
-extern BOOL OsSlabAllocatorCheck(const OsSlabAllocator *allocator, VOID *ptr);
+extern BOOL OsSlabAllocatorCheck(const OsSlabAllocator *allocator, const VOID *ptr);
 extern VOID OsSlabMemInit(VOID *pool, UINT32 size);
 extern VOID OsSlabMemDeinit(VOID *pool);
 extern VOID *OsSlabMemAlloc(VOID *pool, UINT32 sz);
 extern BOOL OsSlabMemFree(VOID *pool, VOID *ptr);
-extern UINT32 OsSlabMemCheck(const VOID *pool, VOID *ptr);
+extern UINT32 OsSlabMemCheck(const VOID *pool, const VOID *ptr);
 extern UINT32 OsSlabStatisticsGet(const VOID *pool, LosSlabStatus *status);
 extern UINT32 OsSlabGetMaxFreeBlkSize(const VOID *pool);
 extern VOID *OsSlabCtrlHdrGet(const VOID *pool);
@@ -163,7 +163,7 @@ STATIC INLINE BOOL OsSlabMemFree(VOID *pool, VOID *ptr)
     return FALSE;
 }
 
-STATIC INLINE UINT32 OsSlabMemCheck(const VOID *pool, VOID *ptr)
+STATIC INLINE UINT32 OsSlabMemCheck(const VOID *pool, const VOID *ptr)
 {
     return (UINT32)-1;
 }

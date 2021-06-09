@@ -39,11 +39,15 @@ LOCAL_SRCS_$(LOSCFG_KERNEL_MEMBOX_STATIC) += mem/membox/los_membox.c
 LOCAL_SRCS_$(LOSCFG_KERNEL_MEMBOX_DYNAMIC) += mem/membox/los_membox_dyn.c
 
 # Memory Debug
-LOCAL_DIRS_$(LOSCFG_MEM_RECORDINFO) += mem/common/memrecord
 LOCAL_DIRS_$(LOSCFG_MEM_MUL_POOL) += mem/common/multipool
 
 # Shellcmd
-LOCAL_DIRS_$(LOSCFG_SHELL) += shellcmd
+LOCAL_SRCS_$(LOSCFG_SHELL) += shellcmd/hwi_shellcmd.c
+LOCAL_SRCS_$(LOSCFG_SHELL) += shellcmd/mempt_shellcmd.c
+LOCAL_SRCS_$(LOSCFG_SHELL) += shellcmd/swtmr_shellcmd.c
+LOCAL_SRCS_$(LOSCFG_SHELL) += shellcmd/sysinfo_shellcmd.c
+LOCAL_SRCS_y += shellcmd/stack_shellcmd.c
+LOCAL_SRCS_y += shellcmd/task_shellcmd.c
 
 LOCAL_SRCS_y += $(foreach dir, $(LOCAL_DIRS_y), $(wildcard $(dir)/*.c))
 LOCAL_SRCS    = $(LOCAL_SRCS_y)

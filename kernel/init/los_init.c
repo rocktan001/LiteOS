@@ -27,7 +27,6 @@
  * --------------------------------------------------------------------------- */
 
 #include "los_config.h"
-#include "string.h"
 #include "stdio.h"
 #ifdef LOSCFG_COMPAT_LINUX
 #include "linux/workqueue.h"
@@ -63,9 +62,7 @@
 #ifdef LOSCFG_KERNEL_TICKLESS
 #include "los_tickless.h"
 #endif
-#ifdef LOSCFG_MEM_RECORDINFO
-#include "los_memrecord_pri.h"
-#endif
+
 #ifdef LOSCFG_KERNEL_DYNLOAD
 #include "los_ld_initlib_pri.h"
 #endif
@@ -74,11 +71,14 @@
 #include "lowpower/los_runstop_pri.h"
 #endif
 
-#if defined(LOSCFG_HW_RANDOM_ENABLE) || defined (LOSCFG_DRIVERS_RANDOM)
-#include <sys/cdefs.h>
-#include "randomdev.h"
-#include "yarrow.h"
+#ifdef LOSCFG_KERNEL_INTERMIT
+#include "los_intermit_pri.h"
 #endif
+
+#ifdef LOSCFG_KERNEL_LMS
+#include "los_lms_pri.h"
+#endif
+
 #ifdef LOSCFG_SHELL_DMESG
 #include "dmesg_pri.h"
 #endif
@@ -93,6 +93,10 @@
 #include "los_driverbase_pri.h"
 #endif
 
+#if defined(LOSCFG_KERNEL_TICKLESS) && !defined(LOSCFG_KERNEL_POWER_MGR)
+#include "los_lowpower_pri.h"
+#endif
+
 #include "arch/exception.h"
 
 #ifdef __cplusplus
@@ -101,25 +105,48 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-LITE_OS_SEC_TEXT_INIT static VOID OsRegister(VOID)
+/* temp task blocks for booting procedure */
+LITE_OS_SEC_BSS STATIC LosTaskCB                g_mainTask[LOSCFG_KERNEL_CORE_NUM];
+
+VOID *OsGetMainTask()
+{
+    return (g_mainTask + ArchCurrCpuid());
+}
+
+VOID OsSetMainTask()
+{
+    UINT32 i;
+    for (i = 0; i < LOSCFG_KERNEL_CORE_NUM; i++) {
+        g_mainTask[i].taskStatus = OS_TASK_STATUS_UNUSED;
+        g_mainTask[i].taskId = LOSCFG_BASE_CORE_TSK_LIMIT;
+        g_mainTask[i].priority = OS_TASK_PRIORITY_LOWEST + 1;
+        g_mainTask[i].taskName = "osMain";
+#ifdef LOSCFG_KERNEL_SMP_LOCKDEP
+        g_mainTask[i].lockDep.lockDepth = 0;
+        g_mainTask[i].lockDep.waitLock = NULL;
+#endif
+    }
+}
+
+LITE_OS_SEC_TEXT_INIT STATIC VOID OsRegister(VOID)
 {
 #ifdef LOSCFG_LIB_CONFIGURABLE
     g_osSysClock            = OS_SYS_CLOCK_CONFIG;
-    g_tickPerSecond         = LOSCFG_BASE_CORE_TICK_PER_SECOND_CONFIG; /* tick per sencond */
-    g_taskLimit             = LOSCFG_BASE_CORE_TSK_LIMIT_CONFIG;
+    g_taskLimit             = LOSCFG_BASE_CORE_TSK_LIMIT;
     g_taskMaxNum            = g_taskLimit + 1;
-    g_taskMinStkSize        = LOSCFG_BASE_CORE_TSK_MIN_STACK_SIZE_CONFIG;
-    g_taskIdleStkSize       = LOSCFG_BASE_CORE_TSK_IDLE_STACK_SIZE_CONFIG;
-    g_taskDfltStkSize       = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE_CONFIG;
-    g_taskSwtmrStkSize      = LOSCFG_BASE_CORE_TSK_SWTMR_STACK_SIZE_CONFIG;
-    g_swtmrLimit            = LOSCFG_BASE_CORE_SWTMR_LIMIT_CONFIG;
-    g_semLimit              = LOSCFG_BASE_IPC_SEM_LIMIT_CONFIG;
-    g_muxLimit              = LOSCFG_BASE_IPC_MUX_LIMIT_CONFIG;
-    g_queueLimit            = LOSCFG_BASE_IPC_QUEUE_LIMIT_CONFIG;
-    g_timeSliceTimeOut      = LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT_CONFIG;
-#else
-    g_tickPerSecond         = LOSCFG_BASE_CORE_TICK_PER_SECOND;
+    g_taskMinStkSize        = LOSCFG_BASE_CORE_TSK_MIN_STACK_SIZE;
+    g_taskIdleStkSize       = LOSCFG_BASE_CORE_TSK_IDLE_STACK_SIZE;
+    g_taskDfltStkSize       = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    g_taskSwtmrStkSize      = LOSCFG_BASE_CORE_TSK_SWTMR_STACK_SIZE;
+    g_swtmrLimit            = LOSCFG_BASE_CORE_SWTMR_LIMIT;
+    g_semLimit              = LOSCFG_BASE_IPC_SEM_LIMIT;
+    g_muxLimit              = LOSCFG_BASE_IPC_MUX_LIMIT;
+    g_queueLimit            = LOSCFG_BASE_IPC_QUEUE_LIMIT;
+#ifdef LOSCFG_BASE_CORE_TIMESLICE
+    g_timeSliceTimeOut      = LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT;
 #endif
+#endif
+    g_tickPerSecond         = LOSCFG_BASE_CORE_TICK_PER_SECOND;
     SET_SYS_CLOCK(OS_SYS_CLOCK);
 
 #ifdef LOSCFG_KERNEL_NX
@@ -163,6 +190,7 @@ LITE_OS_SEC_TEXT_INIT STATIC UINT32 OsIpcInit(VOID)
 #ifdef LOSCFG_BASE_IPC_SEM
     ret = OsSemInit();
     if (ret != LOS_OK) {
+        PRINT_ERR("Sem init err.\n");
         return ret;
     }
 #endif
@@ -170,6 +198,7 @@ LITE_OS_SEC_TEXT_INIT STATIC UINT32 OsIpcInit(VOID)
 #ifdef LOSCFG_BASE_IPC_MUX
     ret = OsMuxInit();
     if (ret != LOS_OK) {
+        PRINT_ERR("Mux init err.\n");
         return ret;
     }
 #endif
@@ -177,26 +206,84 @@ LITE_OS_SEC_TEXT_INIT STATIC UINT32 OsIpcInit(VOID)
 #ifdef LOSCFG_BASE_IPC_QUEUE
     ret = OsQueueInit();
     if (ret != LOS_OK) {
+        PRINT_ERR("Que init err.\n");
         return ret;
     }
 #endif
     return ret;
 }
 
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+STATIC UINT32 OsAppTaskCreate(VOID)
+{
+    UINT32 taskId;
+    TSK_INIT_PARAM_S appTask;
+
+    (VOID)memset_s(&appTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    appTask.pfnTaskEntry = (TSK_ENTRY_FUNC)app_init;
+    appTask.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    appTask.pcName = "app_Task";
+    appTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+    appTask.uwResved = LOS_TASK_STATUS_DETACHED;
+#ifdef LOSCFG_KERNEL_SMP
+    appTask.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
+#endif
+    return LOS_TaskCreate(&taskId, &appTask);
+}
+
+UINT32 OsAppInit(VOID)
+{
+    UINT32 ret;
+#ifdef LOSCFG_FS_VFS
+    los_vfs_init();
+#endif
+
+#ifdef LOSCFG_COMPAT_LINUX
+
+#ifdef LOSCFG_COMPAT_LINUX_HRTIMER
+    ret = HrtimersInit();
+    if (ret != LOS_OK) {
+        PRINT_ERR("HrtimersInit error\n");
+        return ret;
+    }
+#endif
+#ifdef LOSCFG_BASE_CORE_SWTMR
+    g_pstSystemWq = create_workqueue("system_wq");
+#endif
+
+#endif
+
+    ret = OsAppTaskCreate();
+    PRINTK("OsAppInit\n");
+    if (ret != LOS_OK) {
+        return ret;
+    }
+
+#ifdef LOSCFG_KERNEL_TICKLESS
+    LOS_TicklessEnable();
+#endif
+    return 0;
+}
+#endif /* LOSCFG_PLATFORM_OSAPPINIT */
 
 LITE_OS_SEC_TEXT_INIT UINT32 OsMain(VOID)
 {
     UINT32 ret;
 
 #ifdef LOSCFG_EXC_INTERACTION
-    ret = OsMemExcInteractionInit((UINTPTR)&__bss_end);
+    ret = OsMemExcInteractionInit((UINTPTR)&__exc_heap_start);
     if (ret != LOS_OK) {
         return ret;
     }
 #endif
 
-    ret = OsMemSystemInit((UINTPTR)&__bss_end + g_excInteractMemSize);
+#ifdef LOSCFG_KERNEL_LMS
+    OsLmsInit();
+#endif
+
+    ret = OsMemSystemInit((UINTPTR)OS_SYS_MEM_ADDR);
     if (ret != LOS_OK) {
+        PRINT_ERR("Mem init err.\n");
         return ret;
     }
 
@@ -217,27 +304,33 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(VOID)
 
     ArchExcInit();
 
+#if defined(LOSCFG_KERNEL_TICKLESS) && !defined(LOSCFG_KERNEL_POWER_MGR)
+    OsLowpowerInit(NULL);
+#endif
+
     ret = OsTickInit(GET_SYS_CLOCK(), LOSCFG_BASE_CORE_TICK_PER_SECOND);
     if (ret != LOS_OK) {
+        PRINT_ERR("Tick init err.\n");
         return ret;
     }
 
-#ifdef LOSCFG_PLATFORM_UART_WITHOUT_VFS
+#if defined(LOSCFG_DRIVERS_UART) || defined(LOSCFG_DRIVERS_SIMPLE_UART)
     uart_init();
 #ifdef LOSCFG_SHELL
     uart_hwiCreate();
 #endif /* LOSCFG_SHELL */
-#endif /* LOSCFG_PLATFORM_UART_WITHOUT_VFS */
+#endif /* LOSCFG_DRIVERS_SIMPLE_UART */
+
     ret = OsTaskInit();
     if (ret != LOS_OK) {
-        PRINT_ERR("OsTaskInit error\n");
+        PRINT_ERR("Task init err.\n");
         return ret;
     }
 
 #ifdef LOSCFG_KERNEL_TRACE
     ret = LOS_TraceInit(NULL, LOS_TRACE_BUFFER_SIZE);
     if (ret != LOS_OK) {
-        PRINT_ERR("LOS_TraceInit error\n");
+        PRINT_ERR("Trace init err.\n");
         return ret;
     }
 #endif
@@ -262,7 +355,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(VOID)
 #ifdef LOSCFG_KERNEL_CPUP
     ret = OsCpupInit();
     if (ret != LOS_OK) {
-        PRINT_ERR("OsCpupInit error\n");
+        PRINT_ERR("Cpup init err.\n");
         return ret;
     }
 #endif
@@ -270,6 +363,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(VOID)
 #ifdef LOSCFG_BASE_CORE_SWTMR
     ret = OsSwtmrInit();
     if (ret != LOS_OK) {
+        PRINT_ERR("Swtmr init err.\n");
         return ret;
     }
 #endif
@@ -285,18 +379,21 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(VOID)
     }
 #endif
 
-#if defined(LOSCFG_HW_RANDOM_ENABLE) || defined (LOSCFG_DRIVERS_RANDOM)
-    random_alg_context.ra_init_alg(NULL);
-    run_harvester_iterate(NULL);
-#endif
-
     ret = OsIdleTaskCreate();
     if (ret != LOS_OK) {
+        PRINT_ERR("Create idle task err.\n");
         return ret;
     }
 
 #ifdef LOSCFG_KERNEL_RUNSTOP
     ret = OsWowWriteFlashTaskCreate();
+    if (ret != LOS_OK) {
+        return ret;
+    }
+#endif
+
+#ifdef LOSCFG_KERNEL_INTERMIT
+    ret = OsIntermitDaemonStart();
     if (ret != LOS_OK) {
         return ret;
     }
@@ -320,7 +417,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(VOID)
 #endif
 
 #ifdef LOSCFG_PLATFORM_OSAPPINIT
-    ret = osAppInit();
+    ret = OsAppInit();
 #else /* LOSCFG_TEST */
     ret = OsTestInit();
 #endif
@@ -329,86 +426,6 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMain(VOID)
     }
 
     return LOS_OK;
-}
-
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-STATIC UINT32 OsAppTaskCreate(VOID)
-{
-    UINT32 taskId;
-    TSK_INIT_PARAM_S appTask;
-
-    (VOID)memset_s(&appTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
-    appTask.pfnTaskEntry = (TSK_ENTRY_FUNC)app_init;
-    appTask.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    appTask.pcName = "app_Task";
-    appTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
-    appTask.uwResved = LOS_TASK_STATUS_DETACHED;
-#ifdef LOSCFG_KERNEL_SMP
-    appTask.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
-#endif
-    return LOS_TaskCreate(&taskId, &appTask);
-}
-
-#ifdef LOSCFG_MEM_RECORDINFO
-STATIC UINT32 OsMemShowTaskCreate(VOID)
-{
-    UINT32 taskId;
-    TSK_INIT_PARAM_S appTask;
-
-    (VOID)memset_s(&appTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
-    appTask.pfnTaskEntry = (TSK_ENTRY_FUNC)OsMemRecordShowTask;
-    appTask.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    appTask.pcName = "memshow_Task";
-    appTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
-    appTask.uwResved = LOS_TASK_STATUS_DETACHED;
-    return LOS_TaskCreate(&taskId, &appTask);
-}
-#endif
-#endif
-
-UINT32 osAppInit(VOID)
-{
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-    UINT32 ret;
-#ifdef LOSCFG_FS_VFS
-    los_vfs_init();
-#endif
-
-#ifdef LOSCFG_COMPAT_LINUX
-
-#ifdef LOSCFG_COMPAT_LINUX_HRTIMER
-    ret = HrtimersInit();
-    if (ret != LOS_OK) {
-        PRINT_ERR("HrtimersInit error\n");
-        return ret;
-    }
-#endif
-
-#ifdef LOSCFG_BASE_CORE_SWTMR
-    g_pstSystemWq = create_workqueue("system_wq");
-#endif
-
-#endif
-    ret = OsAppTaskCreate();
-    PRINTK("osAppInit\n");
-    if (ret != LOS_OK) {
-        return ret;
-    }
-#ifdef LOSCFG_MEM_RECORDINFO
-    ret = OsMemShowTaskCreate();
-    if (ret != LOS_OK) {
-        PRINTK("create memshow_Task error %u\n", ret);
-        return ret;
-    }
-    PRINTK("create memshow_Task ok\n");
-#endif
-#ifdef LOSCFG_KERNEL_TICKLESS
-    LOS_TicklessEnable();
-#endif
-
-#endif /* LOSCFG_PLATFORM_OSAPPINIT */
-
-    return 0;
 }
 
 #ifdef __cplusplus

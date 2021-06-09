@@ -36,7 +36,6 @@
 
 #include "los_base.h"
 #include "los_task.h"
-#include "los_sortlink_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -132,6 +131,7 @@ extern "C" {
  * Value: 0x02000308.
  *
  * Solution: Re-configure the number of software timers.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_SWTMR_MAXSIZE_INVALID        LOS_ERRNO_OS_ERROR(LOS_MOD_SWTMR, 0x08)
 
@@ -152,6 +152,7 @@ extern "C" {
  * Value: 0x0200030a.
  *
  * Solution: Expand the memory allocated by membox.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_SWTMR_HANDLER_POOL_NO_MEM    LOS_ERRNO_OS_ERROR(LOS_MOD_SWTMR, 0x0a)
 
@@ -200,6 +201,7 @@ extern "C" {
  * Software timer error code: This error code is not in use temporarily.
  *
  * Value: 0x0200030f
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_SWTMR_SORTLIST_NULL          LOS_ERRNO_OS_ERROR(LOS_MOD_SWTMR, 0x0f)
 

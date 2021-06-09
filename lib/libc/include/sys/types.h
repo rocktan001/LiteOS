@@ -58,9 +58,6 @@ extern "C" {
 #endif
 
 #include <bits/alltypes.h>
-#ifdef __LITEOS__
-#include <int-ll64.h>
-#endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 typedef unsigned char u_int8_t;

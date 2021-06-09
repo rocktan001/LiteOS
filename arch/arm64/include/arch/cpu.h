@@ -52,7 +52,7 @@ extern const CHAR *ArchCpuInfo(VOID);
 
 STATIC INLINE UINT32 ArchCurrCpuid(VOID)
 {
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
     UINT32 cpuid;
     UINT64 mpidr = AARCH64_SYSREG_READ(mpidr_el1);
     if (!(mpidr & MPIDR_MT_MASK)) {

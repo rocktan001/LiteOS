@@ -43,6 +43,7 @@ extern "C" {
 
 #ifdef LOSCFG_DEBUG_SEMAPHORE
 #define OS_ALL_SEM_MASK 0xffffffff
+
 STATIC VOID OsSemPendedTaskNamePrint(LosSemCB *semNode)
 {
     LosTaskCB *tskCB = NULL;
@@ -51,7 +52,7 @@ STATIC VOID OsSemPendedTaskNamePrint(LosSemCB *semNode)
     UINT32 num = 0;
 
     SCHEDULER_LOCK(intSave);
-    if ((semNode->semStat == OS_SEM_UNUSED) || (LOS_ListEmpty(&semNode->semList))) {
+    if ((semNode->semStat == LOS_UNUSED) || (LOS_ListEmpty(&semNode->semList))) {
         SCHEDULER_UNLOCK(intSave);
         return;
     }
@@ -127,7 +128,7 @@ STATIC VOID OsSemSort(UINT32 *semIndexArray, UINT32 usedCount)
     semSortParam.buf = (CHAR *)g_semDebugArray;
     semSortParam.ctrlBlockSize = sizeof(SemDebugCB);
     semSortParam.ctrlBlockCnt = LOSCFG_BASE_IPC_SEM_LIMIT;
-    semSortParam.sortElemOff = OFFSET_OF_FIELD(SemDebugCB, lastAccessTime);
+    semSortParam.sortElemOff = LOS_OFF_SET_OF(SemDebugCB, lastAccessTime);
 
     /* It will Print out ALL the Used Semaphore List. */
     PRINTK("Used Semaphore List: \n");
@@ -143,7 +144,7 @@ STATIC VOID OsSemSort(UINT32 *semIndexArray, UINT32 usedCount)
         (VOID)memcpy_s(&semNode, sizeof(LosSemCB), semCB, sizeof(LosSemCB));
         (VOID)memcpy_s(&semDebug, sizeof(SemDebugCB), &g_semDebugArray[semIndexArray[i]], sizeof(SemDebugCB));
         SCHEDULER_UNLOCK(intSave);
-        if ((semNode.semStat != OS_SEM_USED) || (semDebug.creator == NULL)) {
+        if ((semNode.semStat != LOS_USED) || (semDebug.creator == NULL)) {
             continue;
         }
         PRINTK("   0x%-07x0x%-07u0x%-14u%-22p0x%llx\n", semNode.semId, semDebug.origSemCount,
@@ -168,7 +169,7 @@ UINT32 OsSemInfoGetFullData(VOID)
     for (i = 0; i < LOSCFG_BASE_IPC_SEM_LIMIT; i++) {
         semNode = GET_SEM(i);
         semDebug = &g_semDebugArray[i];
-        if ((semNode->semStat == OS_SEM_USED) && (semDebug->creator != NULL)) {
+        if ((semNode->semStat == LOS_USED) && (semDebug->creator != NULL)) {
             usedSemCnt++;
         }
     }
@@ -188,7 +189,7 @@ UINT32 OsSemInfoGetFullData(VOID)
         for (i = 0; i < LOSCFG_BASE_IPC_SEM_LIMIT; i++) {
             semNode = GET_SEM(i);
             semDebug = &g_semDebugArray[i];
-            if ((semNode->semStat != OS_SEM_USED) || (semDebug->creator == NULL)) {
+            if ((semNode->semStat != LOS_USED) || (semDebug->creator == NULL)) {
                 continue;
             }
             *(semIndexArray + count) = i;
@@ -218,7 +219,7 @@ STATIC UINT32 OsSemInfoOutput(size_t semId)
         for (loop = 0, semCnt = 0; loop < LOSCFG_BASE_IPC_SEM_LIMIT; loop++) {
             semCB = GET_SEM(loop);
             SCHEDULER_LOCK(intSave);
-            if (semCB->semStat == OS_SEM_USED) {
+            if (semCB->semStat == LOS_USED) {
                 (VOID)memcpy_s(&semNode, sizeof(LosSemCB), semCB, sizeof(LosSemCB));
                 SCHEDULER_UNLOCK(intSave);
                 semCnt++;
@@ -231,16 +232,11 @@ STATIC UINT32 OsSemInfoOutput(size_t semId)
         PRINTK("   SemUsingNum    :  %u\n\n", semCnt);
         return LOS_OK;
     } else {
-        if (GET_SEM_INDEX(semId) >= LOSCFG_BASE_IPC_SEM_LIMIT) {
-            PRINTK("\nInvalid semaphore id!\n");
-            return OS_ERROR;
-        }
-
         semCB = GET_SEM(semId);
         SCHEDULER_LOCK(intSave);
         (VOID)memcpy_s(&semNode, sizeof(LosSemCB), semCB, sizeof(LosSemCB));
         SCHEDULER_UNLOCK(intSave);
-        if ((semNode.semId != semId) || (semNode.semStat != OS_SEM_USED)) {
+        if ((semNode.semId != semId) || (semNode.semStat != LOS_USED)) {
             PRINTK("\nThe semaphore is not in use!\n");
             return LOS_OK;
         }
@@ -278,7 +274,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdSemInfoGet(UINT32 argc, const CHAR **arg
         }
 
         semId = strtoul(argv[0], &endPtr, 0);
-        if ((endPtr == NULL) || (*endPtr != 0)) {
+        if ((*endPtr != 0) || (GET_SEM_INDEX(semId) >= LOSCFG_BASE_IPC_SEM_LIMIT)) {
             PRINTK("\nsem ID can't access %s.\n", argv[0]);
             return OS_ERROR;
         }

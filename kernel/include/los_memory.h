@@ -63,6 +63,9 @@ extern "C" {
 #define LOS_RECORD_LR_CNT 3
 #endif
 
+
+#define OS_MEM_ALIGN_SIZE   (sizeof(UINTPTR))
+
 /**
  * @ingroup los_memory
  * @brief Define the type of the customized tuning function when calling the API LOS_MemAlloc to allocate
@@ -108,24 +111,12 @@ extern UINT8 *m_aucSysMem1;
  */
 extern UINTPTR g_sys_mem_addr_end;
 
+#ifdef LOSCFG_EXC_INTERACTION
 /**
  * @ingroup los_memory
  * The size of exception interaction memory.
  */
 extern UINTPTR g_excInteractMemSize;
-
-/**
- * @ingroup los_memory
- * The memory Maximum memory usage statistics.
- * Note that this macro is defined only when LOSCFG_MEM_WATERLINE is defined.
- * @attention
- * <ul> <li>If running as debug mode, it will affect the performance of memory malloc and free.</li>
- * <li> OS_MEM_WATERLINE=YES: open the function for Maximum memory usage statistics </li>
- * <li> OS_MEM_WATERLINE=NO: close the function for Maximum memory usage statistics, it set to NO as usual </li>
- * </ul>
- */
-#ifdef LOSCFG_MEM_WATERLINE
-#define OS_MEM_WATERLINE NO
 #endif
 
 #ifdef LOSCFG_MEM_MUL_MODULE
@@ -346,7 +337,7 @@ typedef struct {
  * 1) Be less than or equal to the Memory pool size;
  * 2) Be greater than the size of OS_MEM_MIN_POOL_SIZE.</li>
  * <li>Call this API when dynamic memory needs to be initialized during the startup of Huawei LiteOS.</li>
- * <li>The parameter input must be four byte-aligned.</li>
+ * <li>The parameter input must be OS_MEM_ALIGN_SIZE byte-aligned.</li>
  * <li>The init area [pool, pool + size] should not conflict with other pools.</li>
  * </ul>
  *
@@ -613,7 +604,7 @@ extern UINTPTR LOS_MemLastUsedGet(VOID *pool);
  * The input pool parameter must be initialized via func LOS_MemInit.
  *
  * @param  pool                 [IN] A pointer pointed to the memory pool.
- * @param  poolStatus           [IN] A pointer for storage the pool status
+ * @param  poolStatus           [OUT] A pointer for storage the pool status
  *
  * @retval #LOS_NOK           The input parameter pool is NULL or invalid.
  * @retval #LOS_OK            Get memory information successfully.
@@ -666,6 +657,7 @@ extern UINT32 LOS_MemFreeNodeShow(VOID *pool);
  */
 extern UINT32 LOS_MemIntegrityCheck(VOID *pool);
 
+#ifdef LOSCFG_BASE_MEM_NODE_SIZE_CHECK
 /**
  * @ingroup los_memory
  * @brief Check the size of the specified memory node.
@@ -739,6 +731,7 @@ extern UINT32 LOS_MemCheckLevelSet(UINT8 checkLevel);
  * @since Huawei LiteOS V100R001C00
  */
 extern UINT8 LOS_MemCheckLevelGet(VOID);
+#endif
 
 /**
  * @ingroup los_memory

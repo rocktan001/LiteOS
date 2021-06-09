@@ -26,6 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+/**
+ * @defgroup mpu
+ * @ingroup kernel
+ */
+
 #ifndef _ARCH_MPU_H
 #define _ARCH_MPU_H
 

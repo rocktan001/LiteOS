@@ -31,7 +31,6 @@
 
 #include "time.h"
 #include "sys/cdefs.h"
-#include "los_typedef.h"
 
 __BEGIN_DECLS
 
@@ -68,7 +67,7 @@ void settimezone(const char *);
  * @retval   None
  * @since Huawei LiteOS V200R001C00
  */
-int dst_disable(VOID);
+int dst_disable(void);
 
 /**
  * @ingroup localtime

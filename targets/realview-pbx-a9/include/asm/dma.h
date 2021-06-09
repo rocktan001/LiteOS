@@ -45,6 +45,5 @@ extern void dma_cache_inv(unsigned int start, unsigned int end);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-
-#endif /* __DMA_H */
+#endif /* _DMA_H */
 

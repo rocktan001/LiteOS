@@ -4,7 +4,7 @@
 #include "lock.h"
 
 #ifdef __LITEOS__
-pthread_mutex_t lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+LIBC_LOCK_INIT(g_tzdstLock);
 #endif
 
 time_t mktime(struct tm *tm)
@@ -36,14 +36,14 @@ error:
 	long long t = __tm_to_secs(tm);
 	int dstsec = 0;
 
-	LOCK(lock);
+	(void)LIBC_LOCK(g_tzdstLock);
 	if (tm->tm_isdst != 0) {
 		if (CheckWithinDstPeriod(tm, 0) == TRUE)
 			dstsec = DstForwardSecondGet();
 		tm->tm_isdst = 0;
 	}
 	t = t - timezone - dstsec;
-	UNLOCK(lock);
+	(void)LIBC_UNLOCK(g_tzdstLock);
 	if ((time_t)t != t) goto error;
 
 	return t;

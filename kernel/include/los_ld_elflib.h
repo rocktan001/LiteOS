@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 /**
- * @defgroup dynload Dynamic loading
+ * @defgroup los_dynload Dynamic loading
  * @ingroup kernel
  */
 
@@ -45,7 +45,7 @@ extern "C" {
 #ifdef LOSCFG_KERNEL_DYNLOAD_DYN
 #ifdef LOSCFG_DYNLOAD_DYN_FROM_FS
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * Define an enum type indicates load strategy.
  *
  * Type of load strategy of dynamic load, ZIP means using zipped shared object, NOZIP means using normal shared object.
@@ -56,7 +56,7 @@ enum LOAD_STRATEGY {
 };
 
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * Define the structure of the parameters used for dynamic.
  *
  * Information of specified parameters passed in during dynamic load.
@@ -66,7 +66,7 @@ typedef struct tagDynloadParam {
 } DYNLOAD_PARAM_S;
 
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Register the dynamic parameters.
  *
  * @par Description:
@@ -86,7 +86,7 @@ typedef struct tagDynloadParam {
 extern VOID LOS_DynParamReg(DYNLOAD_PARAM_S *dynloadParam);
 
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Load a shared object file.
  *
  * @par Description:
@@ -110,7 +110,7 @@ extern VOID *LOS_SoLoad(CHAR *elfFileName);
 
 #ifdef LOSCFG_DYNLOAD_DYN_FROM_MEM
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Load a shared object file from the memory.
  *
  * @par Description:
@@ -139,7 +139,7 @@ extern VOID *LOS_MemLoad(const CHAR *elfFileName, UINT32 fileNameLen,
 
 #ifdef LOSCFG_KERNEL_DYNLOAD_REL
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Load a object file.
  *
  * @par Description:
@@ -162,7 +162,7 @@ extern VOID *LOS_ObjLoad(CHAR *elfFileName);
 #endif /* LOSCFG_KERNEL_DYNLOAD_REL */
 
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Unload a module.
  *
  * @par Description:
@@ -184,7 +184,7 @@ extern VOID *LOS_ObjLoad(CHAR *elfFileName);
 extern INT32 LOS_ModuleUnload(VOID *handle);
 
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Destroy a dynamic loader.
  *
  * @par Description:
@@ -205,7 +205,7 @@ extern INT32 LOS_ModuleUnload(VOID *handle);
 extern VOID LOS_LdDestroy(VOID);
 
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Search for a symbol address.
  *
  * @par Description:
@@ -230,7 +230,7 @@ extern VOID LOS_LdDestroy(VOID);
 extern VOID *LOS_FindSymByName(VOID *handle, CHAR *name);
 
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Add a default path.
  *
  * @par Description:
@@ -252,7 +252,7 @@ extern VOID *LOS_FindSymByName(VOID *handle, CHAR *name);
 extern INT32 LOS_PathAdd(CHAR *path);
 
 /**
- * @ingroup dynload
+ * @ingroup los_dynload
  * @brief Set the memory pool address used by dynload
  *
  * @par Description:

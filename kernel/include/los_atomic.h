@@ -60,7 +60,7 @@ extern "C" {
  * @see LOS_Atomic64Read
  * @since Huawei LiteOS V200R003C00
  */
-STATIC INLINE INT32 LOS_AtomicRead(Atomic *v)
+STATIC INLINE INT32 LOS_AtomicRead(const Atomic *v)
 {
     return ArchAtomicRead(v);
 }

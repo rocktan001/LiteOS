@@ -1,0 +1,11 @@
+include $(LITEOSTOPDIR)/config.mk
+
+MODULE_NAME := $(notdir $(CURDIR))
+
+LOCAL_SRCS_$(LOSCFG_DRIVERS_UART_CSKY_PORT) += uart_port.c
+
+LOCAL_SRCS = $(LOCAL_SRCS_y)
+
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+
+include $(MODULE)

@@ -87,10 +87,10 @@ STATIC INLINE VOID OsSwtmrUpdate(LosSwtmrCB *swtmr)
     if (swtmr->mode == LOS_SWTMR_MODE_ONCE) {
         OsSwtmrDelete(swtmr);
 
-        if (swtmr->timerId < (OS_SWTMR_MAX_TIMERID - LOSCFG_BASE_CORE_SWTMR_LIMIT)) {
-            swtmr->timerId += LOSCFG_BASE_CORE_SWTMR_LIMIT;
+        if (swtmr->timerId < (OS_SWTMR_MAX_TIMERID - KERNEL_SWTMR_LIMIT)) {
+            swtmr->timerId += KERNEL_SWTMR_LIMIT;
         } else {
-            swtmr->timerId %= LOSCFG_BASE_CORE_SWTMR_LIMIT;
+            swtmr->timerId %= KERNEL_SWTMR_LIMIT;
         }
     } else if (swtmr->mode == LOS_SWTMR_MODE_NO_SELFDELETE) {
         swtmr->state = OS_SWTMR_STATUS_CREATED;
@@ -145,7 +145,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsSwtmrTaskCreate(VOID)
 
     (VOID)memset_s(&swtmrTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     swtmrTask.pfnTaskEntry = (TSK_ENTRY_FUNC)OsSwtmrTask;
-    swtmrTask.uwStackSize = LOSCFG_BASE_CORE_TSK_SWTMR_STACK_SIZE;
+    swtmrTask.uwStackSize = KERNEL_TSK_SWTMR_STACK_SIZE;
     swtmrTask.pcName = "Swt_Task";
     swtmrTask.usTaskPrio = 0;
     swtmrTask.uwResved = LOS_TASK_STATUS_DETACHED;
@@ -170,7 +170,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsSwtmrInit(VOID)
     LosSwtmrCB *swtmr = NULL;
     UINT32 cpuid = ArchCurrCpuid();
     if (cpuid == 0) {
-        size = sizeof(LosSwtmrCB) * LOSCFG_BASE_CORE_SWTMR_LIMIT;
+        size = sizeof(LosSwtmrCB) * KERNEL_SWTMR_LIMIT;
         swtmr = (LosSwtmrCB *)LOS_MemAlloc(m_aucSysMem0, size); /* system resident resource */
         if (swtmr == NULL) {
             return LOS_ERRNO_SWTMR_NO_MEMORY;
@@ -179,7 +179,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsSwtmrInit(VOID)
         (VOID)memset_s(swtmr, size, 0, size);
         g_swtmrCBArray = swtmr;
         LOS_ListInit(&g_swtmrFreeList);
-        for (index = 0; index < LOSCFG_BASE_CORE_SWTMR_LIMIT; index++, swtmr++) {
+        for (index = 0; index < KERNEL_SWTMR_LIMIT; index++, swtmr++) {
             swtmr->timerId = index;
             LOS_ListTailInsert(&g_swtmrFreeList, &swtmr->sortList.sortLinkNode);
         }
@@ -243,7 +243,8 @@ LITE_OS_SEC_TEXT VOID OsSwtmrScan(VOID)
         if (swtmrHandler != NULL) {
             swtmrHandler->handler = swtmr->handler;
             swtmrHandler->arg = swtmr->arg;
-            if (LOS_QueueWriteCopy(OsPercpuGet()->swtmrHandlerQueue, &swtmrHandler, sizeof(CHAR *), LOS_NO_WAIT)) {
+            if (LOS_QueueWriteCopy(OsPercpuGet()->swtmrHandlerQueue, &swtmrHandler,
+                                   sizeof(CHAR *), LOS_NO_WAIT) != LOS_OK) {
                 (VOID)LOS_MemFree(m_aucSysMem0, swtmrHandler);
             }
         }
@@ -389,7 +390,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_SwtmrStart(UINT16 swtmrId)
     }
 
     SWTMR_LOCK(intSave);
-    swtmrCBId = swtmrId % LOSCFG_BASE_CORE_SWTMR_LIMIT;
+    swtmrCBId = swtmrId % KERNEL_SWTMR_LIMIT;
     swtmr = g_swtmrCBArray + swtmrCBId;
 
     if (swtmr->timerId != swtmrId) {
@@ -433,7 +434,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_SwtmrStop(UINT16 swtmrId)
     }
 
     SWTMR_LOCK(intSave);
-    swtmrCBId = swtmrId % LOSCFG_BASE_CORE_SWTMR_LIMIT;
+    swtmrCBId = swtmrId % KERNEL_SWTMR_LIMIT;
     swtmr = g_swtmrCBArray + swtmrCBId;
 
     if (swtmr->timerId != swtmrId) {
@@ -477,7 +478,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_SwtmrTimeGet(UINT16 swtmrId, UINT32 *tick)
     }
 
     SWTMR_LOCK(intSave);
-    swtmrCBId = swtmrId % LOSCFG_BASE_CORE_SWTMR_LIMIT;
+    swtmrCBId = swtmrId % KERNEL_SWTMR_LIMIT;
     swtmr = g_swtmrCBArray + swtmrCBId;
 
     if (swtmr->timerId != swtmrId) {
@@ -514,7 +515,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_SwtmrDelete(UINT16 swtmrId)
     }
 
     SWTMR_LOCK(intSave);
-    swtmrCBId = swtmrId % LOSCFG_BASE_CORE_SWTMR_LIMIT;
+    swtmrCBId = swtmrId % KERNEL_SWTMR_LIMIT;
     swtmr = g_swtmrCBArray + swtmrCBId;
 
     if (swtmr->timerId != swtmrId) {

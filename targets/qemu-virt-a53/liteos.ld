@@ -1,3 +1,4 @@
+
 ENTRY(reset_vector)
 INCLUDE board.ld
 SECTIONS
@@ -125,7 +126,7 @@ SECTIONS
     .bss ALIGN(0x800) : {
         __int_stack_start = .;
         *(.int_stack);
-        . = . + 0x24;
+        . = ALIGN(0x4);
         KEEP(*(.bss.prebss.*))
         . = ALIGN(0x8);
         __bss_start = .;
@@ -134,6 +135,15 @@ SECTIONS
         *(COMMON)
         . = ALIGN(0x8);
         __bss_end = .;
+    } > ram
+
+    .heap : {
+        . = ALIGN(0x40);
+        __exc_heap_start = .;
+        __exc_heap_end = . + __ram_exc_heap_memsize;
+        . = __exc_heap_end;
+        . = ALIGN(0x40);
+        __heap_start = .;
     } > ram
 
     . = ALIGN(0x1000);

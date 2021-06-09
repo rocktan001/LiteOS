@@ -124,39 +124,6 @@ osThreadId osThreadCreate(const osThreadDef_t *thread_def, void *argument)
     }
 }
 
-#if (LOSCFG_KERNEL_USERSPACE == YES)
-osThreadId osUsrThreadCreate(const osThreadDef_t *thread_def, void *stackPointer, UINT32 stackSize, void *argument)
-{
-    UINT32 ret;
-    UINT32 taskId;
-    TSK_INIT_PARAM_S taskInitParam;
-
-    if ((thread_def == NULL) ||
-        (thread_def->pthread == NULL) ||
-        (thread_def->tpriority < osPriorityIdle) ||
-        (thread_def->tpriority > osPriorityRealtime)) {
-        return NULL;
-    }
-
-    (VOID)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
-    taskInitParam.pfnTaskEntry     = (TSK_ENTRY_FUNC)thread_def->pthread;
-    taskInitParam.uwStackSize      = thread_def->stacksize;
-    taskInitParam.pcName           = thread_def->name;
-    taskInitParam.usTaskPrio       = (UINT16)(PRIORITY_WIN - thread_def->tpriority);  /* 1~7 */
-    taskInitParam.uwResved         = OS_TASK_STATUS_USERSPACE;
-    taskInitParam.pUserSP          = stackPointer;
-    taskInitParam.uwUserStackSize  = stackSize;
-    LOS_TASK_PARAM_INIT_ARG(taskInitParam, argument);
-
-    ret = LOS_TaskCreate(&taskId, &taskInitParam);
-    if (ret == LOS_OK) {
-        return (osThreadId)OS_TCB_FROM_TID(taskId);
-    } else {
-        return NULL;
-    }
-}
-#endif
-
 osThreadId osThreadGetId(void)
 {
     return (osThreadId)OsCurrTaskGet();
@@ -257,41 +224,6 @@ osPriority osThreadGetPriority(osThreadId thread_id)
     return (osPriority)priorityRet;
 }
 
-#if (LOSCFG_KERNEL_USERSPACE == YES)
-osStatus osThreadSelfSuspend(void)
-{
-    LosTaskCB *runTask = OsCurrTaskGet();
-    if (LOS_TaskSuspend(runTask->taskId) == LOS_OK) {
-        return osOK;
-    } else {
-        return osErrorOS;
-    }
-}
-
-osStatus osThreadResume(osThreadId thread_id)
-{
-    LosTaskCB *taskCB = (LosTaskCB *)thread_id;
-    UINT32 ret;
-
-    if (taskCB == NULL) {
-        return osErrorParameter;
-    }
-    if (OS_INT_ACTIVE) {
-        return osErrorISR;
-    }
-
-    ret = LOS_TaskResume(taskCB->taskId);
-    if ((ret == LOS_OK) || (ret == LOS_ERRNO_TSK_NOT_SUSPENDED)) {
-        return osOK;
-    } else if ((ret == LOS_ERRNO_TSK_ID_INVALID) || (ret == LOS_ERRNO_TSK_NOT_CREATED)) {
-        return osErrorParameter;
-    } else {
-        return osErrorResource;
-    }
-}
-#endif
-
-
 //  ==== Semaphore Management Functions ====
 #ifdef LOSCFG_BASE_IPC_SEM
 
@@ -317,7 +249,7 @@ osSemaphoreId osSemaphoreCreate(const osSemaphoreDef_t *semaphore_def, int32_t c
     UINT32 ret;
     UINT32 semId;
 
-    if ((semaphore_def == NULL) || (count > OS_SEM_COUNT_MAX) || (count < 0) || OS_INT_ACTIVE) {
+    if ((semaphore_def == NULL) || (count > LOS_SEM_COUNT_MAX) || (count < 0) || OS_INT_ACTIVE) {
         return NULL;
     }
 
@@ -485,7 +417,8 @@ osStatus osMutexDelete(osMutexId mutex_id)
 STATIC VOID *CreateAndInitMemBox(UINT32 blkNum, UINT32 blkSize)
 {
     VOID *memBox = NULL;
-    UINT32 poolSize;
+    UINT64 poolSize;
+    UINT32 boxCBSize;
     UINT32 ret;
 
     if ((blkNum == 0) || (blkSize == 0)) {
@@ -493,20 +426,25 @@ STATIC VOID *CreateAndInitMemBox(UINT32 blkNum, UINT32 blkSize)
     }
 
 #ifdef LOSCFG_KERNEL_MEMBOX_STATIC
-    poolSize = LOS_MEMBOX_SIZE(blkSize, blkNum);
-    memBox = LOS_MemAlloc(m_aucSysMem0, poolSize);
+    poolSize = LOS_MEMBOX_SIZE(blkSize, (UINT64)blkNum);
+    boxCBSize = (UINT32)poolSize;
 #else
     blkSize = LOS_MEMBOX_ALLIGNED(blkSize);
-    poolSize = blkSize * blkNum;
-    memBox = LOS_MemAlloc(m_aucSysMem0, sizeof(LOS_MEMBOX_INFO));
+    poolSize = blkSize * (UINT64)blkNum;
+    boxCBSize = sizeof(LOS_MEMBOX_INFO);
 #endif
+    if ((UINT32)(poolSize >> 32) != 0) { /* get the high 32 bits */
+        PRINT_ERR("pool size too large! \n");
+        return NULL;
+    }
+    memBox = LOS_MemAlloc(m_aucSysMem0, boxCBSize);
     if (memBox == NULL) {
         return NULL;
     }
 
-    ret = LOS_MemboxInit(memBox, poolSize, blkSize);
+    ret = LOS_MemboxInit(memBox, (UINT32)poolSize, blkSize);
     if (ret != LOS_OK) {
-        LOS_MemFree(m_aucSysMem0, memBox);
+        (VOID)LOS_MemFree(m_aucSysMem0, memBox);
         return NULL;
     }
 
@@ -733,7 +671,7 @@ osMailQId osMailCreate(const osMailQDef_t *queue_def, osThreadId thread_id)
     mailQ = (struct osMailQ *)(queue_def->pool);
     mailQ->pool = CreateAndInitMemBox(queue_def->queue_sz, queue_def->item_sz);
     if (mailQ->pool == NULL) {
-        LOS_QueueDelete(queueId);
+        (VOID)LOS_QueueDelete(queueId);
         return NULL;
     }
 
@@ -744,7 +682,7 @@ osMailQId osMailCreate(const osMailQDef_t *queue_def, osThreadId thread_id)
 void *osMailAlloc(osMailQId queue_id, uint32_t millisec)
 {
     struct osMailQ *mailQ = (struct osMailQ *)queue_id;
-    if (mailQ == NULL) {
+    if ((mailQ == NULL) || (mailQ->pool == NULL)) {
         return NULL;
     }
 
@@ -769,7 +707,7 @@ osStatus osMailFree(osMailQId queue_id, void *mail)
     struct osMailQ *mailQ = (struct osMailQ *)queue_id;
     UINT32 ret;
 
-    if (mailQ == NULL) {
+    if ((mailQ == NULL) || (mailQ->pool == NULL)) {
         return osErrorParameter;
     }
 
@@ -858,7 +796,7 @@ osStatus osMailDelete(osMailQId queue_id)
     osStatus ret1;
     UINT32 ret2;
 
-    if (mailQ == NULL) {
+    if ((mailQ == NULL) || (mailQ->pool == NULL)) {
         return osErrorParameter;
     }
     if (OS_INT_ACTIVE) {
@@ -1011,7 +949,7 @@ osTimerId osTimerCreate(const osTimerDef_t *timer_def, os_timer_type type, void 
 
     ret = LOS_SwtmrCreate(1, type, (SWTMR_PROC_FUNC)(timer_def->ptimer), &swtmrId, (UINT32)(UINTPTR)argument);
     if (ret == LOS_OK) {
-        return (osTimerId)OS_SWT_FROM_SID(swtmrId);
+        return (osTimerId)OS_SWT_FROM_SWTID(swtmrId);
     } else {
         return NULL;
     }

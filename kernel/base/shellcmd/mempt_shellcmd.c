@@ -29,9 +29,6 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "los_memory_pri.h"
-#ifdef LOSCFG_MEM_RECORDINFO
-#include "los_memrecord_pri.h"
-#endif
 #ifdef LOSCFG_KERNEL_SCATTER
 #include "los_scatter_pri.h"
 #endif
@@ -56,9 +53,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdMemCheck(INT32 argc, const CHAR *argv[])
         return OS_ERROR;
     }
 
-#ifdef LOSCFG_KERNEL_MEM_BESTFIT
     OsMemIntegrityMultiCheck();
-#endif
     return 0;
 }
 
@@ -233,24 +228,6 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdMemUsed(INT32 argc, const CHAR *argv[])
 #endif
     return 0;
 }
-#endif
-#ifdef LOSCFG_MEM_RECORDINFO
-LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdMemRecordEnable(INT32 argc, const CHAR *argv[])
-{
-    OsMemRecordShowSet(TRUE);
-    return 0;
-}
-
-LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdMemRecordDisable(INT32 argc, const CHAR *argv[])
-{
-    OsMemRecordShowSet(FALSE);
-    return 0;
-}
-
-SHELLCMD_ENTRY(memshowenable_shellcmd, CMD_TYPE_EX, "memshowenable", 0,
-               (CmdCallBackFunc)OsShellCmdMemRecordEnable);
-SHELLCMD_ENTRY(memshowdisable_shellcmd, CMD_TYPE_EX, "memshowdisable", 0,
-               (CmdCallBackFunc)OsShellCmdMemRecordDisable);
 #endif
 
 #ifdef LOSCFG_MEM_LEAKCHECK

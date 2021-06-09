@@ -29,10 +29,13 @@ LITEOS_LD_SCRIPT :=
 LITEOS_MK_PATH :=
 ## c as cxx ld flags ##
 LITEOS_ASFLAGS :=
+LITEOS_U_INCLUDES :=
+LITEOS_K_INCLUDES :=
 LITEOS_CFLAGS :=
 LITEOS_CFLAGS_INTERWORK :=
 LITEOS_LDFLAGS :=
 LITEOS_CXXFLAGS :=
+LIBC_FILTER_OPTS :=
 ## depended lib ##
 LITEOS_BASELIB :=
 LITEOS_LIBDEP :=
@@ -43,6 +46,10 @@ LIB_SUBDIRS :=
 LITEOS_COMPILER_CXXLIB_PATH :=
 LITEOS_COMPILER_GCCLIB_PATH :=
 LITEOS_COMPILER_GCC_INCLUDE :=
+
+## opensource path ##
+LITEOS_ZLIB_PATH := $(LITEOSTOPDIR)/lib/zlib/include
+LITEOS_LIBC_PATH := $(LITEOSTOPDIR)/lib/libc
 
 -include $(LITEOSTOPDIR)/.config
 
@@ -85,15 +92,14 @@ MK_PATH  = $(LITEOSTOPDIR)/build/mk
 LITEOS_SCRIPTPATH  ?= $(LITEOSTOPDIR)/tools/scripts
 LITEOS_LIB_BIGODIR  = $(OUT)/lib/obj
 LOSCFG_ENTRY_SRC    = $(LITEOSTOPDIR)/kernel/init/los_init.c
-
-LITEOS_MENUCONFIG_H = $(LITEOSTOPDIR)/targets/bsp/common/menuconfig.h
+LITEOS_MENUCONFIG_H = $(LITEOSTOPDIR)/targets/menuconfig.h
 LITEOS_PLATFORM_MENUCONFIG_H = $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/menuconfig.h
 BOARD_LD_FILE = $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/board.ld
 BOARD_LD_S_FILE = $(BOARD_LD_FILE).S
 
 ### include variable
 MODULE = $(MK_PATH)/module.mk
-MODULE_LIB = $(MK_PATH)/module_lib.mk
+MODULE_LIBC = $(MK_PATH)/module_libc.mk
 
 ifeq ($(LOSCFG_COMPILER_HIMIX_32), y)
 LITEOS_CMACRO      += -D__COMPILER_HUAWEILITEOS__
@@ -101,14 +107,16 @@ else ifeq ($(LOSCFG_COMPILER_HIMIX210_64), y)
 LITEOS_CMACRO      += -D__COMPILER_HUAWEILITEOS__
 else ifeq ($(LOSCFG_COMPILER_HCC_64), y)
 LITEOS_CMACRO      += -D__COMPILER_HUAWEILITEOS__
-else ifeq ($(LOSCFG_COMPILER_XTENSA_32), y)
+else ifeq ($(LOSCFG_COMPILER_HIMIX310_32), y)
 LITEOS_CMACRO      += -D__COMPILER_HUAWEILITEOS__
-LITEOS_CMACRO      += -D__COMPILER_XTENSA__
+else ifeq ($(LOSCFG_COMPILER_CSKYV2), y)
+LITEOS_CMACRO      += -D__COMPILER_HUAWEILITEOS__
+LITEOS_CMACRO      += -D__COMPILER_CSKY__
 endif
 
 LITEOS_CMACRO      += -D__LITEOS__ -DSECUREC_IN_KERNEL=0 -D_ALL_SOURCE
 LITEOS_BASELIB     += -lgcc
-ifneq ($(LOSCFG_COMPILER_ARM_NONE_EABI)$(LOSCFG_COMPILER_RISCV_UNKNOWN)$(LOSCFG_COMPILER_XTENSA_32), y)
+ifneq ($(LOSCFG_COMPILER_ARM_NONE_EABI)$(LOSCFG_COMPILER_RISCV_UNKNOWN)$(LOSCFG_COMPILER_RISCV_NULEI)$(LOSCFG_COMPILER_XTENSA_32)$(LOSCFG_COMPILER_CSKYV2)$(LOSCFG_COMPILER_RISCV64_UNKNOWN), y)
 LITEOS_BASELIB     += -lgcc_eh
 endif
 AS_OBJS_LIBC_FLAGS  = -D__ASSEMBLY__
@@ -119,16 +127,31 @@ ifeq ($(LOSCFG_KERNEL_DYNLOAD), y)
 endif
 
 include $(LITEOSTOPDIR)/arch/cpu.mk
-include $(LITEOSTOPDIR)/targets/targets.mk
+include $(LITEOSTOPDIR)/targets/bsp.mk
 
-# Export APIs from these module.
 include $(LITEOSTOPDIR)/lib/api.mk
+include $(LITEOSTOPDIR)/drivers/api.mk
+
 include $(LITEOSTOPDIR)/compat/api.mk
 include $(LITEOSTOPDIR)/shell/api.mk
 include $(LITEOSTOPDIR)/components/components.mk
 include $(LITEOSTOPDIR)/demos/demos.mk
 
-LIB_SUBDIRS += kernel compat lib osdepends components demos shell
+LIB_SUBDIRS += kernel lib drivers osdepends
+
+# Export APIs from these module.
+ifneq ($(wildcard $(LITEOSTOPDIR)/compat),)
+LIB_SUBDIRS += compat
+endif
+ifneq ($(wildcard $(LITEOSTOPDIR)/shell),)
+LIB_SUBDIRS += shell
+endif
+ifneq ($(wildcard $(LITEOSTOPDIR)/components),)
+LIB_SUBDIRS += components
+endif
+ifneq ($(wildcard $(LITEOSTOPDIR)/demos),)
+LIB_SUBDIRS += demos
+endif
 
 LITEOS_KERNEL_INCLUDE := -I $(LITEOSTOPDIR)/kernel/include
 
@@ -185,9 +208,22 @@ endif
 # are compiled with liteos which should be controlled with KCONFIGS.
 LITEOS_CMACRO     += -DLOSCFG_KERNEL_CPP_EXCEPTIONS_SUPPORT
 LITEOS_CXXMACRO   += -DLOSCFG_KERNEL_CPP_EXCEPTIONS_SUPPORT
+LIBC_FILTER_OPTS  += -Wfloat-equal
+LITEOS_COMMON_OPTS = -fno-pic -fno-builtin -funsigned-char \
+                     -ffunction-sections -fdata-sections \
+                     $(WARNING_AS_ERROR) $(LITEOS_SSP) $(LIBC_FILTER_OPTS)
 
-LITEOS_COMMON_OPTS = -fno-pic -fno-builtin -freg-struct-return -funsigned-char \
-                     -ffunction-sections -fdata-sections $(WARNING_AS_ERROR) $(LITEOS_SSP)
+LITEOS_CXXMACRO   += -D_U=1 -D_L=2 -D_N=4 -D_S=8 -D_P=16 -D_C=32 -D_X=64 -D_B=128
+ifeq ($(LOSCFG_LIB_CPP_EXTEND), y)
+LITEOS_CXXMACRO   += -D_GLIBCXX_HAS_GTHREADS
+endif
+
+ifeq ($(LOSCFG_ARCH_XTENSA), y)
+LITEOS_COMMON_OPTS += -Wshadow
+else
+## xtensa do not have -freg-struct-return.
+LITEOS_COMMON_OPTS += -freg-struct-return
+endif
 
 LITEOS_COMMON_OPTS += -Wformat=2
 ifneq ($(LOSCFG_COMPILER_CLANG), y)
@@ -218,8 +254,11 @@ LITEOS_COPTS_BASE += -fno-aggressive-loop-optimizations
 endif
 
 # clang support -fno-omit-frame-pointer
-ifeq ($(LOSCFG_BACKTRACE_WITH_FP), y)
+ifeq ($(LOSCFG_BACKTRACE), y)
+ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M),)
 LITEOS_COPTS_BASE += -fno-omit-frame-pointer
+LITEOS_CXXOPTS_BASE += -fno-omit-frame-pointer
+endif
 endif
 
 ifneq ($(LOSCFG_COMPILER_XTENSA_32), y)
@@ -233,16 +272,8 @@ endif
 LITEOS_CXXOPTS_BASE += -std=c++11 -nostdinc++ -fexceptions -fpermissive -fno-use-cxa-atexit -frtti \
                        $(LITEOS_COMMON_OPTS)
 
-ifeq ($(LOSCFG_BACKTRACE_WITH_FP), y)
-LITEOS_CXXOPTS_BASE += -fno-omit-frame-pointer
-endif
-
 ifneq ($(LOSCFG_COMPILER_XTENSA_32), y)
 LITEOS_CXXOPTS_BASE += -Winvalid-pch
-endif
-
-ifeq ($(LOSCFG_ARCH_ARM_AARCH64), y)
-LITEOS_COPTS_BASE += -Wno-pragmas -Wno-missing-braces -Wno-parentheses
 endif
 
 ifeq ($(LOSCFG_LLTREPORT), y)
@@ -253,17 +284,11 @@ endif
 
 LITEOS_LD_OPTS += -nostartfiles -static --gc-sections
 
-ifeq ($(LOSCFG_PLATFORM_PBX_A9), y)
-LITEOS_COMPILER_GCCLIB_PATH = $(GCC_GCCLIB_PATH)
-LITEOS_COMPILER_CXXLIB_PATH = $(GCC_GXXLIB_PATH)
-endif
-
-ifeq ($(LOSCFG_ARCH_CORTEX_M0), y)
+ifeq ($(findstring y, $(LOSCFG_ARCH_CORTEX_M0)$(LOSCFG_ARCH_CORTEX_M0_PLUS)), y)
 LITEOS_COPTS_BASE += -fshort-enums
 endif
 
 LITEOS_LD_OPTS += $(LITEOS_DYNLOADOPTS)
-
 LITEOS_LD_PATH += -L$(LITEOS_SCRIPTPATH)/ld -L$(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM) -L$(OUT)/lib -L$(LITEOS_LIB_BIGODIR) -L$(LITEOSTOPDIR)/tools/build
 LITEOS_LD_PATH += -L$(LITEOS_COMPILER_GCCLIB_PATH) -L$(LITEOS_COMPILER_CXXLIB_PATH)
 
@@ -299,10 +324,11 @@ LITEOS_CXXINCLUDE += \
         $(LITEOS_NET_INCLUDE) \
         -I $(LITEOSTOPDIR)/kernel/base/include \
         -I $(LITEOSTOPDIR)/compat/posix/include \
-        -I $(LITEOSTOPDIR)/lib/libc/include \
+        -I $(LITEOS_LIBC_PATH)/include \
         -I $(LITEOSTOPDIR)/fs/include \
         -I $(LITEOSTOPDIR)/kernel/include \
-        $(LITEOS_LIBC_INCLUDE)
+        $(LITEOS_LIBC_INCLUDE) \
+        $(LITEOS_DRIVERS_INCLUDE)
 
 LOSCFG_TOOLS_DEBUG_INCLUDE := $(LITEOS_SHELL_INCLUDE) $(LITEOS_UART_INCLUDE)
 

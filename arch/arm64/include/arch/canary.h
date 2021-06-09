@@ -26,6 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+/**
+ * @defgroup canary
+ * @ingroup kernel
+ */
+
 #ifndef _ARCH_CANARY_H
 #define _ARCH_CANARY_H
 
@@ -41,7 +46,7 @@ extern "C" {
 extern UINTPTR __stack_chk_guard;
 
 /**
- * @ingroup  arch sp
+ * @ingroup cannary
  * @brief Stack protector canaries value init.
  *
  * @par Description:

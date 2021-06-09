@@ -1,9 +1,9 @@
-#include <termios.h>
-#include <sys/ioctl.h>
 #ifdef __LITEOS__
 #include <errno.h>
 #include "los_printf.h"
 #endif
+#include <termios.h>
+#include <sys/ioctl.h>
 
 int tcgetattr(int fd, struct termios *tio)
 {

@@ -52,6 +52,7 @@ extern "C" {
  * Solution: Configure the maximum number of queue resources to be greater than 0. If queue
  * modules are not used, set the configuration item for the tailoring of the maximum number
  * of queue resources to NO.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_QUEUE_MAXNUM_ZERO         LOS_ERRNO_OS_ERROR(LOS_MOD_QUE, 0x00)
 
@@ -388,7 +389,7 @@ typedef struct tagQueueInfo {
  * @see LOS_QueueDelete | LOS_QueueCreate
  * @since Huawei LiteOS V200R005C00
  */
-extern UINT32 LOS_QueueCreateStatic(CHAR *queueName,
+extern UINT32 LOS_QueueCreateStatic(const CHAR *queueName,
                                     UINT16 len,
                                     UINT32 *queueId,
                                     UINT32 flags,
@@ -425,7 +426,7 @@ extern UINT32 LOS_QueueCreateStatic(CHAR *queueName,
  * @see LOS_QueueDelete | LOS_QueueCreateStatic
  * @since Huawei LiteOS V100R001C00
  */
-extern UINT32 LOS_QueueCreate(CHAR *queueName,
+extern UINT32 LOS_QueueCreate(const CHAR *queueName,
                               UINT16 len,
                               UINT32 *queueId,
                               UINT32 flags,

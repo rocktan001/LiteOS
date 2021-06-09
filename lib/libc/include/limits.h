@@ -96,7 +96,7 @@
  * @ingroup semaphore
  * Maximum semaphore value.
  */
-#define SEM_VALUE_MAX OS_SEM_COUNT_MAX
+#define SEM_VALUE_MAX LOS_SEM_COUNT_MAX
 /**
  * @ingroup semaphore
  * Maximum number of supported semaphores.

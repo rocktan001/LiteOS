@@ -40,6 +40,10 @@
 #include "los_trace_pri.h"
 #endif
 
+#ifdef LOSCFG_LIB_CONFIGURABLE
+    UINTPTR g_irqStackTop = (UINTPTR)(&__irq_stack_top);
+#endif
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -52,7 +56,6 @@ UINT32 g_curNestCount = 0;
 #define OS_MAX_BACKTRACE 15
 #define DUMPSIZE         128U
 #define DUMPREGS         30
-#define FP_NUM           29
 
 #define NBIT(val, high, low) (((val) >> (low)) & ((1U << (((high) - (low)) + 1)) - 1))
 #define GET_IL(esr) ((esr) & (1U << 25))
@@ -68,27 +71,27 @@ VOID OsDecodeDataAbortISS(UINT32 bitsISS)
 
     if (!bitFnV) {
         if (bitWnR) {
-            PRINTK("Abort caused by a write instruction.");
+            PrintExcInfo("Abort caused by a write instruction.");
         } else {
-            PRINTK("Abort caused by a read instruction.");
+            PrintExcInfo("Abort caused by a read instruction.");
         }
         switch (bitsDFSC) {
             case 0x21:  /* 0b100001 */
-                PRINTK("Alignment fault.\n");
+                PrintExcInfo("Alignment fault.\n");
                 break;
             case 0x0:   /* 0b000000 */
             case 0x01:  /* 0b000001 */
             case 0x03:  /* 0b000011 */
             case 0x04:  /* 0b000100 */
-                PRINTK("Address size fault.\n");
+                PrintExcInfo("Address size fault.\n");
                 break;
             default:
-                PRINTK("\nOMG!UNKNOWN fault, "
+                PrintExcInfo("\nOMG!UNKNOWN fault, "
                        "check ISS encoding for an exception from a Data Abort in AARM for armv8-a.\n");
                 break;
         }
     } else {
-        PRINTK("FAR is not valid, and holds an UNKNOWN value.\n");
+        PrintExcInfo("FAR is not valid, and holds an UNKNOWN value.\n");
     }
 }
 
@@ -138,8 +141,18 @@ UINT32 ArchSetExcHook(EXC_PROC_FUNC excHook)
     return 0;
 }
 
+#ifdef LOSCFG_BACKTRACE
+STATIC VOID BackTraceWithFp(UINTPTR fp)
+{
+    PrintExcInfo("*******backtrace begin*******\n");
+    (VOID)ArchBackTraceGet(fp, NULL, OS_MAX_BACKTRACE);
+    PrintExcInfo("*******backtrace end*******\n");
+}
+#endif
+
 UINT32 ArchBackTraceGet(UINTPTR fp, UINTPTR *callChain, UINT32 maxDepth)
 {
+#ifdef LOSCFG_BACKTRACE
     UINTPTR tmpFp;
     UINTPTR backLr;
     UINTPTR backFp = fp;
@@ -161,37 +174,34 @@ UINT32 ArchBackTraceGet(UINTPTR fp, UINTPTR *callChain, UINT32 maxDepth)
             break;
         }
     }
+
     return count;
-}
-
-STATIC VOID BackTraceSub(UINTPTR fp)
-{
-    (VOID)ArchBackTraceGet(fp, NULL, OS_MAX_BACKTRACE);
-}
-
-STATIC VOID BackTraceWithFp(UINTPTR fp)
-{
-    UINTPTR backFp;
-
-    if ((VOID *)fp == NULL) {
-        backFp = ArchGetFp();
-    } else {
-        backFp = fp;
-    }
-
-    PrintExcInfo("*******backtrace begin*******\n");
-    BackTraceSub(backFp);
+#else
+    (VOID)fp;
+    (VOID)callChain;
+    (VOID)maxDepth;
+    return 0;
+#endif
 }
 
 VOID ArchBackTrace(VOID)
 {
-    BackTraceWithFp((UINTPTR)NULL);
+#ifdef LOSCFG_BACKTRACE
+    UINTPTR fp = ArchGetFp();
+    PrintExcInfo("fp:0x%08x\n", fp);
+    BackTraceWithFp(fp);
+#endif
 }
 
 VOID ArchBackTraceWithSp(const VOID *stackPointer)
 {
+#ifdef LOSCFG_BACKTRACE
     UINTPTR fp = ArchGetTaskFp(stackPointer);
-    BackTraceSub(fp);
+    PrintExcInfo("fp:0x%08x\n", fp);
+    BackTraceWithFp(fp);
+#else
+    (VOID)stackPointer;
+#endif
 }
 
 VOID OsCallStackInfo(VOID)
@@ -220,7 +230,7 @@ VOID OsCallStackInfo(VOID)
         }
         stackPointer--;
     }
-    PRINTK("\n");
+    PrintExcInfo("\n");
 }
 
 VOID OsDumpContextMem(const ExcContext *excBufAddr)
@@ -242,7 +252,7 @@ VOID OsDumpContextMem(const ExcContext *excBufAddr)
 }
 
 STATIC const StackInfo g_excStack[] = {
-    {&__stack_startup, OS_EXC_START_STACK_SIZE, "start_stack"},
+    {&__startup_stack, OS_EXC_START_STACK_SIZE, "start_stack"},
 #ifdef LOSCFG_IRQ_USE_STANDALONE_STACK
     {&__irq_stack, OS_EXC_IRQ_STACK_SIZE, "irq_stack"}
 #endif
@@ -270,17 +280,21 @@ VOID OsExcDumpContext(const ExcContext *excBufAddr)
     PrintExcInfo("LR = 0x%llx\nELR = 0x%llx\nSPSR = 0x%llx\n",
                  excBufAddr->LR, excBufAddr->regELR, excBufAddr->SPSR);
 
-    BackTraceSub(excBufAddr->X[FP_NUM]);
-#ifdef LOSCFG_SHELL
-    (VOID)OsShellCmdTskInfoGet(OS_ALL_TASK_MASK);
+#ifdef LOSCFG_BACKTRACE
+    BackTraceWithFp(excBufAddr->X[29]);  /* 29: fp reg num */
 #endif
+
+    (VOID)OsShellCmdTskInfoGet(OS_ALL_TASK_MASK);
     OsExcStackInfo();
+
     OsDumpContextMem(excBufAddr);
 #ifdef LOSCFG_KERNEL_MEM_BESTFIT
     OsMemIntegrityMultiCheck();
 #endif
 #ifdef LOSCFG_KERNEL_TRACE
-    OsTraceRecordDump(FALSE);
+    if (g_traceDumpHook != NULL) {
+        g_traceDumpHook(FALSE);
+    }
 #endif
 }
 
@@ -289,15 +303,20 @@ VOID OsCurrentELGet(UINT32 reg)
     PRINT_ERR("The current exception level is EL%d\n", NBIT(reg, 3, 2));
 }
 
-VOID OsExceptSyncExcHdl(ExcContext *frame)
+VOID OsExceptSyncExcHdl(const ExcContext *frame)
 {
     UINT32 regESR = AARCH64_SYSREG_READ(ESR_ELx);
     UINT32 bitsEC = NBIT(regESR, 31, 26);       /* get the 26-31bit for EC */
 
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
+    UINT32 ret;
+
     /* use halt ipi to stop other active cores */
     UINT32 target = (UINT32)(OS_MP_CPU_ALL & ~CPUID_TO_AFFI_MASK(ArchCurrCpuid()));
-    HalIrqSendIpi(target, LOS_MP_IPI_HALT);
+    ret = HalIrqSendIpi(target, LOS_MP_IPI_HALT);
+    if (ret != LOS_OK) {
+        PrintExcInfo("The interrupt %u is invalid, irq send inter-core interrupt failed.\n", LOS_MP_IPI_HALT);
+    }
 #endif
 
 #ifdef LOSCFG_SHELL_EXCINFO_DUMP

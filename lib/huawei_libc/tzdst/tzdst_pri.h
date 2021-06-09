@@ -39,7 +39,7 @@ extern "C" {
 
 extern INT32 DstForwardSecondGet(VOID);
 extern BOOL CheckWithinDstPeriod(const struct tm * const tm, INT64 seconds);
-extern pthread_mutex_t lock;
+extern UINT32 g_tzdstLock;
 
 #ifdef __cplusplus
 #if __cplusplus

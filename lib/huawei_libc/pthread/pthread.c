@@ -29,7 +29,6 @@
 #include "pthread.h"
 #include "pprivate.h"
 #include "errno.h"
-#include "sched.h"
 #include "stdio.h"
 #include "limits.h"
 #include "map_error.h"
@@ -45,13 +44,12 @@ extern "C" {
  * Array of pthread control structures. A pthread_t object is
  * "just" an index into this array.
  */
-#ifndef LOSCFG_LIB_CONFIGURABLE
+
 STATIC _pthread_data g_pthreadData[LOSCFG_BASE_CORE_TSK_LIMIT + 1];
-#else
-__attribute__((section(".libc.pthread"))) _pthread_data g_pthreadData[LOSCFG_BASE_CORE_TSK_LIMIT_CONFIG + 1];
-#endif
 /* Count of number of threads that have exited and not been reaped. */
 STATIC INT32 g_pthreadsExited = 0;
+STATIC UINT16 g_pthreadNameNumber = 1;
+SPIN_LOCK_INIT(g_pthreadNameSpin);
 
 /* this is to protect the pthread data */
 STATIC pthread_mutex_t g_pthreadsDataMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -65,7 +63,7 @@ UINTPTR pthread_canceled_dummy_var;
  */
 _pthread_data *pthread_get_self_data(void)
 {
-    UINT32 runningTaskPID = ((LosTaskCB *)(OsCurrTaskGet()))->taskId;
+    UINT32 runningTaskPID = LOS_CurTaskIDGet();
     _pthread_data *data = &g_pthreadData[runningTaskPID];
 
     return data;
@@ -75,7 +73,7 @@ _pthread_data *pthread_get_data(pthread_t id)
 {
     _pthread_data *data = NULL;
 
-    if ((id >= (pthread_t)g_taskMaxNum) || (id < 0)) {
+    if ((id >= (pthread_t)(sizeof(g_pthreadData) / sizeof(_pthread_data))) || (id < 0)) {
         return NULL;
     }
 
@@ -133,7 +131,7 @@ STATIC VOID PthreadReap(VOID)
      * g_pthreadsExited counter springs us out of this once we have
      * found them all (and keeps us out if there are none to do).
      */
-    for (i = 0; g_pthreadsExited && (i < g_taskMaxNum); i++) {
+    for (i = 0; g_pthreadsExited && (i < (sizeof(g_pthreadData) / sizeof(_pthread_data))); i++) {
         data = &g_pthreadData[i];
         if (data->state == PTHREAD_STATE_EXITED) {
             /* the Huawei LiteOS not delete the dead TCB,so need to delete the TCB */
@@ -211,7 +209,7 @@ STATIC UINT32 InitPthreadData(pthread_t threadId, pthread_attr_t *userAttr,
     created->cancelbuf    = NULL;
     created->canceled     = 0;
     created->freestack    = 0; /* no use default : 0 */
-    created->stackmem     = taskCB->topOfStack;
+    created->stackmem     = (UINT32)taskCB->topOfStack;
     created->thread_data  = NULL;
 
     if (created->state == PTHREAD_STATE_RUNNING) {
@@ -228,14 +226,20 @@ STATIC UINT32 InitPthreadData(pthread_t threadId, pthread_attr_t *userAttr,
     return ret;
 }
 
+STATIC VOID SetPthreadName(CHAR *name, UINT32 len)
+{
+    LOS_SpinLock(&g_pthreadNameSpin);
+    (VOID)snprintf_s(name, len, len - 1, "pth%02u", g_pthreadNameNumber);
+    ++g_pthreadNameNumber;
+    LOS_SpinUnlock(&g_pthreadNameSpin);
+}
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*startRoutine)(void *), void *arg)
 {
     pthread_attr_t userAttr;
     UINT32 ret;
-    CHAR name[PTHREAD_DATA_NAME_MAX];
-    STATIC UINT16 pthreadNumber = 1;
+    CHAR name[PTHREAD_DATA_NAME_MAX] = {0};
     TSK_INIT_PARAM_S taskInitParam = {0};
     UINT32 taskHandle;
     _pthread_data *self = pthread_get_self_data();
@@ -245,15 +249,12 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
     }
 
     SetPthreadAttr(self, attr, &userAttr);
-
-    (VOID)memset_s(name, sizeof(name), 0, sizeof(name));
-    (VOID)snprintf_s(name, sizeof(name), sizeof(name) - 1, "pth%02d", pthreadNumber);
-    pthreadNumber++;
+    SetPthreadName(name, sizeof(name));
 
     taskInitParam.pcName       = name;
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)startRoutine;
     taskInitParam.usTaskPrio   = (UINT16)userAttr.schedparam.sched_priority;
-    taskInitParam.uwStackSize  = userAttr.stacksize;
+    taskInitParam.uwStackSize  = (UINT32)userAttr.stacksize;
     /* Set the pthread default joinable */
     taskInitParam.uwResved = 0;
     LOS_TASK_PARAM_INIT_ARG(taskInitParam, arg);
@@ -806,7 +807,7 @@ pthread_t pthread_self(void)
  */
 int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize, const cpu_set_t* cpuset)
 {
-    INT32 ret = sched_setaffinity(thread, cpusetsize, cpuset);
+    INT32 ret = (INT32)sched_setaffinity(thread, cpusetsize, cpuset);
     if (ret == -1) {
         return errno;
     } else {
@@ -819,7 +820,7 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize, const cpu_set_t*
  */
 int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize, cpu_set_t* cpuset)
 {
-    INT32 ret = sched_getaffinity(thread, cpusetsize, cpuset);
+    INT32 ret = (INT32)sched_getaffinity(thread, cpusetsize, cpuset);
     if (ret == -1) {
         return errno;
     } else {

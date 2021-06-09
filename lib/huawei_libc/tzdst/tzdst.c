@@ -30,7 +30,6 @@
 #include "stdio.h"
 #include "stdint.h"
 #include "stdlib.h"
-#include "string.h"
 #include "unistd.h"
 #include "time.h"
 #include "pthread.h"
@@ -189,7 +188,7 @@ void settimezone(const char *buff)
         goto ERROR;
     }
 
-    if (LOCK(lock)) {
+    if (LIBC_LOCK(g_tzdstLock)) {
         goto ERROR;
     }
 
@@ -199,7 +198,7 @@ void settimezone(const char *buff)
         timezone = -timezone;
     }
 
-    (void)UNLOCK(lock);
+    (void)LIBC_UNLOCK(g_tzdstLock);
 
     return;
 
@@ -550,15 +549,15 @@ BOOL CheckWithinDstPeriod(const struct tm * const tm, INT64 seconds)
     INT64 dstStart, dstEnd;
     struct tm time = {0};
 
-    if (LOCK(lock)) {
+    if (LIBC_LOCK(g_tzdstLock)) {
         return FALSE;
     }
     if (g_isDstWork == FALSE) {
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return FALSE;
     }
 
-    (void)UNLOCK(lock);
+    (void)LIBC_UNLOCK(g_tzdstLock);
     /* represent a local time. */
     if (tm != NULL) {
         (void)memcpy_s(&time, sizeof(struct tm), tm, sizeof(struct tm));
@@ -594,48 +593,48 @@ BOOL CheckWithinDstPeriod(const struct tm * const tm, INT64 seconds)
 
 int dst_disable(VOID)
 {
-    if (LOCK(lock)) {
+    if (LIBC_LOCK(g_tzdstLock)) {
         return -1;
     }
 
     g_isDstWork = FALSE;
 
-    (void)UNLOCK(lock);
+    (void)LIBC_UNLOCK(g_tzdstLock);
 
     return 0;
 }
 
 int dst_enable(const char *strDstStartTime, const char *strDstEndTime, int swForwardSeconds)
 {
-    if (LOCK(lock)) {
+    if (LIBC_LOCK(g_tzdstLock)) {
         return -1;
     }
 
     /* Check if the format of dst config is correct. */
     if (DstConfigCheck(strDstStartTime, strDstEndTime) != TRUE) {
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return -1;
     }
 
     if ((swForwardSeconds < 0) || (swForwardSeconds >= 24 * 3600)) { /* seconds per day 24 * 3600 */
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return -1;
     }
 
     g_isDstWork = FALSE;
     if (strncpy_s(g_strDstStart, DST_SET_LENGTH_MAX, strDstStartTime, strlen(strDstStartTime)) != EOK) {
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return -1;
     }
     if (strncpy_s(g_strDstEnd, DST_SET_LENGTH_MAX, strDstEndTime, strlen(strDstEndTime)) != EOK) {
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return -1;
     }
 
     g_dstForwardSeconds = swForwardSeconds;
     g_isDstWork = TRUE;
 
-    (void)UNLOCK(lock);
+    (void)LIBC_UNLOCK(g_tzdstLock);
 
     return 0;
 }
@@ -644,24 +643,24 @@ int dst_inquire(int year, struct tm *start, struct tm *end)
 {
     INT64 dstStart, dstEnd;
 
-    if (LOCK(lock)) {
+    if (LIBC_LOCK(g_tzdstLock)) {
         return -1;
     }
 
     if (!g_isDstWork) {
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return -1;
     }
 
     if ((start == NULL) || (end == NULL)) {
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return -1;
     }
 
     dstStart = DstConfigDecode(year, g_strDstStart);
     dstEnd = DstConfigDecode(year, g_strDstEnd);
     if ((dstStart == -1) || (dstEnd == -1)) {
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return -1;
     }
 
@@ -672,11 +671,11 @@ int dst_inquire(int year, struct tm *start, struct tm *end)
 #else
     if ((gmtime64_r(&dstStart, start) == NULL) || (gmtime64_r(&dstEnd, end) == NULL)) {
 #endif
-        (void)UNLOCK(lock);
+        (void)LIBC_UNLOCK(g_tzdstLock);
         return -1;
     }
 
-    (void)UNLOCK(lock);
+    (void)LIBC_UNLOCK(g_tzdstLock);
     return 0;
 }
 

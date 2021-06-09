@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Board
+ * Description: Board Implementation
  * Author: Huawei LiteOS Team
  * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
@@ -48,33 +48,33 @@ VOID board_config(VOID)
 
 #if LOSCFG_DRIVERS_UART
 static struct uart_driver_data uart0_pl011_driver = {
-    .num = 0,
-    .baudrate = 115200,
+    .num             = 0,
+    .baudrate        = 115200,
     .attr.fifo_rx_en = 1,
     .attr.fifo_tx_en = 1,
-    .flags = UART_FLG_RD_BLOCK,
+    .flags           = UART_FLG_RD_BLOCK,
 };
 
 static struct resource uart0_pl011_resources[] = {
     {
-        .start = UART_REG_BASE,
-        .end = UART_REG_BASE + 0x48,
-        .flags = IORESOURCE_MEM,
+        .start  = UART_REG_BASE,
+        .end    = UART_REG_BASE + 0x48,
+        .flags  = IORESOURCE_MEM,
     },
     {
-        .start = NUM_HAL_INTERRUPT_UART,
-        .end = NUM_HAL_INTERRUPT_UART,
-        .flags = IORESOURCE_IRQ,
+        .start  = NUM_HAL_INTERRUPT_UART,
+        .end    = NUM_HAL_INTERRUPT_UART,
+        .flags  = IORESOURCE_IRQ,
     },
 };
 struct platform_device uart0_pl011_device = {
-    .name = "uart-pl011",
+    .name       = "uart-pl011",
     .id = -1,
     .dev = {
         .driver_data = &uart0_pl011_driver,
     },
-    .resource = uart0_pl011_resources,
-    .num_resources = ARRAY_SIZE(uart0_pl011_resources),
+    .resource   = uart0_pl011_resources,
+    .num_resources  = ARRAY_SIZE(uart0_pl011_resources),
 };
 
 int machine_init(void)

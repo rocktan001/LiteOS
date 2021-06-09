@@ -56,16 +56,16 @@ LITE_OS_SEC_TEXT UINT32 OsMuxInit(VOID)
 
     LOS_ListInit(&g_unusedMuxList);
     /* system resident memory, don't free */
-    g_allMux = (LosMuxCB *)LOS_MemAlloc(m_aucSysMem0, (LOSCFG_BASE_IPC_MUX_LIMIT * sizeof(LosMuxCB)));
+    g_allMux = (LosMuxCB *)LOS_MemAlloc(m_aucSysMem0, (KERNEL_MUX_LIMIT * sizeof(LosMuxCB)));
     if (g_allMux == NULL) {
         return LOS_ERRNO_MUX_NO_MEMORY;
     }
 
-    for (index = 0; index < LOSCFG_BASE_IPC_MUX_LIMIT; index++) {
+    for (index = 0; index < KERNEL_MUX_LIMIT; index++) {
         muxNode = g_allMux + index;
         muxNode->muxId = index;
         muxNode->owner = NULL;
-        muxNode->muxStat = OS_MUX_UNUSED;
+        muxNode->muxStat = LOS_UNUSED;
         LOS_ListTailInsert(&g_unusedMuxList, &muxNode->muxList);
     }
 
@@ -98,7 +98,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxCreate(UINT32 *muxHandle)
     LOS_ListDelete(unusedMux);
     muxCreated = LOS_DL_LIST_ENTRY(unusedMux, LosMuxCB, muxList);
     muxCreated->muxCount = 0;
-    muxCreated->muxStat = OS_MUX_USED;
+    muxCreated->muxStat = LOS_USED;
     muxCreated->owner = NULL;
     LOS_ListInit(&muxCreated->muxList);
     *muxHandle = muxCreated->muxId;
@@ -121,7 +121,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxDelete(UINT32 muxHandle)
     UINT32 errNo;
     UINT32 errLine;
 
-    if (GET_MUX_INDEX(muxHandle) >= (UINT32)LOSCFG_BASE_IPC_MUX_LIMIT) {
+    if (GET_MUX_INDEX(muxHandle) >= (UINT32)KERNEL_MUX_LIMIT) {
         OS_GOTO_ERR_HANDLER(LOS_ERRNO_MUX_INVALID);
     }
 
@@ -131,7 +131,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxDelete(UINT32 muxHandle)
         ((muxDeleted->owner == NULL) ? 0xFFFFFFFF : muxDeleted->owner->taskId));
 
     SCHEDULER_LOCK(intSave);
-    if ((muxDeleted->muxId != muxHandle) || (muxDeleted->muxStat == OS_MUX_UNUSED)) {
+    if ((muxDeleted->muxId != muxHandle) || (muxDeleted->muxStat == LOS_UNUSED)) {
         SCHEDULER_UNLOCK(intSave);
         OS_GOTO_ERR_HANDLER(LOS_ERRNO_MUX_INVALID);
     }
@@ -142,7 +142,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxDelete(UINT32 muxHandle)
     }
 
     LOS_ListTailInsert(&g_unusedMuxList, &muxDeleted->muxList);
-    muxDeleted->muxStat = OS_MUX_UNUSED;
+    muxDeleted->muxStat = LOS_UNUSED;
     muxDeleted->muxId = SET_MUX_ID(GET_MUX_COUNT(muxDeleted->muxId) + 1, GET_MUX_INDEX(muxDeleted->muxId));
 
     OsMuxDbgUpdateHook(muxDeleted->muxId, NULL);
@@ -157,7 +157,7 @@ ERR_HANDLER:
 
 LITE_OS_SEC_TEXT STATIC UINT32 OsMuxParaCheck(const LosMuxCB *muxCB, UINT32 muxHandle)
 {
-    if ((muxCB->muxStat == OS_MUX_UNUSED) || (muxCB->muxId != muxHandle)) {
+    if ((muxCB->muxStat == LOS_UNUSED) || (muxCB->muxId != muxHandle)) {
         OS_RETURN_ERROR(LOS_ERRNO_MUX_INVALID);
     }
 
@@ -278,7 +278,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxPend(UINT32 muxHandle, UINT32 timeout)
     LosMuxCB *muxPended = NULL;
     LosTaskCB *runTask = NULL;
 
-    if (GET_MUX_INDEX(muxHandle) >= (UINT32)LOSCFG_BASE_IPC_MUX_LIMIT) {
+    if (GET_MUX_INDEX(muxHandle) >= (UINT32)KERNEL_MUX_LIMIT) {
         OS_RETURN_ERROR(LOS_ERRNO_MUX_INVALID);
     }
 
@@ -287,16 +287,16 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxPend(UINT32 muxHandle, UINT32 timeout)
     LOS_TRACE(MUX_PEND, muxHandle, muxPended->muxCount,
         ((muxPended->owner == NULL) ? 0xFFFFFFFF : muxPended->owner->taskId), timeout);
 
+    runTask = OsCurrTaskGet();
+    if (runTask->taskFlags & OS_TASK_FLAG_SYSTEM) {
+        PRINT_DEBUG("Warning: DO NOT recommend to use %s in system tasks.\n", __FUNCTION__);
+    }
+
     SCHEDULER_LOCK(intSave);
 
     ret = OsMuxParaCheck(muxPended, muxHandle);
     if (ret != LOS_OK) {
         goto OUT_UNLOCK;
-    }
-
-    runTask = OsCurrTaskGet();
-    if (runTask->taskFlags & OS_TASK_FLAG_SYSTEM) {
-        PRINT_DEBUG("Warning: DO NOT recommend to use %s in system tasks.\n", __FUNCTION__);
     }
 
     if (muxPended->muxCount == 0) {
@@ -318,7 +318,6 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxPend(UINT32 muxHandle, UINT32 timeout)
 
     if (!OsPreemptableInSched()) {
         ret = LOS_ERRNO_MUX_PEND_IN_LOCK;
-        PRINT_ERR("!!!LOS_ERRNO_MUX_PEND_IN_LOCK!!!\n");
         OsBackTrace();
         goto OUT_UNLOCK;
     }
@@ -328,6 +327,9 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxPend(UINT32 muxHandle, UINT32 timeout)
 
 OUT_UNLOCK:
     SCHEDULER_UNLOCK(intSave);
+    if (ret == LOS_ERRNO_MUX_PEND_IN_LOCK) {
+        PRINT_ERR("!!!LOS_ERRNO_MUX_PEND_IN_LOCK!!!\n");
+    }
     return ret;
 }
 
@@ -392,7 +394,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_MuxPost(UINT32 muxHandle)
     LosMuxCB *muxPosted = GET_MUX(muxHandle);
     UINT32 intSave;
 
-    if (GET_MUX_INDEX(muxHandle) >= (UINT32)LOSCFG_BASE_IPC_MUX_LIMIT) {
+    if (GET_MUX_INDEX(muxHandle) >= (UINT32)KERNEL_MUX_LIMIT) {
         OS_RETURN_ERROR(LOS_ERRNO_MUX_INVALID);
     }
 

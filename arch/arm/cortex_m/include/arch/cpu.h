@@ -64,6 +64,33 @@ STATIC INLINE UINT32 ArchSPGet(VOID)
     return val;
 }
 
+STATIC INLINE UINTPTR ArchGetSp(VOID)
+{
+    UINTPTR regSp;
+
+    __asm__ __volatile__("mov %0, sp\n" : "=r"(regSp));
+
+    return regSp;
+}
+
+STATIC INLINE UINTPTR ArchGetPsp(VOID)
+{
+    UINTPTR regPsp;
+
+    __asm__ __volatile__("MRS %0, psp\n" : "=r"(regPsp));
+
+    return regPsp;
+}
+
+STATIC INLINE UINTPTR ArchGetMsp(VOID)
+{
+    UINTPTR regMsp;
+
+    __asm__ __volatile__("MRS %0, msp\n" : "=r"(regMsp));
+
+    return regMsp;
+}
+
 STATIC INLINE UINT32 ArchCurrCpuid(void)
 {
     return 0;

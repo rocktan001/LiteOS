@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 #include "los_list.h"
-#include "los_task_pri.h"
+#include "los_event.h"
 #include "bits/pthread_types.h"
 #include "los_mux_pri.h"
 #include <features.h>
@@ -91,6 +91,9 @@ typedef struct pthread_cond {
 #ifdef __LITEOS__
 #define PTHREAD_MUTEX_ERRORCHECK_NP 2
 #define PTHREAD_MUTEX_RECURSIVE_NP 1
+
+/* priority must in valid range [OS_TASK_PRIORITY_HIGHEST, PTHREAD_MUTEX_PRIORITY] */
+#define PTHREAD_MUTEX_PRIORITY 31
 #endif
 
 #define PTHREAD_MUTEX_STALLED 0
@@ -167,51 +170,51 @@ typedef struct pthread_cond {
  * Statically initialize a recursive mutex that applies the priority inheritance protocol
  */
 #define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
-    { { PTHREAD_PRIO_INHERIT, OS_TASK_PRIORITY_LOWEST, PTHREAD_MUTEX_RECURSIVE_NP, 0 }, \
+    { { PTHREAD_PRIO_INHERIT, PTHREAD_MUTEX_PRIORITY, PTHREAD_MUTEX_RECURSIVE_NP, 0 }, \
     { { (struct LOS_DL_LIST *)NULL, (struct LOS_DL_LIST *)NULL }, \
-    (LosTaskCB *)NULL, 0 } }
+    NULL, 0 } }
 /**
  * @ingroup pthread
  * Statically initialize a normal mutex that applies the priority inheritance protocol
  */
 #define PTHREAD_MUTEX_INITIALIZER \
-    { { PTHREAD_PRIO_INHERIT, OS_TASK_PRIORITY_LOWEST, 0, 0 }, \
+    { { PTHREAD_PRIO_INHERIT, PTHREAD_MUTEX_PRIORITY, 0, 0 }, \
     { { (struct LOS_DL_LIST *)NULL, (struct LOS_DL_LIST *)NULL }, \
-    (LosTaskCB *)NULL, 0 } }
+    NULL, 0 } }
 #elif defined POSIX_MUTEX_DEFAULT_PROTECT
 /**
  * @ingroup pthread
  * Statically initialize a recursive mutex that applies the priority protection protocol
  */
 #define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
-    { { PTHREAD_PRIO_PROTECT, OS_TASK_PRIORITY_LOWEST, PTHREAD_MUTEX_RECURSIVE_NP, 0 }, \
+    { { PTHREAD_PRIO_PROTECT, PTHREAD_MUTEX_PRIORITY, PTHREAD_MUTEX_RECURSIVE_NP, 0 }, \
     { { (struct LOS_DL_LIST *)NULL, (struct LOS_DL_LIST *)NULL }, \
-    (LosTaskCB *)NULL, 0 } }
+    NULL, 0 } }
 /**
  * @ingroup pthread
  * Statically initialize a normal mutex that applies the priority protection protocol
  */
 #define PTHREAD_MUTEX_INITIALIZER \
-    { { PTHREAD_PRIO_PROTECT, OS_TASK_PRIORITY_LOWEST, 0, 0 },  \
+    { { PTHREAD_PRIO_PROTECT, PTHREAD_MUTEX_PRIORITY, 0, 0 },  \
     { { (struct LOS_DL_LIST *)NULL, (struct LOS_DL_LIST *)NULL }, \
-    (LosTaskCB *)NULL, 0 } }
+    NULL, 0 } }
 #else
 /**
  * @ingroup pthread
  * Statically initialize a recursive mutex that applies no priority protocol
  */
 #define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
-    { { PTHREAD_PRIO_NONE, OS_TASK_PRIORITY_LOWEST, PTHREAD_MUTEX_RECURSIVE_NP, 0 }, \
+    { { PTHREAD_PRIO_NONE, PTHREAD_MUTEX_PRIORITY, PTHREAD_MUTEX_RECURSIVE_NP, 0 }, \
     { { (struct LOS_DL_LIST *)NULL, (struct LOS_DL_LIST *)NULL }, \
-    (LosTaskCB *)NULL, 0 } }
+    NULL, 0 } }
 /**
  * @ingroup pthread
  * Statically initialize a normal mutex that applies no priority protocol
  */
 #define PTHREAD_MUTEX_INITIALIZER \
-    { { PTHREAD_PRIO_NONE, OS_TASK_PRIORITY_LOWEST, 0, 0 }, \
+    { { PTHREAD_PRIO_NONE, PTHREAD_MUTEX_PRIORITY, 0, 0 }, \
     { { (struct LOS_DL_LIST *)NULL, (struct LOS_DL_LIST *)NULL }, \
-    (LosTaskCB *)NULL, 0 } }
+    NULL, 0 } }
 #endif
 #endif
 

@@ -1,3 +1,5 @@
+
+
 ## LiteOS代码入口
 
 LiteOS入口在工程对应的main.c中，基本流程如下：
@@ -40,6 +42,8 @@ INT32 main(VOID)
 | arch       | arm                      | cortex_a_r            | A核架构支持                                                  |
 |            |                          | cortex_m              | M核架构支持                                                  |
 |            | arm64                    |                       | arm64架构支持                                                |
+|            | csky                     | cskyv2                | cskyv2架构支持                                                |
+|            | riscv                    | rvm32                 | riscv架构支持                                                |
 | build      |                          |                       | LiteOS编译系统需要的配置及脚本                               |
 | compat     | cmsis                    |                       | liteos提供的CMSIS-RTOS 1.0和2.0接口                          |
 | components | ai                       |                       | ai(基于mindspore)算子库实现                                  |
@@ -47,24 +51,36 @@ INT32 main(VOID)
 |            |                          | lwm2m                 | lwm2m协议实现                                                |
 |            |                          | mqtt                  | MQTT开源协议实现                                             |
 |            |                          | nb_iot                | LiteOS NB-IoT API                                            |
-|            | fs                       |                       | 文件系统，含vfs、spiffs、ramfs、littlefs、kifs、fatfs、devfs |
+|            | fs                       | devfs                 | devfs文件系统                                                 |
+|            |                          | fatfs                 | fatfs文件系统                                                 |
+|            |                          | kifs                  | kifs文件系统                                                  |
+|            |                          | littlefs              | littlefs文件系统                                              |
+|            |                          | ramfs                 | ramfs文件系统                                                 |
+|            |                          | spiffs                | spiffs文件系统                                                |
+|            |                          | vfs                   | 虚拟文件系统                                                  |
 |            | gui                      |                       | 开源LittlevGL图形库                                          |
-|            | language                 |                       | 语言相关组件，含lua                                                  |
+|            | language                 |                       | 语言相关组件，含lua                                             |
 |            | lib                      | cjson                 | c语言json库                                                  |
 |            | log                      |                       | 日志等级控制                                                 |
-|            | media                    |                       | 媒体相关组件，含opus、libpng                                         |
+|            | media                    |                       | 媒体相关组件，含libpng、openexif、opus、upup、                   |
 |            | net                      | at_device             | AT设备适配层                                                 |
 |            |                          | at_frame              | LiteOS AT框架API                                             |
+|            |                          | ifconfig              | ifconfig shell命令实现                                         |
+|            |                          | los_iperf             | 网络带宽测试工具                                                |
 |            |                          | lwip/lwip_port        | lwip驱动及OS适配代码                                         |
 |            |                          | lwip/lwip-2.1.2       | lwip协议实现                                                 |
 |            |                          | lwip/ppp_port         | lwip协议ppp端口支持                                          |
+|            |                          | pcap                  | 网络抓包工具                                                 |
+|            |                          | ping                  | ping shell命令实现                                           |
 |            |                          | sal                   | socket通讯支持                                               |
+|            |                          | tftp_server           | tftp服务                                                    |
 |            | ota                      |                       | 固件升级代码                                                 |
 |            | security                 | mbedtls/mbedtls_port  | mbed TLS的OS适配代码                                         |
 |            |                          | mbedtls/mbedtl-2.16.8 | mbed TLS协议实现                                             |
+|            |                          | openssl               | openssl协议                                                 |
 |            | sensorhub                | include               | sensor manager头文件                                         |
 |            |                          | src                   | sensor manager的源码实现                                     |
-|            | utility                  |                       | 解析工具，含bidireference、freetype、iconv、iniparser、json-c、libxml2 |
+|            | utility                  |                       | 解析工具，含bidireference、curl、fastlz、freetype、harfbuzz、iconv、iniparser、json-c、jsoncpp、libxml2、sqlite、thttpd、tinyxml2  |
 | demos      | agenttiny_lwm2m          |                       | lwm2m协议 demo                                               |
 |            | agenttiny_mqtt           |                       | mqtt 协议demo                                                |
 |            | ai                       |                       | ai的demo                                                     |
@@ -102,20 +118,31 @@ INT32 main(VOID)
 |            | libsec                   |                       | 华为安全函数库                                               |
 |            | zlib                     |                       | 开源zlib库                                                   |
 | osdepends  | liteos                   |                       | LiteOS提供的部分OS适配接口                                   |
-| shell      |                          |                       | 实现shell命令的代码，支持基本调试功能                        |
+| shell      |                          | src                   | 实现shell命令的代码，支持基本调试功能                          |
+|            |                          | include               | shell头文件                                                  |
 | targets    | bsp                      |                       | 通用板级支持包                                               |
-|            | Cloud_STM32F429IGTx_FIRE |                       | 野火STM32F429（ARM Cortex M4）开发板的开发工程源码包         |
+|            | CB2201                   |                       | CB2201（ck802）开发板的开发工程源码包                         |
+|            | Cloud_STM32F429IGTx_FIRE |                       | 野火STM32F429（ARM Cortex M4）开发板的开发工程源码包           |
+|            | GD32E103C_START          |                       | GD32E103C_START（ARM Cortex M4）开发板的开发工程源码包        |
+|            | GD32F303RGT6_BearPi      |                       | GD32F303RGT6_BearPi（ARM Cortex M4）开发板的开发工程源码包    |
+|            | GD32VF103V_EVAL          |                       | GD32VF103V_EVAL（riscv）开发板的开发工程源码包                |
+|            | HiFive1_Rev1_B01         |                       | HiFive1_Rev1_B01（riscv）开发板的开发工程源码包                |
 |            | qemu-virt-a53            |                       | Coretex A53的qemu开发工程源码包                              |
 |            | realview-pbx-a9          |                       | Coretex A9的qemu开发工程源码包                               |
-|            | STM32F072_Nucleo         |                       | STM32F072_Nucleo（ARM Cortex M0）开发板的开发工程源码包      |
-|            | STM32F103_FIRE_Arbitrary |                       | 野火STM32F103（ARM Cortex M3）霸道开发板的开发工程源码包     |
-|            | STM32F407_ATK_Explorer   |                       | 正点原子STM32F407（ARM Cortex M4）探索者开发板的开发工程源码包 |
-|            | STM32F769IDISCOVERY      |                       | STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包   |
-|            | STM32L4R9I_Discovery     |                       | STM32L4R9IDISCOVERY（ARM Cortex M4）开发板的开发工程源码包   |
-|            | STM32L431_BearPi         |                       | 小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包       |
-|            | STM32L476_NB476          |                       | 深创客STM32L476（ARM Cortex M4）开发板的开发工程源码包       |
-|            | STM32L496_Nucleo         |                       | STM32L496 NUCLEO-144（ARM Cortex M4）开发板的开发工程源码包  |
-| tools      | build                    |                       | LiteOS支持的开发板编译配置文件                               |
+|            | STM32F072_Nucleo         |                       | STM32F072_Nucleo（ARM Cortex M0）开发板的开发工程源码包        |
+|            | STM32F103_FIRE_Arbitrary |                       | 野火STM32F103（ARM Cortex M3）霸道开发板的开发工程源码包       |
+|            | STM32F407_ATK_Explorer   |                       | 正点原子STM32F407（ARM Cortex M4）探索者开发板的开发工程源码包  |
+|            | STM32F769IDISCOVERY      |                       | STM32F769IDISCOVERY（ARM Cortex M7）开发板的开发工程源码包     |
+|            | STM32L4R9I_Discovery     |                       | STM32L4R9IDISCOVERY（ARM Cortex M4）开发板的开发工程源码包     |
+|            | STM32L073_Nucleo         |                       | STM32L073_Nucleo（ARM Cortex M0+）开发板的开发工程源码包       |
+|            | STM32L431_BearPi         |                       | 小熊派STM32L431（ARM Cortex M4）开发板的开发工程源码包          |
+|            | STM32L476_NB476          |                       | 深创客STM32L476（ARM Cortex M4）开发板的开发工程源码包         |
+|            | STM32L496_Nucleo         |                       | STM32L496 NUCLEO-144（ARM Cortex M4）开发板的开发工程源码包    |
+|            | STM32L552_Nucleo         |                       | STM32L552 Nucleo（ARM Cortex M33）开发板的开发工程源码包       |
+| tools      | build                    |                       | LiteOS支持的开发板编译配置文件                                |
 |            | menuconfig               |                       | LiteOS编译所需的menuconfig脚本                               |
-| Makefile   |                          |                       | LiteOS Makefile                                              |
+| Makefile   |                          |                       | LiteOS Makefile                                             |
 | .config    |                          |                       | 开发板的配置文件，如果用户不重新选择开发板，默认为野火挑战者STM32F429开发板的配置文件 |
+
+
+

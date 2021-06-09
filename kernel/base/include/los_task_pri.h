@@ -98,12 +98,6 @@ extern SPIN_LOCK_S g_taskSpin;
 /* The task is system-level task, like idle, swtmr and etc */
 #define OS_TASK_FLAG_SYSTEM         0x0002U
 
-/* Boundary on which the stack size is aligned */
-#define OS_TASK_STACK_SIZE_ALIGN    16U
-
-/* Boundary on which the stack address is aligned */
-#define OS_TASK_STACK_ADDR_ALIGN    8U
-
 /* Number of usable task priorities */
 #define OS_TSK_PRINUM               (OS_TASK_PRIORITY_LOWEST - OS_TASK_PRIORITY_HIGHEST + 1)
 
@@ -130,9 +124,6 @@ typedef struct {
     UINT32          taskId;             /* Task ID */
     TSK_ENTRY_FUNC  taskEntry;          /* Task entrance function */
     VOID            *taskSem;           /* Task-held semaphore */
-#ifdef LOSCFG_LAZY_STACK
-    UINT32          stackFrame;         /* Stack frame: 0=Basic, 1=Extended */
-#endif
 #ifdef LOSCFG_COMPAT_POSIX
     VOID            *threadJoin;        /* pthread adaption */
     VOID            *threadJoinRetval;  /* pthread adaption */
@@ -217,8 +208,6 @@ extern UINT32 OsShellCmdDumpTask(INT32 argc, const CHAR **argv);
 /* get task info */
 #define OS_ALL_TASK_MASK  0xFFFFFFFF
 extern UINT32 OsShellCmdTskInfoGet(UINT32 taskId);
-extern VOID *OsGetMainTask(VOID);
-extern VOID OsSetMainTask(VOID);
 extern LosTaskCB *OsGetTopTask(VOID);
 extern UINT32 OsGetIdleTaskId(VOID);
 extern CHAR *OsCurTaskNameGet(VOID);
@@ -234,6 +223,11 @@ extern VOID OsSchedStatistics(LosTaskCB *runTask, LosTaskCB *newTask);
 #endif
 #ifdef LOSCFG_EXC_INTERACTION
 extern BOOL IsIdleTask(UINT32 taskId);
+#endif
+
+#ifdef LOSCFG_KERNEL_INTERMIT
+typedef VOID (*DELETETASKHOOK)(LosTaskCB *taskCB);
+extern VOID OsTaskDelHookReg(DELETETASKHOOK hook);
 #endif
 
 #ifdef __cplusplus

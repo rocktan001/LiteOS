@@ -7,45 +7,62 @@ weak_alias(dummy, __stderr_used);
 
 int fflush(FILE *f)
 {
-	if (!f) {
-		int r = 0;
-		if (__stdout_used) r |= fflush(__stdout_used);
-		if (__stderr_used) r |= fflush(__stderr_used);
+#ifdef LOSCFG_KERNEL_CPPSUPPORT
+    uint32_t p = (uintptr_t)f;
+    extern char _sstack, _estack;
+    static const int sstack = (const int)&_sstack;
+    static const int estack = (const int)&_estack;
+    if (p < sstack || p > estack) {
+        f = stdout;
+    }
+#endif
+    if (!f) {
+        int r = 0;
+        if (__stdout_used) {
+            r |= fflush(__stdout_used);
+        }
+        if (__stderr_used) {
+            r |= fflush(__stderr_used);
+        }
 
-		for (f=*__ofl_lock(); f; f=f->next) {
-			FLOCK(f);
-			if (f->wpos != f->wbase) r |= fflush(f);
-			FUNLOCK(f);
-		}
-		__ofl_unlock();
+        for (f = *__ofl_lock(); f; f = f->next) {
+            FLOCK(f);
+            if (f->wpos != f->wbase) {
+                r |= fflush(f);
+            }
+            FUNLOCK(f);
+        }
+        __ofl_unlock();
 
-		return r;
-	}
+        return r;
+    }
 
-	FLOCK(f);
+    FLOCK(f);
 
-	/* If writing, flush output */
-	if (f->wpos != f->wbase) {
-		f->write(f, 0, 0);
-		if (!f->wpos) {
-			FUNLOCK(f);
-			return EOF;
-		}
-	}
+    /* If writing, flush output */
+    if (f->wpos != f->wbase) {
+        f->write(f, 0, 0);
+        if (!f->wpos) {
+            FUNLOCK(f);
+            return EOF;
+        }
+    }
 
 #ifndef __LITEOS__
-	/* If reading, sync position, per POSIX */
-	if (f->rpos != f->rend) f->seek(f, f->rpos-f->rend, SEEK_CUR);
+    /* If reading, sync position, per POSIX */
+    if (f->rpos != f->rend)
+        f->seek(f, f->rpos - f->rend, SEEK_CUR);
 #else
-	if (f->rpos != f->rend) f->seek64(f, f->rpos-f->rend, SEEK_CUR);
+    if (f->rpos != f->rend)
+        f->seek64(f, f->rpos - f->rend, SEEK_CUR);
 #endif
 
-	/* Clear read and write modes */
-	f->wpos = f->wbase = f->wend = 0;
-	f->rpos = f->rend = 0;
+    /* Clear read and write modes */
+    f->wpos = f->wbase = f->wend = 0;
+    f->rpos = f->rend = 0;
 
-	FUNLOCK(f);
-	return 0;
+    FUNLOCK(f);
+    return 0;
 }
 
 weak_alias(fflush, fflush_unlocked);

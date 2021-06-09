@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Main Process
+ * Description: Main Process Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-02-03
+ * Create: 2021-04-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -28,8 +28,8 @@
 
 #include "main.h"
 #include "los_task_pri.h"
+#include "arch/canary.h"
 #include "gpio.h"
-#include "timer.h"
 #include "usart.h"
 
 VOID board_config(VOID)
@@ -43,11 +43,17 @@ VOID HardwareInit(VOID)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_LPUART1_UART_Init();
-    // TimerInitialize();
+    StmTimerInit();
 }
 
 INT32 main(VOID)
 {
+#ifdef __GNUC__
+    ArchStackGuardInit();
+#endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+
     board_config();
     HardwareInit();
 

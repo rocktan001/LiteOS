@@ -29,7 +29,6 @@
 #include "los_slab_pri.h"
 #include "los_memory_pri.h"
 
-#include "string.h"
 #include "securec.h"
 
 #ifdef __cplusplus
@@ -193,7 +192,7 @@ VOID *OsSlabAllocatorGetIdxP(const OsSlabAllocator *allocator, UINT32 idx)
     return allocator->dataChunks + allocator->itemSz * idx;
 }
 
-UINT32 OsSlabAllocatorGetIndex(const OsSlabAllocator *allocator, VOID* ptr)
+UINT32 OsSlabAllocatorGetIndex(const OsSlabAllocator *allocator, const VOID* ptr)
 {
     UINT8 *ptrTmp = (UINT8*)ptr;
     UINT32 itemOffset = (UINT32)(ptrTmp - allocator->dataChunks);
@@ -238,7 +237,7 @@ VOID OsSlabAllocatorGetSlabInfo(const OsSlabAllocator *allocator, UINT32 *pitemS
     *curUsage = OsSlabAllocatorGetUsedItemCnt(allocator);
 }
 
-BOOL OsSlabAllocatorCheck(const OsSlabAllocator *allocator, VOID* ptr)
+BOOL OsSlabAllocatorCheck(const OsSlabAllocator *allocator, const VOID* ptr)
 {
     UINT8 *ptrTmp = (UINT8*)ptr;
     UINT32 itemOffset = (UINT32)(ptrTmp - allocator->dataChunks);

@@ -1,73 +1,89 @@
 include $(LITEOSTOPDIR)/config.mk
+LIBC_RELATIVE_PATH := ../../lib/libc
+include libc_src.mk
 
 MODULE_NAME := c
 
-# musl_libc path
-LOCAL_DIRS_LIBC := errno string stdlib internal time misc \
-                locale ctype temp fcntl signal network unistd complex termios
-LOCAL_DIRS_LIBC := $(addprefix src/, $(LOCAL_DIRS_LIBC))
+# libc module
+LOCAL_SRCS_LIBC := $(LIBC_ERRNO_SRC) $(LIBC_STRING_SRC) $(LIBC_STDLIB_SRC) \
+				   $(LIBC_INTERNAL_SRC) $(LIBC_TIME_SRC) $(LIBC_MISC_SRC) \
+				   $(LIBC_LOCALE_SRC) $(LIBC_CTYPE_SRC) $(LIBC_TEMP_SRC) \
+				   $(LIBC_FCNTL_SRC) $(LIBC_SIGNAL_SRC) $(LIBC_NETWORK_SRC) \
+				   $(LIBC_UNISTD_SRC) $(LIBC_COMPLEX_SRC) $(LIBC_TERMIOS_SRC)
 
-# huawei_libc path
-LOCAL_DIRS_HUAWEI_LIBC := errno string stdlib signal
+# huawei_libc module
+LOCAL_DIRS_HUAWEI_LIBC := errno string stdlib signal tzdst lock
 LOCAL_DIRS_HUAWEI_LIBC := $(addprefix ../huawei_libc/, $(LOCAL_DIRS_HUAWEI_LIBC))
 
-LOCAL_DIRS_y := $(LOCAL_DIRS_LIBC) $(LOCAL_DIRS_HUAWEI_LIBC)
+LOCAL_DIRS_y := $(LOCAL_DIRS_HUAWEI_LIBC)
+LOCAL_SRCS_y += $(LOCAL_SRCS_LIBC)
+LOCAL_SRCS_y += $(foreach dir, $(LOCAL_DIRS_y), $(wildcard $(dir)/*.c))
 
-# STDIO configured module path
-LOCAL_DIRS_$(LOSCFG_LIB_STDIO) += src/stdio ../huawei_libc/stdio
+# standard io basic function
+LOCAL_SRCS_STDIO_BASE := sprintf.c asprintf.c snprintf.c vsprintf.c vasprintf.c vsnprintf.c vfprintf.c \
+                        sscanf.c vsscanf.c vfscanf.c \
+                        __uflow.c __toread.c
+LOCAL_SRCS_STDIO_BASE := $(addprefix $(LIBC_RELATIVE_PATH)/src/stdio/, $(LOCAL_SRCS_STDIO_BASE))
+LOCAL_SRCS_y += $(LOCAL_SRCS_STDIO_BASE)
 
-LOCAL_SRCS_y := $(foreach dir, $(LOCAL_DIRS_y), $(wildcard $(dir)/*.c))
+# standard io extended function
+ifeq ($(LOSCFG_LIB_STDIO), y)
+LOCAL_SRCS_STDIO_EX := $(LIBC_STDIO_SRC)
+LOCAL_SRCS_STDIO_EX := $(filter-out $(LOCAL_SRCS_STDIO_BASE), $(LOCAL_SRCS_STDIO_EX))
+LOCAL_SRCS_y += $(LOCAL_SRCS_STDIO_EX)
+endif
 
-LOCAL_SRCS_y += ../huawei_libc/time/time.c src/prng/rand.c
-ifneq ($(LOSCFG_LIB_STDIO), y)
-LOCAL_SRCS_y += src/stdio/__uflow.c src/stdio/__toread.c
+LOCAL_SRCS_y += ../huawei_libc/time/time.c ../huawei_libc/time/time64.c
+ifneq ($(LOSCFG_COMPAT_POSIX), y)
+LOCAL_SRCS_y += $(LIBC_RELATIVE_PATH)/src/prng/rand.c
 endif
 
 LOCAL_SRCS    = $(LOCAL_SRCS_y)
 
-LOCAL_SRCS += $(wildcard src/string/$(ARCH_LOCAL)/*.s)
+LOCAL_SRCS += $(wildcard $(LIBC_RELATIVE_PATH)/src/string/$(ARCH_LOCAL)/*.s)
 ifneq ($(LOSCFG_ARCH_ARM_CORTEX_M), y)
-LOCAL_SRCS += $(wildcard src/string/$(ARCH_LOCAL)/*.S)
+LOCAL_SRCS += $(wildcard $(LIBC_RELATIVE_PATH)/src/string/$(ARCH_LOCAL)/*.S)
 endif
 
-ifeq ($(LITEOS_CPU_TYPE), cortex-a7)
-FILTER_FILES = $(wildcard src/string/memcpy.c) \
-               $(wildcard src/string/memset.c) \
-               $(wildcard src/string/strcmp.c) \
-               $(wildcard src/string/memcmp.c)
-LOCAL_SRCS := $(filter-out $(FILTER_FILES), $(LOCAL_SRCS))
-else ifeq ($(LITEOS_CPU_TYPE), cortex-a9)
-FILTER_FILES = $(wildcard src/string/memcpy.c) \
-               $(wildcard src/string/memset.c) \
-               $(wildcard src/string/strcmp.c) \
-               $(wildcard src/string/memcmp.c)
-LOCAL_SRCS := $(filter-out $(FILTER_FILES), $(LOCAL_SRCS))
-else ifeq ($(LITEOS_CPU_TYPE), riscv)
-FILTER_FILES = $(wildcard src/string/memset.c) \
-               $(wildcard src/string/strcmp.c) \
-               $(wildcard src/string/memcpy.c)
-LOCAL_SRCS := $(filter-out $(FILTER_FILES), $(LOCAL_SRCS))
+FILTER_FILES :=
+ifneq ($(findstring $(LOSCFG_ARCH_ARM_V7A)$(LOSCFG_ARCH_ARM_V7R), y y),)
+FILTER_FILES += $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memcpy.c) \
+                $(wildcard $(LIBC_RELATIVE_PATH)/src/string/strcmp.c) \
+                $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memcmp.c)
+ifeq ($(LOSCFG_ARCH_FPU_VFP_NEON), y)
+FILTER_FILES += $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memset.c)
 endif
+else ifneq ($(findstring $(LOSCFG_ARCH_RISCV_RV32IMC), y),)
+FILTER_FILES += $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memset.c) \
+                $(wildcard $(LIBC_RELATIVE_PATH)/src/string/strcmp.c) \
+                $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memcpy.c)
+else ifneq ($(findstring $(LOSCFG_ARCH_ARM_V8A)$(LOSCFG_ARCH_ARM_V8R), y y),)
+FILTER_FILES += $(wildcard $(LIBC_RELATIVE_PATH)/src/string/strcmp.c) \
+                $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memcmp.c) \
+                $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memset.c) \
+                $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memcpy.c)
+endif
+LOCAL_SRCS := $(filter-out $(FILTER_FILES), $(LOCAL_SRCS))
 
 LOCAL_INCLUDE := \
-    -I $(LITEOSTOPDIR)/lib/libc/src/include \
-    -I $(LITEOSTOPDIR)/lib/libc/src/internal \
-    -I $(LITEOSTOPDIR)/lib/libc/src/crypt \
-    -I $(LITEOSTOPDIR)/lib/libc/src/ctype \
-    -I $(LITEOSTOPDIR)/lib/libc/src/dirent \
-    -I $(LITEOSTOPDIR)/lib/libc/src/errno \
-    -I $(LITEOSTOPDIR)/lib/libc/src/ipc \
-    -I $(LITEOSTOPDIR)/lib/libc/src/locale \
-    -I $(LITEOSTOPDIR)/lib/libc/src/math \
-    -I $(LITEOSTOPDIR)/lib/libc/src/multibyte \
-    -I $(LITEOSTOPDIR)/lib/libc/src/networknetwork \
-    -I $(LITEOSTOPDIR)/lib/libc/src/passwd \
-    -I $(LITEOSTOPDIR)/lib/libc/src/prng \
-    -I $(LITEOSTOPDIR)/lib/libc/src/process \
-    -I $(LITEOSTOPDIR)/lib/libc/src/regex \
-    -I $(LITEOSTOPDIR)/lib/libc/src/search \
-    -I $(LITEOSTOPDIR)/lib/libc/src/time \
-    -I $(LITEOSTOPDIR)/drivers/random/dev/random \
+    -I $(LITEOS_LIBC_PATH)/src/include \
+    -I $(LITEOS_LIBC_PATH)/src/internal \
+    -I $(LITEOS_LIBC_PATH)/src/crypt \
+    -I $(LITEOS_LIBC_PATH)/src/ctype \
+    -I $(LITEOS_LIBC_PATH)/src/dirent \
+    -I $(LITEOS_LIBC_PATH)/src/errno \
+    -I $(LITEOS_LIBC_PATH)/src/ipc \
+    -I $(LITEOS_LIBC_PATH)/src/locale \
+    -I $(LITEOS_LIBC_PATH)/src/math \
+    -I $(LITEOS_LIBC_PATH)/src/multibyte \
+    -I $(LITEOS_LIBC_PATH)/src/networknetwork \
+    -I $(LITEOS_LIBC_PATH)/src/passwd \
+    -I $(LITEOS_LIBC_PATH)/src/prng \
+    -I $(LITEOS_LIBC_PATH)/src/process \
+    -I $(LITEOS_LIBC_PATH)/src/regex \
+    -I $(LITEOS_LIBC_PATH)/src/search \
+    -I $(LITEOS_LIBC_PATH)/src/time \
+    -I $(LITEOSTOPDIR)/lib/huawei_libc/random/dev/random \
     -I $(LITEOSTOPDIR)/lib/huawei_libc/pthread \
     -I $(LITEOSTOPDIR)/lib/huawei_libc/tzdst \
 
@@ -75,6 +91,6 @@ ifeq ($(LOSCFG_LLTSER), y)
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/tools/gcov_ser
 endif
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 
-include $(MODULE_LIB)
+include $(MODULE_LIBC)

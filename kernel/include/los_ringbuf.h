@@ -26,6 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+/**
+ * @defgroup los_ringbuf RingBuffer
+ * @ingroup kernel
+ */
+
 #ifndef _LOS_RINGBUF_H
 #define _LOS_RINGBUF_H
 
@@ -96,7 +101,7 @@ extern UINT32 LOS_RingbufInit(Ringbuf *ringbuf, CHAR *fifo, UINT32 size);
  *
  * @param  ringbuf        [IN] Ringbuf created by LOS_RingbufInit.
  *
- * @retval #None.
+ * @retval None.
  *
  * @par Dependency:
  * <ul><li>los_ringbuf.h: the header file that contains the API declaration.</li></ul>

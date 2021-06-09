@@ -142,9 +142,9 @@ VOID *OsMemAlloc(VOID *pool, UINT32 size)
     return OsHeapAlloc(pool, size);
 }
 
-UINT32 OsMemFree(VOID *pool, VOID *mem)
+UINT32 OsMemFree(VOID *pool, const VOID *ptr)
 {
-    if (OsHeapFree(pool, mem) == TRUE) {
+    if (OsHeapFree(pool, ptr) == TRUE) {
         return LOS_OK;
     } else {
         return LOS_NOK;
@@ -223,7 +223,7 @@ VOID *OsHeapAlloc(VOID *pool, UINT32 size)
 
     /* alloc failed */
     if (best == NULL) {
-        PRINT_ERR("there's not enough whole to alloc 0x%x Bytes!\n", alignSize);
+        PRINT_ERR("there's not enough mem to alloc 0x%x Bytes!\n", alignSize);
         goto OUT;
     }
 
@@ -330,7 +330,7 @@ STATIC VOID OsHeapDoFree(struct LosHeapManager *heapMan, struct LosHeapNode *cur
  *               VOID* ptr --- the pointer of heap memory we want to free
  * Return      : 1:success 0:error
  */
-BOOL OsHeapFree(VOID *pool, VOID *ptr)
+BOOL OsHeapFree(VOID *pool, const VOID *ptr)
 {
     struct LosHeapNode *node = NULL;
 

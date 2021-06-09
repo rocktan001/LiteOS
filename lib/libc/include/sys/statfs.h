@@ -31,7 +31,7 @@ typedef struct __fsid_t {
 #include <bits/statfs.h>
 
 /**
- * @ingroup vfs
+ * @ingroup statfs
  *
  * @par Description:
  * The statfs() function shall get the information of the file system pointed to by the path and return the

@@ -66,12 +66,12 @@ struct TM *localtime64_r(const Time64_T *time, struct TM *local_tm)
     Time64_T timeoff;
     int dstsec = 0;
 
-    LOCK(lock);
+    (void)LIBC_LOCK(g_tzdstLock);
     if (CheckWithinDstPeriod(NULL, *time) == TRUE) {
         dstsec = DstForwardSecondGet();
     }
     timeoff = *time + timezone + dstsec;
-    UNLOCK(lock);
+    (void)LIBC_UNLOCK(g_tzdstLock);
 
     /* Reject time_t values whose year would overflow int because
      * __secs_to_zone cannot safely handle them. */
@@ -124,7 +124,7 @@ Time64_T mktime64(struct TM *tm)
     long long t = __tm_to_secs(tm);
     int dstsec = 0;
 
-    LOCK(lock);
+    (void)LIBC_LOCK(g_tzdstLock);
     if (tm->tm_isdst != 0) {
         if (CheckWithinDstPeriod(tm, 0) == TRUE) {
             dstsec = DstForwardSecondGet();
@@ -132,7 +132,7 @@ Time64_T mktime64(struct TM *tm)
         tm->tm_isdst = 0;
     }
     t = t - timezone - dstsec;
-    UNLOCK(lock);
+    (void)LIBC_UNLOCK(g_tzdstLock);
 
     if ((Time64_T)t != t) {
         goto error;
@@ -141,7 +141,7 @@ Time64_T mktime64(struct TM *tm)
     return t;
 
 error:
-    UNLOCK(lock);
+    (void)LIBC_UNLOCK(g_tzdstLock);
     errno = EOVERFLOW;
     return -1;
 }

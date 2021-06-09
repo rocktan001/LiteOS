@@ -1,4 +1,5 @@
-#include "include/board.h"
+#include "include/menuconfig.h"
+#include "include/asm/memmap_config.h"
 
 #define TEXT_BASE  (SYS_MEM_BASE + TEXT_OFFSET)
 
@@ -18,4 +19,10 @@ SECTIONS
         KEEP (*(.vectors))
     } > ram
     __ram_vectors_lma = LOADADDR(.ram_vectors);
+
+#ifdef LOSCFG_EXC_INTERACTION
+    __ram_exc_heap_memsize = EXC_INTERACT_MEM_SIZE;
+#else
+    __ram_exc_heap_memsize = 0;
+#endif
 }

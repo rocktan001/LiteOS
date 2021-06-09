@@ -83,13 +83,11 @@ VOID OsMuxDlockNodeInsert(UINT32 taskId, VOID *muxCB)
     MuxDLinkNode *muxDLNode = NULL;
 
     if ((taskId > LOSCFG_BASE_CORE_TSK_LIMIT) || (muxCB == NULL)) {
-        PRINT_ERR("%s: Argument is invalid!\n", __FUNCTION__);
         return;
     }
 
     muxDLNode = (MuxDLinkNode *)LOS_MemAlloc(m_aucSysMem1, sizeof(MuxDLinkNode));
     if (muxDLNode == NULL) {
-        PRINT_ERR("%s: malloc failed!\n", __FUNCTION__);
         return;
     }
     (VOID)memset_s(muxDLNode, sizeof(MuxDLinkNode), 0, sizeof(MuxDLinkNode));
@@ -105,7 +103,6 @@ VOID OsMuxDlockNodeDelete(UINT32 taskId, const VOID *muxCB)
     MuxDLinkNode *muxDLNode = NULL;
 
     if ((taskId > LOSCFG_BASE_CORE_TSK_LIMIT) || (muxCB == NULL)) {
-        PRINT_ERR("%s: Argument is invalid!\n", __FUNCTION__);
         return;
     }
 
@@ -118,8 +115,6 @@ VOID OsMuxDlockNodeDelete(UINT32 taskId, const VOID *muxCB)
             return;
         }
     }
-
-    PRINT_ERR("%s: find mutex deadlock node failed!\n", __FUNCTION__);
 }
 
 VOID OsTaskTimeUpdate(UINT32 taskId, UINT64 tickCount)

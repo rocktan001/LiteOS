@@ -25,16 +25,35 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
+
+#include "mmu.h"
 #include "los_config.h"
-#include "hisoc/mmu_config.h"
 #include "los_hwi.h"
 #include "asm/dma.h"
+#include "los_memory.h"
+#ifdef LOSCFG_KERNEL_RUNSTOP
+#include "lowpower/los_runstop_pri.h"
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
+/* This is operation for page table */
+#if defined (LOSCFG_KERNEL_NX) && defined (LOSCFG_KERNEL_DYNLOAD)
+__attribute__((aligned(MMU_16K))) __attribute__((section(".bss.prebss.translation_table")))
+UINT8 g_firstPageTable[MMU_16K];
+__attribute__((aligned(MMU_1K))) UINT8 g_secondPageTableOs[MMU_16K];
+__attribute__((aligned(MMU_1K))) UINT8 g_secondPageTableDl[LOS_DL_HEAP_SIZE / MMU_1K];
+__attribute__((aligned(MMU_1K))) UINT8 g_secondPageTableApp[MMZ_MEM_LEN / MMU_1K];
+#else
+__attribute__((aligned(MMU_16K))) __attribute__((section(".bss.prebss.translation_table")))
+UINT8 g_firstPageTable[MMU_16K];
+__attribute__((aligned(MMU_1K))) UINT8 g_secondPageTableOs[MMU_16K];
+__attribute__((aligned(MMU_1K))) UINT8 g_secondPageTableApp[MMZ_MEM_LEN / MMU_1K];
+#endif
 
 SENCOND_PAGE g_mmuOsPage = {0};
 SENCOND_PAGE g_mmuAppPage = {0};
@@ -55,12 +74,23 @@ SENCOND_PAGE g_excPage = {0};
 #define BYTES_PER_ITEM 4
 #define ITEM_TYPE_MASK 0x3
 
+/* table start position + offset = 'addr' table item position */
+#define MMU_GET_FIRST_TABLE_ADDR(addr)    (((addr) >> SHIFT_1M) * 4 + (UINTPTR)g_firstPageTable)
+/* get item content which storaged by table */
+#define MMU_GET_FIRST_TABLE_ITEM(addr)    (*(UINTPTR *)MMU_GET_FIRST_TABLE_ADDR(addr))
+/* if the first item ID is MMU_FIRST_LEVEL_PAGE_TABLE_ID, get second table item addr by hi 22bits */
+#define MMU_GET_SECOND_TABLE_BASE(addr)   ((MMU_GET_FIRST_TABLE_ITEM(addr)) & 0xfffffc00)
+/* second table item offset */
+#define MMU_GET_SECOND_TABLE_OFFSET(addr) ((((addr) & (MMU_1M - 1)) >> SHIFT_4K) * 4)
+/* second table item address */
+#define MMU_GET_SECOND_TABLE_ADDR(addr)   (MMU_GET_SECOND_TABLE_BASE(addr) + MMU_GET_SECOND_TABLE_OFFSET(addr))
+
 STATIC VOID MmuSetMemPage(MMU_PARAM *para)
 {
     UINT32 pageBase;
     UINT32 pageStartIndex, pageEndIndex;
     UINT32 length, bitsCache, bitsBuf, bitsAP;
-#if defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#if defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     UINT32 bitsXn;
 #endif
     UINT32 endAddr = para->endAddr;
@@ -97,7 +127,7 @@ STATIC VOID MmuSetMemPage(MMU_PARAM *para)
         X_MMU_TWO_LEVEL_PAGE(pageBase, pageStartIndex, length, bitsCache, bitsBuf, bitsAP);
     }
 
-#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     bitsXn = MMU_EXECUTE_STATE(para->uwFlag);
     if (pageSize == MMU_64K) {
         pageBase = para->startAddr >> SHIFT_64K;
@@ -114,7 +144,7 @@ STATIC UINT32 MmuSetFirstSection(const MMU_PARAM *para, UINT32 itemStart, UINT32
     UINT32 intSave;
     UINT32 itemTemp = itemStart;
     UINT32 bitsCache, bitsBuf, bitsAP;
-#if defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#if defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     UINT32 bitsXn = MMU_EXECUTE_STATE(para->uwFlag);
 #endif
 
@@ -137,7 +167,7 @@ STATIC UINT32 MmuSetFirstSection(const MMU_PARAM *para, UINT32 itemStart, UINT32
     while (itemTemp <= itemEnd) {
 #ifdef LOSCFG_ARCH_ARM926
         SECTION_CHANGE(itemTemp, bitsCache, bitsBuf, bitsAP);
-#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
         SECTION_CHANGE(itemTemp, bitsCache, bitsBuf, bitsAP, bitsXn);
 #endif
         itemTemp += sizeof(UINTPTR);
@@ -170,6 +200,7 @@ STATIC UINT32 MmuSetSecondPage(MMU_PARAM *para, UINT32 itemStart, UINT32 itemEnd
         if (((*(UINTPTR *)(UINTPTR)itemTemp) & ITEM_TYPE_MASK) != MMU_FIRST_LEVEL_PAGE_TABLE_ID) {
             PRINT_ERR("not all mem belongs to second page(4K or 64K every item), mmu table ID:%u \n",
                       ((*(UINT32 *)(UINTPTR)itemTemp) & ITEM_TYPE_MASK));
+
             return LOS_NOK;
         }
         itemTemp += sizeof(UINTPTR);
@@ -191,7 +222,7 @@ VOID ArchSecPageEnable(SENCOND_PAGE *page, UINT32 flag)
 {
     UINT32 pageStart, pageEnd;
     UINT32 secStart, secEnd;
-    UINT32 ttbBase = FIRST_PAGE_DESCRIPTOR_ADDR;
+    UINT32 ttbBase = (UINTPTR)g_firstPageTable;
     MMU_PARAM para;
 
     if (page == NULL) {
@@ -253,7 +284,7 @@ VOID ArchMMUParamSet(MMU_PARAM *para)
     CleanTLB();
 }
 
-VOID ArchRemapCached(UINTPTR physAddr, size_t size)
+VOID OsCachedRemap(UINTPTR physAddr, size_t size)
 {
     MMU_PARAM para;
 
@@ -264,14 +295,14 @@ VOID ArchRemapCached(UINTPTR physAddr, size_t size)
     para.endAddr = physAddr + size;
 #ifdef LOSCFG_ARCH_ARM926
     para.uwFlag = BUFFER_ENABLE | CACHE_ENABLE | ACCESS_PERM_RW_RW;
-#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     para.uwFlag = BUFFER_ENABLE | CACHE_ENABLE | EXEC_DISABLE | ACCESS_PERM_RW_RW;
 #endif
     para.stPage = (SENCOND_PAGE *)&g_mmuAppPage;
     ArchMMUParamSet(&para);
 }
 
-VOID ArchRemapNoCached(UINTPTR physAddr, size_t size)
+VOID OsNoCachedRemap(UINTPTR physAddr, size_t size)
 {
     MMU_PARAM para;
 
@@ -282,7 +313,7 @@ VOID ArchRemapNoCached(UINTPTR physAddr, size_t size)
     para.endAddr = physAddr + size;
 #ifdef LOSCFG_ARCH_ARM926
     para.uwFlag = BUFFER_DISABLE | CACHE_DISABLE | ACCESS_PERM_RW_RW;
-#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     para.uwFlag = BUFFER_DISABLE | CACHE_DISABLE | EXEC_DISABLE | ACCESS_PERM_RW_RW;
 #endif
     para.stPage = (SENCOND_PAGE *)&g_mmuAppPage;
@@ -291,15 +322,26 @@ VOID ArchRemapNoCached(UINTPTR physAddr, size_t size)
 
 VOID ArchCodeProtect(VOID)
 {
-    CODE_PROTECT;
+    MMU_PARAM mPara;
+    /* note: must confirm that every addr be aglined as 4K(64K) */
+    mPara.startAddr = (UINTPTR)&__text_start;
+    mPara.endAddr = (UINTPTR)&__ram_data_start;
+    mPara.uwFlag = BUFFER_ENABLE | CACHE_ENABLE | ACCESS_PERM_RO_RO;
+    mPara.stPage = (SENCOND_PAGE *)&g_mmuOsPage;
+    ArchMMUParamSet(&mPara);
+
 #ifdef LOSCFG_KERNEL_NX
-    DATA_NOEXC;
+    mPara.startAddr = (UINTPTR)&__ram_data_start;
+    mPara.endAddr = ((((UINTPTR)&__ram_data_start) + MMU_1M - 1) & ~(MMU_1M - 1));
+    mPara.uwFlag = BUFFER_ENABLE | CACHE_ENABLE | EXEC_DISABLE | ACCESS_PERM_RW_RW;
+    mPara.stPage = (SENCOND_PAGE *)&g_mmuOsPage;
+    ArchMMUParamSet(&mPara);
 #endif
 }
 
 INT32 ArchMemNoAccessSet(UINTPTR startaddr, size_t length)
 {
-    UINTPTR ttbBase = FIRST_PAGE_DESCRIPTOR_ADDR;
+    UINTPTR ttbBase = (UINTPTR)g_firstPageTable;
     UINTPTR endAddr = startaddr + length;
     UINT32 base;
 
@@ -328,7 +370,7 @@ INT32 ArchMemNoAccessSet(UINTPTR startaddr, size_t length)
     base = startaddr >> SHIFT_1M;
 #ifdef LOSCFG_ARCH_ARM926
     X_MMU_SECTION(base, base, length >> SHIFT_1M, 0, 0, 0, D_NA);
-#elif defined(LOSCFG_ARCH_CORTEX_A9) || defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
+#elif defined(LOSCFG_ARCH_CORTEX_A7) || defined(LOSCFG_ARCH_CORTEX_A17) || defined(LOSCFG_ARCH_CORTEX_A53_AARCH32)
     X_MMU_SECTION(base, base, length >> SHIFT_1M, 0, 0, 0, 0, D_NA);
 #endif
     dma_cache_clean(ttbBase + ((startaddr >> SHIFT_1M) * BYTES_PER_ITEM),
@@ -345,11 +387,14 @@ VOID ArchPrintPageItem(const MMU_PARAM *para)
     UINT32 startAddr;
     UINT32 pageLen;
 
-    if ((para == NULL) || (para->stPage == NULL)) {
+    if (para == NULL) {
         return;
     }
 
     if (MMU_GET_AREA(para->uwFlag) == SECOND_PAGE) {
+        if (para->stPage == NULL) {
+            return;
+        }
         startAddr = para->stPage->page_descriptor_addr +
                     (((para->startAddr - para->stPage->page_addr) >> SHIFT_4K) * BYTES_PER_ITEM);
         pageLen = ((para->endAddr - para->startAddr) >> SHIFT_4K) * BYTES_PER_ITEM;
@@ -358,7 +403,7 @@ VOID ArchPrintPageItem(const MMU_PARAM *para)
         }
         PRINTK("SECOND_PAGE:\n");
     } else if (MMU_GET_AREA(para->uwFlag) == FIRST_SECTION) {
-        startAddr = para->stPage->page_descriptor_addr + ((para->startAddr >> SHIFT_1M) * BYTES_PER_ITEM);
+        startAddr = (UINTPTR)g_firstPageTable + ((para->startAddr >> SHIFT_1M) * BYTES_PER_ITEM);
         pageLen = ((para->endAddr - para->startAddr) >> SHIFT_1M) * BYTES_PER_ITEM;
         if ((para->endAddr & (MMU_1M - 1)) != 0) {
             pageLen += sizeof(UINT32);
@@ -375,9 +420,114 @@ VOID ArchPrintPageItem(const MMU_PARAM *para)
         if (tmp % ITEM_PRINT_LEN == 0) {
             PRINTK("\n");
         }
-        PRINTK ("0x%0+8x  ", *(UINTPTR *)(startAddr + tmp));
+        PRINTK ("0x%0+8x  ", *(UINTPTR *)(UINTPTR)(startAddr + tmp));
     }
     PRINTK("\n");
+}
+
+/*
+ * The liteos cache addr & length
+ */
+#define LITEOS_CACHE_ADDR             SYS_MEM_BASE
+#define LITEOS_CACHE_LENGTH           (g_sys_mem_addr_end - LITEOS_CACHE_ADDR)
+#if (LITEOS_CACHE_ADDR & (MMU_1M - 1))
+#error "LITEOS_CACHE_ADDR is not aligned by 1M!"
+#endif
+
+VOID MmuSectionMap(VOID)
+{
+    UINT32 ttbBase = (UINTPTR)g_firstPageTable;
+
+#ifdef LOSCFG_KERNEL_RUNSTOP
+    if (IsImageResume()) {
+        return;
+    }
+#endif
+
+    /* First clear all TT entries - ie Set them to Faulting */
+    (VOID)memset_s((VOID *)(UINTPTR)ttbBase, MMU_16K, 0, MMU_16K);
+
+    /*
+     * Set domain of mmu descriptor of (0~1M) D_NA, check the illegal access to NULL pointer in code.
+     * Access to NULL pointer and mem (0 ~ 1M) will trigger exception immediately
+     */
+    X_MMU_SECTION(0, 0, (MMU_1M >> SHIFT_1M), UNCACHEABLE, UNBUFFERABLE,
+                  ACCESS_NA, NON_EXECUTABLE, D_NA);
+
+    /* Set all mem 4G except (0~1M) as uncacheable & rw first */
+    X_MMU_SECTION((MMU_1M >> SHIFT_1M), (MMU_1M >> SHIFT_1M), ((MMU_4G - MMU_1M) >> SHIFT_1M),
+                  UNCACHEABLE, UNBUFFERABLE, ACCESS_RW, NON_EXECUTABLE, D_CLIENT);
+
+    if (LITEOS_CACHE_LENGTH & (MMU_1M - 1)) {
+        PRINT_ERR("LITEOS_CACHE_LENGTH is not aligned by 1M.\n");
+        return;
+    }
+    /*
+     * set table as your config
+     * 1: LITEOS_CACHE_ADDR ~ LITEOS_CACHE_ADDR + LITEOS_CACHE_LENGTH ---- set as section(1M) and cacheable & rw
+     */
+#ifdef LOSCFG_KERNEL_NX
+    UINTPTR codeLens  = ((((UINTPTR)(&__ram_data_start) - SYS_MEM_BASE) + MMU_1M - 1) & ~(MMU_1M - 1));
+    UINTPTR dataStart = LITEOS_CACHE_ADDR + codeLens;
+    UINTPTR dataLens  = LITEOS_CACHE_LENGTH - codeLens;
+    X_MMU_SECTION((LITEOS_CACHE_ADDR >> SHIFT_1M), (LITEOS_CACHE_ADDR >> SHIFT_1M), (codeLens >> SHIFT_1M),
+                  CACHEABLE, BUFFERABLE, ACCESS_RW, EXECUTABLE, D_CLIENT);
+    X_MMU_SECTION((dataStart >> SHIFT_1M), (dataStart >> SHIFT_1M), (dataLens >> SHIFT_1M),
+                  CACHEABLE, BUFFERABLE, ACCESS_RW, NON_EXECUTABLE, D_CLIENT);
+#else
+    X_MMU_SECTION((LITEOS_CACHE_ADDR >> SHIFT_1M), (SYS_MEM_BASE >> SHIFT_1M), (LITEOS_CACHE_LENGTH >> SHIFT_1M),
+                  CACHEABLE, BUFFERABLE, ACCESS_RW, EXECUTABLE, D_CLIENT);
+#endif
+}
+
+/* Init OS related second page item */
+VOID OsSysSecPteInit(VOID)
+{
+    /*
+     * The page table storage addr
+     * notice: must ensure it has enough free mem for storage page table
+     */
+    g_mmuOsPage.page_addr = SYS_MEM_BASE;
+    g_mmuOsPage.page_length = (((UINTPTR)(&__ram_data_start) - SYS_MEM_BASE) + MMU_1M - 1) & ~(MMU_1M - 1);
+    g_mmuOsPage.page_descriptor_addr = (UINTPTR)g_secondPageTableOs;
+    g_mmuOsPage.page_type = MMU_SECOND_LEVEL_SMALL_PAGE_TABLE_ID;
+
+    if (g_mmuOsPage.page_length > (sizeof(g_secondPageTableOs) << 10)) { /* 10: 2^10 = 4k / 4 */
+        PRINT_ERR("%s,%d\n", __FUNCTION__, __LINE__);
+        PRINT_ERR("the mapping size of os second page is 0x%x, should be not bigger than 0x%x\n",
+                  g_mmuOsPage.page_length, (sizeof(g_secondPageTableOs) << 10)); /* 10: 2^10 = 4k / 4 */
+        return;
+    }
+    ArchSecPageEnable(&g_mmuOsPage, BUFFER_ENABLE | CACHE_ENABLE | ACCESS_PERM_RW_RW);
+
+#if defined (LOSCFG_KERNEL_NX) && defined (LOSCFG_KERNEL_DYNLOAD)
+    g_mmuDlPage.page_addr = LOS_DL_HEAP_BASE;
+    g_mmuDlPage.page_length = LOS_DL_HEAP_SIZE;
+    g_mmuDlPage.page_descriptor_addr = (UINTPTR)g_secondPageTableDl;
+    g_mmuDlPage.page_type = MMU_SECOND_LEVEL_SMALL_PAGE_TABLE_ID;
+    ArchSecPageEnable(&g_mmuDlPage, BUFFER_DISABLE | CACHE_DISABLE | EXEC_DISABLE | ACCESS_PERM_RW_RW);
+#endif
+
+#ifdef LOSCFG_NULL_ADDRESS_PROTECT
+    X_MMU_SECOND_TABLE_EXC_PAGE_SET();
+#endif
+}
+
+/* Init app related second page item */
+VOID OsAppSecPteInit(UINTPTR startAddr, UINTPTR len, UINT32 flag, UINT32 pageType)
+{
+    g_mmuAppPage.page_addr = startAddr;
+    g_mmuAppPage.page_length = len;
+    g_mmuAppPage.page_descriptor_addr = (UINTPTR)g_secondPageTableApp;
+    g_mmuAppPage.page_type = pageType;
+
+    if (g_mmuAppPage.page_length > (sizeof(g_secondPageTableApp) << 10)) { /* 10: 2^10 = 4k / 4 */
+        PRINT_ERR("the mapping size of app second page is 0x%x, should be not bigger than 0x%x\n",
+                  g_mmuAppPage.page_length, sizeof(g_secondPageTableApp) << 10); /* 10: 2^10 = 4k / 4 */
+        return;
+    }
+
+    ArchSecPageEnable(&g_mmuAppPage, flag);
 }
 
 #ifdef __cplusplus

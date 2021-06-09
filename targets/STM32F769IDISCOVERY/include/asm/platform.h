@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Platform HeadFile
  * Author: Huawei LiteOS Team
@@ -29,6 +29,33 @@
 #ifndef _ASM_PLATFORM_H
 #define _ASM_PLATFORM_H
 
-#include "asm/hal_platform_ints.h"
+#include "los_typedef.h"
+#include "stm32f769xx.h"
+#include "stm32f7xx.h"
+#include "uart.h"
+#include "tim.h"
+
+#include "interrupt_config.h"
+#include "memmap_config.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#ifndef STM32F769xx
+#define STM32F769xx
+#endif
+
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern VOID app_init(VOID);
+#endif
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _ASM_PLATFORM_H */

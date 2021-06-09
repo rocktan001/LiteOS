@@ -42,7 +42,6 @@
 #include "los_memory.h"
 #include "los_err.h"
 #include "arch/task.h"
-#include "los_lowpower.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -187,6 +186,7 @@ extern "C" {
  * Value: 0x0200020c.
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_MSG_NONZERO               LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x0c)
 
@@ -247,6 +247,7 @@ extern "C" {
  * Value: 0x02000212.
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_HOOK_NOT_MATCH            LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x12)
 
@@ -257,6 +258,7 @@ extern "C" {
  * Value: 0x02000213.
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_HOOK_IS_FULL              LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x13)
 
@@ -288,6 +290,7 @@ extern "C" {
  * Value: 0x02000217
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_FREE_STACK_FAILED         LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x17)
 
@@ -298,6 +301,7 @@ extern "C" {
  * Value: 0x02000218
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_STKAREA_TOO_SMALL         LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x18)
 
@@ -308,6 +312,7 @@ extern "C" {
  * Value: 0x03000219.
  *
  * Solution: Perform task switching after creating an idle task.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_ACTIVE_FAILED             LOS_ERRNO_OS_FATAL(LOS_MOD_TSK, 0x19)
 
@@ -318,6 +323,7 @@ extern "C" {
  * Value: 0x0200021a
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_CONFIG_TOO_MANY           LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x1a)
 
@@ -326,6 +332,7 @@ extern "C" {
  * Task error code: This error code is not in use temporarily.
  *
  * Value: 0x0200021b
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_CP_SAVE_AREA_NOT_ALIGN    LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x1b)
 
@@ -334,6 +341,7 @@ extern "C" {
  * Task error code: This error code is not in use temporarily.
  *
  * Value: 0x0200021d
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_MSG_Q_TOO_MANY            LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x1d)
 
@@ -342,6 +350,7 @@ extern "C" {
  * Task error code: This error code is not in use temporarily.
  *
  * Value: 0x0200021e
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_CP_SAVE_AREA_NULL         LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x1e)
 
@@ -350,6 +359,7 @@ extern "C" {
  * Task error code: This error code is not in use temporarily.
  *
  * Value: 0x0200021f
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_SELF_DELETE_ERR           LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x1f)
 
@@ -370,6 +380,7 @@ extern "C" {
  * Value: 0x02000221.
  *
  * Solution: Check the task ID and do not suspend software timer task.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TSK_SUSPEND_SWTMR_NOT_ALLOWED LOS_ERRNO_OS_ERROR(LOS_MOD_TSK, 0x21)
 
@@ -417,10 +428,10 @@ extern "C" {
  * @ingroup los_task
  * Minimum stack size.
  *
- * LOSCFG_TASK_MIN_STACK_SIZE bytes, configured in menuconfig.
+ * LOSCFG_BASE_CORE_TSK_MIN_STACK_SIZE bytes, configured in menuconfig.
  * LOS_TASK_MIN_STACK_SIZE bytes, aligned on a boundary of LOSCFG_STACK_POINT_ALIGN_SIZE.
  */
-#define LOS_TASK_MIN_STACK_SIZE (ALIGN(LOSCFG_TASK_MIN_STACK_SIZE, LOSCFG_STACK_POINT_ALIGN_SIZE))
+#define LOS_TASK_MIN_STACK_SIZE (ALIGN(KERNEL_TSK_MIN_STACK_SIZE, LOSCFG_STACK_POINT_ALIGN_SIZE))
 
 #ifdef LOSCFG_BASE_CORE_TSK_MONITOR
 /**
@@ -549,13 +560,11 @@ typedef struct tagTskInfo {
  * @par Description:
  * This API is used to create a task and suspend it. This task will not be added to the queue of ready tasks before
  * resume it.
- * User should define a static stack memory and assign to stack pointer, the uwStackSize in taskInitParam must fit
- * the stack memory size.
+ * User should allocate memory for task's stack and assign its addr to para topStack, the uwStackSize in taskInitParam
+ * must fit the stack memory size. When the task is deleted, the stack's memory should be free in time by users.
  *
  * @attention
  * <ul>
- * <li>During task creation, the task control block and task stack of the task that is previously automatically deleted
- * are deallocated.</li>
  * <li>The task name is a pointer and is not allocated memory.</li>
  * <li>If the size of the task stack of the task to be created is 0, configure #LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE
  * to specify the default task stack size. The stack size should be a reasonable value, if the size is too large, may
@@ -571,9 +580,9 @@ typedef struct tagTskInfo {
  * uwStackSize remain as the kernel stack size.</li>
  * </ul>
  *
- * @param  taskID        [OUT] Type  #UINT32 * Task ID.
- * @param  taskInitParam [IN]  Type  #TSK_INIT_PARAM_S * Parameter for task creation.
- * @param  topOfStack    [IN]  Type  #VOID* Parameter for task's top of stack address.
+ * @param  taskId        [OUT] Type  #UINT32 * Task Id.
+ * @param  initParam     [IN]  Type  #TSK_INIT_PARAM_S * Parameter for task creation.
+ * @param  topStack      [IN]  Type  #VOID* Parameter for task's top of stack address.
  *
  * @retval #LOS_ERRNO_TSK_ID_INVALID        Invalid Task ID, param puwTaskID is NULL.
  * @retval #LOS_ERRNO_TSK_PTR_NULL          Param pstInitParam is NULL.
@@ -600,14 +609,12 @@ extern UINT32 LOS_TaskCreateOnlyStatic(UINT32 *taskId, TSK_INIT_PARAM_S *initPar
  * @par Description:
  * This API is used to create a task. If the priority of the task created after system initialized is higher than
  * the current task and task scheduling is not locked, it is scheduled for running.
- * User should define a static stack memory and assign to stack pointer, the uwStackSize in taskInitParam must fit
- * the stack memory size.
+ * User should allocate memory for task's stack and assign its addr to para topStack, the uwStackSize in taskInitParam
+ * must fit the stack memory size. When the task is deleted, the stack's memory should be free in time by users.
  * If not, the created task is added to the queue of ready tasks.
  *
  * @attention
  * <ul>
- * <li>During task creation, the task control block and task stack of the task that is previously automatically
- * deleted are deallocated.</li>
  * <li>The task name is a pointer and is not allocated memory.</li>
  * <li>If the size of the task stack of the task to be created is 0, configure #LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE
  * to specify the default task stack size.</li>
@@ -624,9 +631,9 @@ extern UINT32 LOS_TaskCreateOnlyStatic(UINT32 *taskId, TSK_INIT_PARAM_S *initPar
  * the uwStackSize must fit the stack memory size.</li>
  * </ul>
  *
- * @param  taskID        [OUT] Type  #UINT32 * Task ID.
- * @param  taskInitParam [IN]  Type  #TSK_INIT_PARAM_S * Parameter for task creation.
- * @param  topOfStack    [IN]  Type  #VOID * Parameter for task's top of stack address.
+ * @param  taskId        [OUT] Type  #UINT32 * Task Id.
+ * @param  initParam     [IN]  Type  #TSK_INIT_PARAM_S * Parameter for task creation.
+ * @param  topStack      [IN]  Type  #VOID * Parameter for task's top of stack address.
  *
  * @retval #LOS_ERRNO_TSK_ID_INVALID        Invalid Task ID, param puwTaskID is NULL.
  * @retval #LOS_ERRNO_TSK_PTR_NULL          Param pstInitParam is NULL.
@@ -1132,10 +1139,79 @@ extern VOID LOS_TaskResRecycle(VOID);
             initParam.pArgs = (VOID *)arg
 #endif
 
-#ifdef LOSCFG_KERNEL_LOWPOWER
-typedef VOID (*LowPowerHookFn)(VOID);
-extern VOID LOS_LowpowerHookReg(LowPowerHookFn hook);
-#endif
+/**
+ * @ingroup los_task
+ * @brief Define the lowpower framework process function type.
+ *
+ * @par Description:
+ * This API is used to define the lowpower framework entry function type.
+ *
+ * @attention None.
+ *
+ * @param None.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>los_task.h: the header file that contains the API declaration.</li></ul>
+ * @see None.
+ * @since Huawei LiteOS V200R005C10
+ */
+typedef VOID (*LOWPOWERIDLEHOOK)(VOID);
+
+/**
+ * @ingroup  los_task
+ * @brief Register a hook to enter lowpower framework process.
+ *
+ * @par Description:
+ * This API is used to register lowpower framework entry function.
+ *
+ * @attention None.
+ *
+ * @param  hook [IN] The lowpower framework hook.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>los_task.h: the header file that contains the API declaration.</li></ul>
+ * @see None.
+ * @since Huawei LiteOS V200R005C10
+ */
+extern VOID LOS_LowpowerHookReg(LOWPOWERIDLEHOOK hook);
+
+/**
+ * @ingroup los_task
+ * @brief Define the type of idle handler hook function.
+ *
+ * @par Description:
+ * This API is used to define the type of idle handler hook function.
+ * @attention None.
+ *
+ * @param None.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>los_task.h: the header file that contains the API declaration.</li></ul>
+ * @since Huawei LiteOS V200R005C20
+ */
+typedef VOID (*IDLEHANDLERHOOK)(VOID);
+
+/**
+ * @ingroup  los_task
+ * @brief Register the hook function for idle task.
+ *
+ * @par Description:
+ * This API is used to register a hook function called when system idle.
+ *
+ * @attention The hook will be called when system idle.
+ *
+ * @param None.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>los_task.h: the header file that contains the API declaration.</li></ul>
+ * @see None.
+ * @since Huawei LiteOS V200R005C20
+ */
+extern VOID LOS_IdleHandlerHookReg(IDLEHANDLERHOOK hook);
 
 #ifdef __cplusplus
 #if __cplusplus

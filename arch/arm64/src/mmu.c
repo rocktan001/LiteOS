@@ -28,7 +28,7 @@
 
 #include "mmu_pri.h"
 #include "mmu.h"
-#include "board.h"
+#include "asm/memmap_config.h"
 #include "asm/dma.h"
 #include "los_base.h"
 #include "los_hwi.h"
@@ -44,8 +44,8 @@ ALIGNED_4K __attribute__((section(".bss.prebss.translation_table"))) UINT8 g_fir
 static ALIGNED_4K UINT8 g_secondPageTableOs[SECOND_PAGE_TABLE_OS_LEN];
 static ALIGNED_4K UINT8 g_secondPageTableApp[SECOND_PAGE_TABLE_APP_LEN];
 
-static SENCOND_PAGE g_mmuOsPage = {0};
-static SENCOND_PAGE g_mmuAppPage = {0};
+SENCOND_PAGE g_mmuOsPage = {0};
+SENCOND_PAGE g_mmuAppPage = {0};
 
 #define PGD_ADDR  (UINT64)g_firstPageTable
 #define PMD_ADDR0 (PGD_ADDR + PAGE_SIZE)
@@ -225,18 +225,26 @@ STATIC INLINE INT32 OsMMUFlagCheck(UINT64 flag)
     return LOS_OK;
 }
 
+STATIC INLINE INT32 OsMMUParamCheck(const MMU_PARAM *para)
+{
+    if ((para == NULL) || (OsMMUFlagCheck(para->uwFlag) == LOS_NOK)) {
+        PRINT_ERR("para is invalid\n");
+        return LOS_NOK;
+    }
+
+    if (para->startAddr >= para->endAddr) {
+        PRINT_ERR("wrong addr input para->startAddr[0x%llx] para->endAddr[0x%llx]\n", para->startAddr, para->endAddr);
+        return LOS_NOK;
+    }
+    return LOS_OK;
+}
+
 VOID ArchMMUParamSet(MMU_PARAM *para)
 {
     UINT64 pmdStart, pmdEnd, pmdTmp;
     UINT32 intSave;
 
-    if ((para == NULL) || (OsMMUFlagCheck(para->uwFlag) == LOS_NOK)) {
-        PRINT_ERR("para is invalid\n");
-        return;
-    }
-
-    if (para->startAddr >= para->endAddr) {
-        PRINT_ERR("wrong addr input para->startAddr[0x%llx] para->endAddr[0x%llx]\n", para->startAddr, para->endAddr);
+    if (OsMMUParamCheck(para) == LOS_NOK) {
         return;
     }
 
@@ -244,16 +252,16 @@ VOID ArchMMUParamSet(MMU_PARAM *para)
         pmdStart = PMD_ADDR_GET(para->startAddr);
         pmdEnd = PMD_ADDR_GET(para->endAddr);
         for (pmdTmp = pmdStart; pmdTmp < pmdEnd; pmdTmp += BYTES_PER_ITEM) {
-            if (((*(UINTPTR *)pmdTmp) & ITEM_TYPE_MASK) != MMU_PTE_L012_DESCRIPTOR_BLOCK) {
+            if (((*(UINT64 *)(UINTPTR)pmdTmp) & ITEM_TYPE_MASK) != MMU_PTE_L012_DESCRIPTOR_BLOCK) {
                 PRINT_ERR("not all mem belongs to pmd section(2M every item), descriptor types:0x%llx\n",
-                          ((*(UINTPTR *)pmdTmp) & ITEM_TYPE_MASK));
+                          ((*(UINT64 *)(UINTPTR)pmdTmp) & ITEM_TYPE_MASK));
                 return;
             } else {
-                PRINT_DEBUG("pmdTmp = 0x%llx : 0x%llx\n", pmdTmp, *(UINTPTR *)pmdTmp);
+                PRINT_DEBUG("pmdTmp = 0x%llx : 0x%llx\n", pmdTmp, *(UINT64 *)(UINTPTR)pmdTmp);
             }
         }
         OsBlockMapsSet(para->uwFlag | MMU_PTE_L012_DESCRIPTOR_BLOCK, para->startAddr, para->endAddr);
-        PRINT_DEBUG("pmdStart = 0x%llx : 0x%llx\n", pmdStart, *(UINTPTR *)pmdStart);
+        PRINT_DEBUG("pmdStart = 0x%llx : 0x%llx\n", pmdStart, *(UINT64 *)(UINTPTR)pmdStart);
         v8_dma_clean_range(pmdStart, pmdEnd);
         __asm__ __volatile__("tlbi    vmalle1");
         return;
@@ -261,6 +269,11 @@ VOID ArchMMUParamSet(MMU_PARAM *para)
 
     if ((para->startAddr & (MMU_4K - 1)) != 0) {
         PRINT_ERR("para->startAddr[0x%llx] not aligned as 4K\n", para->startAddr);
+        return;
+    }
+
+    if (para->stPage == NULL) {
+        PRINT_ERR("para->stPage is null\n");
         return;
     }
 
@@ -283,7 +296,7 @@ VOID ArchMMUParamSet(MMU_PARAM *para)
 }
 
 #define SECOND_PAGE_TABLE_MAPPING_LEN(table) ((sizeof(table) >> 3) << 12)
-VOID OsKernelSecPteInit(UINTPTR startAddr, UINTPTR len, UINT64 flag)
+VOID OsSysSecPteInit(UINTPTR startAddr, UINTPTR len, UINT64 flag)
 {
     g_mmuOsPage.page_addr = startAddr;
     g_mmuOsPage.page_length = len;

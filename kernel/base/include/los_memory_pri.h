@@ -96,7 +96,7 @@ extern UINT32 OsMemSystemInit(UINTPTR memStart);
 /* SLAB extention needs memory algorithms provide following internal apis */
 #ifdef LOSCFG_KERNEL_MEM_SLAB_EXTENTION
 extern VOID* OsMemAlloc(VOID *pool, UINT32 size);
-extern UINT32 OsMemFree(VOID *pool, VOID *mem);
+extern UINT32 OsMemFree(VOID *pool, const VOID *ptr);
 #endif /* LOSCFG_KERNEL_MEM_SLAB_EXTENTION */
 
 #ifdef LOSCFG_MEM_MUL_POOL

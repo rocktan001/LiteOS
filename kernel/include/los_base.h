@@ -43,6 +43,7 @@
 #include "los_err.h"
 #include "los_errno.h"
 #include "los_hw.h"
+#include "los_tick.h"
 #include "securec.h"
 #ifdef LOSCFG_LIB_LIBCMINI
 #include "stdarg.h"
@@ -52,9 +53,6 @@
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-
-#define SIZE(a) (a)
 
 /**
  * @ingroup los_base
@@ -230,7 +228,7 @@ extern "C" {
  */
 #ifdef LOSCFG_DEBUG_VERSION
 #define LOS_ASSERT(judge) do {                                                     \
-    if ((UINT32)(judge) == 0) {                                                    \
+    if ((UINTPTR)(judge) == 0) {                                                    \
         (VOID)LOS_IntLock();                                                       \
         PRINT_ERR("ASSERT ERROR! %s, %d, %s\n", __FILE__, __LINE__, __FUNCTION__); \
         while (1) {}                                                               \
@@ -239,8 +237,6 @@ extern "C" {
 #else
 #define LOS_ASSERT(judge)
 #endif
-
-#define STATIC_ASSERT _Static_assert
 
 /**
  * @ingroup los_base
@@ -283,6 +279,7 @@ extern UINTPTR LOS_Align(UINTPTR addr, UINT32 boundary);
  * current task continues to be executed.</li>
  * <li>The parameter passed in can not be equal to LOS_WAIT_FOREVER(0xFFFFFFFF).
  * If that happens, the task will not sleep 0xFFFFFFFF milliseconds or sleep forever but sleep 0xFFFFFFFF Ticks.</li>
+ * <li>This API is not an accurate delay function. The actual delay time is longer than that of parameter msecs.</li>
  * </ul>
  *
  * @param msecs [IN] Type #UINT32 Milliseconds for which the task is delayed.

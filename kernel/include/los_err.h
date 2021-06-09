@@ -111,14 +111,6 @@ extern UINT32 LOS_ErrHandle(CHAR *fileName, UINT32 lineNo,
  */
 extern VOID LOS_RegErrHandle(LOS_ERRORHANDLE_FUNC func);
 
-/**
- * @ingroup los_err
- * Error handling function structure.
- */
-typedef struct tagUserErrFunc_S {
-    LOS_ERRORHANDLE_FUNC pfnHook; /**< Hook function for error handling. */
-} USER_ERR_FUNC_S;
-
 #ifdef __cplusplus
 #if __cplusplus
 }

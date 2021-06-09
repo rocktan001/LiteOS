@@ -27,7 +27,7 @@ struct ifaddrs {
 /**
  * @defgroup Network_Interfaces_Info Network Interfaces Info
  * This section contains the interfaces to get information about Network interfaces in LwIP.
- * @ingroup User_interfaces
+ * @ingroup libc
  */
 
 /*

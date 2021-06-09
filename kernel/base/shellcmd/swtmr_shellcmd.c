@@ -114,17 +114,16 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdSwtmrInfoGet(INT32 argc, const UINT8 **a
         return OS_ERROR;
     }
 
+    OsPrintSwtmrMsgHead();
     if (timerId == OS_ALL_SWTMR_MASK) {
         for (index = 0; index < LOSCFG_BASE_CORE_SWTMR_LIMIT; index++, swtmr++) {
             if (swtmr->state != 0) {
-                OsPrintSwtmrMsgHead();
                 OsPrintSwtmrMsg(swtmr);
             }
         }
     } else {
         for (index = 0; index < LOSCFG_BASE_CORE_SWTMR_LIMIT; index++, swtmr++) {
             if ((timerId == (size_t)(swtmr->timerId % LOSCFG_BASE_CORE_SWTMR_LIMIT)) && (swtmr->state != 0)) {
-                OsPrintSwtmrMsgHead();
                 OsPrintSwtmrMsg(swtmr);
                 return LOS_OK;
             }

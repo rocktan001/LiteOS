@@ -56,7 +56,12 @@ x:                      \
     and    \reg0, \reg0, #MPIDR_CPUID_MASK /* get cpu id */
     mov    \reg1, #\stackSize
     mul    \reg1, \reg1, \reg0             /* calculate current cpu stack offset */
+#ifdef LOSCFG_LIB_CONFIGURABLE
     ldr    \reg0, =\stackBottom
+    ldr    \reg0, [\reg0]
+#else
+    ldr    \reg0, =\stackBottom
+#endif
     sub    \reg0, \reg0, \reg1             /* calculate current cpu stack bottom */
     mov    sp, \reg0                       /* set  sp */
 .endm

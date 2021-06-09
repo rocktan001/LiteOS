@@ -35,13 +35,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* Hook function for error handling. */
-LITE_OS_SEC_BSS USER_ERR_FUNC_S g_usrErrFunc;
+LITE_OS_SEC_BSS LOS_ERRORHANDLE_FUNC g_usrErrFunc;
 
 LITE_OS_SEC_TEXT_INIT UINT32 LOS_ErrHandle(CHAR *fileName, UINT32 lineNo, UINT32 errorNo,
                                            UINT32 paraLen, VOID *para)
 {
-    if (g_usrErrFunc.pfnHook != NULL) {
-        g_usrErrFunc.pfnHook(fileName, lineNo, errorNo, paraLen, para);
+    if (g_usrErrFunc != NULL) {
+        g_usrErrFunc(fileName, lineNo, errorNo, paraLen, para);
     }
 
     return LOS_OK;
@@ -49,7 +49,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_ErrHandle(CHAR *fileName, UINT32 lineNo, UINT32
 
 LITE_OS_SEC_TEXT_INIT VOID LOS_RegErrHandle(LOS_ERRORHANDLE_FUNC func)
 {
-    g_usrErrFunc.pfnHook = func;
+    g_usrErrFunc = func;
 }
 
 #ifdef __cplusplus

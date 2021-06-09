@@ -83,7 +83,7 @@ typedef struct {
     _regFp; \
 })
 
-typedef VOID (*EXC_PROC_FUNC)(UINT32, ExcContext *);
+typedef VOID (*EXC_PROC_FUNC)(UINT32, const ExcContext *);
 
 UINT32 ArchSetExcHook(EXC_PROC_FUNC excHook);
 #define LOS_ExcRegHook ArchSetExcHook
@@ -99,8 +99,8 @@ UINT32 ArchBackTraceGet(UINTPTR fp, UINTPTR *callChain, UINT32 maxDepth);
 VOID ArchExcInit(VOID);
 
 /* Stack pointers for different modes. */
-extern UINTPTR __stack_startup;
-extern UINTPTR __stack_startup_top;
+extern UINTPTR __startup_stack;
+extern UINTPTR __startup_stack_top;
 extern UINTPTR __irq_stack_top;
 extern UINTPTR __irq_stack;
 

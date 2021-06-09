@@ -40,9 +40,23 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+LITE_OS_SEC_TEXT_MINOR STATIC VOID OsShellCmdHwiInfoTitle(VOID)
+{
+#ifdef LOSCFG_CPUP_INCLUDE_IRQ
+    PRINTK("InterruptNo     Share     ResponseCount     CYCLECOST     CPUUSE     CPUUSE10s     CPUUSE1s     Name"
+           "             DevId\n");
+    PRINTK("-----------     -----     -------------     ---------     ------     ---------     --------     ---------"
+           "        --------\n");
+
+#else
+    PRINTK("InterruptNo     Share     ResponseCount     Name             DevId\n");
+    PRINTK("-----------     -----     -------------     ---------        --------\n");
+#endif
+}
+
 STATIC BOOL GetHwiShare(const HwiHandleInfo *hwiForm)
 {
-#ifdef LOSCFG_NO_SHARED_IRQ
+#ifndef LOSCFG_SHARED_IRQ
     return false;
 #else
     return (hwiForm->shareMode);
@@ -50,15 +64,14 @@ STATIC BOOL GetHwiShare(const HwiHandleInfo *hwiForm)
 }
 
 #ifdef LOSCFG_CPUP_INCLUDE_IRQ
-STATIC CPUP_INFO_S g_hwiCpupAll[OS_HWI_MAX_NUM];
-STATIC CPUP_INFO_S g_hwiCpup10s[OS_HWI_MAX_NUM];
-STATIC CPUP_INFO_S g_hwiCpup1s[OS_HWI_MAX_NUM];
+STATIC CPUP_INFO_S g_hwiCpupAll[LOSCFG_PLATFORM_HWI_LIMIT];
+STATIC CPUP_INFO_S g_hwiCpup10s[LOSCFG_PLATFORM_HWI_LIMIT];
+STATIC CPUP_INFO_S g_hwiCpup1s[LOSCFG_PLATFORM_HWI_LIMIT];
 LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdHwi(INT32 argc, const CHAR **argv)
 {
-    UINT32 i;
-    UINT32 intSave;
+    UINT32 i, intSave;
     UINT64 cycles = 0;
-    size_t size = sizeof(CPUP_INFO_S) * OS_HWI_MAX_NUM;
+    size_t size = sizeof(CPUP_INFO_S) * LOSCFG_PLATFORM_HWI_LIMIT;
     HwiHandleInfo *hwiForm = NULL;
 
     (VOID)argv;
@@ -72,13 +85,13 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdHwi(INT32 argc, const CHAR **argv)
     (VOID)memset_s(g_hwiCpup1s, size, 0, size);
 
     intSave = LOS_IntLock();
-    (VOID)LOS_AllCpuUsage(OS_HWI_MAX_NUM, g_hwiCpupAll, CPUP_ALL_TIME, 0);
-    (VOID)LOS_AllCpuUsage(OS_HWI_MAX_NUM, g_hwiCpup10s, CPUP_LAST_TEN_SECONDS, 0);
-    (VOID)LOS_AllCpuUsage(OS_HWI_MAX_NUM, g_hwiCpup1s, CPUP_LAST_ONE_SECONDS, 0);
+    (VOID)LOS_AllCpuUsage(LOSCFG_PLATFORM_HWI_LIMIT, g_hwiCpupAll, CPUP_ALL_TIME, 0);
+    (VOID)LOS_AllCpuUsage(LOSCFG_PLATFORM_HWI_LIMIT, g_hwiCpup10s, CPUP_LAST_TEN_SECONDS, 0);
+    (VOID)LOS_AllCpuUsage(LOSCFG_PLATFORM_HWI_LIMIT, g_hwiCpup1s, CPUP_LAST_ONE_SECONDS, 0);
     LOS_IntRestore(intSave);
 
-    PRINTK(" InterruptNo     share      Count    CYCLECOST    CPUUSE   CPUUSE10s   CPUUSE1s     Name         DevId\n");
-    for (i = 0; i < OS_HWI_MAX_NUM; i++) {
+    OsShellCmdHwiInfoTitle();
+    for (i = 0; i < LOSCFG_PLATFORM_HWI_LIMIT; i++) {
         if (!HWI_IS_REGISTED(i)) {
             continue;
         }
@@ -89,24 +102,24 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdHwi(INT32 argc, const CHAR **argv)
 
         /* Different cores has different hwi form implementation */
         hwiForm = OsGetHwiForm(i);
-        PRINTK(" %8u:\t   %-s\t      %-10u%-10llu %2u.%-7u %2u.%-7u %2u.%-6u",
+        PRINTK("%-8u\t  %-s\t  %-10u\t    %-10llu   %2u.%-7u %2u.%-7u    %2u.%-6u",
                i, GetHwiShare(hwiForm) ? "Y" : "N", OsGetHwiFormCnt(i), cycles,
                g_hwiCpupAll[i].uwUsage / LOS_CPUP_PRECISION_MULT, g_hwiCpupAll[i].uwUsage % LOS_CPUP_PRECISION_MULT,
                g_hwiCpup10s[i].uwUsage / LOS_CPUP_PRECISION_MULT, g_hwiCpup10s[i].uwUsage % LOS_CPUP_PRECISION_MULT,
                g_hwiCpup1s[i].uwUsage / LOS_CPUP_PRECISION_MULT, g_hwiCpup1s[i].uwUsage % LOS_CPUP_PRECISION_MULT);
-#ifndef LOSCFG_NO_SHARED_IRQ
+#ifdef LOSCFG_SHARED_IRQ
         hwiForm = hwiForm->next;
 #endif
         if ((hwiForm->registerInfo != 0) && ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName != NULL) {
-            PRINTK(" %-16s %-32u\n",
+            PRINTK("\t %-16s 0x%-.8x\n",
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName,
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pDevId);
         } else {
             PRINTK("\n");
         }
-#ifndef LOSCFG_NO_SHARED_IRQ
+#ifdef LOSCFG_SHARED_IRQ
         while ((hwiForm = hwiForm->next) != NULL) {
-            PRINTK("\t\t\t\t\t\t\t\t\t\t   %-16s %-32u\n",
+            PRINTK("\t\t\t\t\t\t\t\t\t\t\t\t %-16s 0x%-.8x\n",
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName,
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pDevId);
         }
@@ -126,29 +139,29 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdHwi(INT32 argc, const CHAR **argv)
         return OS_ERROR;
     }
 
-    PRINTK(" InterruptNo     share      Count          Name          DevId\n");
-    for (i = 0; i < OS_HWI_MAX_NUM; i++) {
+    OsShellCmdHwiInfoTitle();
+    for (i = 0; i < LOSCFG_PLATFORM_HWI_LIMIT; i++) {
         if (!HWI_IS_REGISTED(i)) {
             continue;
         }
 
         /* Different cores has different hwi form implementation */
         hwiForm = OsGetHwiForm(i);
-        PRINTK(" %8u:\t   %-s\t      %-10u", i, GetHwiShare(hwiForm) ? "Y" : "N", OsGetHwiFormCnt(i));
-#ifndef LOSCFG_NO_SHARED_IRQ
+        PRINTK("%-8u\t  %-s\t  %-10u", i, GetHwiShare(hwiForm) ? "Y" : "N", OsGetHwiFormCnt(i));
+#ifdef LOSCFG_SHARED_IRQ
         hwiForm = hwiForm->next;
 #endif
         if ((hwiForm->registerInfo != 0) && ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName != NULL) {
-            PRINTK(" %-16s %-32u\n",
+            PRINTK("\t    %-16s 0x%-.8x\n",
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName,
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pDevId);
         } else {
             PRINTK("\n");
         }
 
-#ifndef LOSCFG_NO_SHARED_IRQ
+#ifdef LOSCFG_SHARED_IRQ
         while ((hwiForm = hwiForm->next) != NULL) {
-            PRINTK("\t\t\t\t\t %-16s %-32u\n",
+            PRINTK("\t\t\t\t\t    %-16s 0x%-.8x\n",
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pName,
                    ((HWI_IRQ_PARAM_S *)hwiForm->registerInfo)->pDevId);
         }

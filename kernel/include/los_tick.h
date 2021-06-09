@@ -96,6 +96,7 @@ extern "C" {
  * Tick error code: This error code is not in use temporarily.
  *
  * Value: 0x02000401
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TICK_NO_HWTIMER        LOS_ERRNO_OS_ERROR(LOS_MOD_TICK, 0x01)
 
@@ -104,6 +105,7 @@ extern "C" {
  * Tick error code: This error code is not in use temporarily.
  *
  * Value: 0x02000402
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_TICK_PER_SEC_TOO_SMALL LOS_ERRNO_OS_ERROR(LOS_MOD_TICK, 0x02)
 
@@ -132,7 +134,7 @@ extern UINT32 g_sysClock;
 extern UINT32 g_tickPerSecond;
 
 /**
- * @ingroup los_typedef
+ * @ingroup los_tick
  * system time structure.
  */
 typedef struct tagSysTime {
@@ -189,9 +191,15 @@ extern UINT32 LOS_CyclePerTickGet(VOID);
  * @par Description:
  * This API is used to convert Ticks to milliseconds.
  * @attention
- * The number of milliseconds obtained through the conversion is 32-bit.
+ * <ul>
+ * <li>The number of milliseconds obtained through the conversion is 32-bit. Pay attention to the value to be
+ * converted because data possibly overflows.</li>
+ * </ul>
  *
- * @param  tick  [IN] Number of Ticks. The value range is (0, #OS_SYS_CLOCK).
+ * @param  tick  [IN] Number of Ticks.
+ * If KERNEL_TICK_PER_SECOND > OS_SYS_MS_PER_SECOND, the value range is (0, 0xFFFFFFFF].
+ * If KERNEL_TICK_PER_SECOND <= OS_SYS_MS_PER_SECOND,  the value range
+ * is (0, 0xFFFFFFFF * KERNEL_TICK_PER_SECOND / OS_SYS_MS_PER_SECOND].
  *
  * @retval #UINT32 Milliseconds obtained through the conversion.
  * @par  Dependency:
@@ -208,10 +216,16 @@ extern UINT32 LOS_Tick2MS(UINT32 tick);
  * @par Description:
  * This API is used to convert milliseconds to Ticks.
  * @attention
- * If the parameter passed in is equal to 0xFFFFFFFF, the retval is 0xFFFFFFFF. Pay attention to
- * the value to be converted because data may overflows.
+ * <ul>
+ * <li>If the parameter passed in is equal to 0xFFFFFFFF, the retval is 0xFFFFFFFF. Pay attention to
+ * the value to be converted because data may overflows.</li>
+ * <li>This API is not an accurate function, and the calculation result is rounded up.</li>
+ * </ul>
  *
  * @param  millisec  [IN] The milliseconds need to be converted to Ticks.
+ * If KERNEL_TICK_PER_SECOND > OS_SYS_MS_PER_SECOND, the value range
+ * is (0, 0xFFFFFFFF * OS_SYS_MS_PER_SECOND / KERNEL_TICK_PER_SECOND).
+ * If KERNEL_TICK_PER_SECOND <= OS_SYS_MS_PER_SECOND,  the value range is (0, 0xFFFFFFFF].
  *
  * @retval #UINT32 Number of Ticks obtained through the conversion.
  * @par Dependency:
@@ -305,6 +319,46 @@ extern VOID LOS_Udelay(UINT32 usecs);
  * @since Huawei LiteOS V100R001C00
  */
 extern VOID LOS_Mdelay(UINT32 msecs);
+
+#ifdef LOSCFG_KERNEL_TICKLESS
+/**
+ * @ingroup los_tick
+ * @brief Define the lowpower framework wakeup function type.
+ *
+ * @par Description:
+ * This API is used to define the lowpower framework wakeup function type.
+ *
+ * @attention None.
+ *
+ * @param  tickNum [IN] The tick interrupt number.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>los_tick.h: the header file that contains the API declaration.</li></ul>
+ * @see None.
+ * @since Huawei LiteOS V200R005C10
+ */
+typedef VOID (*WAKEUPTICKHOOK)(UINT32 tickNum);
+
+/**
+ * @ingroup  los_tick
+ * @brief Register a hook to wakeup from tick interrupt.
+ *
+ * @par Description:
+ * This API is used to register a recovery function after wakeup from tick interrupt
+ *
+ * @attention None.
+ *
+ * @param  hook [IN] The lowpower wakeup from tick hook.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>los_tick.h: the header file that contains the API declaration.</li></ul>
+ * @see None.
+ * @since Huawei LiteOS V200R005C10
+ */
+extern VOID LOS_IntTickWakeupHookReg(WAKEUPTICKHOOK hook);
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

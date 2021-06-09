@@ -12,4 +12,5 @@ SECTIONS
         KEEP (*(.vectors))
     } > ram
     __ram_vectors_lma = LOADADDR(.ram_vectors);
+    __ram_exc_heap_memsize = 0;
 }

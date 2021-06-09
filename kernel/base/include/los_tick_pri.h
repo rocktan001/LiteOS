@@ -44,52 +44,28 @@ extern SPIN_LOCK_S g_tickSpin;
 #define TICK_LOCK(state)                       LOS_SpinLockSave(&g_tickSpin, &(state))
 #define TICK_UNLOCK(state)                     LOS_SpinUnlockRestore(&g_tickSpin, (state))
 
-/**
- * @ingroup los_tick
- * Count of Ticks
- */
+/* Count of Ticks */
 extern volatile UINT64 g_tickCount[];
 
-/**
- * @ingroup los_tick
- * Cycle to nanosecond scale
- */
+/* Cycle to nanosecond scale */
 extern DOUBLE g_cycle2NsScale;
 
-/**
-* @ingroup  los_tick
-* @brief Handle the system tick timeout.
-*
-* @par Description:
-* This API is called when the system tick timeout and triggers the interrupt.
-*
-* @attention
-* <ul>
-* <li>None.</li>
-* </ul>
-*
-* @param none.
-*
-* @retval None.
-* @par Dependency:
-* <ul><li>los_tick.h: the header file that contains the API declaration.</li></ul>
-* @see None.
-* @since Huawei LiteOS V100R001C00
-*/
+/* This API is called when the system tick timeout and triggers the interrupt. */
 extern VOID OsTickHandler(VOID);
-
 extern UINT32 OsTickInit(UINT32 systemClock, UINT32 tickPerSecond);
 extern VOID OsTickStart(VOID);
-/**
- * @ingroup los_tick
- * Convert from the cycle count to nanosecond.
- */
+
+/* Convert from the cycle count to nanosecond. */
 #define CYCLE_TO_NS(cycles) ((cycles) * g_cycle2NsScale)
 
 /**
  * Current system timer register is 32 bit, therefore TIMER_MAXLOAD define just in order to avoid ambiguity.
  */
 #define TIMER_MAXLOAD 0xffffffff
+
+#ifdef LOSCFG_KERNEL_TICKLESS
+#define LOS_TICK_INT_FLAG 0x80000000
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

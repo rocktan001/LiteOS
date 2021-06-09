@@ -1,3 +1,4 @@
+
 ENTRY(reset_vector)
 INCLUDE board.ld
 SECTIONS
@@ -47,6 +48,37 @@ SECTIONS
 
     /* .ARM.exidx is sorted, so has to go in its own output section.  */
     .ARM.exidx ALIGN(0x8) : { __exidx_start = .; *(.ARM.exidx* .gnu.linkonce.armexidx.*) ;__exidx_end = .;} > ram
+
+    __fast_start = .;
+
+    .fast_rodata ALIGN(0x1000) : { __fast_rodata_start = ABSOLUTE(.); . = .;
+    }
+
+    .fast_ctors ALIGN(0x4) : {
+    . = ALIGN(4);
+    __init_array_start = ABSOLUTE(.);
+    KEEP(*(SORT(.init_array.*)))
+    KEEP(*(SORT(.init_array)))
+    __init_array_end = ABSOLUTE(.);
+    }
+
+    __fast_rodata_end = ABSOLUTE(.);
+
+    /* Exception handling  */
+    PROVIDE (__EH_FRAME_BEGIN__ = LOADADDR(.eh_frame));
+    .eh_frame ALIGN (0x8) : { KEEP (*(.eh_frame)) *(.eh_frame.*);  } > ram
+
+    .fast_text ALIGN(0x4) : { __fast_text_start = ABSOLUTE(.); . = .;
+    }
+
+    __fast_text_end = ABSOLUTE(.);
+
+    .fast_data ALIGN(0x4) : { __fast_data_start = ABSOLUTE(.); . = .;
+    }
+
+    __fast_data_end = ABSOLUTE(.);
+
+    __fast_end = .;
 
     /* text/read-only data */
     .text ALIGN(0x1000) : {
@@ -125,7 +157,7 @@ SECTIONS
     .bss ALIGN(0x800) : {
         __int_stack_start = .;
         *(.int_stack);
-        . = . + 0x24;
+        . = ALIGN(0x4);
         KEEP(*(.bss.prebss.*))
         . = ALIGN(0x8);
         __bss_start = .;
@@ -134,6 +166,15 @@ SECTIONS
         *(COMMON)
         . = ALIGN(0x8);
         __bss_end = .;
+    } > ram
+
+    .heap : {
+        . = ALIGN(0x40);
+        __exc_heap_start = .;
+        __exc_heap_end = . + __ram_exc_heap_memsize;
+        . = __exc_heap_end;
+        . = ALIGN(0x40);
+        __heap_start = .;
     } > ram
 
     . = ALIGN(0x1000);

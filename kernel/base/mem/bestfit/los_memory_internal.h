@@ -43,10 +43,10 @@ typedef struct {
     union {
         LOS_DL_LIST freeNodeInfo;         /* Free memory node */
         struct {
-            UINT32 magic;
-            UINT32 taskId   : 16;
+            UINTPTR magic;
+            UINTPTR taskId   : 16;
 #ifdef LOSCFG_MEM_MUL_MODULE
-            UINT32 moduleId : 16;
+            UINTPTR moduleId : 16;
 #endif
         };
     };
@@ -56,13 +56,6 @@ typedef struct {
 #ifdef LOSCFG_MEM_HEAD_BACKUP
     UINT32 gapSize;
     UINTPTR checksum; /* magic = xor checksum */
-#endif
-
-#ifdef LOSCFG_MEM_RECORDINFO
-    UINT32 originSize;
-#ifdef LOSCFG_AARCH64
-    UINT32 reserve1; /* 64-bit alignment */
-#endif
 #endif
 
 #ifdef LOSCFG_MEM_LEAKCHECK
@@ -89,11 +82,6 @@ typedef struct tagLosMemDynNode {
 #define OS_MEM_MIN_POOL_SIZE                (OS_DLNK_HEAD_SIZE + (2 * OS_MEM_NODE_HEAD_SIZE) + sizeof(LosMemPoolInfo))
 #define IS_POW_TWO(value)                   ((((UINTPTR)(value)) & ((UINTPTR)(value) - 1)) == 0)
 #define POOL_ADDR_ALIGNSIZE                 64
-#ifdef LOSCFG_AARCH64
-#define OS_MEM_ALIGN_SIZE                   8
-#else
-#define OS_MEM_ALIGN_SIZE                   4
-#endif
 #define OS_MEM_NODE_USED_FLAG               0x80000000U
 #define OS_MEM_NODE_ALIGNED_FLAG            0x40000000U
 #define OS_MEM_NODE_ALIGNED_AND_USED_FLAG   (OS_MEM_NODE_USED_FLAG | OS_MEM_NODE_ALIGNED_FLAG)
@@ -125,7 +113,7 @@ typedef struct tagLosMemDynNode {
 #define OS_MEM_MIDDLE_ADDR(startAddr, middleAddr, endAddr) \
     (((UINT8 *)(startAddr) <= (UINT8 *)(middleAddr)) && ((UINT8 *)(middleAddr) <= (UINT8 *)(endAddr)))
 #define OS_MEM_SET_MAGIC(value) \
-    (value) = (UINT32)((UINTPTR)&(value) ^ (UINTPTR)(-1))
+    ((value) = (UINTPTR)&(value) ^ (UINTPTR)(-1))
 #define OS_MEM_MAGIC_VALID(value) \
     (((UINTPTR)(value) ^ (UINTPTR)&(value)) == (UINTPTR)(-1))
 
@@ -136,3 +124,4 @@ typedef struct tagLosMemDynNode {
 #endif /* __cplusplus */
 
 #endif /* _LOS_MEMORY_INTERNAL_H */
+

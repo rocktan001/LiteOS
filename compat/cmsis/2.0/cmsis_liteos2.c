@@ -102,7 +102,7 @@ osStatus_t osKernelGetInfo(osVersion_t *version, char *id_buf, uint32_t id_size)
         version->kernel = g_losVersion.kernel;
         return osOK;
     } else {
-        PRINT_ERR("[%s] memcpy_s failed, error type = %u\n", __func__, ret);
+        PRINT_ERR("[%s] memcpy_s failed, error type = %d\n", __func__, ret);
         return osError;
     }
 }
@@ -250,24 +250,36 @@ osThreadId_t osThreadNew(osThreadFunc_t func, void *argument, const osThreadAttr
 {
     UINT32 ret;
     UINT32 taskId;
+    UINT16 priority;
+    UINT32 stackSize;
+    CHAR *name = "undefined";
     TSK_INIT_PARAM_S taskInitParam;
 
-    if ((func == NULL) || (attr == NULL) || OS_INT_ACTIVE) {
+    if ((func == NULL) || OS_INT_ACTIVE) {
         return NULL;
     }
-    if ((attr->priority < osPriorityLow3) || (attr->priority > osPriorityHigh)) {
-        PRINT_ERR("[%s] Fail, NOT in adapt priority range: [osPriorityLow3 : osPriorityHigh].\n", __func__);
-        return NULL;
+
+    if (attr != NULL) {
+        if ((attr->priority < osPriorityLow3) || (attr->priority > osPriorityHigh)) {
+            PRINT_ERR("osThreadNew Fail, NOT in adapt priority range: [osPriorityLow3 : osPriorityHigh].\n");
+            return NULL;
+        }
+        /* task priority: 1~30 */
+        priority = (UINT16)(OS_TASK_PRIORITY_LOWEST - (attr->priority - LOS_PRIORITY_WIN));
+        stackSize = (UINT32)attr->stack_size;
+        name = (CHAR *)attr->name;
+    } else {
+        priority = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+        stackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     }
 
     /* Ignore the return code when matching CSEC rule 6.6(4). */
     (VOID)memset_s(&taskInitParam, sizeof(taskInitParam), 0, sizeof(taskInitParam));
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)func;
-    taskInitParam.uwStackSize = attr->stack_size;
-    taskInitParam.pcName = (CHAR *)attr->name;
+    taskInitParam.uwStackSize = stackSize;
+    taskInitParam.pcName = name;
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
-    /* task priority: 0~31 */
-    taskInitParam.usTaskPrio = (UINT16)(OS_TASK_PRIORITY_LOWEST - (attr->priority - LOS_PRIORITY_WIN));
+    taskInitParam.usTaskPrio = priority;
     LOS_TASK_PARAM_INIT_ARG(taskInitParam, argument);
 
     ret = LOS_TaskCreate(&taskId, &taskInitParam);
@@ -863,7 +875,7 @@ osTimerId_t osTimerNew(osTimerFunc_t func, osTimerType_t type, void *argument, c
 
     ret = LOS_SwtmrCreate(1, mode, (SWTMR_PROC_FUNC)func, &swtmrId, (UINTPTR)argument);
     if (ret == LOS_OK) {
-        return (osTimerId_t)OS_SWT_FROM_SID(swtmrId);
+        return (osTimerId_t)OS_SWT_FROM_SWTID(swtmrId);
     } else {
         return NULL;
     }
@@ -1082,7 +1094,7 @@ osSemaphoreId_t osSemaphoreNew(uint32_t max_count, uint32_t initial_count, const
     UINT32 ret;
     UINT32 semId;
 
-    if ((initial_count > max_count) || (max_count > OS_SEM_COUNT_MAX) || OS_INT_ACTIVE) {
+    if ((initial_count > max_count) || (max_count > LOS_SEM_COUNT_MAX) || OS_INT_ACTIVE) {
         return NULL;
     }
 
@@ -1155,7 +1167,7 @@ uint32_t osSemaphoreGetCount(osSemaphoreId_t semaphore_id)
     }
 
     intSave = LOS_IntLock();
-    if (semCB->semStat == OS_SEM_UNUSED) {
+    if (semCB->semStat == LOS_UNUSED) {
         LOS_IntRestore(intSave);
         return 0;
     }
@@ -1276,7 +1288,7 @@ STATIC UINT16 osMessageQueueGetAttr(osMessageQueueId_t mq_id, QueueAttribute att
     }
 
     intSave = LOS_IntLock();
-    if (queueCB->queueState == OS_QUEUE_UNUSED) {
+    if (queueCB->queueState == LOS_UNUSED) {
         LOS_IntRestore(intSave);
         return 0;
     }

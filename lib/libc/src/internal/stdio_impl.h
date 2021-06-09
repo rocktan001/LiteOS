@@ -81,7 +81,7 @@ extern hidden FILE *volatile __stderr_used;
 	_lock.stAttr.reserved = 0, \
 	_lock.stLock.muxList.pstPrev = (struct LOS_DL_LIST *)NULL, \
 	_lock.stLock.muxList.pstNext = (struct LOS_DL_LIST *)NULL, \
-	_lock.stLock.owner = (LosTaskCB *)NULL, \
+	_lock.stLock.owner = NULL, \
 	_lock.stLock.muxCount = 0
 #endif
 hidden int __lockfile(FILE *);

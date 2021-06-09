@@ -28,6 +28,7 @@
 
 #include "los_base.h"
 #include "los_task_pri.h"
+#include "arch/canary.h"
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "platform_init.h"
@@ -39,6 +40,12 @@ VOID board_config(VOID)
 
 INT32 main(VOID)
 {
+#ifdef __GNUC__
+    ArchStackGuardInit();
+#endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+
     board_config();
     HardwareInit();
 

@@ -7,10 +7,11 @@
 .extern __bss_end
 .global __irq_stack_top
 .global __irq_stack
-.global __stack_startup_top
-.global __stack_startup
+.global __startup_stack_top
+.global __startup_stack
 .global psci_call
 .extern test_uart_putc
+.extern board_config
 
 .align 5
 .text
@@ -35,13 +36,16 @@
 .global reset_vector
 .type   reset_vector,function
 reset_vector:
-    mrs     x11, mpidr_el1
-    ubfx    x11, x11, #0, #24
-    cbnz    x11, excstatck_loop_done
+    adr x26, .
+    ldr x14, =reset_vector
+    sub x26, x14, x26 /* x26: offset of virt addr and phy addr */
+    mrs     x25, mpidr_el1
+    ubfx    x25, x25, #0, #24
+    cbnz    x25, excstatck_loop_done
 /* clear out the interrupt and exception stack and set magic num to check the overflow */
 do_excstatck:
     ldr     x1, =OS_STACK_INIT
-    ldr     x2, =__stack_startup
+    ldr     x2, =__startup_stack
     ldr     x3, =__irq_stack_top
 /* Main loop sets 32 bytes at a time. */
 excstatck_loop:
@@ -53,7 +57,7 @@ excstatck_loop:
     blt     excstatck_loop
 
     STACK_MAGIC_SET __irq_stack, #OS_EXC_IRQ_STACK_SIZE, OS_STACK_MAGIC_WORD
-    STACK_MAGIC_SET __stack_startup, #OS_EXC_START_STACK_SIZE, OS_STACK_MAGIC_WORD
+    STACK_MAGIC_SET __startup_stack, #OS_EXC_START_STACK_SIZE, OS_STACK_MAGIC_WORD
 
 excstatck_loop_done:
 
@@ -76,9 +80,86 @@ excstatck_loop_done:
     ldr     x9, =arm64_exception_handlers
     msr     vbar_el1, x9
 
-    cbnz    x11, cpu_start
-    ldr     x10, =__stack_startup_top
-    mov     sp, x10
+    cbnz    x25, setup_mmu
+
+    /* set core0's stack, phy addr */
+    ldr     x9, =__startup_stack_top
+    sub     x9, x9, x26
+    /* aligned to 16 byte */
+    and     x9, x9, #0xfffffffffff0
+    mov     sp, x9
+    bl      uart_early_init
+    bl      board_config  /* initialize g_sys_mem_addr_end  before MmuSectionMap */
+
+pagetable_init:
+/* clear first_page_table */
+.L__do_first_page_table:
+    /* clear out the first_page_table*/
+    ldr     x9, =g_firstPageTable
+    mov     x10, #36864
+    cbz     x10, .L__first_page_table_loop_done
+.L__first_page_table_loop:
+    sub     x10, x10, #8
+    str     xzr, [x9], #8
+    cbnz    x10, .L__first_page_table_loop
+.L__first_page_table_loop_done:
+    bl      MmuSectionMap
+
+setup_mmu:
+    /* set up all cores' stacks, virtual addr */
+    ldr     x10, =__startup_stack_top
+    mov     x9, #OS_EXC_START_STACK_SIZE
+    mul     x9, x9, x25
+    sub     sp, x10, x9
+
+    /* set up the mmu */
+    /* Invalidate TLB */
+    tlbi    vmalle1is
+    isb
+    dsb     sy
+
+    /* Initialize Memory Attribute Indirection Register */
+    /* 44:normal mem non-cache;ff:normal mem cache;04:Device-nGnRE memory;00:Device-nGnRnE memory */
+    ldr     x9, =0x44FF0400
+    msr     mair_el1, x9
+
+    /* Initialize TCR_EL1 */
+    /* set cacheable attributes on translation walk */
+    /* (SMP extensions) non-shareable, inner write-back write-allocate */
+    mov x9, 0
+    orr x9, x9, #(0x1 << 38)  /* [38]select low address calculation */
+    orr x9, x9, #(0x1 << 36)  /* [36]asid = 16bits */
+    orr x9, x9, #(0x1 << 32)  /* [34:32]IPA size 64G, stage1 output address */
+    orr x9, x9, #(0x1 << 31)  /* [31:30]granule be set as 4K */
+    /* [29:16]igonre ttbr1 configuration */
+    orr x9, x9, #(0x3 << 12)  /* [13:12]ttbr0:inner shareable */
+    orr x9, x9, #(0x1 << 10)  /* [11:10]ttbr0:outer cacheability: write-back write-allocate */
+    orr x9, x9, #(0x1 << 8)   /* [9:8]ttbr0:inner cacheability: write-back write-allocate */
+    mov x10, #(0x19)             /* [5:0] 64 - 0x19 = 39-bits, stage1 tranlation input address*/
+    orr x9, x9, x10              /* [5:0]T0SZ the size offset of memory region set to 2^(64-0x19)=512G */
+    msr     tcr_el1, x9
+
+    isb
+
+    ldr     x9, =g_firstPageTable
+    msr     ttbr0_el1, x9
+    isb
+
+    /* Turn on the MMU */
+    mrs     x9, sctlr_el1
+    orr     x9, x9, #0x1
+    msr     sctlr_el1, x9
+
+.Lmmu_on_pc:
+    isb
+
+    /* Jump to virtual code address */
+.Lmmu_on_vaddr:
+    /* Invalidate TLB */
+    tlbi    vmalle1
+    isb
+
+    cbnz    x25, cpu_start
 
     /* clear bss */
 .L__do_bss:
@@ -98,11 +179,6 @@ excstatck_loop_done:
     b       .
 
 cpu_start:
-    /* Set up the stack */
-    ldr     x10, =__stack_startup_top
-    mov     x9, #OS_EXC_START_STACK_SIZE
-    mul     x9, x9, x11
-    sub     sp, x10, x9
     bl      secondary_cpu_start
     b       .
 
@@ -209,9 +285,9 @@ excstack_magic_loop:
 
 .section .bss.prebss.stack
     .align 4
-__stack_startup:
+__startup_stack:
     .skip OS_EXC_START_STACK_SIZE * CORE_NUM
-__stack_startup_top:
+__startup_stack_top:
 __irq_stack:
     .skip OS_EXC_IRQ_STACK_SIZE * CORE_NUM
 __irq_stack_top:

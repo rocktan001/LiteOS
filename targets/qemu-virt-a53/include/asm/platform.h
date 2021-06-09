@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Platform HeadFile
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+ * Description: Platform Config HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,11 +26,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _BOARD_DEFINES_H
-#define _BOARD_DEFINES_H
+#ifndef _ASM_PLATFORM_H
+#define _ASM_PLATFORM_H
 
-#include "asm/hal_platform_ints.h"
-#include "stdarg.h"
+#include "los_typedef.h"
+#include "interrupt_config.h"
+#include "memmap_config.h"
+#include "uart.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -38,61 +40,11 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-// type defines
+#define OS_SYS_CLOCK            2000000
 
-#ifndef uint8_t
-#define uint8_t unsigned char
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern VOID app_init(VOID);
 #endif
-
-#ifndef uint16_t
-#define uint16_t unsigned short
-#endif
-
-#ifndef uint32_t
-#define uint32_t unsigned int
-#endif
-
-#include "uart.h"
-
-// ARM QEMU VIRT
-
-/* map all of 0-1GB into kernel space in one shot */
-#define PERIPHERAL_BASE_PHYS            (0)
-#define PERIPHERAL_BASE_SIZE            (0x40000000UL) // 1GB
-#define ARCH_ARM64                      (0)
-
-#define PERIPHERAL_BASE_VIRT            (0x00000000UL) // not use mmu, use physical addr
-
-/* individual peripherals in this mapping */
-#define CPUPRIV_BASE_VIRT               (PERIPHERAL_BASE_VIRT + 0x08000000)
-#define CPUPRIV_BASE_PHYS               (PERIPHERAL_BASE_PHYS + 0x08000000)
-#define CPUPRIV_SIZE                    (0x00020000)
-#define UART_REG_BASE                   (PERIPHERAL_BASE_VIRT + 0x09000000)
-#define UART_SIZE                       (0x00001000)
-#define RTC_BASE                        (PERIPHERAL_BASE_VIRT + 0x09010000)
-#define RTC_SIZE                        (0x00001000)
-#define FW_CFG_BASE                     (PERIPHERAL_BASE_VIRT + 0x09020000)
-#define FW_CFG_SIZE                     (0x00001000)
-#define NUM_VIRTIO_TRANSPORTS           32
-#define VIRTIO_BASE                     (PERIPHERAL_BASE_VIRT + 0x0a000000)
-#define VIRTIO_SIZE                     (NUM_VIRTIO_TRANSPORTS * 0x200)
-
-#define GIC_BASE_ADDR                   CPUPRIV_BASE_VIRT
-
-#ifdef LOSCFG_PLATFORM_BSP_GIC_V2
-#define GICD_OFFSET                     0x00000                         /* interrupt distributor offset */
-#define GICC_OFFSET                     0x10000                         /* CPU interface register offset */
-#else /* GICv3 */
-#define GICD_OFFSET                     0x00000                         /* interrupt distributor offset */
-#define GICR_OFFSET                     0xa0000                         /* interrupt redistributor offset */
-#define GICR_STRIDE                     0x20000                         /* interrupt redistributor stride */
-#endif
-
-extern char *tab;
-extern int color;
-
-extern void enable_scu(void);
-extern char* strcpy(char* dest, const char* src);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -100,4 +52,4 @@ extern char* strcpy(char* dest, const char* src);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _BOARD_DEFINES_H */
+#endif /* _ASM_PLATFORM_H */

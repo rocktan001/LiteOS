@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Targets Stm32l476 Asm Platform HeadFile
+ * Description: Platform HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2021-02-03
  * Redistribution and use in source and binary forms, with or without modification,
@@ -29,6 +29,29 @@
 #ifndef _ASM_PLATFORM_H
 #define _ASM_PLATFORM_H
 
-#include "asm/hal_platform_ints.h"
+#include "los_typedef.h"
+#include "stm32l476xx.h"
+#include "stm32l4xx.h"
+#include "uart.h"
+#include "tim.h"
+
+#include "interrupt_config.h"
+#include "memmap_config.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern VOID app_init(VOID);
+#endif
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _ASM_PLATFORM_H */

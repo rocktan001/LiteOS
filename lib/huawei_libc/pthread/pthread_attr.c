@@ -30,7 +30,6 @@
 #include "pprivate.h"
 #include "errno.h"
 #include "libc.h"
-#include "los_memory_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus

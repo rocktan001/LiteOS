@@ -8,6 +8,6 @@ LOCAL_SRCS := memset.S strcmp.S setjmp.S memcpy.S
 
 LOCAL_ASFLAGS := $(AS_OBJS_LIBC_FLAGS)
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 
-include $(MODULE_LIB)
+include $(MODULE_LIBC)

@@ -235,25 +235,6 @@ LITE_OS_SEC_ALW_INLINE STATIC INLINE BOOL LOS_ListEmpty(LOS_DL_LIST *list)
 }
 
 /**
- * @brief Obtain the offset of a field relative to the structure start address.
- *
- * @par  Description:
- * This API is used to obtain the offset of the structure member (field) relative to
- * the start address of the structure (type). And return the offset of #UINTPTR type.
- * @attention
- * None.
- *
- * @param type   [IN] Structure name.
- * @param field  [IN] The structure member name which needs to measure the offset.
- *
- * @retval #UINTPTR Offset of the field relative to the structure start address.
- * @par Dependency:
- * <ul><li>los_list.h: the header file that contains the API declaration.</li></ul>
- * @since Huawei LiteOS V100R001C00
- */
-#define OFFSET_OF_FIELD(type, field) ((UINTPTR)&((type *)0)->field)
-
-/**
  * @ingroup los_list
  * @brief Obtain the offset of a structure member relative to the structure start address.
  *
@@ -272,6 +253,9 @@ LITE_OS_SEC_ALW_INLINE STATIC INLINE BOOL LOS_ListEmpty(LOS_DL_LIST *list)
  * @since Huawei LiteOS V100R001C00
  */
 #define LOS_OFF_SET_OF(type, member) ((UINTPTR)&((type *)0)->member)
+
+/* Obsolete API, please use LOS_OFF_SET_OF instead */
+#define OFFSET_OF_FIELD(type, field) LOS_OFF_SET_OF(type, field)
 
 /**
  * @ingroup los_list
@@ -356,7 +340,7 @@ LITE_OS_SEC_ALW_INLINE STATIC INLINE BOOL LOS_ListEmpty(LOS_DL_LIST *list)
  */
 #define LOS_DL_LIST_FOR_EACH_ENTRY_SAFE(item, next, list, type, member)               \
     for (item = LOS_DL_LIST_ENTRY((list)->pstNext, type, member),                     \
-         next = LOS_DL_LIST_ENTRY((item)->member->pstNext, type, member);             \
+         next = LOS_DL_LIST_ENTRY((item)->member.pstNext, type, member);              \
          &(item)->member != (list);                                                   \
          item = next, next = LOS_DL_LIST_ENTRY((item)->member.pstNext, type, member))
 

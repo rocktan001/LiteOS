@@ -32,9 +32,6 @@
 #include "securec.h"
 
 #include "los_hwi.h"
-#if (LOSCFG_PLATFORM_EXC == YES)
-#include "los_memcheck_pri.h"
-#endif
 #include "los_spinlock.h"
 #include "los_trace.h"
 
@@ -51,7 +48,10 @@ LITE_OS_SEC_BSS  SPIN_LOCK_INIT(g_memSpin);
 UINT8 *m_aucSysMem0 = (UINT8 *)NULL;
 UINT8 *m_aucSysMem1 = (UINT8 *)NULL;
 __attribute__((section(".data.init"))) UINTPTR g_sys_mem_addr_end;
+
+#ifdef LOSCFG_EXC_INTERACTION
 __attribute__((section(".data.init"))) UINTPTR g_excInteractMemSize = 0;
+#endif
 
 LITE_OS_SEC_TEXT_INIT UINT32 LOS_MemInit(VOID *pool, UINT32 size)
 {
@@ -62,8 +62,13 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_MemInit(VOID *pool, UINT32 size)
         return ret;
     }
 
-    MEM_LOCK(intSave);
+    if (!IS_ALIGNED(size, OS_MEM_ALIGN_SIZE) || !IS_ALIGNED(pool, OS_MEM_ALIGN_SIZE)) {
+        PRINT_WARN("pool [%p, %p) size 0x%x should be aligned with OS_MEM_ALIGN_SIZE\n",
+                   pool, (UINTPTR)pool + size, size);
+        size = OS_MEM_ALIGN(size, OS_MEM_ALIGN_SIZE) - OS_MEM_ALIGN_SIZE;
+    }
 
+    MEM_LOCK(intSave);
     if (OsMemMulPoolInit(pool, size) != LOS_OK) {
         goto OUT;
     }
@@ -74,7 +79,6 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_MemInit(VOID *pool, UINT32 size)
     }
 
     OsSlabMemInit(pool, size);
-
     ret = LOS_OK;
 OUT:
     MEM_UNLOCK(intSave);
@@ -87,7 +91,7 @@ OUT:
 LITE_OS_SEC_TEXT_INIT UINT32 OsMemExcInteractionInit(UINTPTR memStart)
 {
     UINT32 ret;
-    m_aucSysMem0 = (UINT8 *)((memStart + (POOL_ADDR_ALIGNSIZE - 1)) & ~((UINTPTR)(POOL_ADDR_ALIGNSIZE - 1)));
+    m_aucSysMem0 = (UINT8 *)memStart;
     g_excInteractMemSize = EXC_INTERACT_MEM_SIZE;
     ret = LOS_MemInit(m_aucSysMem0, g_excInteractMemSize);
     PRINT_INFO("LiteOS kernel exc interaction memory address:%p,size:0x%x\n", m_aucSysMem0, g_excInteractMemSize);
@@ -104,7 +108,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsMemSystemInit(UINTPTR memStart)
     UINT32 ret;
     UINT32 memSize;
 
-    m_aucSysMem1 = (UINT8 *)((memStart + (POOL_ADDR_ALIGNSIZE - 1)) & ~((UINTPTR)(POOL_ADDR_ALIGNSIZE - 1)));
+    m_aucSysMem1 = (UINT8 *)memStart;
     memSize = OS_SYS_MEM_SIZE;
     ret = LOS_MemInit((VOID *)m_aucSysMem1, memSize);
 #ifndef LOSCFG_EXC_INTERACTION
@@ -325,6 +329,24 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_MemIntegrityCheck(VOID *pool)
     MEM_UNLOCK(intSave);
 
     return ret;
+}
+
+VOID OsMemIntegrityMultiCheck(VOID)
+{
+    if (LOS_MemIntegrityCheck(m_aucSysMem1) == LOS_OK) {
+        PRINTK("system memcheck over, all passed!\n");
+#ifdef LOSCFG_SHELL_EXCINFO_DUMP
+        WriteExcInfoToBuf("system memcheck over, all passed!\n");
+#endif
+    }
+#ifdef LOSCFG_EXC_INTERACTION
+    if (LOS_MemIntegrityCheck(m_aucSysMem0) == LOS_OK) {
+        PRINTK("exc interaction memcheck over, all passed!\n");
+#ifdef LOSCFG_SHELL_EXCINFO_DUMP
+        WriteExcInfoToBuf("exc interaction memcheck over, all passed!\n");
+#endif
+    }
+#endif
 }
 
 #ifdef __cplusplus

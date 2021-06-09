@@ -21,13 +21,13 @@ struct tm *__localtime_r(const time_t *restrict t, struct tm *restrict tm)
 	}
 	return tm;
 #else
-	LOCK(lock);
+	(void)LIBC_LOCK(g_tzdstLock);
 	time_t timeoff;
 	int dstsec = 0;
 	if (CheckWithinDstPeriod(NULL, *t) == TRUE)
 	 	dstsec = DstForwardSecondGet();
 	timeoff = *t + timezone + dstsec;
-	UNLOCK(lock);
+	(void)LIBC_UNLOCK(g_tzdstLock);
 
 	/* Reject time_t values whose year would overflow int because
 	 * __secs_to_zone cannot safely handle them. */

@@ -43,7 +43,6 @@ struct pollfd {
 typedef unsigned int pollevent_t;
 
 #include "semaphore.h"
-#include "linux/wait.h"
 
 struct pollfd {
 	int fd;               /* The descriptor being polled */
@@ -62,8 +61,6 @@ typedef struct tag_poll_table {
 	pollevent_t key;
 } poll_table;
 
-extern void notify_poll(wait_queue_head_t *);
-extern void notify_poll_with_key(wait_queue_head_t *, pollevent_t);
 #endif
 
 /**

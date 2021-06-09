@@ -33,7 +33,20 @@ LITEOS_TABLES_KERNEL_LDFLAGS := \
 #telnet_loop.c -utelnet_shellcmd
 LITEOS_TABLES_NET_LDFLAGS := \
     -uarp_shellcmd \
-    -utelnet_shellcmd
+    -utelnet_shellcmd \
+    -umqttconn_shellcmd \
+    -umqttpub_shellcmd \
+    -umqttsub_shellcmd \
+    -umqttunsub_shellcmd \
+    -umqttdisconn_shellcmd \
+    -umqttquit_shellcmd \
+    -umqttstatus_shellcmd \
+    -umqttmem_shellcmd \
+    -ucipherInit_shellcmd \
+    -ucipherDeinit_shellcmd \
+    -utftp_server_shellcmd \
+    -uifconfig_shellcmd \
+    -uping_shellcmd
 
 ####FS command####
 #vfs_shellcmd.c -ucd_shellcmd -ucat_shellcmd -uls_shellcmd -upwd_shellcmd -urm_shellcmd -urmdir_shellcmd -umkdir_shellcmd -utouch_shellcmd -uumount_shellcmd -umount_shellcmd -usync_shellcmd -ustatfs_shellcmd -ucp_shellcmd
@@ -50,13 +63,16 @@ LITEOS_TABLES_FS_LDFLAGS := \
     -uumount_shellcmd -umount_shellcmd \
     -uvirstatfs_shellcmd \
     -ulsfd_shellcmd \
-    -ufatfsck_shellcmd
+    -ufatfsck_shellcmd \
+    -udd_shellcmd
 
 ####Tools command####
 #iperf_shell.c -uiperf_shellcmd
 LITEOS_TABLES_TOOLS_LDFLAGS := \
     -uiperf_shellcmd \
-    -ulwip_dump_shellcmd
+    -ulwip_dump_shellcmd \
+    -uthttpd_shellcmd \
+    -ufastlz_shellcmd
 
 ####Extend command####
 #reset_shell.c -ureset_shellcmd
@@ -102,7 +118,8 @@ LITEOS_TABLES_DRIVER_LDFLAGS := \
     -umedia_devfreq_init \
     -udevfreq_machine_init\
     -uhieth_machine_init\
-    -uhigmac_machine_init
+    -uhigmac_machine_init \
+    -umachine_init
 
 ####FS MAP####
 #fs_mount.c -ug_fsmap_wow -ug_fsmap_wow_end
@@ -122,6 +139,7 @@ LITEOS_TABLES_FSMAP_LDFLAGS := \
     -unfs_fsmap \
     -ufat_fsmap \
     -uyaffs_fsmap \
+    -ulittlefs_fsmap \
     -uromfs_fsmap \
     -ug_fsmap
 

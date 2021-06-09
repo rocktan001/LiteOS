@@ -2,6 +2,12 @@
 
 #undef assert
 
+#ifdef __LITEOS__
+#define DEBUGASSERT(f)
+#ifndef LOSCFG_DEBUG_VERSION
+#define NDEBUG
+#endif
+#endif
 
 /**
  * @ingroup assert
@@ -27,14 +33,6 @@
 #define	assert(x) (void)0
 #else
 #define assert(x) ((void)((x) || (__assert_fail(#x, __FILE__, __LINE__, __func__),0)))
-#endif
-
-#ifdef __LITEOS__
-#ifdef CONFIG_DEBUG
-#define DEBUGASSERT(f) ((void)((f) || (__assert_fail(#f, __FILE__, __LINE__, __func__),0)))
-#else
-#define DEBUGASSERT(f)
-#endif
 #endif
 
 #if __STDC_VERSION__ >= 201112L && !defined(__cplusplus)

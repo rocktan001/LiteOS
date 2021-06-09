@@ -29,8 +29,6 @@
 #ifndef _LOS_LMS_H
 #define _LOS_LMS_H
 
-#include "stdint.h"
-#include "stddef.h"
 #include "los_typedef.h"
 #include "securec.h"
 
@@ -53,7 +51,7 @@ extern "C" {
 #define memmove_s                         KasanMemmoveSec
 #define strcat_s                          KasanStrcatSec
 #define strcpy_s                          KasanStrcpySec
-// End： Kernel Address Sanitizer(KASAN) for LiteOS
+// End: Kernel Address Sanitizer(KASAN) for LiteOS
 
 VOID *KasanMemcpy(VOID *__restrict dest, const VOID *__restrict src, size_t copyAmount);
 VOID *KasanMemmove(VOID *dest, const VOID *src, size_t len);

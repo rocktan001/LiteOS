@@ -25,7 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-
+#include "uart.h"
 #include "los_trace_pri.h"
 #include "trace_pipeline.h"
 
@@ -54,6 +54,7 @@ LITE_OS_SEC_BSS STATIC UINT32 g_traceMask = TRACE_DEFAULT_MASK;
 LITE_OS_SEC_BSS STATIC UINT32 g_traceTaskId;
 #endif
 
+#define EVENT_MASK            0xFFFFFFF0
 #define MIN(x, y)             ((x) < (y) ? (x) : (y))
 
 LITE_OS_SEC_BSS STATIC TRACE_HWI_FILTER_HOOK g_traceHwiFliterHook = NULL;
@@ -90,14 +91,14 @@ STATIC VOID OsTraceSetFrame(TraceEventFrame *frame, UINT32 eventType, UINTPTR id
     frame->curTime   = HalClockGetCycles();
     frame->eventType = eventType;
 
-#if (LOSCFG_TRACE_FRAME_CORE_MSG == YES)
+#ifdef LOSCFG_TRACE_FRAME_CORE_MSG
     frame->core.cpuId      = ArchCurrCpuid();
     frame->core.hwiActive  = OS_INT_ACTIVE ? TRUE : FALSE;
     frame->core.taskLockCnt = MIN(OsPercpuGet()->taskLockCnt, 0xF); /* taskLockCnt is 4 bits, max vaule = 0xF */
     frame->core.paramCount = paramCount;
 #endif
 
-#if (LOSCFG_TRACE_FRAME_EVENT_COUNT == YES)
+#ifdef LOSCFG_TRACE_FRAME_EVENT_COUNT
     frame->eventCount = g_traceEventCount;
     g_traceEventCount++;
 #endif
@@ -153,6 +154,14 @@ VOID OsTraceHook(UINT32 eventType, UINTPTR identity, const UINTPTR *params, UINT
 BOOL OsTraceIsEnable(VOID)
 {
     return g_enableTrace == TRUE;
+}
+
+STATIC VOID OsTraceHookInstall(VOID)
+{
+    g_traceEventHook = OsTraceHook;
+#ifdef LOSCFG_RECORDER_MODE_OFFLINE
+    g_traceDumpHook = OsTraceRecordDump;
+#endif
 }
 
 #ifdef LOSCFG_TRACE_CONTROL_AGENT
@@ -251,6 +260,8 @@ UINT32 LOS_TraceInit(VOID *buf, UINT32 size)
         goto LOS_RELEASE;
     }
 
+    OsTraceHookInstall();
+
     g_traceEventCount = 0;
 
 #ifdef LOSCFG_RECORDER_MODE_ONLINE  /* Wait trace client to start trace */
@@ -318,7 +329,7 @@ STOP_END:
 
 VOID LOS_TraceEventMaskSet(UINT32 mask)
 {
-    g_traceMask = mask;
+    g_traceMask = mask & EVENT_MASK;
 }
 
 VOID LOS_TraceRecordDump(BOOL toClient)

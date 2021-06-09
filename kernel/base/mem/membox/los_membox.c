@@ -58,13 +58,13 @@ LITE_OS_SEC_BSS  SPIN_LOCK_INIT(g_memboxSpin);
 
 STATIC INLINE UINT32 OsCheckBoxMem(const LOS_MEMBOX_INFO *boxInfo, const VOID *node)
 {
-    UINT32 offset;
+    size_t offset;
 
     if (boxInfo->uwBlkSize == 0) {
         return LOS_NOK;
     }
 
-    offset = (UINT32)((UINTPTR)node - (UINTPTR)(boxInfo + 1));
+    offset = (UINTPTR)node - (UINTPTR)(boxInfo + 1);
     if ((offset % boxInfo->uwBlkSize) != 0) {
         return LOS_NOK;
     }

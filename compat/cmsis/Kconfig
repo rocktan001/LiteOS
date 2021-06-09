@@ -1,18 +1,17 @@
 config  LOSCFG_COMPAT_CMSIS
     bool "Enable Cmsis"
     default y
-    select LOSCFG_KERNEL_MEMBOX
+    select LOSCFG_KERNEL_MEMBOX if CMSIS_OS_VER = 1
     help
       Answer Y to enable LiteOS support cmsis interface.
 
-menu "Cmsis Options"
-    depends on LOSCFG_COMPAT_CMSIS
+if LOSCFG_COMPAT_CMSIS
 
 config CMSIS_OS_VER
     int "Cmsis Api Version"
-    default 1
+    default 2
     help
       The Cmsis Version Only Support 1 or 2.
 
-endmenu
+endif # LOSCFG_COMPAT_CMSIS
 

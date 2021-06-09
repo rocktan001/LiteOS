@@ -53,13 +53,17 @@ Huawei LiteOS支持多种芯片架构，如Cortex-M series、Cortex-R series、C
 <a name="table1174111111341"></a>
 <table><thead align="left"><tr id="row157411111645"><th class="cellrowborder" valign="top" width="50%" id="mcps1.2.3.1.1"><p id="p1874115117419"><a name="p1874115117419"></a><a name="p1874115117419"></a>架构</p>
 </th>
-<th class="cellrowborder" valign="top" width="50%" id="mcps1.2.3.1.2"><p id="p107416114419"><a name="p107416114419"></a><a name="p107416114419"></a>核</p>
+<th class="cellrowborder" valign="top" width="50%" id="mcps1.2.3.1.2"><p id="p107416114419"><a name="p107416114419"></a><a name="p107416114419"></a>系列</p>
 </th>
 </tr>
 </thead>
 <tbody><tr id="row187410111244"><td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.1 "><p id="p721512579614"><a name="p721512579614"></a><a name="p721512579614"></a>ARM</p>
 </td>
 <td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.2 "><p id="p6215175714614"><a name="p6215175714614"></a><a name="p6215175714614"></a>Cortex-M0</p>
+</td>
+</tr>
+<tr id="row187410111244"><td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.1 ">&nbsp;&nbsp;</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.2 "><p id="p1521595713611"><a name="p1521595713611"></a><a name="p1521595713614"></a>Cortex-M0+</p>
 </td>
 </tr>
 <tr id="row18741141114412"><td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.1 ">&nbsp;&nbsp;</td>
@@ -87,6 +91,10 @@ Huawei LiteOS支持多种芯片架构，如Cortex-M series、Cortex-R series、C
 </td>
 </tr>
 <tr id="row14722240151019"><td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.1 "><p id="p117221440111011"><a name="p117221440111011"></a><a name="p117221440111011"></a>ARM64</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.2 ">&nbsp;&nbsp;</td>
+</tr>
+<tr id="row5168183681011"><td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.1 "><p id="p91693365104"><a name="p91693365104"></a><a name="p91693365104"></a>C-SKY</p>
 </td>
 <td class="cellrowborder" valign="top" width="50%" headers="mcps1.2.3.1.2 ">&nbsp;&nbsp;</td>
 </tr>

@@ -12,20 +12,22 @@ ifeq ($(LOSCFG_LIB_LIBC), y)
         ARCH_LOCAL := arm
     else ifeq ($(LOSCFG_ARCH_ARM_AARCH64), y)
         ARCH_LOCAL := aarch64
-    else ifeq ($(LOSCFG_ARCH_RISCV_RV32IM), y)
+    else ifeq ($(LOSCFG_ARCH_RISCV_RV32IMC), y)
         ARCH_LOCAL := riscv32
+    else ifeq ($(LOSCFG_ARCH_CSKY), y)
+        ARCH_LOCAL := csky
     endif
 
     LITEOS_LIBC_INCLUDE += \
-        -I $(LITEOSTOPDIR)/lib/libc/arch/$(ARCH_LOCAL) \
-        -I $(LITEOSTOPDIR)/lib/libc/arch/generic \
+        -I $(LITEOS_LIBC_PATH)/arch/$(ARCH_LOCAL) \
+        -I $(LITEOS_LIBC_PATH)/arch/generic \
         -I $(LITEOSTOPDIR)/lib/huawei_libc/include \
-        -I $(LITEOSTOPDIR)/lib/libc/include
+        -I $(LITEOS_LIBC_PATH)/include
 
 endif
 
 ifeq ($(LOSCFG_LIB_ZLIB), y)
-    LITEOS_ZLIB_INCLUDE += -I $(LITEOSTOPDIR)/lib/zlib/include
+    LITEOS_ZLIB_INCLUDE += -I $(LITEOS_ZLIB_PATH)
 endif
 
 ifeq ($(LOSCFG_KERNEL_CPPSUPPORT), y)

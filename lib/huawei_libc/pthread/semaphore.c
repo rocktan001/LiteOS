@@ -31,6 +31,7 @@
 #include "sys/types.h"
 #include "errno.h"
 #include "map_error.h"
+#include "los_sem_pri.h"
 #include "time_pri.h"
 #include "los_sys.h"
 
@@ -40,6 +41,14 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+static inline unsigned int SemaphoreGetId(const sem_t *sem)
+{
+    return ((LosSemCB *)(sem->sem))->semId;
+}
+static inline unsigned short SemaphoreGetCount(const sem_t *sem)
+{
+    return ((LosSemCB *)(sem->sem))->semCount;
+}
 /* Initialize semaphore to value, shared is not supported in Huawei LiteOS. */
 int sem_init(sem_t *sem, int shared, unsigned int value)
 {
@@ -71,7 +80,7 @@ int sem_destroy(sem_t *sem)
         return -1;
     }
 
-    ret = LOS_SemDelete(sem->sem->semId);
+    ret = LOS_SemDelete(SemaphoreGetId(sem));
     if (map_errno(ret) != ENOERR) {
         return -1;
     }
@@ -87,7 +96,7 @@ int sem_wait(sem_t *sem)
         return -1;
     }
 
-    ret = LOS_SemPend(sem->sem->semId, LOS_WAIT_FOREVER);
+    ret = LOS_SemPend(SemaphoreGetId(sem), LOS_WAIT_FOREVER);
     if (map_errno(ret) == ENOERR) {
         return 0;
     } else {
@@ -104,7 +113,7 @@ int sem_trywait(sem_t *sem)
         return -1;
     }
 
-    ret = LOS_SemPend(sem->sem->semId, LOS_NO_WAIT);
+    ret = LOS_SemPend(SemaphoreGetId(sem), LOS_NO_WAIT);
     if (map_errno(ret) == ENOERR) {
         return 0;
     } else {
@@ -131,7 +140,7 @@ int sem_timedwait(sem_t *sem, const struct timespec *timeout)
     }
 
     tickCnt = OsTimespec2Tick(timeout);
-    ret = LOS_SemPend(sem->sem->semId, tickCnt);
+    ret = LOS_SemPend(SemaphoreGetId(sem), tickCnt);
     if (map_errno(ret) == ENOERR) {
         return 0;
     } else {
@@ -148,7 +157,7 @@ int sem_post(sem_t *sem)
         return -1;
     }
 
-    ret = LOS_SemPost(sem->sem->semId);
+    ret = LOS_SemPost(SemaphoreGetId(sem));
     if (map_errno(ret) != ENOERR) {
         return -1;
     }
@@ -164,7 +173,7 @@ int sem_getvalue(sem_t *sem, int *currVal)
         errno = EINVAL;
         return -1;
     }
-    val = sem->sem->semCount;
+    val = SemaphoreGetCount(sem);
     if (val < 0) {
         val = 0;
     }

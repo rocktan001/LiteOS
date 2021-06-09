@@ -10,7 +10,9 @@ LOCAL_INCLUDE := \
 	-I $(LITEOSTOPDIR)/kernel/extended/include \
 
 ifeq ($(LITEOS_ARM_ARCH), -march=armv7-a)
-LOCAL_SRCS_y += $(wildcard src/armv7a/*.S)
+LOCAL_SRCS_y += $(wildcard src/armv7/*.S)
+else ifeq ($(LITEOS_ARM_ARCH), -march=armv7-r)
+LOCAL_SRCS_y += $(wildcard src/armv7/cache.S)
 endif
 
 ifneq ($(LOSCFG_APC_ENABLE), y)

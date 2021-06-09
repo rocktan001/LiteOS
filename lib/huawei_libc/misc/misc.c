@@ -35,6 +35,8 @@
 #include "sys/utsname.h"
 #include "mqueue.h"
 #include "semaphore.h"
+#include "los_sem_pri.h"
+#include "los_task_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus

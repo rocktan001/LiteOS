@@ -37,14 +37,31 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#define MMU_1K 0x400
+#define MMU_4K 0x1000
+#define MMU_16K 0x4000
+#define MMU_64K 0x10000
+#define MMU_1M 0x100000
+#define MMU_2M 0x200000
+#define MMU_1G 0x40000000
+
+#define SHIFT_1K 10
+#define SHIFT_4K 12
+#define SHIFT_16K 14
+#define SHIFT_64K 16
+#define SHIFT_1M 20
+#define SHIFT_2M 21
+#define SHIFT_1G 30
+
 extern VOID OsNoCachedRemap(UINTPTR physAddr, size_t size);
 extern VOID OsCachedRemap(UINTPTR physAddr, size_t size);
 
 extern VOID OsBlockMapsSet(UINT64 flags, UINT64 start, UINT64 end);
 extern VOID OsBlockMapsInit(UINT64 flags, UINT64 start, UINT64 end);
 
-extern VOID OsKernelSecPteInit(UINTPTR startAddr, UINTPTR len, UINT64 flag);
+extern VOID OsSysSecPteInit(UINTPTR startAddr, UINTPTR len, UINT64 flag);
 extern VOID OsAppSecPteInit(UINTPTR startAddr, UINTPTR len, UINT64 flag);
+extern VOID ArchCodeProtect(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -74,12 +74,6 @@ config LOSCFG_OBSOLETE_API
     help
       Task processing function parameters use the old way.
 
-config LOSCFG_LAZY_STACK
-    bool "Enable Lazy Stack Function"
-    default n
-    help
-      Task lazy stack function.
-
 config LOSCFG_BASE_CORE_TSK_MONITOR
     bool "Enable Task Monitor Function"
     default y
@@ -98,7 +92,7 @@ config LOSCFG_BASE_CORE_TSK_LIMIT
     help
       This represents the max number of task.
 
-config LOSCFG_TASK_MIN_STACK_SIZE
+config LOSCFG_BASE_CORE_TSK_MIN_STACK_SIZE
     int "Task Min Stack Size"
     default 2048
     help
@@ -153,11 +147,16 @@ config LOSCFG_BASE_CORE_USE_SINGLE_LIST
       Use Single List for Task & Swtmr.
 endchoice
 
+config LOSCFG_STARTUP_STACK_SIZE
+    hex "Startup stack size"
+    default 0x2000
+    depends on LOSCFG_ARCH_RISCV
+
 endmenu
 
 source "kernel/base/mem/Kconfig"
 
-menu "Hardware Interrupt"
+menu "Interrupt Management"
 
 config LOSCFG_ARCH_INTERRUPT_PREEMPTION
     bool "Enable Interrupt Preemption"
@@ -167,13 +166,25 @@ config LOSCFG_ARCH_INTERRUPT_PREEMPTION
 config LOSCFG_IRQ_USE_STANDALONE_STACK
     bool "Use standalone interrupt stack"
     default y
-    depends on LOSCFG_ARCH_ARM_AARCH64 || LOSCFG_ARCH_ARM_AARCH32
+    depends on LOSCFG_ARCH_ARM_AARCH64 || LOSCFG_ARCH_ARM_CORTEX_A || LOSCFG_ARCH_ARM_CORTEX_R
     help
       This option will support using standalone interrupt stack.
 
-config LOSCFG_NO_SHARED_IRQ
-    bool "Enable interrupt no share"
-    default n
+config LOSCFG_IRQ_STACK_SIZE
+    hex "Interrupt stack size"
+    default 0x2000
+    depends on LOSCFG_ARCH_RISCV
+
+config LOSCFG_NMI_STACK_SIZE
+    hex "NMI stack size"
+    default 0x800
+    depends on LOSCFG_ARCH_RISCV
+    help
+      non-maskable interrupt stack size
+
+config LOSCFG_SHARED_IRQ
+    bool "Enable interrupt share"
+    default y
 
 config LOSCFG_PLATFORM_HWI_LIMIT
     int "Max Hardware Interrupts"
@@ -195,6 +206,18 @@ config LOSCFG_ARCH_EXC_SIMPLE_INFO
     default n
     help
       This option is used to reduce exc output info.
+
+config LOSCFG_EXC_STACK_SIZE
+    hex "Exception stack size"
+    default 0x800
+    depends on LOSCFG_ARCH_RISCV
+
+config LOSCFG_SHELL_EXCINFO_DUMP
+    bool "Enable Shell excInfo"
+    default n
+    select LOSCFG_COMPAT_POSIX
+    help
+      Answer Y to enable LiteOS support shell excInfo.
 endmenu
 
 menuconfig LOSCFG_BASE_CORE_SWTMR
@@ -205,10 +228,10 @@ menuconfig LOSCFG_BASE_CORE_SWTMR
 if LOSCFG_BASE_CORE_SWTMR
 
 config LOSCFG_BASE_CORE_SWTMR_LIMIT
-    int "Max Swmtmr Number"
+    int "Max Swtmr Number"
     default 1024
     help
-      This represents the maximum number of soft-timers.
+      This represents the maximum number of Software Timers.
 
 config LOSCFG_BASE_CORE_SWTMR_IN_ISR
     bool "Software Timer callback in interrupt"
@@ -239,16 +262,6 @@ endif # LOSCFG_BASE_IPC_QUEUE
 menuconfig LOSCFG_BASE_IPC_EVENT
     bool "Enable Event"
     default y
-
-if LOSCFG_BASE_IPC_EVENT
-
-config LOSCFG_BASE_IPC_EVENT_LIMIT
-    int "Max Event Number"
-    default 1024
-    help
-      This represents the maximum number of events.
-
-endif # LOSCFG_BASE_IPC_EVENT
 
 menuconfig LOSCFG_BASE_IPC_MUX
     bool "Enable Mutex"
@@ -329,7 +342,7 @@ config LOSCFG_KERNEL_EXTKERNEL
     bool "Enable Extend Kernel"
     default y
     help
-      This option will enable extend Kernel of LiteOS.  Extend kernel include
+      This option will enable extend Kernel of LiteOS. Extend kernel include
       cppsupport, cpup, dynload, runstop and scatter. You can select one or some
       of them.
 
@@ -377,7 +390,7 @@ config LOSCFG_KERNEL_POWER_MGR
     default n
     depends on LOSCFG_KERNEL_LOWPOWER
     help
-      If you wish to build LiteOS with support for tickless.
+      If you wish to build LiteOS with support for lowpower management.
 
 config LOSCFG_KERNEL_DEEPSLEEP
     bool "Enable Deep Sleep Feature"
@@ -385,6 +398,37 @@ config LOSCFG_KERNEL_DEEPSLEEP
     depends on LOSCFG_KERNEL_POWER_MGR
     help
       If you wish to build LiteOS with support for deep sleep.
+
+config LOSCFG_KERNEL_RAM_SAVE
+    bool "Enable RAM Save Restore Feature"
+    default n
+    depends on LOSCFG_KERNEL_DEEPSLEEP
+    help
+      If you wish to build LiteOS with support for RAM save restore.
+
+config LOSCFG_KERNEL_INTERMIT
+    bool "Enable Intermit Feature"
+    default n
+    depends on LOSCFG_KERNEL_DEEPSLEEP && LOSCFG_ARCH_ARM_CORTEX_M
+    select LOSCFG_TASK_STATIC_ALLOCATION
+    select LOSCFG_KERNEL_RAM_SAVE
+    select LOSCFG_BASE_IPC_MUX
+    help
+      If you wish to build LiteOS with support for intermit.
+
+config LOSCFG_KERNEL_INTERMIT_WITH_CLUSTERTOOLS
+    bool "Modify the image layout to support task-level RAM restore."
+    default n
+    depends on LOSCFG_KERNEL_INTERMIT
+    help
+      If you wish to build LiteOS with support for RAM save restore.
+
+config LOSCFG_KERNEL_DYN_FREQ
+    bool "Enable Dynamic Frequency Adjustment Feature"
+    default n
+    depends on LOSCFG_KERNEL_POWER_MGR
+    help
+      If you wish to build LiteOS with support for dynamic frequency adjustment.
 
 config LOSCFG_KERNEL_RUNSTOP
     bool "Enable Run stop Feature"
@@ -408,6 +452,28 @@ config LOSCFG_KERNEL_TRACE
     default n
     depends on LOSCFG_KERNEL_EXTKERNEL
 
+config LOSCFG_TRACE_MSG_EXTEND
+    bool "Enable Record more extended content"
+    default n
+    depends on LOSCFG_KERNEL_TRACE
+
+config LOSCFG_TRACE_FRAME_CORE_MSG
+    bool "Record cpuid, hardware interrupt status, task lock status"
+    default n
+    depends on LOSCFG_TRACE_MSG_EXTEND
+
+config LOSCFG_TRACE_FRAME_EVENT_COUNT
+    bool "Record event count, which indicate the sequence of happend events"
+    default n
+    depends on LOSCFG_TRACE_MSG_EXTEND
+
+config LOSCFG_TRACE_FRAME_MAX_PARAMS
+    int "Record max params"
+    default 3
+    depends on LOSCFG_KERNEL_TRACE
+    help
+      Make sure the max value is bigger than the number defined by each #MODULE#_#TYPE#_PARMAS in los_trace.h, e.g. TASK_SWITCH_PARAMS
+
 choice
     prompt "Trace work mode"
     default LOSCFG_RECORDER_MODE_OFFLINE
@@ -421,6 +487,11 @@ config LOSCFG_RECORDER_MODE_OFFLINE
     bool "Offline mode"
 
 endchoice
+
+config LOSCFG_TRACE_BUFFER_SIZE
+    int "Trace record buffer size"
+    default 2048
+    depends on LOSCFG_RECORDER_MODE_OFFLINE
 
 config LOSCFG_TRACE_CLIENT_INTERACT
     bool "Enable Trace Client Visualization and Control"

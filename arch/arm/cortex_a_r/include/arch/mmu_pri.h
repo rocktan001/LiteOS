@@ -26,10 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_MMU_PRI_H
-#define _LOS_MMU_PRI_H
-
-#include "hisoc/mmu_config.h"
+#ifndef _ARCH_MMU_PRI_H
+#define _ARCH_MMU_PRI_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,9 +35,11 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern VOID OsSecPageInit(VOID);
-extern VOID ArchRemapNoCached(UINTPTR physAddr, size_t size);
-extern VOID ArchRemapCached(UINTPTR physAddr, size_t size);
+extern VOID OsAppSecPteInit(UINTPTR startAddr, UINTPTR len, UINT32 flag, UINT32 pageType);
+extern VOID OsSysSecPteInit(VOID);
+extern VOID OsNoCachedRemap(UINTPTR physAddr, size_t size);
+extern VOID OsCachedRemap(UINTPTR physAddr, size_t size);
+extern VOID ArchCodeProtect(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -47,4 +47,4 @@ extern VOID ArchRemapCached(UINTPTR physAddr, size_t size);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _LOS_MMU_PRI_H */
+#endif /* _ARCH_MMU_PRI_H */

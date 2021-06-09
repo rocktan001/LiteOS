@@ -48,9 +48,14 @@ LITE_OS_SEC_BSS SPIN_LOCK_INIT(g_mpCallSpin);
 
 VOID LOS_MpSchedule(UINT32 target)
 {
+    UINT32 ret;
     UINT32 cpuid = ArchCurrCpuid();
     target &= ~(1U << cpuid);
-    HalIrqSendIpi(target, LOS_MP_IPI_SCHEDULE);
+    ret = HalIrqSendIpi(target, LOS_MP_IPI_SCHEDULE);
+    if (ret != LOS_OK) {
+        return;
+    }
+    return;
 }
 
 VOID OsMpWakeHandler(VOID)
@@ -108,6 +113,7 @@ VOID OsMpFuncCall(UINT32 target, SMP_FUNC_CALL func, VOID *args)
 {
     UINT32 index;
     UINT32 intSave;
+    UINT32 ret;
 
     if (func == NULL) {
         return;
@@ -132,7 +138,11 @@ VOID OsMpFuncCall(UINT32 target, SMP_FUNC_CALL func, VOID *args)
             MP_CALL_UNLOCK(intSave);
         }
     }
-    HalIrqSendIpi(target, LOS_MP_IPI_FUNC_CALL);
+    ret = HalIrqSendIpi(target, LOS_MP_IPI_FUNC_CALL);
+    if (ret != LOS_OK) {
+        return;
+    }
+    return;
 }
 
 VOID OsMpFuncCallHandler(VOID)

@@ -40,34 +40,34 @@ LITE_OS_SEC_BSS SPIN_LOCK_INIT(g_pipeSpin);
 #define PIPE_LOCK(state)                   LOS_SpinLockSave(&g_pipeSpin, &(state))
 #define PIPE_UNLOCK(state)                 LOS_SpinUnlockRestore(&g_pipeSpin, (state))
 
-static TlvTable g_traceTlvTblNotify[] = {
+STATIC TlvTable g_traceTlvTblNotify[] = {
     { CMD,    LOS_OFF_SET_OF(TraceNotifyFrame, cmd),   sizeof(UINT32) },
     { PARAMS, LOS_OFF_SET_OF(TraceNotifyFrame, param), sizeof(UINT32) },
     { TRACE_TLV_TYPE_NULL, 0, 0 },
 };
 
-static TlvTable g_traceTlvTblHead[] = {
+STATIC TlvTable g_traceTlvTblHead[] = {
     { ENDIAN,     LOS_OFF_SET_OF(TraceBaseHeaderInfo, bigLittleEndian), sizeof(UINT32) },
     { VERSION,    LOS_OFF_SET_OF(TraceBaseHeaderInfo, version),         sizeof(UINT32) },
     { CLOCK_FREQ, LOS_OFF_SET_OF(TraceBaseHeaderInfo, clockFreq),       sizeof(UINT32) },
     { TRACE_TLV_TYPE_NULL, 0, 0 },
 };
 
-static TlvTable g_traceTlvTblObj[] = {
+STATIC TlvTable g_traceTlvTblObj[] = {
     { ADDR, LOS_OFF_SET_OF(ObjData, id),   sizeof(UINT32) },
     { PRIO, LOS_OFF_SET_OF(ObjData, prio), sizeof(UINT32) },
     { NAME, LOS_OFF_SET_OF(ObjData, name), sizeof(CHAR) * LOSCFG_TRACE_OBJ_MAX_NAME_SIZE },
     { TRACE_TLV_TYPE_NULL, 0, 0 },
 };
 
-static TlvTable g_traceTlvTblEvent[] = {
-#if (LOSCFG_TRACE_FRAME_CORE_MSG == YES)
+STATIC TlvTable g_traceTlvTblEvent[] = {
+#ifdef LOSCFG_TRACE_FRAME_CORE_MSG
     { CORE,         LOS_OFF_SET_OF(TraceEventFrame, core),       sizeof(UINT32) },
 #endif
     { EVENT_CODE,   LOS_OFF_SET_OF(TraceEventFrame, eventType),  sizeof(UINT32) },
     { CUR_TIME,     LOS_OFF_SET_OF(TraceEventFrame, curTime),    sizeof(UINT64) },
 
-#if (LOSCFG_TRACE_FRAME_EVENT_COUNT == YES)
+#ifdef LOSCFG_TRACE_FRAME_EVENT_COUNT
     { EVENT_COUNT,  LOS_OFF_SET_OF(TraceEventFrame, eventCount), sizeof(UINT32) },
 #endif
     { CUR_TASK,     LOS_OFF_SET_OF(TraceEventFrame, curTask),    sizeof(UINT32) },
@@ -76,7 +76,7 @@ static TlvTable g_traceTlvTblEvent[] = {
     { TRACE_TLV_TYPE_NULL, 0, 0 },
 };
 
-static TlvTable *g_traceTlvTbl[] = {
+STATIC TlvTable *g_traceTlvTbl[] = {
     g_traceTlvTblNotify,
     g_traceTlvTblHead,
     g_traceTlvTblObj,

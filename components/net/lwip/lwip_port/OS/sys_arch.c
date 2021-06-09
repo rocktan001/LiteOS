@@ -515,7 +515,7 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
         }
     }
 
-    retval = LOS_SemPend(sem->sem->semId, timeout);
+    retval = LOS_SemPend(((LosSemCB *)(sem->sem))->semId, timeout);
 
     if (retval != ERR_OK) {
         return SYS_ARCH_TIMEOUT;
@@ -541,7 +541,7 @@ void sys_sem_signal(sys_sem_t *sem)
     if (!sem) {
         return;
     }
-    ret = LOS_SemPost(sem->sem->semId);
+    ret = LOS_SemPost(((LosSemCB *)(sem->sem))->semId);
     if (ret != ERR_OK) {
         return;
     }
@@ -564,7 +564,7 @@ void sys_sem_free(sys_sem_t *sem)
     if (!sem) {
         return;
     }
-    ret = LOS_SemDelete(sem->sem->semId);
+    ret = LOS_SemDelete(((LosSemCB *)(sem->sem))->semId);
     LWIP_ASSERT("LOS_SemDelete failed", (ret == 0));
     ((void)(ret));
     return;
