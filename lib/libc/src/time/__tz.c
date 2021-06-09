@@ -412,9 +412,9 @@ static void do_tzset(void)
 
 static void __tzset(void)
 {
-	LOCK(lock);
+	(void)LIBC_LOCK(g_tzdstLock);
 	do_tzset();
-	UNLOCK(lock);
+	(void)LIBC_UNLOCK(g_tzdstLock);
 }
 
 weak_alias(__tzset, tzset);

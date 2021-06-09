@@ -53,12 +53,12 @@
 
 /* macros to save and restore fpu regs */
 .macro PUSH_FPU_REGS reg1
-#if !defined(LOSCFG_ARCH_FPU_DISABLE)
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     VMRS    \reg1, FPEXC
     PUSH    {\reg1}
     VMRS    \reg1, FPSCR
     PUSH    {\reg1}
-#if defined(LOSCFG_ARCH_FPU_VFP_D32)
+#ifdef LOSCFG_ARCH_FPU_VFP_D32
     VPUSH   {D16-D31}
 #endif
     VPUSH   {D0-D15}
@@ -66,9 +66,9 @@
 .endm
 
 .macro POP_FPU_REGS reg1
-#if !defined(LOSCFG_ARCH_FPU_DISABLE)
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     VPOP    {D0-D15}
-#if defined(LOSCFG_ARCH_FPU_VFP_D32)
+#ifdef LOSCFG_ARCH_FPU_VFP_D32
     VPOP    {D16-D31}
 #endif
     POP     {\reg1}
@@ -84,7 +84,6 @@
 OsStartToRun:
     MSR     CPSR_c, #(CPSR_INT_DISABLE | CPSR_SVC_MODE)
 
-    LDRH    R1, [R0, #4]
     MOV     R1, #OS_TASK_STATUS_RUNNING
     STRH    R1, [R0, #4]
 
@@ -92,11 +91,17 @@ OsStartToRun:
     MCR     p15, 0, R0, c13, c0, 4
     ISB
 
-    /* fpu */
+#ifdef LOSCFG_ARCH_FPU_ENABLE
+/*
+ * Test whether the fpu on the hardware is turned on, 
+ * if it is not turned on, the execution of the instruction 
+ * will cause an exception.
+*/
     VPUSH   {S0}
     VPOP    {S0}
     VPUSH   {D0}
     VPOP    {D0}
+#endif
 
     B       OsTaskContextLoad
 
@@ -166,7 +171,11 @@ OsIrqHandler:
 #ifdef LOSCFG_IRQ_USE_STANDALONE_STACK
     PUSH    {R4}
     MOV     R4, SP
+#ifdef LOSCFG_LIB_CONFIGURABLE
+    EXC_SP_SET g_svcStackTop, OS_EXC_SVC_STACK_SIZE, R1, R2
+#else
     EXC_SP_SET __svc_stack_top, OS_EXC_SVC_STACK_SIZE, R1, R2
+#endif
 #endif
 
     BLX     OsIntEntry

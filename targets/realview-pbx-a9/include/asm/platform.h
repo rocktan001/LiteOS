@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Platform HeadFile
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+ * Description: Platform Config HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,84 +26,32 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _BOARD_DEFINES_H
-#define _BOARD_DEFINES_H
+#ifndef _ASM_PLATFORM_H
+#define _ASM_PLATFORM_H
 
-#include "asm/hal_platform_ints.h"
-#include "stdarg.h"
-
-// type defines
-
-#ifndef uint8_t
-#define uint8_t unsigned char
-#endif
-
-#ifndef uint16_t
-#define uint16_t unsigned short
-#endif
-
-#ifndef uint32_t
-#define uint32_t unsigned int
-#endif
-
+#include "los_typedef.h"
+#include "interrupt_config.h"
+#include "memmap_config.h"
+#include "register_config.h"
 #include "uart.h"
-int do_uart_getc(void);
 
-// ARM Realview-pbx-a9 board.
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#define GIC_BASE_ADDR                   0x1F000000
-#define GICD_OFFSET                     0x1000                          /* interrupt distributor offset */
-#define GICC_OFFSET                     0x100                           /* CPU interface register offset */
+#define OS_SYS_CLOCK             0x6000000
+#define HRTIMER_CLOCK            OS_SYS_CLOCK
 
-// I/O devices
-#define TIMER0_BASE_ADDR                0x10011000
-#define TIMER0_LR                       (*((volatile u32 *)(UART_REG_BASE + 0x000)))
-#define TIMER0_BR                       (*((volatile u32 *)(UART_REG_BASE + 0x032)))
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern VOID app_init(VOID);
+#endif
 
-#define PRVTIMER_BASE_ADDR              0x1F000600
-#define GTIMER_BASE_ADDR                0x1F000200
-#define TIMER_FREQ                      0x6000000
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-#define UART_REG_BASE                   0x10009000
-
-#define KBD_BASE_ADDR                   0x10006000
-#define KBD_CR                          (*((volatile u32 *)(KBD_BASE_ADDR + 0x000)))
-#define KBD_DR                          (*((volatile u32 *)(KBD_BASE_ADDR + 0x008)))
-
-#define LCD_BASE_ADDR                   0x10020000
-
-/* status and system control registers */
-#define SYS_FLAGSSET                    0x10000030
-
-#define LINES                           4
-#define N_SCAN                          64
-
-#define BLUE                            0
-#define GREEN                           1
-#define RED                             2
-#define CYAN                            3
-#define YELLOW                          4
-#define PURPLE                          5
-#define WHITE                           6
-
-extern char *tab;
-extern int color;
-
-extern void enable_scu(void);
-
-#define TIMER0_REG_BASE                 0x10011000
-#define TIMER1_REG_BASE                 0x10012000
-#define TIMER2_REG_BASE                 0x10018000
-#define TIMER3_REG_BASE                 0x10019000
-#define HRTIMER_TIMER_REG_BASE          TIMER0_REG_BASE /* timer for hrtimer */
-#define HRTIMER_TIMER_ENABLE            1u << 15
-
-#define TIMER_LOAD                      0x0
-#define TIMER_VALUE                     0x4
-#define TIMER_CONTROL                   0x8
-#define TIMER_INT_CLR                   0xc
-#define TIMER_RIS                       0x10
-#define TIMER_MIS                       0x14
-#define TIMER_BGLOAD                    0x18
-
-#endif // _BOARD_DEFINES_H
+#endif /* _ASM_PLATFORM_H */

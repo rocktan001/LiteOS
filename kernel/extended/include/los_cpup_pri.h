@@ -52,8 +52,8 @@ typedef struct {
 
 extern OsCpupCB *OsCpupCBGet(UINT32 index);
 extern UINT32 OsCpupInit(VOID);
-extern VOID OsSetCpuCycle(UINT64 startCycles);
-extern UINT64 OsGetCpuCycle(VOID);
+extern VOID OsCpupSetCycle(UINT64 startCycles);
+extern UINT64 OsCpupGetCycle(VOID);
 extern VOID OsTaskCycleStart(VOID);
 extern VOID OsTaskCycleEnd(VOID);
 extern VOID OsTaskCycleEndStart(const LosTaskCB *newTask);

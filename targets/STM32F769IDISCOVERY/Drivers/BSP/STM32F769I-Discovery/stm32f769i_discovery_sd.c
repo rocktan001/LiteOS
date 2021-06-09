@@ -114,7 +114,6 @@ EndDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f769i_discovery_sd.h"
-#include "platform_config.h"
 
 /** @addtogroup BSP
   * @{

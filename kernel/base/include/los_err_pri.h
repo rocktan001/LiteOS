@@ -61,23 +61,6 @@ extern "C" {
     goto ERR_HANDLER;                     \
 } while (0)
 
-/* Unified error code return */
-#define OS_GOTO_ERREND() do { \
-    goto LOS_ERREND; \
-} while (0)
-
-#define OS_RETURN_ERR_FUNCPTR_IS_NULL(func, err) do {   \
-    if (func == NULL) {                                 \
-        return err;                                     \
-    }                                                   \
-} while (0)
-
-#define OS_RETURN_FUNCPTR_IS_NULL(func) do {            \
-    if (func == NULL) {                                 \
-        return;                                         \
-    }                                                   \
-} while (0)
-
 #ifdef __cplusplus
 #if __cplusplus
 }

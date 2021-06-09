@@ -32,9 +32,9 @@
 #ifndef LOSCFG_LIB_CONFIGURABLE
 int g_errnoArray[LOSCFG_BASE_CORE_TSK_LIMIT + 1];
 #else
-__attribute__((section(".libc.errno"))) int g_errnoArray[LOSCFG_BASE_CORE_TSK_LIMIT_CONFIG + 1];
+__attribute__((section(".libc.errno"))) int g_errnoArray0[LOSCFG_BASE_CORE_TSK_LIMIT + 1];
+int *g_errnoArray = &g_errnoArray0[0];
 #endif
-
 /* the specific errno get or set in interrupt service routine */
 static int g_errnoIsr;
 

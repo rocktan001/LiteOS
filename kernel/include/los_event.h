@@ -145,6 +145,7 @@ extern "C" {
  * Value: 0x02001c07.
  *
  * Solution: Read the event in a vailid task.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define LOS_ERRNO_EVENT_READ_IN_SYSTEM_TASK LOS_ERRNO_OS_ERROR(LOS_MOD_EVENT, 0x07)
 

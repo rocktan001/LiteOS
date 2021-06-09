@@ -67,6 +67,7 @@ STATIC UINT32 OsWriteTlv(UINT8 *tlvBuf, UINT8 type, UINT8 len, UINT8 *value)
 
     body->type = type;
     body->len = len;
+    /* Do not check return value for performance, if copy failed, only this package will be discarded */
     (VOID)memcpy_s(body->value, len, value, len);
     return len + sizeof(body->type) + sizeof(body->len);
 }

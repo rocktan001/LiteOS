@@ -26,8 +26,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+/**
+ * @defgroup los_lockdep lockdep
+ * @ingroup kernel
+ */
+
 #ifndef _LOS_LOCKDEP_H
 #define _LOS_LOCKDEP_H
+
 #include "los_config.h"
 
 #ifdef __cplusplus
@@ -37,6 +43,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct Spinlock SPIN_LOCK_S;
+#ifdef LOSCFG_KERNEL_SMP_LOCKDEP
 
 #define MAX_LOCK_DEPTH  16U
 
@@ -140,6 +147,8 @@ extern VOID OsLockDepCheckOut(SPIN_LOCK_S *lock);
  * @since Huawei LiteOS V200R003C00
  */
 extern VOID OsLockdepClearSpinlocks(VOID);
+
+#endif /* LOSCFG_KERNEL_SMP_LOCKDEP */
 
 #ifdef __cplusplus
 #if __cplusplus

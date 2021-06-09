@@ -76,7 +76,7 @@ struct LosHeapNode {
 extern BOOL OsHeapInit(VOID *pool, UINT32 size);
 extern VOID* OsHeapAlloc(VOID *pool, UINT32 size);
 extern VOID* OsHeapAllocAlign(VOID *pool, UINT32 size, UINT32 boundary);
-extern BOOL OsHeapFree(VOID *pool, VOID* ptr);
+extern BOOL OsHeapFree(VOID *pool, const VOID* ptr);
 extern UINT32 OsHeapStatisticsGet(VOID *pool, LosHeapStatus *status);
 extern UINT32 OsHeapIntegrityCheck(struct LosHeapManager *heap);
 

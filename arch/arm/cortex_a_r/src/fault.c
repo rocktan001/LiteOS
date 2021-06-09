@@ -47,6 +47,11 @@
 #include "los_trace_pri.h"
 #endif
 
+#ifdef LOSCFG_LIB_CONFIGURABLE
+    UINTPTR g_svcStackTop = (UINTPTR)(&__svc_stack_top);
+    UINTPTR g_excStackTop = (UINTPTR)(&__exc_stack_top);
+#endif
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -56,7 +61,7 @@ extern "C" {
 VOID OsExcHook(UINT32 excType, ExcContext *excBufAddr);
 UINT32 g_curNestCount = 0;
 STATIC EXC_PROC_FUNC g_excHook = (EXC_PROC_FUNC)OsExcHook;
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
 STATIC SPIN_LOCK_INIT(g_excSerializerSpin);
 #endif
 
@@ -242,7 +247,7 @@ VOID OsDumpContextMem(const ExcContext *excBufAddr)
 
     for (excReg = &(excBufAddr->R0); count <= DUMPREGS; excReg++, count++) {
         if (IS_VALID_ADDR(*excReg)) {
-            PrintExcInfo("\ndump mem around R%u:%p", count, (*excReg));
+            PrintExcInfo("\ndump mem around R%u:%u", count, (*excReg));
             OsDumpMemByte(DUMPSIZE, ((*excReg) - (DUMPSIZE >> 1)));
         }
     }
@@ -253,6 +258,7 @@ VOID OsDumpContextMem(const ExcContext *excBufAddr)
     }
 }
 
+#ifdef LOSCFG_BACKTRACE
 /* this function is used to validate fp or validate the checking range start and end. */
 STATIC INLINE BOOL IsValidFP(UINTPTR regFP, UINTPTR start, UINTPTR end)
 {
@@ -301,8 +307,17 @@ FOUND:
     return found;
 }
 
+STATIC VOID BackTraceWithFp(UINTPTR fp)
+{
+    PrintExcInfo("*******backtrace begin*******\n");
+    (VOID)ArchBackTraceGet(fp, NULL, OS_MAX_BACKTRACE);
+    PrintExcInfo("*******backtrace end*******\n");
+}
+#endif
+
 UINT32 ArchBackTraceGet(UINTPTR fp, UINTPTR *callChain, UINT32 maxDepth)
 {
+#ifdef LOSCFG_BACKTRACE
     UINTPTR tmpFP;
     UINTPTR backLR;
     UINTPTR backFP = fp;
@@ -310,11 +325,8 @@ UINT32 ArchBackTraceGet(UINTPTR fp, UINTPTR *callChain, UINT32 maxDepth)
     UINT32 count = 0;
 
     if (FindSuitableStack(fp, &stackStart, &stackEnd) == FALSE) {
+        PrintExcInfo("fp error, backtrace failed!\n");
         return 0;
-    }
-
-    if (callChain == NULL) {
-        PrintExcInfo("*******backtrace begin*******\n");
     }
 
     /*
@@ -326,7 +338,6 @@ UINT32 ArchBackTraceGet(UINTPTR fp, UINTPTR *callChain, UINT32 maxDepth)
     tmpFP = *((UINTPTR *)(fp));
     if (IsValidFP(tmpFP, stackStart, stackEnd)) {
         backFP = tmpFP;
-
         if (callChain == NULL) {
             PrintExcInfo("traceback fp fixed, trace using   fp = 0x%x\n", backFP);
         }
@@ -347,31 +358,41 @@ UINT32 ArchBackTraceGet(UINTPTR fp, UINTPTR *callChain, UINT32 maxDepth)
             break;
         }
     }
-    return count;
-}
 
-STATIC VOID BackTraceWithFp(UINTPTR fp)
-{
-    (VOID)ArchBackTraceGet(fp, NULL, OS_MAX_BACKTRACE);
+    return count;
+#else
+    (VOID)fp;
+    (VOID)callChain;
+    (VOID)maxDepth;
+    return 0;
+#endif
 }
 
 VOID ArchBackTrace(VOID)
 {
-    UINT32 regFp = ArchGetFp();
+#ifdef LOSCFG_BACKTRACE
+    UINT32 fp = ArchGetFp();
+    PrintExcInfo("fp:0x%08x\n", fp);
 
-    BackTraceWithFp(regFp);
+    BackTraceWithFp(fp);
+#endif
+}
+
+VOID ArchBackTraceWithSp(const VOID *stackPointer)
+{
+#ifdef LOSCFG_BACKTRACE
+    UINT32 fp = ArchGetTaskFp(stackPointer);
+    PrintExcInfo("fp:0x%08x\n", fp);
+
+    BackTraceWithFp(fp);
+#else
+    (VOID)stackPointer;
+#endif
 }
 
 VOID ArchExcInit(VOID)
 {
     OsExcStackInfoReg(g_excStack, sizeof(g_excStack) / sizeof(g_excStack[0]));
-}
-
-VOID ArchBackTraceWithSp(const VOID *stackPointer)
-{
-    UINT32 regFp = ArchGetTaskFp(stackPointer);
-
-    BackTraceWithFp(regFp);
 }
 
 VOID OsExcHook(UINT32 excType, ExcContext *excBufAddr)
@@ -380,18 +401,22 @@ VOID OsExcHook(UINT32 excType, ExcContext *excBufAddr)
     OsExcSysInfo(excType, excBufAddr);
     OsExcRegsInfo(excBufAddr);
 
+#ifdef LOSCFG_BACKTRACE
     BackTraceWithFp(excBufAddr->R11);
-#ifdef LOSCFG_SHELL
+#endif
+
     (VOID)OsShellCmdTskInfoGet(OS_ALL_TASK_MASK);
     OsExcStackInfo();
-#endif
+
     OsDumpContextMem(excBufAddr);
 #ifdef LOSCFG_KERNEL_MEM_BESTFIT
     OsMemIntegrityMultiCheck();
 #endif
 
 #ifdef LOSCFG_KERNEL_TRACE
-    OsTraceRecordDump(FALSE);
+    if (g_traceDumpHook != NULL) {
+        g_traceDumpHook(FALSE);
+    }
 #endif
 
 #ifdef LOSCFG_COREDUMP
@@ -424,7 +449,7 @@ VOID OsCallStackInfo(VOID)
         }
         stackPointer--;
     }
-    PRINTK("\n");
+    PrintExcInfo("\n");
 }
 
 #ifdef LOSCFG_GDB
@@ -479,7 +504,7 @@ VOID OsDataAbortExcHandleEntry(ExcContext *excBufAddr)
 #endif /* __LINUX_ARM_ARCH__ */
 #endif /* LOSCFG_GDB */
 
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
 #define EXC_WAIT_INTER 50U
 #define EXC_WAIT_TIME  2000U
 #define INVALID_CPUID  0xFFFF
@@ -552,10 +577,15 @@ STATIC VOID CheckAllCpuStatus(VOID)
  */
 LITE_OS_SEC_TEXT_INIT VOID OsExcHandleEntry(UINT32 excType, ExcContext *excBufAddr)
 {
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
+    UINT32 ret;
+
     /* use halt ipi to stop other active cores */
     UINT32 target = (UINT32)(OS_MP_CPU_ALL & ~CPUID_TO_AFFI_MASK(ArchCurrCpuid()));
-    HalIrqSendIpi(target, LOS_MP_IPI_HALT);
+    ret = HalIrqSendIpi(target, LOS_MP_IPI_HALT);
+    if (ret != LOS_OK) {
+        PrintExcInfo("The interrupt %d is invalid, irq send inter-core interrupt failed.\n", LOS_MP_IPI_HALT);
+    }
 
     OsPercpuGet()->excFlag = CPU_EXC;
     LOCKDEP_CLEAR_LOCKS();

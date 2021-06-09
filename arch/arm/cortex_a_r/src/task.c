@@ -87,7 +87,7 @@ LITE_OS_SEC_TEXT_INIT VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOI
     taskContext->regPSR = PSR_MODE_SVC_ARM;   /* CPSR (Disable IRQ and FIQ interrupts, ARM-mode) */
 #endif
 
-#if !defined(LOSCFG_ARCH_FPU_DISABLE)
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     /* 0xAAA0000000000000LL : float reg initialed magic word */
     for (index = 0; index < FP_REGS_NUM; index++) {
         taskContext->D[index] = 0xAAA0000000000000LL + index; /* D0 - D31 */

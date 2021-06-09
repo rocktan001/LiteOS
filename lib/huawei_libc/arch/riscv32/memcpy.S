@@ -27,10 +27,6 @@
  * --------------------------------------------------------------------------- */
 
 .macro MEMCPY_FIRST_32BYTE
-#ifdef LOS_COMPILE_LDM
-    ldmia {t1-t2, a6-a7, t3-t6}, (a1)
-    stmia {t1-t2, a6-a7, t3-t6}, (t0)
-#else
     lw    t1, 0(a1)
     lw    t2, 4(a1)
     lw    a6, 8(a1)
@@ -47,14 +43,9 @@
     sw    t4, 20(t0)
     sw    t5, 24(t0)
     sw    t6, 28(t0)
-#endif
 .endm
 
 .macro MEMCPY_LAST_32BYTE
-#ifdef LOS_COMPILE_LDM
-    ldmia {t1-t2, a6-a7, t3-t6}, (a4)
-    stmia {t1-t2, a6-a7, t3-t6}, (a5)
-#else
     lw    t1, 0(a4)
     lw    t2, 4(a4)
     lw    a6, 8(a4)
@@ -71,7 +62,6 @@
     sw    t4, 20(a5)
     sw    t5, 24(a5)
     sw    t6, 28(a5)
-#endif
 .endm
 
 .section .text
@@ -79,7 +69,7 @@
 .type memcpy, @function
 memcpy:
 #ifdef LOSCFG_BASE_MEM_NODE_SIZE_CHECK
-    addi    sp, sp, -20
+    addi    sp, sp, -32 /* use 20 bytes but sp must be 16 aligned when compile option -mpush-pop is on */
     sw      a0, 0(sp)
     sw      a1, 4(sp)
     sw      a2, 8(sp)
@@ -93,7 +83,7 @@ memcpy:
     lw      a2, 8(sp)
     lw      a1, 4(sp)
     lw      a0, 0(sp) /* restore registers. */
-    addi    sp, sp, 20
+    addi    sp, sp, 32
     li      a0, 0 /* if OsMemSysNodeCheck return LOS_NOK, memcpy return NULL. */
     ret
 1:
@@ -102,7 +92,7 @@ memcpy:
     lw      a2, 8(sp)
     lw      a1, 4(sp)
     lw      a0, 0(sp)
-    addi    sp, sp, 20
+    addi    sp, sp, 32
 #endif
     add     a6, a0, a2
     li      a5, 3
@@ -213,9 +203,6 @@ memcpy:
     addi    t0, t0, 2
     srli    t5, t5, 16
 14:
-#ifdef LOS_COMPILE_LDM
-    ldmia   {t1-t2, a3-a5, a7, t3-t4}, (a1)
-#else
     lw      t4, 0(a1)
     lw      t3, 4(a1)
     lw      a7, 8(a1)
@@ -224,7 +211,6 @@ memcpy:
     lw      a3, 20(a1)
     lw      t2, 24(a1)
     lw      t1, 28(a1)
-#endif
 
 #ifdef LOSCFG_DCACHE
     PREFD   0(t6)
@@ -268,9 +254,6 @@ memcpy:
     addi    a1, a1, 32
     addi    t6, t0, 66
 
-#ifdef LOS_COMPILE_LDM
-    stmia   {t2, a3-a5,a7, t3-t5}, (t0)
-#else
     sw      t5, 0(t0)
     sw      t4, 4(t0)
     sw      t3, 8(t0)
@@ -279,7 +262,6 @@ memcpy:
     sw      a4, 20(t0)
     sw      a3, 24(t0)
     sw      t2, 28(t0)
-#endif
     addi    t0, t0, 32
     srli    t5, t1, 16
 
@@ -297,9 +279,6 @@ memcpy:
     addi    t6, t0, 32
     addi    t0, t0, 3
 16:
-#ifdef LOS_COMPILE_LDM
-    ldmia   {t1-t2, a3-a5,a7, t3-t4}, (a1)
-#else
     lw      t4, 0(a1)
     lw      t3, 4(a1)
     lw      a7, 8(a1)
@@ -308,7 +287,6 @@ memcpy:
     lw      a3, 20(a1)
     lw      t2, 24(a1)
     lw      t1, 28(a1)
-#endif
 #ifdef LOSCFG_DCACHE
     PREFD   0(t6)
 #endif
@@ -351,9 +329,6 @@ memcpy:
     addi    a1, a1, 32
     addi    t6, t0, 65
 
-#ifdef LOS_COMPILE_LDM
-    stmia   {t2, a3-a5,a7, t3-t5}, (t0)
-#else
     sw      t5, 0(t0)
     sw      t4, 4(t0)
     sw      t3, 8(t0)
@@ -362,7 +337,6 @@ memcpy:
     sw      a4, 20(t0)
     sw      a3, 24(t0)
     sw      t2, 28(t0)
-#endif
     addi    t0, t0, 32
     srli    t5, t1, 24
 
@@ -378,9 +352,7 @@ memcpy:
     addi    t0, t0, 1
     srli    t5, t5, 8
 18:
-#ifdef LOS_COMPILE_LDM
-    ldmia   {t1-t2, a3-a5,a7, t3-t4}, (a1)
-#else
+
     lw      t4, 0(a1)
     lw      t3, 4(a1)
     lw      a7, 8(a1)
@@ -389,7 +361,6 @@ memcpy:
     lw      a3, 20(a1)
     lw      t2, 24(a1)
     lw      t1, 28(a1)
-#endif
 #ifdef LOSCFG_DCACHE
     PREFD   0(t6)
 #endif
@@ -432,9 +403,6 @@ memcpy:
     addi    a1, a1, 32
     addi    t6, t0, 67
 
-#ifdef LOS_COMPILE_LDM
-    stmia   {t2, a3-a5,a7, t3-t5}, (t0)
-#else
     sw      t5, 0(t0)
     sw      t4, 4(t0)
     sw      t3, 8(t0)
@@ -443,7 +411,6 @@ memcpy:
     sw      a4, 20(t0)
     sw      a3, 24(t0)
     sw      t2, 28(t0)
-#endif
     addi    t0, t0, 32
     srli    t5, t1, 8
 

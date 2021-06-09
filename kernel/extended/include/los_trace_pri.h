@@ -59,6 +59,9 @@ extern SPIN_LOCK_S g_traceSpin;
 #define TRACE_LOCK(state)                   LOS_SpinLockSave(&g_traceSpin, &(state))
 #define TRACE_UNLOCK(state)                 LOS_SpinUnlockRestore(&g_traceSpin, (state))
 
+typedef VOID (*TRACE_DUMP_HOOK)(BOOL toClient);
+extern TRACE_DUMP_HOOK g_traceDumpHook;
+
 enum TraceCmd {
     TRACE_CMD_START = 1,
     TRACE_CMD_STOP,

@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 /**
- * @defgroup los_runstop wake-up
+ * @defgroup los_runstop Wakeup
  * @ingroup kernel
  */
 
@@ -159,7 +159,7 @@ typedef struct tagRunstopParam {
  * @see
  * @since Huawei LiteOS V100R001C00
  */
-extern VOID LOS_MakeImage(RUNSTOP_PARAM_S *runstopParam);
+extern VOID LOS_MakeImage(const RUNSTOP_PARAM_S *runstopParam);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -45,6 +45,5 @@ extern void dma_cache_inv(UINTPTR start, UINTPTR end);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-
 #endif /* _DMA_H */
 

@@ -28,8 +28,8 @@
 
 #include "main.h"
 #include "los_task_pri.h"
+#include "arch/canary.h"
 #include "gpio.h"
-#include "timer.h"
 #include "usart.h"
 
 VOID board_config(VOID)
@@ -43,11 +43,17 @@ VOID HardwareInit(VOID)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_USART2_UART_Init();
-    TimerInitialize();
+    StmTimerInit();
 }
 
 INT32 main(VOID)
 {
+#ifdef __GNUC__
+    ArchStackGuardInit();
+#endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+
     board_config();
     HardwareInit();
 

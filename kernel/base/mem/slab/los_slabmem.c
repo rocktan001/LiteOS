@@ -38,11 +38,11 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 
-static UINT32 g_slabAlloctorSizeCfg[SLAB_MEM_COUNT] = {
+STATIC UINT32 g_slabAlloctorSizeCfg[SLAB_MEM_COUNT] = {
     [0 ... SLAB_MEM_COUNT - 1] = SLAB_MEM_ALLOCATOR_SIZE
 };
 
-static VOID OsSlabSizeReset(VOID)
+STATIC VOID OsSlabSizeReset(VOID)
 {
     INT32 idx;
 
@@ -62,7 +62,7 @@ VOID *OsSlabBlockHeadFill(OsSlabBlockNode *slabNode, UINT32 blkSz)
 }
 
 #ifdef LOSCFG_KERNEL_MEM_SLAB_AUTO_EXPANSION_MODE
-static BOOL OsSlabMemBucketInit(VOID *pool, UINT32 size)
+STATIC BOOL OsSlabMemBucketInit(VOID *pool, UINT32 size)
 {
     UINT32 bucketNum, idx, i, blkSz, blkCnt;
     struct LosSlabControlHeader *slabMemHead = OsSlabCtrlHdrGet(pool);
@@ -71,7 +71,7 @@ static BOOL OsSlabMemBucketInit(VOID *pool, UINT32 size)
     if ((slabMemHead == NULL) ||
         (SLAB_MEM_BUCKET_SIZE_TYPE >= SLAB_BUCKET_SIZE_TYPE_MAX) ||
         (bucketNum < SLAB_MEM_COUNT)) {
-        PRINT_ERR("invalid para, size type %d, bucketNum %d\n", SLAB_MEM_BUCKET_SIZE_TYPE, bucketNum);
+        PRINT_ERR("invalid para, size type %d, bucketNum %u\n", SLAB_MEM_BUCKET_SIZE_TYPE, bucketNum);
         return FALSE;
     }
 
@@ -117,7 +117,7 @@ BUCKET_ALLOC_FAIL:
     return FALSE;
 }
 
-static BOOL OsSlabMemAllocStrollBuckets(VOID *pool, VOID **outMem,
+STATIC BOOL OsSlabMemAllocStrollBuckets(VOID *pool, VOID **outMem,
     OsSlabMem *slabClass)
 {
     struct LosSlabControlHeader *slabMem = OsSlabCtrlHdrGet(pool);
@@ -158,7 +158,7 @@ static BOOL OsSlabMemAllocStrollBuckets(VOID *pool, VOID **outMem,
 }
 
 
-static BOOL OsSlabMemFreeStrollBuckets(VOID *pool, OsSlabBlockNode *slabNode,
+STATIC BOOL OsSlabMemFreeStrollBuckets(VOID *pool, OsSlabBlockNode *slabNode,
     OsSlabMem *slabClass)
 {
     struct LosSlabControlHeader *slabMem = OsSlabCtrlHdrGet(pool);
@@ -187,7 +187,7 @@ static BOOL OsSlabMemFreeStrollBuckets(VOID *pool, OsSlabBlockNode *slabNode,
     return FALSE;
 }
 
-static UINT32 OsGetBlkSzStrollBuckets(const OsSlabBlockNode *slabNode, const OsSlabMem *slabClass)
+STATIC UINT32 OsGetBlkSzStrollBuckets(const OsSlabBlockNode *slabNode, const OsSlabMem *slabClass)
 {
     OsSlabMem *slabMemClass = (OsSlabMem *)slabClass;
     OsSlabMemAllocator *bucket = slabMemClass->bucket; /* slabMemClass->bucket must not be NULL */
@@ -369,7 +369,7 @@ VOID OsSlabMemDeinit(VOID *pool)
     return;
 }
 
-UINT32 OsSlabMemCheck(const VOID *pool, VOID* ptr)
+UINT32 OsSlabMemCheck(const VOID *pool, const VOID* ptr)
 {
     struct LosSlabControlHeader *slabMem = OsSlabCtrlHdrGet(pool);
     UINT32 retBlkSz = (UINT32)-1;

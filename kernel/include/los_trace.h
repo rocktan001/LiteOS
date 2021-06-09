@@ -54,25 +54,6 @@ extern "C" {
 #define LOSCFG_TRACE_TASK_PRIORITY                              2
 #endif
 
-/**
- * @ingroup los_trace
- * Whether trace records key informations, including cpuid, hardware interrupt status, task lock status.
- */
-#define LOSCFG_TRACE_FRAME_CORE_MSG                             NO
-
-/**
- * @ingroup los_trace
- * Whether trace records event count, which can indicate the sequence of happend events and the event loss count.
- */
-#define LOSCFG_TRACE_FRAME_EVENT_COUNT                          NO
-
-/**
- * @ingroup los_trace
- * Trace records the max params number in struct TraceEventFrame of events. if set to 0, trace will just record basic
- * event's type, not record event's any params.
- */
-#define LOSCFG_TRACE_FRAME_MAX_PARAMS                           3
-
 #define LOSCFG_TRACE_OBJ_MAX_NAME_SIZE                          LOS_TASK_NAMELEN
 
 /**
@@ -152,6 +133,11 @@ typedef enum {
  * @ingroup los_trace
  * Trace event type which indicate the exactly happend events, user can define own module's event type like
  * TRACE_#MODULE#_FLAG | NUMBER.
+ *                   28                     4
+ *    0 0 0 0 0 0 0 0 X X X X X X X X 0 0 0 0 0 0
+ *    |                                   |     |
+ *             trace_module_flag           number
+ *
  */
 typedef enum {
     /* 0x10~0x1F */
@@ -159,7 +145,7 @@ typedef enum {
     SYS_START             = TRACE_SYS_FLAG | 1,
     SYS_STOP              = TRACE_SYS_FLAG | 2,
 
-    /* 0x20~0x3F */
+    /* 0x20~0x2F */
     HWI_CREATE              = TRACE_HWI_FLAG | 0,
     HWI_CREATE_SHARE        = TRACE_HWI_FLAG | 1,
     HWI_DELETE              = TRACE_HWI_FLAG | 2,
@@ -174,7 +160,7 @@ typedef enum {
     HWI_SETAFFINITY         = TRACE_HWI_FLAG | 11,
     HWI_SENDIPI             = TRACE_HWI_FLAG | 12,
 
-    /* 0x40~0x7F */
+    /* 0x40~0x4F */
     TASK_CREATE           = TRACE_TASK_FLAG | 0,
     TASK_PRIOSET          = TRACE_TASK_FLAG | 1,
     TASK_DELETE           = TRACE_TASK_FLAG | 2,
@@ -183,14 +169,14 @@ typedef enum {
     TASK_SWITCH           = TRACE_TASK_FLAG | 5,
     TASK_SIGNAL           = TRACE_TASK_FLAG | 6,
 
-     /* 0x80~0xFF */
+    /* 0x80~0x8F */
     SWTMR_CREATE          = TRACE_SWTMR_FLAG | 0,
     SWTMR_DELETE          = TRACE_SWTMR_FLAG | 1,
     SWTMR_START           = TRACE_SWTMR_FLAG | 2,
     SWTMR_STOP            = TRACE_SWTMR_FLAG | 3,
     SWTMR_EXPIRED         = TRACE_SWTMR_FLAG | 4,
 
-     /* 0x100~0x1FF */
+    /* 0x100~0x10F */
     MEM_ALLOC             = TRACE_MEM_FLAG | 0,
     MEM_ALLOC_ALIGN       = TRACE_MEM_FLAG | 1,
     MEM_REALLOC           = TRACE_MEM_FLAG | 2,
@@ -198,25 +184,25 @@ typedef enum {
     MEM_INFO_REQ          = TRACE_MEM_FLAG | 4,
     MEM_INFO              = TRACE_MEM_FLAG | 5,
 
-     /* 0x200~0x3FF */
+    /* 0x200~0x20F */
     QUEUE_CREATE          = TRACE_QUE_FLAG | 0,
     QUEUE_DELETE          = TRACE_QUE_FLAG | 1,
     QUEUE_RW              = TRACE_QUE_FLAG | 2,
 
-     /* 0x400~0x7FF */
+    /* 0x400~0x40F */
     EVENT_CREATE          = TRACE_EVENT_FLAG | 0,
     EVENT_DELETE          = TRACE_EVENT_FLAG | 1,
     EVENT_READ            = TRACE_EVENT_FLAG | 2,
     EVENT_WRITE           = TRACE_EVENT_FLAG | 3,
     EVENT_CLEAR           = TRACE_EVENT_FLAG | 4,
 
-     /* 0x800~0xFFF */
+    /* 0x800~0x80F */
     SEM_CREATE            = TRACE_SEM_FLAG | 0,
     SEM_DELETE            = TRACE_SEM_FLAG | 1,
     SEM_PEND              = TRACE_SEM_FLAG | 2,
     SEM_POST              = TRACE_SEM_FLAG | 3,
 
-     /* 0x1000~0x1FFF */
+    /* 0x1000~0x100F */
     MUX_CREATE            = TRACE_MUX_FLAG | 0,
     MUX_DELETE            = TRACE_MUX_FLAG | 1,
     MUX_PEND              = TRACE_MUX_FLAG | 2,
@@ -242,7 +228,7 @@ typedef struct {
     UINT32  curTask;                                 /**< current running task */
     UINT64  curTime;                                 /**< current timestamp */
     UINTPTR identity;                                /**< subject of the event description */
-#if (LOSCFG_TRACE_FRAME_CORE_MSG == YES)
+#ifdef LOSCFG_TRACE_FRAME_CORE_MSG
     struct CoreStatus {
         UINT32 cpuId      : 8,                       /**< cpuid */
                hwiActive  : 4,                       /**< whether is in hwi response */
@@ -252,10 +238,13 @@ typedef struct {
     } core;
 #endif
 
-#if (LOSCFG_TRACE_FRAME_EVENT_COUNT == YES)
+#ifdef LOSCFG_TRACE_FRAME_EVENT_COUNT
     UINT32  eventCount;                               /**< the sequence of happend events */
 #endif
+
+#ifdef LOSCFG_TRACE_FRAME_MAX_PARAMS
     UINTPTR params[LOSCFG_TRACE_FRAME_MAX_PARAMS];    /**< event frame's params */
+#endif
 } TraceEventFrame;
 
 /**
@@ -302,7 +291,8 @@ typedef struct {
  */
 typedef BOOL (*TRACE_HWI_FILTER_HOOK)(UINT32 hwiNum);
 
-extern VOID OsTraceHook(UINT32 eventType, UINTPTR identity, const UINTPTR *params, UINT16 paramCount);
+typedef VOID (*TRACE_EVENT_HOOK)(UINT32 eventType, UINTPTR identity, const UINTPTR *params, UINT16 paramCount);
+extern TRACE_EVENT_HOOK g_traceEventHook;
 
 /**
  * @ingroup los_trace
@@ -408,8 +398,8 @@ extern VOID OsTraceHook(UINT32 eventType, UINTPTR identity, const UINTPTR *param
         LOS_PERF(TYPE);                                                            \
         UINTPTR _inner[] = {0, TYPE##_PARAMS((UINTPTR)IDENTITY, ##__VA_ARGS__)};   \
         UINTPTR _n = sizeof(_inner) / sizeof(UINTPTR);                             \
-        if (_n > 1) {                                                              \
-            OsTraceHook(TYPE, _inner[1], _n > 2 ? &_inner[2] : NULL, _n - 2);      \
+        if ((_n > 1) && (g_traceEventHook != NULL)) {                              \
+            g_traceEventHook(TYPE, _inner[1], _n > 2 ? &_inner[2] : NULL, _n - 2); \
         }                                                                          \
     } while (0)
 #else
@@ -436,11 +426,13 @@ extern VOID OsTraceHook(UINT32 eventType, UINTPTR identity, const UINTPTR *param
  * <ul><li>los_trace.h: the header file that contains the API declaration.</li></ul>
  * @since Huawei LiteOS V200R005C00
  */
-#define LOS_TRACE_EASY(TYPE, IDENTITY, ...)                                                                 \
-    do {                                                                                                    \
-        UINTPTR _inner[] = {0, ##__VA_ARGS__};                                                              \
-        UINTPTR _n = sizeof(_inner) / sizeof(UINTPTR);                                                      \
-        OsTraceHook(TRACE_USER_DEFAULT_FLAG | TYPE, (UINTPTR)IDENTITY, _n > 1 ? &_inner[1] : NULL, _n - 1); \
+#define LOS_TRACE_EASY(TYPE, IDENTITY, ...)                                                                          \
+    do {                                                                                                             \
+        UINTPTR _inner[] = {0, ##__VA_ARGS__};                                                                       \
+        UINTPTR _n = sizeof(_inner) / sizeof(UINTPTR);                                                               \
+        if (g_traceEventHook != NULL) {                                                                              \
+            g_traceEventHook(TRACE_USER_DEFAULT_FLAG | TYPE, (UINTPTR)IDENTITY, _n > 1 ? &_inner[1] : NULL, _n - 1); \
+        }                                                                                                            \
     } while (0)
 #else
 #define LOS_TRACE_EASY(...)

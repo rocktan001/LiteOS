@@ -30,7 +30,6 @@
 #define _BITS_PTHREAD_TYPES_H_
 
 #include <sched.h>
-#include "los_config.h"
 
 typedef struct __pthread_attr_s {
     unsigned int detachstate;
@@ -42,7 +41,7 @@ typedef struct __pthread_attr_s {
     void* stackaddr;
     unsigned int stacksize_set;
     size_t stacksize;
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
     cpu_set_t cpuset;
 #endif
 } pthread_attr_t;

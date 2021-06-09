@@ -50,7 +50,6 @@ endif
 
 ALL_ASSRCS := $(wildcard *.S)
 ASSRCS := $(subst board.ld.S,,$(ALL_ASSRCS))
-
 LOCAL_SRCS += $(ASSRCS)
 
 LOCAL_INCLUDE += \
@@ -58,12 +57,9 @@ LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/hisoc \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/asm \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/pm \
-    -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/uart \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM) \
     -I $(LITEOSTOPDIR)/include
 
-BOARD_DEF += $(C_DEFS)
-
-LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 
 include $(MODULE)

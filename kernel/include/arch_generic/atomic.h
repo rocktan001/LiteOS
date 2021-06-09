@@ -45,7 +45,7 @@ extern "C" {
 
 #ifndef LOSCFG_KERNEL_SMP
 
-STATIC INLINE INT32 ArchAtomicRead(Atomic *v)
+STATIC INLINE INT32 ArchAtomicRead(const Atomic *v)
 {
     return *(volatile INT32 *)v;
 }
@@ -273,3 +273,4 @@ STATIC INLINE BOOL ArchAtomicCmpXchg64bits(Atomic64 *v, INT64 val, INT64 oldVal)
 #endif /* __cplusplus */
 
 #endif /* _ARCH_GENERIC_ATOMIC_H */
+

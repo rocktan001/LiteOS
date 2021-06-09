@@ -67,7 +67,7 @@ VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOID *topStack)
     taskContext->regSPSR = 0x5;                /* CPSR (Enable IRQ and FIQ interrupts, EL1h) */
 #endif
 
-#ifdef LOSCFG_AARCH64_FPU
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     /* 0xAAA0000000000001LL : float reg initialed magic word */
     for (index = 0; index < FP_REGS_NUM; index++) {
         taskContext->Q[index] = 0xAAA0000000000001LL + index;  /* Q1 -Q31 */

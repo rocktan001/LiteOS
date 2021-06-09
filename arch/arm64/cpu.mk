@@ -11,7 +11,9 @@ LIB_SUBDIRS             += arch/arm64/
 
 # CPU compile options
 # AArch64 has no specific FPU compile options like AArch32 does.
-ifeq ($(LOSCFG_ARCH_FPU_DISABLE), y)
+ifeq ($(LOSCFG_ARCH_FPU_ENABLE), y)
+EXTENSION               :=
+else
 EXTENSION               := +nofp
 endif
 LITEOS_CPU_OPTS         := -mcpu=$(LOSCFG_ARCH_CPU)$(EXTENSION)
@@ -28,13 +30,6 @@ ARCH_INCLUDE            := -I $(LITEOSTOPDIR)/arch/arm64/include \
 
 LITEOS_PLATFORM_INCLUDE += $(ARCH_INCLUDE)
 LITEOS_CXXINCLUDE       += $(ARCH_INCLUDE)
-
-# expose FPU info to assembly code
-ifeq ($(LOSCFG_ARCH_FPU_DISABLE), y)
-    LITEOS_CMACRO       += -DLOSCFG_ARCH_FPU_DISABLE
-else
-    LITEOS_CMACRO       += -DLOSCFG_AARCH64_FPU
-endif
 
 # extra definition for other module
 LITEOS_CPU_TYPE          = $(LOSCFG_ARCH_CPU)

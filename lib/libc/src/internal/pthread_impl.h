@@ -82,12 +82,22 @@ struct __timer {
 #define _a_sched __u.__i[3*__SU+1]
 #define _a_policy __u.__i[3*__SU+2]
 #define _a_prio __u.__i[3*__SU+3]
-#define _m_type __u.__i[0]
-#define _m_lock __u.__vi[1]
-#define _m_waiters __u.__vi[2]
-#define _m_prev __u.__p[3]
-#define _m_next __u.__p[4]
-#define _m_count __u.__i[5]
+
+/* We define the original value of _m_* in include/ptherad.h
+ * as macros MUTEX_* to make the user be able to
+ * access the inner attribute of the mutex struct.
+ * Then, we modify the value of _m_* macros to MUTEX_* here,
+ * so that we can immediately be aware of the changes that
+ * the open source society has made to these original macros,
+ * because patching will fail if the value of the _m_* are
+ * changed by musl society*/
+#define _m_type MUTEX_TYPE
+#define _m_lock MUTEX_LOCK
+#define _m_waiters MUTEX_WAITERS
+#define _m_prev MUTEX_PREV
+#define _m_next MUTEX_NEXT
+#define _m_count MUTEX_COUNT
+
 #define _c_shared __u.__p[0]
 #define _c_seq __u.__vi[2]
 #define _c_waiters __u.__vi[3]

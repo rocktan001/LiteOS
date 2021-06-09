@@ -64,7 +64,6 @@ BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/bsp/common \
     -I $(LITEOSTOPDIR)/targets/bsp/include \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
-    -I $(LITEOSTOPDIR)/targets/bsp/drivers/st_timer \
     -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/include \
     -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Drivers/BSP/STM324x9I_EVAL \
     -I $(LITEOSTOPDIR)/kernel/extended/include \

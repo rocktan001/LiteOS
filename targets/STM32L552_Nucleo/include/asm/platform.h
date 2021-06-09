@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Targets Stm32l4r9 Asm Platform HeadFile
+ * Description: Platform HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-02-03
+ * Create: 2021-04-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -29,6 +29,29 @@
 #ifndef _ASM_PLATFORM_H
 #define _ASM_PLATFORM_H
 
-#include "asm/hal_platform_ints.h"
+#include "los_typedef.h"
+#include "stm32l552xx.h"
+#include "stm32l5xx.h"
+#include "uart.h"
+#include "tim.h"
+
+#include "interrupt_config.h"
+#include "memmap_config.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern VOID app_init(VOID);
+#endif
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _ASM_PLATFORM_H */

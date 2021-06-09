@@ -106,7 +106,7 @@ struct Spinlock {
 #endif
 };
 
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
 /**
  * @ingroup  los_spinlock
  * @brief Lock the spinlock.
@@ -219,7 +219,7 @@ LITE_OS_SEC_ALW_INLINE STATIC INLINE VOID LOS_SpinUnlock(SPIN_LOCK_S *lock)
 
 /**
  * @ingroup  los_spinlock
- * @brief Lock the spinlock and disable all interrupts. 
+ * @brief Lock the spinlock and disable all interrupts.
  *
  * @par Description:
  * This API is used to lock the spinlock and disable all interrupts before locking. After
@@ -237,7 +237,7 @@ LITE_OS_SEC_ALW_INLINE STATIC INLINE VOID LOS_SpinUnlock(SPIN_LOCK_S *lock)
  * @param  lock     [IN]    Type #SPIN_LOCK_S The pointer to spinlock.
  * @param  intSave  [OUT]   Type #UINT32 The pointer is used to save the interrupt flag
  *                                       before all interrupts are disabled. It will be
- *                                       used by #LOS_SpinUnlockRestore.                                  
+ *                                       used by #LOS_SpinUnlockRestore.
  *
  * @retval None.
  * @par Dependency:

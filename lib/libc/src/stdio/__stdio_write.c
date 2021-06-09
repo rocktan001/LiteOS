@@ -12,13 +12,17 @@ size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
 	int iovcnt = 2;
 	ssize_t cnt;
 	for (;;) {
-                cnt = writev(f->fd, iov, iovcnt);
+		cnt = writev(f->fd, iov, iovcnt);
 		if (cnt == rem) {
 			f->wend = f->buf + f->buf_size;
 			f->wpos = f->wbase = f->buf;
 			return len;
 		}
+#ifdef __LITEOS__
+		if (cnt <= 0) {
+#else
 		if (cnt < 0) {
+#endif
 			f->wpos = f->wbase = f->wend = 0;
 			f->flags |= F_ERR;
 			return iovcnt == 2 ? 0 : len-iov[0].iov_len;

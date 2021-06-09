@@ -78,7 +78,7 @@ LITE_OS_SEC_TEXT_INIT VOID OsCpupGuard(VOID)
         return;
     }
     intSave = LOS_IntLock();
-    curCycle = OsGetCpuCycle();
+    curCycle = OsCpupGetCycle();
 
     g_hisPos = CPUP_POST_POS(g_hisPos);
     cpuHistoryTime[prevPos] = curCycle;
@@ -90,7 +90,7 @@ LITE_OS_SEC_TEXT_INIT VOID OsCpupGuard(VOID)
     for (loop = 0; loop < LOSCFG_KERNEL_CORE_NUM; loop++) {
         runTaskId = runningTasks[loop];
         /* reacquire the cycle to prevent flip */
-        curCycle = OsGetCpuCycle();
+        curCycle = OsCpupGetCycle();
         g_cpup[runTaskId].historyTime[prevPos] += curCycle - g_cpup[runTaskId].startTime;
 #ifdef LOSCFG_CPUP_INCLUDE_IRQ
         g_cpup[runTaskId].historyTime[prevPos] -= g_timeInIrqPerTskSwitch[loop];
@@ -119,7 +119,7 @@ LITE_OS_SEC_TEXT_INIT VOID OsCpupGuardInit(VOID)
     taskInitParam.pcName        = "CpupGuardCreator";
     taskInitParam.usTaskPrio    = OS_TASK_PRIORITY_HIGHEST;
     taskInitParam.uwResved      = LOS_TASK_STATUS_DETACHED;
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
     taskInitParam.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
 #endif
     (VOID)LOS_TaskCreate(&tempId, &taskInitParam);
@@ -136,7 +136,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsCpupInit(VOID)
     g_cpupTaskMaxNum = g_taskMaxNum;
     g_cpupMaxNum = g_cpupTaskMaxNum;
 #ifdef LOSCFG_CPUP_INCLUDE_IRQ
-    g_cpupMaxNum += OS_HWI_MAX_NUM;
+    g_cpupMaxNum += LOSCFG_PLATFORM_HWI_LIMIT;
 #endif
 
     /* every task has only one record, and it won't operated at the same time */
@@ -169,7 +169,7 @@ LITE_OS_SEC_TEXT_INIT VOID LOS_CpupReset(VOID)
     g_cpupInitFlg = 0;
     intSave = LOS_IntLock();
     (VOID)LOS_SwtmrStop(g_cpupSwtmrId);
-    curCycle = OsGetCpuCycle();
+    curCycle = OsCpupGetCycle();
 
     for (loop = 0; loop < (OS_CPUP_HISTORY_RECORD_NUM + 1); loop++) {
         cpuHistoryTime[loop] = curCycle;
@@ -196,7 +196,7 @@ LITE_OS_SEC_TEXT_INIT VOID LOS_CpupReset(VOID)
     return;
 }
 
-LITE_OS_SEC_TEXT_MINOR VOID OsSetCpuCycle(UINT64 startCycles)
+LITE_OS_SEC_TEXT_MINOR VOID OsCpupSetCycle(UINT64 startCycles)
 {
     g_startCycles = startCycles;
     return;
@@ -206,7 +206,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsSetCpuCycle(UINT64 startCycles)
  * Description: get current cycles count
  * Return     : current cycles count
  */
-LITE_OS_SEC_TEXT_MINOR UINT64 OsGetCpuCycle(VOID)
+LITE_OS_SEC_TEXT_MINOR UINT64 OsCpupGetCycle(VOID)
 {
     UINT32 high;
     UINT32 low;
@@ -243,7 +243,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleStart(VOID)
     taskId = runTask->taskId;
 
     g_cpup[taskId].id = taskId;
-    g_cpup[taskId].startTime = OsGetCpuCycle();
+    g_cpup[taskId].startTime = OsCpupGetCycle();
 
     return;
 }
@@ -268,7 +268,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleEnd(VOID)
         return;
     }
 
-    cpuCycle = OsGetCpuCycle();
+    cpuCycle = OsCpupGetCycle();
     g_cpup[taskId].allTime += cpuCycle - g_cpup[taskId].startTime;
 
 #ifdef LOSCFG_CPUP_INCLUDE_IRQ
@@ -296,7 +296,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsTaskCycleEndStart(const LosTaskCB *newTask)
     }
 
     runTask = OsCurrTaskGet();
-    cpuCycle = OsGetCpuCycle();
+    cpuCycle = OsCpupGetCycle();
 
     cpup = &g_cpup[runTask->taskId];
     if (cpup->startTime != 0) {
@@ -379,7 +379,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistorySysCpuUsage(UINT32 mode)
     UINT16 prePos;
     UINT32 intSave;
     UINT32 idleTaskId;
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
     UINT32 cpuId = 0;
 #endif
 
@@ -394,7 +394,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_HistorySysCpuUsage(UINT32 mode)
     OsCpupGetPos(mode, &pos, &prePos);
     cpuCycleAll = cpuHistoryTime[pos] - cpuHistoryTime[prePos];
 
-#if (LOSCFG_KERNEL_SMP == YES)
+#ifdef LOSCFG_KERNEL_SMP
     /* For SMP system, each idle task needs to be accounted */
     while (cpuId < LOSCFG_KERNEL_CORE_NUM) {
         idleTaskId = g_percpu[cpuId].idleTaskId;
@@ -517,13 +517,13 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_AllCpuUsage(UINT16 maxNum, CPUP_INFO_S *cpupIn
 #ifdef LOSCFG_CPUP_INCLUDE_IRQ
 LITE_OS_SEC_TEXT_MINOR VOID OsCpupIrqStart(VOID)
 {
-    g_intTimeStart[ArchCurrCpuid()] = OsGetCpuCycle();
+    g_intTimeStart[ArchCurrCpuid()] = OsCpupGetCycle();
     return;
 }
 
 LITE_OS_SEC_TEXT_MINOR VOID OsCpupIrqEnd(UINT32 intNum)
 {
-    UINT64 intTimeEnd = OsGetCpuCycle();
+    UINT64 intTimeEnd = OsCpupGetCycle();
     UINT32 cpuId = ArchCurrCpuid();
 
     if (g_cpupInitFlg == 0) {

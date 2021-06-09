@@ -58,157 +58,42 @@ typedef enum {
 #define OS_QUEUE_IS_READ(type) (OS_QUEUE_READ_WRITE_GET(type) == OS_QUEUE_READ)
 #define OS_QUEUE_IS_WRITE(type) (OS_QUEUE_READ_WRITE_GET(type) == OS_QUEUE_WRITE)
 
-/**
- * @ingroup los_queue
- * Queue information block structure
- */
-typedef struct {
-    UINT8 *queueHandle; /**< Pointer to a queue handle */
-    UINT8 queueState; /**< Queue state */
-    UINT8 queueMemType; /**< Queue memory type */
-    UINT16 queueLen; /**< Queue length */
-    UINT16 queueSize; /**< Node size */
-    UINT32 queueId; /**< queueId */
-    UINT16 queueHead; /**< Node head */
-    UINT16 queueTail; /**< Node tail */
-    UINT16 readWriteableCnt[OS_QUEUE_N_RW]; /**< Count of readable or writable resources, 0:readable, 1:writable */
-    LOS_DL_LIST readWriteList[OS_QUEUE_N_RW]; /**< the linked list to be read or written, 0:readlist, 1:writelist */
-    LOS_DL_LIST memList; /**< Pointer to the memory linked list */
-} LosQueueCB;
-
-/* queue state */
-/**
- *  @ingroup los_queue
- *  Message queue state: not in use.
- */
-#define OS_QUEUE_UNUSED        0
-
-/**
- *  @ingroup los_queue
- *  Message queue state: used.
- */
-#define OS_QUEUE_INUSED        1
-
 /* queue memory type */
-/**
- *  @ingroup los_queue
- *  Message queue memory is allocated by os.
- */
-#define OS_QUEUE_ALLOC_DYNAMIC        0
+#define OS_QUEUE_ALLOC_DYNAMIC 0
+#define OS_QUEUE_ALLOC_STATIC 1
+#define OS_QUEUE_NORMAL 0
 
-/**
- *  @ingroup los_queue
- *  Message queue memory is allocated by user.
- */
-#define OS_QUEUE_ALLOC_STATIC         1
-
-/**
- *  @ingroup los_queue
- *  Not in use.
- */
-#define OS_QUEUE_WAIT_FOR_POOL 1
-
-/**
- *  @ingroup los_queue
- *  Normal message queue.
- */
-#define OS_QUEUE_NORMAL        0
-
-/**
- *  @ingroup los_queue
- *  Queue information control block
- */
-extern LosQueueCB *g_allQueue;
-
-/**
- * @ingroup los_queue
- * COUNT | INDEX  split bit
- */
-#define QUEUE_SPLIT_BIT        16
-/**
- * @ingroup los_queue
- * Set the queue id
- */
-#define SET_QUEUE_ID(count, queueId)    (((count) << QUEUE_SPLIT_BIT) | (queueId))
-
-/**
- * @ingroup los_queue
- * get the queue index
- */
-#define GET_QUEUE_INDEX(queueId)        ((queueId) & ((1U << QUEUE_SPLIT_BIT) - 1))
-
-/**
- * @ingroup los_queue
- * get the queue count
- */
-#define GET_QUEUE_COUNT(queueId)        ((queueId) >> QUEUE_SPLIT_BIT)
-
-/**
- * @ingroup los_queue
- * Obtain a handle of the queue that has a specified ID.
- *
- */
-#define GET_QUEUE_HANDLE(queueId)       (((LosQueueCB *)g_allQueue) + GET_QUEUE_INDEX(queueId))
-
-/**
- * @ingroup los_queue
- * Obtain the head node in a queue doubly linked list.
- */
+/* COUNT | INDEX  split bit */
+#define QUEUE_SPLIT_BIT 16
+#define SET_QUEUE_ID(count, queueId) (((count) << QUEUE_SPLIT_BIT) | (queueId))
+#define GET_QUEUE_INDEX(queueId) ((queueId) & ((1U << QUEUE_SPLIT_BIT) - 1))
+#define GET_QUEUE_COUNT(queueId) ((queueId) >> QUEUE_SPLIT_BIT)
+#define GET_QUEUE_HANDLE(queueId) (((LosQueueCB *)g_allQueue) + GET_QUEUE_INDEX(queueId))
+/* Obtain the head node in a queue doubly linked list. */
 #define GET_QUEUE_LIST(ptr) LOS_DL_LIST_ENTRY(ptr, LosQueueCB, readWriteList[OS_QUEUE_WRITE])
 
-/**
- * @ingroup los_queue
- * @brief Alloc a stationary memory for a mail.
- *
- * @par Description:
- * This API is used to alloc a stationary memory for a mail according to queueId.
- * @attention
- * <ul>
- * <li>Do not alloc memory in unblocking modes such as interrupt.</li>
- * <li>This API cannot be called before the Huawei LiteOS is initialized.</li>
- * <li>The argument timeout is a relative time.</li>
- * </ul>
- *
- * @param queueId        [IN]        Queue ID. The value range is [1,LOSCFG_BASE_IPC_QUEUE_LIMIT].
- * @param mailPool        [IN]        The memory poll that stores the mail.
- * @param timeout        [IN]        Expiry time. The value range is [0,LOS_WAIT_FOREVER].
- *
- * @retval   #NULL                     The memory allocation is failed.
- * @retval   #pMem                     The address of alloc memory.
- * @par Dependency:
- * <ul><li>los_queue_pri.h: the header file that contains the API declaration.</li></ul>
- * @see OsQueueMailFree
- * @since Huawei LiteOS V100R001C00
- */
+/* Queue information block structure */
+typedef struct {
+    UINT8 *queueHandle;                     /* Pointer to a queue handle */
+    UINT8 queueState;                       /* state */
+    UINT8 queueMemType;                     /* memory type */
+    UINT16 queueLen;                        /* length */
+    UINT16 queueSize;                       /* Node size */
+    UINT32 queueId;                         /* queueId */
+    UINT16 queueHead;                       /* Node head */
+    UINT16 queueTail;                       /* Node tail */
+    UINT16 readWriteableCnt[OS_QUEUE_N_RW];     /* Count of readable or writable resources, 0:readable, 1:writable */
+    LOS_DL_LIST readWriteList[OS_QUEUE_N_RW];   /* the linked list to be read or written, 0:readlist, 1:writelist */
+    LOS_DL_LIST memList;                        /* Pointer to the memory linked list */
+} LosQueueCB;
+
+/*  Queue information control block */
+extern LosQueueCB *g_allQueue;
+
+/* alloc a stationary memory for a mail according to queueId */
 extern VOID *OsQueueMailAlloc(UINT32 queueId, VOID *mailPool, UINT32 timeout);
-
-/**
- * @ingroup los_queue
- * @brief Free a stationary memory of a mail.
- *
- * @par Description:
- * This API is used to free a stationary memory for a mail according to queueId.
- * @attention
- * <ul>
- * <li>This API cannot be called before the Huawei LiteOS is initialized.</li>
- * </ul>
- *
- * @param queueId        [IN]        Queue ID. The value range is [1,LOSCFG_BASE_IPC_QUEUE_LIMIT].
- * @param mailPool        [IN]        The mail memory poll address.
- * @param mailMem         [IN]        The mail memory block address.
- *
- * @retval   #LOS_OK                                 0x00000000: The memory free successfully.
- * @retval   #OS_ERRNO_QUEUE_MAIL_HANDLE_INVALID     0x02000619: The handle of the queue passed-in when the memory
- *                                                               for the queue is being freed is invalid.
- * @retval   #OS_ERRNO_QUEUE_MAIL_PTR_INVALID        0x0200061a: The pointer to the memory to be freed is null.
- * @retval   #OS_ERRNO_QUEUE_MAIL_FREE_ERROR         0x0200061b: The memory for the queue fails to be freed.
- * @par Dependency:
- * <ul><li>los_queue_pri.h: the header file that contains the API declaration.</li></ul>
- * @see OsQueueMailAlloc
- * @since Huawei LiteOS V100R001C00
- */
+/* free a stationary memory for a mail according to queueId. */
 extern UINT32 OsQueueMailFree(UINT32 queueId, VOID *mailPool, VOID *mailMem);
-
 extern UINT32 OsQueueInit(VOID);
 
 #ifdef __cplusplus

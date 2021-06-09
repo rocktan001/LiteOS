@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Os Adapt
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+ * Description: Os Adapt Implementation
  * Author: Huawei LiteOS Team
  * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,

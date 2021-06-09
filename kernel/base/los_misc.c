@@ -33,6 +33,14 @@
 #include "los_exc_pri.h"
 #endif
 
+#ifdef LOSCFG_KERNEL_TRACE
+#include "los_trace_pri.h"
+#endif
+
+#ifdef LOSCFG_KERNEL_LMS
+#include "los_lms_pri.h"
+#endif
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -59,6 +67,16 @@ LITE_OS_SEC_BSS UINTPTR g_dlNxHeapBase;
 LITE_OS_SEC_BSS UINT32 g_dlNxHeapSize;
 #endif
 
+#ifdef LOSCFG_KERNEL_TRACE
+TRACE_EVENT_HOOK g_traceEventHook = NULL;
+TRACE_DUMP_HOOK g_traceDumpHook = NULL;
+#endif
+
+#ifdef LOSCFG_KERNEL_LMS
+LMS_INIT_HOOK g_lmsMemInitHook = NULL;
+LMS_FUNC_HOOK g_lmsMallocHook = NULL;
+LMS_FUNC_HOOK g_lmsFreeHook = NULL;
+#endif
 LITE_OS_SEC_TEXT UINTPTR LOS_Align(UINTPTR addr, UINT32 boundary)
 {
     return (addr + boundary - 1) & ~((UINTPTR)(boundary - 1));
@@ -69,11 +87,11 @@ LITE_OS_SEC_TEXT_MINOR VOID LOS_Msleep(UINT32 msecs)
     UINT32 interval;
 
     if (msecs == 0) {
-        interval = 0;
+        interval = 0; /* The value 0 indicates direct scheduling. */
     } else {
         interval = LOS_MS2Tick(msecs);
-        if (interval == 0) {
-            interval = 1;
+        if (interval < UINT32_MAX) {
+            interval += 1; /* Add a tick to compensate for the inaccurate tick count. */
         }
     }
 

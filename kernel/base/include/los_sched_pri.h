@@ -134,7 +134,7 @@ STATIC INLINE VOID LOS_Schedule(VOID)
 
 #ifdef LOSCFG_BASE_CORE_TIMESLICE
 /**
- * @ingroup los_timeslice
+ * @ingroup los_sched
  * This API is used to check time slices. If the number of Ticks equals to the time for task switch,
  * tasks are switched. Otherwise, the Tick counting continues.
  */

@@ -17,11 +17,11 @@
   ******************************************************************************
   */
 
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Timer Driver Initialization
+ * Description: Timer Driver Initialization Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-02-03
+ * Create: 2021-04-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -48,12 +48,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "tim.h"
 #include "sys_init.h"
-
+#include "stm32l5xx_hal.h"
 /* USER CODE BEGIN 0 */
 #include "los_hwi.h"
 
-#define TIMER3_RELOAD 50000
-#define TIMER3        3
+#define TIMER3_RELOAD    50000
+
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim3;
@@ -65,9 +65,9 @@ void MX_TIM3_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 8000;
+  htim3.Init.Prescaler = 11000 - 1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 50000;
+  htim3.Init.Period = TIMER3_RELOAD - 1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -83,6 +83,11 @@ void MX_TIM3_Init(void)
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
   {
+    Error_Handler();
+  }
+  if (HAL_TIM_Base_Start_IT(&htim3) != HAL_OK)
+  {
+    /* Starting Error */
     Error_Handler();
   }
 

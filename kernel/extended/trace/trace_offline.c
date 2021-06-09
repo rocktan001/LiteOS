@@ -161,10 +161,10 @@ STATIC VOID OsTraceInfoEventTitle(VOID)
     PRINTK("CurEvtIndex = %u\n", g_traceRecoder.ctrl.curIndex);
 
     PRINTK("Index   Time(cycles)      EventType      CurTask   Identity      ");
-#if (LOSCFG_TRACE_FRAME_CORE_MSG == YES)
+#ifdef LOSCFG_TRACE_FRAME_CORE_MSG
     PRINTK("cpuId    hwiActive    taskLockCnt    ");
 #endif
-#if (LOSCFG_TRACE_FRAME_EVENT_COUNT == YES)
+#ifdef LOSCFG_TRACE_FRAME_EVENT_COUNT
     PRINTK("eventCount    ");
 #endif
     if (LOSCFG_TRACE_FRAME_MAX_PARAMS > 0) {
@@ -181,7 +181,7 @@ STATIC VOID OsTraceInfoEventData(VOID)
     for (i = 0; i < g_traceRecoder.ctrl.maxRecordCount; i++, frame++) {
         PRINTK("%-7u 0x%-15llx 0x%-12x 0x%-7x 0x%-11x ", i, frame->curTime, frame->eventType,
             frame->curTask, frame->identity);
-#if (LOSCFG_TRACE_FRAME_CORE_MSG == YES)
+#ifdef LOSCFG_TRACE_FRAME_CORE_MSG
         UINT32 taskLockCnt = frame->core.taskLockCnt;
 #ifdef LOSCFG_KERNEL_SMP
         /*
@@ -192,7 +192,7 @@ STATIC VOID OsTraceInfoEventData(VOID)
 #endif
         PRINTK("%-11u %-11u %-11u", frame->core.cpuId, frame->core.hwiActive, taskLockCnt);
 #endif
-#if (LOSCFG_TRACE_FRAME_EVENT_COUNT == YES)
+#ifdef LOSCFG_TRACE_FRAME_EVENT_COUNT
         PRINTK("%-11u", frame->eventCount);
 #endif
         for (j = 0; j < LOSCFG_TRACE_FRAME_MAX_PARAMS; j++) {

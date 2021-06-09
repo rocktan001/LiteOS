@@ -110,26 +110,6 @@ extern "C" {
 #define OS_EMBED_ASM            __asm__ __volatile__
 #endif
 
-extern char _dram0_data_start;
-extern char _dram0_data_end;
-extern char _dram0_bss_start;
-extern char _dram0_bss_end;
-extern char _dram1_data_start;
-extern char _dram1_data_end;
-extern char _dram1_bss_start;
-extern char _dram1_bss_end;
-extern char _iram0_start;
-extern char _iram0_end;
-extern char _sram_rodata_start;
-extern char _sram_rodata_end;
-extern char _sram_text_start;
-extern char _sram_text_end;
-extern char _sram_data_start;
-extern char _sram_data_end;
-extern char _sram_bss_start;
-extern char _sram_bss_end;
-extern char __int_stack_start;
-extern char __int_stack_end;
 #ifdef __cplusplus
 #if __cplusplus
 }

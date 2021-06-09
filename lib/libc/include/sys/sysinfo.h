@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#ifndef _LINUX_KERNEL_H
 #define SI_LOAD_SHIFT 16
 
 struct sysinfo {
@@ -22,6 +23,7 @@ struct sysinfo {
 	unsigned mem_unit;
 	char __reserved[256];
 };
+#endif
 
 int sysinfo (struct sysinfo *);
 int get_nprocs_conf (void);

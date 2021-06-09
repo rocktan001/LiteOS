@@ -2,27 +2,27 @@
 #include "arch/regs.h"
 #include "arch/exception.h"
 
-    .global __exc_stack_top
-    .global __irq_stack_top
-    .global __fiq_stack_top
-    .global __svc_stack_top
-    .global __abt_stack_top
-    .global __undef_stack_top
-    .global __exc_stack
-    .global __irq_stack
-    .global __fiq_stack
-    .global __svc_stack
-    .global __abt_stack
-    .global __undef_stack
+.global __exc_stack_top
+.global __irq_stack_top
+.global __fiq_stack_top
+.global __svc_stack_top
+.global __abt_stack_top
+.global __undef_stack_top
+.global __exc_stack
+.global __irq_stack
+.global __fiq_stack
+.global __svc_stack
+.global __abt_stack
+.global __undef_stack
 
 
-    .extern _osExceptFiqHdl
-    .extern _osExceptDataAbortHdl
-    .extern _osExceptPrefetchAbortHdl
-    .extern _osExceptSwiHdl
-    .extern _osExceptUndefInstrHdl
-    .extern board_config
-    .global enable_scu
+.extern _osExceptFiqHdl
+.extern _osExceptDataAbortHdl
+.extern _osExceptPrefetchAbortHdl
+.extern _osExceptSwiHdl
+.extern _osExceptUndefInstrHdl
+.extern board_config
+.global enable_scu
 
 /* param0 is stack top, param1 is stack size, param2 is magic num */
 .macro STACK_MAGIC_SET param0, param1, param2
@@ -32,15 +32,15 @@
     bl      excstack_magic
 .endm
 
-    .code   32
-    .section ".vectors","ax"
+.code   32
+.section ".vectors","ax"
 
-    .global __exception_handlers
+.global __exception_handlers
 __exception_handlers:
     /*
-    *Assumption:  ROM code has these vectors at the hardware reset address.
-    *A simple jump removes any address-space dependencies [i.e. safer]
-    */
+     * Assumption:  ROM code has these vectors at the hardware reset address.
+     * A simple jump removes any address-space dependencies [i.e. safer]
+     */
     b   reset_vector
     b   _osExceptUndefInstrHdl
     b   _osExceptSwiHdl
@@ -50,10 +50,10 @@ __exception_handlers:
     b   OsIrqHandler
     b   _osExceptFiqHdl
 
-    .text
-    /* Startup code which will get the machine into supervisor mode */
-    .global reset_vector
-    .type   reset_vector,function
+.text
+/* Startup code which will get the machine into supervisor mode */
+.global reset_vector
+.type   reset_vector,function
 reset_vector:
     /* get cpuid and keep it in r11 */
     mrc     p15, 0, r11, c0, c0, 5
@@ -118,7 +118,10 @@ enable_scu:
 stack_init:
     ldr     r2, =OS_STACK_INIT
     ldr     r3, =OS_STACK_INIT
-    /* Main loop sets 32 bytes at a time. */
+
+/* 
+ * Main loop sets 32 bytes at a time.
+ */
 stack_init_loop:
     .irp    offset, #0, #8, #16, #24
     strd    r2, r3, [r0, \offset]
@@ -143,8 +146,8 @@ excstack_magic_loop:
     bx      lr
 
     /*
-    * Temporary interrupt stack
-    */
+     * Temporary interrupt stack
+     */
     .section ".int_stack", "wa", %nobits
     .align  3
 

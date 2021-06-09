@@ -27,14 +27,12 @@
  * --------------------------------------------------------------------------- */
 
 .syntax unified
-#if defined(LOSCFG_ARCH_CORTEX_M0)
+#ifdef LOSCFG_ARCH_ARM_V6M
 .arch armv6-m
-#else
-#if defined(LOSCFG_ARCH_CORTEX_M33)
+#elif defined(LOSCFG_ARCH_CORTEX_M33)
 .arch armv8-m.main
 #else
 .arch armv7e-m
-#endif
 #endif
 .thumb
 
@@ -61,43 +59,43 @@ OsStartToRun:
 
     ldr     r1, =g_runTask
     str     r0, [r1]
-#if defined(LOSCFG_ARCH_CORTEX_M0)
-    movs    r1, #2   
+
+    movs    r1, #2
     msr     CONTROL, r1
     ldrh    r7, [r0 , #4]
+
     movs    r6,  #OS_TASK_STATUS_RUNNING
     strh    r6,  [r0 , #4]
+
+#ifdef LOSCFG_ARCH_ARM_V6M
     ldr     r3, [r0]
     adds    r3, r3, #36
+
     ldmfd   r3!, {r0-r2}
     adds    r3, r3, #4
     ldmfd   r3!, {R4-R7}
+
     msr     psp, r3
     subs    r3, r3, #20
     ldr     r3,  [r3]
 #else
-    mov     r1, #2
-    msr     CONTROL, r1
-
-    ldrh    r7, [r0 , #4]
-    mov     r8,  #OS_TASK_STATUS_RUNNING
-    strh    r8,  [r0 , #4]
-
     ldr     r12, [r0]
-    ADD     r12, r12, #36
-#if !defined(LOSCFG_ARCH_CORTEX_M3)
-    ADD     r12, r12, #64
+
+    add     r12, r12, #36
+    /* __VFP_FP__ is set by -mfpu; __SOFTFP__ is set by -mfloat-abi=soft. */
+#if defined(__VFP_FP__) && !defined(__SOFTFP__)
+    add     r12, r12, #4
 #endif
 
     ldmfd   r12!, {R0-R7}
-#if !defined(LOSCFG_ARCH_CORTEX_M3)
-    add     r12, r12, #72
-#endif
+
     msr     psp, r12
-#if !defined(LOSCFG_ARCH_CORTEX_M3)
+
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     vpush   {s0};
     vpop    {s0};
 #endif
+
 #endif
 
     mov     lr, r5
@@ -157,7 +155,7 @@ osPendSV:
 TaskSwitch:
     mrs     r0, psp
 
-#if defined(LOSCFG_ARCH_CORTEX_M0)
+#ifdef LOSCFG_ARCH_ARM_V6M
     subs    r0, #36
     stmia   r0!, {r4-r7}
     mov     r3, r8
@@ -169,10 +167,14 @@ TaskSwitch:
 
     subs    r0, #36
 #else
-    stmfd   r0!, {r4-r12}
-#if !defined(LOSCFG_ARCH_CORTEX_M3)
-    vstmdb  r0!, {d8-d15}
+#if defined(__VFP_FP__) && !defined(__SOFTFP__)
+    /* when enter the exc or interrut, lr's value is EXC_RETURN. If FPCA = 1, the 4's bit of EXC_RETURN is 0. */
+    tst     lr, #0x10
+    it      eq
+    vstmdbeq  r0!, {d8-d15} /* push VFP registers. */
+    stmfd     r0!, {r14}
 #endif
+    stmfd   r0!, {r4-r12}
 #endif
     ldr     r5, =g_oldTask
     ldr     r1, [r5]
@@ -184,13 +186,10 @@ TaskSwitch:
     str     r0, [r5]
     ldr     r1, [r0]
 
-#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_CORTEX_M0)
-    vldmia  r1!, {d8-d15}
-#endif
-#if defined(LOSCFG_ARCH_CORTEX_M0)
+#ifdef LOSCFG_ARCH_ARM_V6M
     adds    r1,   #16
     ldmfd   r1!, {r3-r7}
-    
+
     mov     r8, r3
     mov     r9, r4
     mov     r10, r5
@@ -203,6 +202,14 @@ TaskSwitch:
 #else
     ldmfd   r1!, {r4-r12}
 #endif
+
+#if defined(__VFP_FP__) && !defined(__SOFTFP__)
+    ldmfd   r1!, {r14}
+    tst     r14, #0x10
+    it      eq
+    vldmiaeq r1!, {d8-d15}
+#endif
+
     msr     psp,  r1
 
     msr     PRIMASK, r12

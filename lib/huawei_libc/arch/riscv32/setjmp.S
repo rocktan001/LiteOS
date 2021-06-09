@@ -29,14 +29,20 @@
   .globl  setjmp
   .type   setjmp, @function
 setjmp:
-#ifdef LOS_COMPILE_LDM
-    stmia {ra, sp, s0-s1}, (a0) /* store value in a0 address to registers. */
-#else
-    sw ra,  0(a0)
-    sw s0,  4(a0)
-    sw s1,  8(a0)
-    sw sp,  12(a0)
-#endif
+    sw s0,    0(a0)
+    sw s1,    4(a0)
+    sw s2,    8(a0)
+    sw s3,    12(a0)
+    sw s4,    16(a0)
+    sw s5,    20(a0)
+    sw s6,    24(a0)
+    sw s7,    28(a0)
+    sw s8,    32(a0)
+    sw s9,    36(a0)
+    sw s10,   40(a0)
+    sw s11,   44(a0)
+    sw sp,    48(a0)
+    sw ra,    52(a0)
 
     li      a0, 0
     ret
@@ -45,19 +51,22 @@ setjmp:
   .globl  longjmp
   .type   longjmp, @function
 longjmp:
-#ifdef LOS_COMPILE_LDM
-    ldmia {ra, sp, s0-s1}, (a0)
-#else
-    lw ra,  0(a0)
-    lw s0,  4(a0)
-    lw s1,  8(a0)
-    lw sp,  12(a0)
-#endif
+    lw s0,    0(a0)
+    lw s1,    4(a0)
+    lw s2,    8(a0)
+    lw s3,    12(a0)
+    lw s4,    16(a0)
+    lw s5,    20(a0)
+    lw s6,    24(a0)
+    lw s7,    28(a0)
+    lw s8,    32(a0)
+    lw s9,    36(a0)
+    lw s10,   40(a0)
+    lw s11,   44(a0)
+    lw sp,    48(a0)
+    lw ra,    52(a0)
 
-    beqz a1, 1f /* if a1 is equal to 0, go to 1f and return 1. */
-    move a0, a1 /* return a1. */
-    ret
-1:
-    li   a0, 1
+    seqz a0, a1 /* if a1 = 0, a0 = 1; if a1 != 0, a0 = 0 */
+    add  a0, a0, a1
     ret
     .size   longjmp, .-longjmp

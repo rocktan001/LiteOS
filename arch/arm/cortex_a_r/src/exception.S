@@ -33,8 +33,14 @@
     .extern   g_intCount
     .extern   g_curNestCount
     .extern   OsExcHandleEntry
+#ifdef LOSCFG_LIB_CONFIGURABLE
+    .extern   g_svcStackTop
+    .extern   g_excStackTop
+#else
     .extern   __svc_stack_top
     .extern   __exc_stack_top
+#endif
+
 #ifdef LOSCFG_GDB
     .extern   OsUndefIncExcHandleEntry
 #if __LINUX_ARM_ARCH__ >= 7
@@ -198,7 +204,11 @@ _osExceptDispatch:
 
     MSR     CPSR_c, #(CPSR_INT_DISABLE | CPSR_SVC_MODE)       @ Switch to SVC mode, and disable all interrupts
     MOV     R5, SP
+#ifdef LOSCFG_LIB_CONFIGURABLE
+    EXC_SP_SET g_excStackTop, OS_EXC_STACK_SIZE, R6, R7
+#else
     EXC_SP_SET __exc_stack_top, OS_EXC_STACK_SIZE, R6, R7
+#endif
 
     STMFD   SP!, {R2}                                         @ Push Exception PC
     STMFD   SP!, {LR}
@@ -227,7 +237,11 @@ _osExceptionSwi:
     CMP     R2, #0                                            @ if (g_intCount[ArchCurrCpuid()] > 0)
     BNE     _osExceptionGetSP                                 @ can not switch svc stack
 
+#ifdef LOSCFG_LIB_CONFIGURABLE
+    EXC_SP_SET g_svcStackTop, OS_EXC_SVC_STACK_SIZE, R6, R7 @ Switch to unified exception stack.
+#else
     EXC_SP_SET __svc_stack_top, OS_EXC_SVC_STACK_SIZE, R6, R7 @ Switch to unified exception stack.
+#endif
     ADD     R2, R2, #1
     STR     R2, [R3]
 

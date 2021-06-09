@@ -124,6 +124,14 @@ typedef volatile INT64     Atomic64;
 #define LOS_NOK            1
 #endif
 
+#ifndef LOS_USED
+#define LOS_USED           1
+#endif
+
+#ifndef LOS_UNUSED
+#define LOS_UNUSED         0
+#endif
+
 #define OS_FAIL            1
 #define OS_ERROR           (UINT32)(-1)
 #define OS_INVALID         (UINT32)(-1)

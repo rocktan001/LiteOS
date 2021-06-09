@@ -142,7 +142,7 @@ SECTIONS
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
-   __ram_data_end = _edata;
+    __ram_data_end = _edata;
   } >RAM AT> FLASH
 
   /* Uninitialized data section */
@@ -177,6 +177,8 @@ SECTIONS
   . = ALIGN(8);
   __los_heap_addr_start__ = .;
   __los_heap_addr_end__ = ORIGIN(RAM) + LENGTH(RAM) - _Min_Stack_Size - 1;
+
+  __fast_end = .;
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

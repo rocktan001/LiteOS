@@ -41,10 +41,10 @@ VOID OsDumpMemByte(size_t length, UINTPTR addr);
 
 #if defined(LOSCFG_DEBUG_SEMAPHORE) || defined(LOSCFG_DEBUG_MUTEX) || defined(LOSCFG_DEBUG_QUEUE)
 typedef struct {
-    CHAR *buf;             /**< Control block array total buffer */
-    size_t ctrlBlockSize; /**< Single control block size */
-    size_t ctrlBlockCnt;  /**< Number of control blocks */
-    UINT32 sortElemOff;    /**< The offset of the member to be compared in the control block */
+    CHAR *buf;             /* Control block array total buffer */
+    size_t ctrlBlockSize;  /* Single control block size */
+    size_t ctrlBlockCnt;   /* Number of control blocks */
+    UINT32 sortElemOff;    /* The offset of the member to be compared in the control block */
 } SortParam;
 
 /* Compare the size of the last access time */

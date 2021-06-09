@@ -30,9 +30,6 @@
 #include "los_swtmr_pri.h"
 #include "los_task_pri.h"
 #include "los_sched_pri.h"
-#ifdef LOSCFG_KERNEL_TICKLESS
-#include "lowpower/los_tickless_pri.h"
-#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,6 +45,10 @@ LITE_OS_SEC_BSS DOUBLE g_cycle2NsScale;
 /* spinlock for task module */
 LITE_OS_SEC_BSS SPIN_LOCK_INIT(g_tickSpin);
 
+#ifdef LOSCFG_KERNEL_TICKLESS
+STATIC WAKEUPFROMINTHOOK g_tickWakeupHook = NULL;
+#endif
+
 /*
  * Description : Tick interruption handler
  */
@@ -60,11 +61,9 @@ LITE_OS_SEC_TEXT VOID OsTickHandler(VOID)
     TICK_UNLOCK(intSave);
 
 #ifdef LOSCFG_KERNEL_TICKLESS
-    OsTickIrqFlagSet(OsTicklessFlagGet());
-#endif
-
-#if (LOSCFG_BASE_CORE_TICK_HW_TIME == YES)
-    HalClockIrqClear(); /* diff from every platform */
+    if (g_tickWakeupHook != NULL) {
+        g_tickWakeupHook(LOS_TICK_INT_FLAG);
+    }
 #endif
 
 #ifdef LOSCFG_BASE_CORE_TIMESLICE
@@ -73,7 +72,7 @@ LITE_OS_SEC_TEXT VOID OsTickHandler(VOID)
 
     OsTaskScan(); /* task timeout scan */
 
-#if (LOSCFG_BASE_CORE_SWTMR == YES)
+#ifdef LOSCFG_BASE_CORE_SWTMR
     OsSwtmrScan();
 #endif
 }
@@ -113,7 +112,7 @@ LITE_OS_SEC_TEXT_MINOR UINT64 LOS_TickCountGet(VOID)
 
 LITE_OS_SEC_TEXT_MINOR UINT32 LOS_CyclePerTickGet(VOID)
 {
-    return g_sysClock / LOSCFG_BASE_CORE_TICK_PER_SECOND;
+    return g_sysClock / KERNEL_TICK_PER_SECOND;
 }
 
 LITE_OS_SEC_TEXT_MINOR VOID LOS_GetCpuCycle(UINT32 *highCnt, UINT32 *lowCnt)
@@ -141,16 +140,19 @@ LITE_OS_SEC_TEXT_MINOR UINT64 LOS_CurrNanosec(VOID)
 
 LITE_OS_SEC_TEXT_MINOR UINT32 LOS_MS2Tick(UINT32 millisec)
 {
+    UINT64 delaySec;
+
     if (millisec == UINT32_MAX) {
         return UINT32_MAX;
     }
 
-    return (UINT32)(((UINT64)millisec * LOSCFG_BASE_CORE_TICK_PER_SECOND) / OS_SYS_MS_PER_SECOND);
+    delaySec = (UINT64)millisec * KERNEL_TICK_PER_SECOND;
+    return (UINT32)((delaySec + OS_SYS_MS_PER_SECOND - 1) / OS_SYS_MS_PER_SECOND);
 }
 
 LITE_OS_SEC_TEXT_MINOR UINT32 LOS_Tick2MS(UINT32 tick)
 {
-    return (UINT32)(((UINT64)tick * OS_SYS_MS_PER_SECOND) / LOSCFG_BASE_CORE_TICK_PER_SECOND);
+    return (UINT32)(((UINT64)tick * OS_SYS_MS_PER_SECOND) / KERNEL_TICK_PER_SECOND);
 }
 
 LITE_OS_SEC_TEXT_MINOR VOID LOS_Udelay(UINT32 usecs)
@@ -170,9 +172,9 @@ LITE_OS_SEC_TEXT_MINOR VOID LOS_Mdelay(UINT32 msecs)
 }
 
 #ifdef LOSCFG_KERNEL_TICKLESS
-LITE_OS_SEC_TEXT_MINOR VOID LOS_SysTickReload(UINT32 cycles)
+LITE_OS_SEC_TEXT_MINOR VOID LOS_IntTickWakeupHookReg(WAKEUPFROMINTHOOK hook)
 {
-    HalClockTickTimerReload(cycles);
+    g_tickWakeupHook = hook;
 }
 #endif
 

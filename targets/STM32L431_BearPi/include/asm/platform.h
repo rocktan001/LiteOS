@@ -29,6 +29,33 @@
 #ifndef _ASM_PLATFORM_H
 #define _ASM_PLATFORM_H
 
-#include "asm/hal_platform_ints.h"
+#include "los_typedef.h"
+#include "stm32l431xx.h"
+#include "stm32l4xx.h"
+#include "uart.h"
+#include "tim.h"
+
+#include "interrupt_config.h"
+#include "memmap_config.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#ifndef STM32L431xx
+#define STM32L431xx
+#endif
+
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern VOID app_init(VOID);
+#endif
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _ASM_PLATFORM_H */

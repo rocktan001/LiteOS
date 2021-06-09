@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 /**
- * @defgroup los_hw Hardware
+ * @defgroup sys reg
  * @ingroup kernel
  */
 

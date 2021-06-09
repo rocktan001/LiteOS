@@ -105,7 +105,7 @@ STATIC VOID SortQueueIndexArray(UINT32 *indexArray, UINT32 count)
     queueSortParam.buf = (CHAR *)g_queueDebugArray;
     queueSortParam.ctrlBlockSize = sizeof(QueueDebugCB);
     queueSortParam.ctrlBlockCnt = LOSCFG_BASE_IPC_QUEUE_LIMIT;
-    queueSortParam.sortElemOff = OFFSET_OF_FIELD(QueueDebugCB, lastAccessTime);
+    queueSortParam.sortElemOff = LOS_OFF_SET_OF(QueueDebugCB, lastAccessTime);
 
     if (count > 0) {
         SCHEDULER_LOCK(intSave);
@@ -118,7 +118,7 @@ STATIC VOID SortQueueIndexArray(UINT32 *indexArray, UINT32 count)
             (VOID)memcpy_s(&queueDebugNode, sizeof(QueueDebugCB),
                            &g_queueDebugArray[indexArray[index]], sizeof(QueueDebugCB));
             SCHEDULER_UNLOCK(intSave);
-            if (queueNode.queueState == OS_QUEUE_UNUSED) {
+            if (queueNode.queueState == LOS_UNUSED) {
                 continue;
             }
             OsQueueInfoOutPut(&queueNode);
@@ -149,11 +149,11 @@ VOID OsQueueCheck(VOID)
         (VOID)memcpy_s(&queueDebugNode, sizeof(QueueDebugCB),
                        &g_queueDebugArray[index], sizeof(QueueDebugCB));
         SCHEDULER_UNLOCK(intSave);
-        if ((queueNode.queueState == OS_QUEUE_UNUSED) ||
-            ((queueNode.queueState == OS_QUEUE_INUSED) && (queueDebugNode.creator == NULL))) {
+        if ((queueNode.queueState == LOS_UNUSED) ||
+            ((queueNode.queueState == LOS_USED) && (queueDebugNode.creator == NULL))) {
             continue;
         }
-        if ((queueNode.queueState == OS_QUEUE_INUSED) &&
+        if ((queueNode.queueState == LOS_USED) &&
             (queueNode.queueLen == queueNode.readWriteableCnt[OS_QUEUE_WRITE]) &&
             LOS_ListEmpty(&queueNode.readWriteList[OS_QUEUE_READ]) &&
             LOS_ListEmpty(&queueNode.readWriteList[OS_QUEUE_WRITE]) &&

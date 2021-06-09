@@ -27,7 +27,6 @@
  * --------------------------------------------------------------------------- */
 
 #include "los_task_pri.h"
-#include "los_err_pri.h"
 #include "los_priqueue_pri.h"
 #include "los_sem_pri.h"
 #include "los_mux_debug_pri.h"
@@ -38,13 +37,10 @@
 #include "los_percpu_pri.h"
 #include "los_trace.h"
 
-#ifdef LOSCFG_KERNEL_LOWPOWER
-#include "los_lowpower_pri.h"
-#endif
 #ifdef LOSCFG_KERNEL_CPUP
 #include "los_cpup_pri.h"
 #endif
-#if (LOSCFG_BASE_CORE_SWTMR == YES)
+#ifdef LOSCFG_BASE_CORE_SWTMR
 #include "los_swtmr_pri.h"
 #endif
 #ifdef LOSCFG_EXC_INTERACTION
@@ -62,20 +58,21 @@ LITE_OS_SEC_BSS LOS_DL_LIST                     g_losFreeTask;
 LITE_OS_SEC_BSS LOS_DL_LIST                     g_taskRecycleList;
 LITE_OS_SEC_BSS UINT32                          g_taskMaxNum;
 LITE_OS_SEC_BSS UINT32                          g_taskScheduled; /* one bit for each cores */
-#ifdef LOSCFG_LAZY_STACK
-LITE_OS_SEC_BSS UINT16                          g_stackFrameOffLenInTcb;
-#endif
 
 /* spinlock for task module, only available on SMP mode */
 LITE_OS_SEC_BSS SPIN_LOCK_INIT(g_taskSpin);
 
 #ifdef LOSCFG_BASE_CORE_TSK_MONITOR
 TSKSWITCHHOOK g_pfnUsrTskSwitchHook = NULL;
-#endif /* LOSCFG_BASE_CORE_TSK_MONITOR == YES */
+#endif
 
 #ifdef LOSCFG_KERNEL_LOWPOWER
-LowPowerHookFn g_lowPowerHook = NULL;
+STATIC LOWPOWERIDLEHOOK g_lowPowerHook = NULL;
+#ifdef LOSCFG_KERNEL_INTERMIT
+STATIC DELETETASKHOOK g_taskDelHook = NULL;
 #endif
+#endif
+IDLEHANDLERHOOK g_idleHandlerHook = NULL;
 
 STATIC VOID OsConsoleIDSetHook(UINT32 param1,
                                UINT32 param2) __attribute__((weakref("OsSetConsoleID")));
@@ -87,28 +84,12 @@ STATIC VOID OsExcStackCheckHook(VOID) __attribute__((weakref("OsExcStackCheck"))
 
 #define OS_INVALID_VALUE  0xFFFFFFFF
 
-/* temp task blocks for booting procedure */
-LITE_OS_SEC_BSS STATIC LosTaskCB                g_mainTask[LOSCFG_KERNEL_CORE_NUM];
-
-VOID *OsGetMainTask()
+#ifdef LOSCFG_KERNEL_INTERMIT
+VOID OsTaskDelHookReg(DELETETASKHOOK hook)
 {
-    return (g_mainTask + ArchCurrCpuid());
+    g_taskDelHook = hook;
 }
-
-VOID OsSetMainTask()
-{
-    UINT32 i;
-    for (i = 0; i < LOSCFG_KERNEL_CORE_NUM; i++) {
-        g_mainTask[i].taskStatus = OS_TASK_STATUS_UNUSED;
-        g_mainTask[i].taskId = LOSCFG_BASE_CORE_TSK_LIMIT;
-        g_mainTask[i].priority = OS_TASK_PRIORITY_LOWEST + 1;
-        g_mainTask[i].taskName = "osMain";
-#ifdef LOSCFG_KERNEL_SMP_LOCKDEP
-        g_mainTask[i].lockDep.lockDepth = 0;
-        g_mainTask[i].lockDep.waitLock = NULL;
 #endif
-    }
-}
 
 LITE_OS_SEC_TEXT_INIT STATIC VOID OsTaskCBRecycleToFree(VOID)
 {
@@ -171,6 +152,10 @@ LITE_OS_SEC_TEXT WEAK VOID OsIdleTask(VOID)
 {
     while (1) {
         LOS_TaskResRecycle();
+
+        if (g_idleHandlerHook != NULL) {
+            g_idleHandlerHook();
+        }
 
 #ifdef LOSCFG_KERNEL_LOWPOWER
         if (g_lowPowerHook != NULL) {
@@ -304,8 +289,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsTaskInit(VOID)
     UINT32 ret;
     UINT32 size;
 
-    g_taskMaxNum = LOSCFG_BASE_CORE_TSK_LIMIT;
-    size = (g_taskMaxNum + 1) * sizeof(LosTaskCB);
+    size = (KERNEL_TSK_LIMIT + 1) * sizeof(LosTaskCB);
     /*
      * This memory is resident memory and is used to save the system resources
      * of task control block and will not be freed.
@@ -318,7 +302,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsTaskInit(VOID)
 
     LOS_ListInit(&g_losFreeTask);
     LOS_ListInit(&g_taskRecycleList);
-    for (index = 0; index < g_taskMaxNum; index++) {
+    for (index = 0; index < KERNEL_TSK_LIMIT; index++) {
         g_taskCBArray[index].taskStatus = OS_TASK_STATUS_UNUSED;
         g_taskCBArray[index].taskId = index;
         LOS_ListTailInsert(&g_losFreeTask, &g_taskCBArray[index].pendList);
@@ -342,10 +326,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsTaskInit(VOID)
         }
     }
 
-#ifdef LOSCFG_LAZY_STACK
-    g_stackFrameOffLenInTcb = (UINT16)LOS_OFF_SET_OF(LosTaskCB, stackFrame);
-#endif
-
+    g_taskMaxNum = KERNEL_TSK_LIMIT;
     return LOS_OK;
 }
 
@@ -364,7 +345,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsIdleTaskCreate(VOID)
 
     (VOID)memset_s((VOID *)(&taskInitParam), sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)OsIdleTask;
-    taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_IDLE_STACK_SIZE;
+    taskInitParam.uwStackSize = KERNEL_TSK_IDLE_STACK_SIZE;
     taskInitParam.pcName = "IdleCore000";
     taskInitParam.usTaskPrio = OS_TASK_PRIORITY_LOWEST;
 #ifdef LOSCFG_KERNEL_SMP
@@ -442,11 +423,16 @@ LITE_OS_SEC_TEXT_MINOR VOID OsTaskSwitchCheck(const LosTaskCB *oldTask, const Lo
 #endif /* LOSCFG_BASE_CORE_TSK_MONITOR */
 
 #ifdef LOSCFG_KERNEL_LOWPOWER
-LITE_OS_SEC_TEXT_MINOR VOID LOS_LowpowerHookReg(LowPowerHookFn hook)
+LITE_OS_SEC_TEXT_MINOR VOID LOS_LowpowerHookReg(LOWPOWERIDLEHOOK hook)
 {
     g_lowPowerHook = hook;
 }
 #endif
+
+LITE_OS_SEC_TEXT_MINOR VOID LOS_IdleHandlerHookReg(IDLEHANDLERHOOK hook)
+{
+    g_idleHandlerHook = hook;
+}
 
 STATIC BOOL OsTaskDeleteCheckDetached(const LosTaskCB *taskCB)
 {
@@ -486,7 +472,8 @@ STATIC VOID OsTaskDeleteJoined(LosTaskCB *taskCB, VOID *ret)
     LOS_SpinLock(&g_taskSpin);
     OsSchedResched();
 
-    SCHEDULER_UNLOCK(intSave);
+    LOS_SpinUnlock(&g_taskSpin);
+    LOS_IntRestore(intSave);
 #endif
 }
 
@@ -565,11 +552,11 @@ STATIC UINT32 OsTaskCreateParamCheckStatic(const UINT32 *taskId,
         return ret;
     }
 
-    if ((UINTPTR)topStack & (OS_TASK_STACK_ADDR_ALIGN - 1)) {
+    if ((UINTPTR)topStack & (LOSCFG_STACK_POINT_ALIGN_SIZE - 1)) {
         return LOS_ERRNO_TSK_STKSZ_NOT_ALIGN;
     }
 
-    if (initParam->uwStackSize & (OS_TASK_STACK_ADDR_ALIGN - 1)) {
+    if (initParam->uwStackSize & (LOSCFG_STACK_POINT_ALIGN_SIZE - 1)) {
         return LOS_ERRNO_TSK_STKSZ_NOT_ALIGN;
     }
 
@@ -610,7 +597,7 @@ LITE_OS_SEC_TEXT_INIT STATIC UINT32 OsTaskCreateParamCheck(const UINT32 *taskId,
     }
 
     if (initParam->uwStackSize == 0) {
-        initParam->uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+        initParam->uwStackSize = KERNEL_TSK_DEFAULT_STACK_SIZE;
     }
     initParam->uwStackSize = (UINT32)ALIGN(initParam->uwStackSize, LOSCFG_STACK_POINT_ALIGN_SIZE);
 
@@ -640,31 +627,23 @@ LITE_OS_SEC_TEXT_INIT STATIC VOID OsTaskStackAlloc(VOID **topStack, UINT32 stack
 #endif
 }
 
+#ifdef LOSCFG_KERNEL_SMP_TASK_SYNC
 STATIC INLINE UINT32 OsTaskSyncCreate(LosTaskCB *taskCB)
 {
-#ifdef LOSCFG_KERNEL_SMP_TASK_SYNC
     UINT32 ret = LOS_SemCreate(0, &taskCB->syncSignal);
     if (ret != LOS_OK) {
         return LOS_ERRNO_TSK_MP_SYNC_RESOURCE;
     }
-#else
-    (VOID)taskCB;
-#endif
     return LOS_OK;
 }
 
 STATIC INLINE VOID OsTaskSyncDestroy(const LosTaskCB *taskCB)
 {
-#ifdef LOSCFG_KERNEL_SMP_TASK_SYNC
     (VOID)LOS_SemDelete(taskCB->syncSignal);
-#else
-    (VOID)taskCB;
-#endif
 }
 
 STATIC INLINE UINT32 OsTaskSyncWait(const LosTaskCB *taskCB)
 {
-#ifdef LOSCFG_KERNEL_SMP_TASK_SYNC
     UINT32 ret = LOS_OK;
 
     LOS_ASSERT(LOS_SpinHeld(&g_taskSpin));
@@ -681,15 +660,10 @@ STATIC INLINE UINT32 OsTaskSyncWait(const LosTaskCB *taskCB)
     LOS_SpinLock(&g_taskSpin);
 
     return ret;
-#else
-    (VOID)taskCB;
-    return LOS_OK;
-#endif
 }
 
 STATIC INLINE VOID OsTaskSyncWake(const LosTaskCB *taskCB)
 {
-#ifdef LOSCFG_KERNEL_SMP_TASK_SYNC
     UINT32 syncSignal = taskCB->syncSignal;
     /*
      * unlock to let synchronization works.
@@ -709,10 +683,30 @@ STATIC INLINE VOID OsTaskSyncWake(const LosTaskCB *taskCB)
     (VOID)LOS_SemDelete(syncSignal);
 
     LOS_SpinLock(&g_taskSpin);
-#else
-    (VOID)taskCB;
-#endif
 }
+#else
+STATIC INLINE UINT32 OsTaskSyncCreate(LosTaskCB *taskCB)
+{
+    (VOID)taskCB;
+    return LOS_OK;
+}
+
+STATIC INLINE VOID OsTaskSyncDestroy(const LosTaskCB *taskCB)
+{
+    (VOID)taskCB;
+}
+
+STATIC INLINE UINT32 OsTaskSyncWait(const LosTaskCB *taskCB)
+{
+    (VOID)taskCB;
+    return LOS_OK;
+}
+
+STATIC INLINE VOID OsTaskSyncWake(const LosTaskCB *taskCB)
+{
+    (VOID)taskCB;
+}
+#endif
 
 STATIC VOID OsTaskDelActionOnRun(LosTaskCB *taskCB)
 {
@@ -733,6 +727,11 @@ LITE_OS_SEC_TEXT_INIT STATIC BOOL OsTaskDelAction(LosTaskCB *taskCB, BOOL useUsr
 
     LOS_TRACE(TASK_DELETE, taskCB->taskId, taskCB->taskStatus, taskCB->usrStack);
 
+#ifdef LOSCFG_KERNEL_INTERMIT
+    if (g_taskDelHook != NULL) {
+        g_taskDelHook(taskCB);
+    }
+#endif
     if (taskCB->taskStatus & OS_TASK_STATUS_RUNNING) {
 #ifdef LOSCFG_TASK_STATIC_ALLOCATION
         if (useUsrStack) {
@@ -847,14 +846,14 @@ LITE_OS_SEC_TEXT_INIT STATIC VOID OsTaskCBInit(LosTaskCB *taskCB, const TSK_INIT
     taskCB->taskName     = initParam->pcName;
     taskCB->msg          = NULL;
 
-    taskCB->taskFlags    = ((initParam->uwResved == LOS_TASK_STATUS_DETACHED) ?
-                            OS_TASK_FLAG_DETACHED : 0); /* set the task is detached or joinable */
+     /* set the task is detached or joinable */
+    taskCB->taskFlags    = ((initParam->uwResved == LOS_TASK_STATUS_DETACHED) ? OS_TASK_FLAG_DETACHED : 0);
     taskCB->usrStack     = useUsrStack ? 1 : 0; /* 0: dynamicly alloc stack space;1: user inputs stack space */
     taskCB->signal       = SIGNAL_NONE;
 
 #ifdef LOSCFG_KERNEL_SMP
     taskCB->currCpu      = OS_TASK_INVALID_CPUID;
-#if (LOSCFG_SCHED_MQ == YES)
+#ifdef LOSCFG_SCHED_MQ
     taskCB->lastCpu      = OS_TASK_INVALID_CPUID;
 #endif
     taskCB->cpuAffiMask  = (initParam->usCpuAffiMask) ? initParam->usCpuAffiMask : LOSCFG_KERNEL_CPU_MASK;
@@ -908,7 +907,7 @@ STATIC UINT32 OsTaskCreateOnly(UINT32 *taskId, TSK_INIT_PARAM_S *initParam, VOID
     SCHEDULER_LOCK(intSave);
     errRet = OsTaskGetFreeTaskCB(&taskCB);
     if (errRet != LOS_OK) {
-        OS_GOTO_ERREND();
+        goto LOS_ERREND;
     }
     SCHEDULER_UNLOCK(intSave);
 
@@ -921,7 +920,8 @@ STATIC UINT32 OsTaskCreateOnly(UINT32 *taskId, TSK_INIT_PARAM_S *initParam, VOID
         OsTaskStackAlloc(&topStack, initParam->uwStackSize, pool);
         if (topStack == NULL) {
             errRet = LOS_ERRNO_TSK_NO_MEMORY;
-            goto LOS_ERREND_REWIND_SYNC;
+            OsTaskSyncDestroy(taskCB);
+            goto LOS_ERREND_REWIND_TCB;
         }
     }
     stackPtr = OsTaskStackInit(taskCB->taskId, initParam->uwStackSize, topStack);
@@ -940,8 +940,6 @@ STATIC UINT32 OsTaskCreateOnly(UINT32 *taskId, TSK_INIT_PARAM_S *initParam, VOID
     *taskId = taskCB->taskId;
     return LOS_OK;
 
-LOS_ERREND_REWIND_SYNC:
-    OsTaskSyncDestroy(taskCB);
 LOS_ERREND_REWIND_TCB:
     SCHEDULER_LOCK(intSave);
     LOS_ListAdd(&g_losFreeTask, &taskCB->pendList);
@@ -1018,7 +1016,8 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskCreate(UINT32 *taskId, TSK_INIT_PARAM_S *in
 LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskDelete(UINT32 taskId)
 {
     LosTaskCB *taskCB = NULL;
-    UINT32 intSave, errRet;
+    UINT32 intSave;
+    UINT32 errRet = LOS_OK;
     UINT16 tempStatus;
 
     if (OS_TASK_ID_CHECK_INVALID(taskId)) {
@@ -1035,11 +1034,11 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskDelete(UINT32 taskId)
     tempStatus = taskCB->taskStatus;
     if (tempStatus & OS_TASK_STATUS_UNUSED) {
         errRet = LOS_ERRNO_TSK_NOT_CREATED;
-        OS_GOTO_ERREND();
+        goto LOS_RETURN;
     }
     if ((tempStatus & OS_TASK_STATUS_RUNNING) &&
         !OsTaskDeleteCheckOnRun(taskCB, &errRet)) {
-        OS_GOTO_ERREND();
+        goto LOS_RETURN;
     }
 
     if (tempStatus & OS_TASK_STATUS_READY) {
@@ -1059,9 +1058,6 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskDelete(UINT32 taskId)
     taskCB->event.uwEventID = OS_INVALID_VALUE;
     taskCB->eventMask = 0;
 #endif
-#ifdef LOSCFG_LAZY_STACK
-    taskCB->stackFrame = 0;
-#endif
 #ifdef LOSCFG_KERNEL_CPUP
     (VOID)memset_s((VOID *)OsCpupCBGet(taskCB->taskId), sizeof(OsCpupCB), 0, sizeof(OsCpupCB));
 #endif
@@ -1072,10 +1068,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskDelete(UINT32 taskId)
         OsSchedResched();
     }
 
-    SCHEDULER_UNLOCK(intSave);
-    return LOS_OK;
-
-LOS_ERREND:
+LOS_RETURN:
     SCHEDULER_UNLOCK(intSave);
     return errRet;
 }
@@ -1103,10 +1096,10 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskResume(UINT32 taskId)
 
     if (tempStatus & OS_TASK_STATUS_UNUSED) {
         errRet = LOS_ERRNO_TSK_NOT_CREATED;
-        OS_GOTO_ERREND();
+        goto LOS_ERREND;
     } else if (!(tempStatus & OS_TASK_STATUS_SUSPEND)) {
         errRet = LOS_ERRNO_TSK_NOT_SUSPENDED;
-        OS_GOTO_ERREND();
+        goto LOS_ERREND;
     }
 
     taskCB->taskStatus &= ~OS_TASK_STATUS_SUSPEND;
@@ -1178,7 +1171,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskSuspend(UINT32 taskId)
     LosTaskCB *taskCB = NULL;
     LosTaskCB *runTask = NULL;
     UINT16 tempStatus;
-    UINT32 errRet;
+    UINT32 errRet = LOS_OK;
 
     if (OS_TASK_ID_CHECK_INVALID(taskId)) {
         return LOS_ERRNO_TSK_ID_INVALID;
@@ -1193,17 +1186,17 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskSuspend(UINT32 taskId)
     tempStatus = taskCB->taskStatus;
     if (tempStatus & OS_TASK_STATUS_UNUSED) {
         errRet = LOS_ERRNO_TSK_NOT_CREATED;
-        OS_GOTO_ERREND();
+        goto LOS_RETURN;
     }
 
     if (tempStatus & OS_TASK_STATUS_SUSPEND) {
         errRet = LOS_ERRNO_TSK_ALREADY_SUSPENDED;
-        OS_GOTO_ERREND();
+        goto LOS_RETURN;
     }
 
     if ((tempStatus & OS_TASK_STATUS_RUNNING) &&
         !OsTaskSuspendCheckOnRun(taskCB, &errRet)) {
-        OS_GOTO_ERREND();
+        goto LOS_RETURN;
     }
 
     if (tempStatus & OS_TASK_STATUS_READY) {
@@ -1221,10 +1214,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskSuspend(UINT32 taskId)
         OsSchedResched();
     }
 
-    SCHEDULER_UNLOCK(intSave);
-    return LOS_OK;
-
-LOS_ERREND:
+LOS_RETURN:
     SCHEDULER_UNLOCK(intSave);
     return errRet;
 }
@@ -1409,7 +1399,6 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_TaskYield(VOID)
     /* reset timeslice of yielded task */
     runTask->timeSlice = 0;
 #endif
-
     tskCount = OsPriQueueSize(runTask->priority);
     if (tskCount > 0) {
         runTask->taskStatus |= OS_TASK_STATUS_READY;
@@ -1462,6 +1451,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_TaskInfoGet(UINT32 taskId, TSK_INFO_S *taskInf
 {
     UINT32 intSave;
     LosTaskCB *taskCB = NULL;
+    errno_t errorCode;
 
     if (taskInfo == NULL) {
         return LOS_ERRNO_TSK_PTR_NULL;
@@ -1497,16 +1487,19 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_TaskInfoGet(UINT32 taskId, TSK_INFO_S *taskInf
     taskInfo->pTaskMux = taskCB->taskMux;
     taskInfo->uwTaskID = taskId;
 
-    if (strncpy_s(taskInfo->acName, LOS_TASK_NAMELEN, taskCB->taskName, LOS_TASK_NAMELEN - 1) != EOK) {
-        PRINT_ERR("Task name copy failed!\n");
-    }
+    /* It will cause double lock issue that print after SCHEDULER_LOCK,
+     * so handle the return value errorCode after SCHEDULER_UNLOCK */
+    errorCode = strncpy_s(taskInfo->acName, LOS_TASK_NAMELEN, taskCB->taskName, LOS_TASK_NAMELEN - 1);
     taskInfo->uwBottomOfStack = TRUNCATE(((UINTPTR)taskCB->topOfStack + taskCB->stackSize),
-                                         OS_TASK_STACK_ADDR_ALIGN);
+                                         LOSCFG_STACK_POINT_ALIGN_SIZE);
     taskInfo->uwCurrUsed = (UINT32)(taskInfo->uwBottomOfStack - taskInfo->uwSP);
 
     taskInfo->bOvf = OsStackWaterLineGet((const UINTPTR *)taskInfo->uwBottomOfStack,
                                          (const UINTPTR *)taskInfo->uwTopOfStack, &taskInfo->uwPeakUsed);
     SCHEDULER_UNLOCK(intSave);
+    if (errorCode != EOK) {
+        PRINT_ERR("Task name copy failed, err=%d\n", errorCode);
+    }
 
     return LOS_OK;
 }

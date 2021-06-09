@@ -96,7 +96,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdCpup(INT32 argc, const CHAR **argv)
     }
 
     if (argc == 1) {
-        OsCmdCpupOperateOneParam(mode);
+        OsCmdCpupOperateOneParam((UINT32)mode);
         return 0;
     }
 
@@ -112,7 +112,7 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsShellCmdCpup(INT32 argc, const CHAR **argv)
     }
 
     if (argc == 2) {
-        OsCmdCpupOperateTwoParam(mode, taskId);
+        OsCmdCpupOperateTwoParam((UINT32)mode, (UINT32)taskId);
         return 0;
     }
 

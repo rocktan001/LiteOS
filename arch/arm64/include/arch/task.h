@@ -45,7 +45,7 @@ extern "C" {
 
 /* The size of this structure must be smaller than or equal to the size specified by OS_TSK_STACK_ALIGN (16 bytes). */
 typedef struct {
-#ifdef LOSCFG_AARCH64_FPU
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     UINT128 Q[FP_REGS_NUM]; /* Q0-Q31 */
     UINT64 regFPCR;         /* FPCR */
     UINT64 regFPSR;         /* FPSR */

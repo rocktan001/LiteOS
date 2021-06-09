@@ -14,7 +14,7 @@ def mconf_set_env(style, conf, header):
     os.environ["MENUCONFIG_STYLE"] = style
     os.environ["KCONFIG_CONFIG"] = conf
     os.environ["KCONFIG_CONFIG_HEADER"] = header
-    os.environ["KCONFIG_AUTOHEADER"] = os.path.join("targets", "bsp", "common", "menuconfig.h")
+    os.environ["KCONFIG_AUTOHEADER"] = os.path.join("targets", "menuconfig.h")
     os.environ["CONFIG_"] = ""
 
 def mconfig(argv):

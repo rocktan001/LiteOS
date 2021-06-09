@@ -27,14 +27,12 @@
  * --------------------------------------------------------------------------- */
 
 .syntax unified
-#if defined(LOSCFG_ARCH_CORTEX_M0)
+#if defined(LOSCFG_ARCH_ARM_V6M)
 .arch armv6-m
-#else
-#if defined(LOSCFG_ARCH_CORTEX_M33)
+#elif defined(LOSCFG_ARCH_CORTEX_M33)
 .arch armv8-m.main
 #else
 .arch armv7e-m
-#endif
 #endif
 .thumb
 
@@ -44,7 +42,7 @@
 .type longjmp, %function
 .global longjmp
 longjmp:
-#if defined(LOSCFG_ARCH_CORTEX_M0)
+#if defined(LOSCFG_ARCH_ARM_V6M)
     adds    r0, #16
     ldmia   r0!, {r3-r7}
 
@@ -62,7 +60,7 @@ longjmp:
     mov     sp, r3
 #else
     ldmia   r0!, {r4-r11,lr}
-#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_CORTEX_M0)
+#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_ARM_V6M)
     vldmia  r0!, {d8-d15}
 #endif
     ldr     sp, [r0]
@@ -70,7 +68,7 @@ longjmp:
     mov     r0, r1
     cmp     r1, #0
     bne     1f
-#if defined(LOSCFG_ARCH_CORTEX_M0)
+#if defined(LOSCFG_ARCH_ARM_V6M)
     movs    r0, #1
 #else
     mov     r0, #1
@@ -81,7 +79,7 @@ longjmp:
 .type setjmp, %function
 .global setjmp
 setjmp:
-#if defined(LOSCFG_ARCH_CORTEX_M0)
+#if defined(LOSCFG_ARCH_ARM_V6M)
     stmia   r0!, {r4-r7}
 
     mov     r3, r8
@@ -96,7 +94,7 @@ setjmp:
     movs    r0, #0
 #else
     stmia   r0!, {r4-r11,lr}
-#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_CORTEX_M0)
+#if !defined(LOSCFG_ARCH_CORTEX_M3) && !defined(LOSCFG_ARCH_ARM_V6M)
     vstmia r0!, {d8-d15}
 #endif
     str     sp, [r0]

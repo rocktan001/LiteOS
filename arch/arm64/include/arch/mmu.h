@@ -26,6 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+/**
+ * @defgroup mmu
+ * @ingroup kernel
+ */
+
 #ifndef _ARCH_MMU_H
 #define _ARCH_MMU_H
 
@@ -141,6 +146,9 @@ typedef struct {
                                        MMU_SECOND_LEVEL_SMALL_PAGE_TABLE_ID
                                        or big page ID(64K):MMU_SECOND_LEVEL_BIG_PAGE_TABLE_ID */
 } SENCOND_PAGE;
+
+extern SENCOND_PAGE g_mmuOsPage;
+extern SENCOND_PAGE g_mmuAppPage;
 
 /**
  * @ingroup mmu

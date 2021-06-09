@@ -31,6 +31,7 @@
 
 #include "los_swtmr.h"
 #include "los_spinlock.h"
+#include "los_sortlink_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -40,80 +41,47 @@ extern "C" {
 
 #ifdef LOSCFG_BASE_CORE_SWTMR
 
-/**
- * @ingroup los_swtmr_pri
- * Software timer state
- */
 enum SwtmrState {
-    OS_SWTMR_STATUS_UNUSED,     /**< The software timer is not used.    */
-    OS_SWTMR_STATUS_CREATED,    /**< The software timer is created.     */
-    OS_SWTMR_STATUS_TICKING     /**< The software timer is timing.      */
+    OS_SWTMR_STATUS_UNUSED,     /* The software timer is not used. */
+    OS_SWTMR_STATUS_CREATED,    /* The software timer is created. */
+    OS_SWTMR_STATUS_TICKING     /* The software timer is timing. */
 };
 
-/**
- * @ingroup los_swtmr_pri
- * Structure of the callback function that handles software timer timeout
- */
+/* Structure of the callback function that handles software timer timeout */
 typedef struct {
-    SWTMR_PROC_FUNC handler;    /**< Callback function that handles software timer timeout  */
-    UINTPTR arg;                /**< Parameter passed in when the callback function
+    SWTMR_PROC_FUNC handler;    /* Callback function that handles software timer timeout */
+    UINTPTR arg;                /* Parameter passed in when the callback function
                                      that handles software timer timeout is called */
 } SwtmrHandlerItem;
 
-/**
- * @ingroup los_swtmr
- * Software timer control structure
- */
 typedef struct {
     SortLinkList sortList;
-    UINT8 state;      /**< Software timer state */
-    UINT8 mode;       /**< Software timer mode */
-    UINT8 overrun;    /**< Times that a software timer repeats timing */
-    UINT16 timerId;   /**< Software timer ID */
-    UINT32 interval;  /**< Timeout interval of a periodic software timer (unit: tick) */
-    UINT32 expiry;    /**< Timeout interval of an one-off software timer (unit: tick) */
+    UINT8 state;      /* Software timer state */
+    UINT8 mode;       /* Software timer mode */
+    UINT8 overrun;    /* Times that a software timer repeats timing */
+    UINT16 timerId;   /* Software timer ID */
+    UINT32 interval;  /* Timeout interval of a periodic software timer (unit: tick) */
+    UINT32 expiry;    /* Timeout interval of an one-off software timer (unit: tick) */
 #ifdef LOSCFG_KERNEL_SMP
-    UINT32 cpuid;     /**< The cpu where the timer running on */
+    UINT32 cpuid;     /* The cpu where the timer running on */
 #endif
-    UINTPTR arg;      /**< Parameter passed in when the callback function
+    UINTPTR arg;      /* Parameter passed in when the callback function
                              that handles software timer timeout is called */
-    SWTMR_PROC_FUNC handler; /**< Callback function that handles software timer timeout */
+    SWTMR_PROC_FUNC handler; /* Callback function that handles software timer timeout */
 } LosSwtmrCB;
 
-/**
- * @ingroup los_swtmr_pri
- * Type of the pointer to the structure of the callback function that handles software timer timeout
- */
+/* Type of the pointer to the structure of the callback function that handles software timer timeout */
 typedef SwtmrHandlerItem *SwtmrHandlerItemPtr;
 
 extern LosSwtmrCB *g_swtmrCBArray;
 
-extern SortLinkAttribute g_swtmrSortLink; /* The software timer count list */
+/* The software timer count list */
+extern SortLinkAttribute g_swtmrSortLink;
 
-#define OS_SWT_FROM_SID(swtmrId) ((LosSwtmrCB *)g_swtmrCBArray + ((swtmrId) % LOSCFG_BASE_CORE_SWTMR_LIMIT))
+#define OS_SWT_FROM_SWTID(swtmrId) ((LosSwtmrCB *)g_swtmrCBArray + ((swtmrId) % KERNEL_SWTMR_LIMIT))
 
-/**
- * @ingroup los_swtmr_pri
- * @brief Scan a software timer.
- *
- * @par Description:
- * <ul>
- * <li>This API is used to scan a software timer when a Tick interrupt occurs and determine whether
- * the software timer expires.</li>
- * </ul>
- * @attention
- * <ul>
- * <li>None.</li>
- * </ul>
- *
- * @param  None.
- *
- * @retval None.
- * @par Dependency:
- * <ul><li>los_swtmr_pri.h: the header file that contains the API declaration.</li></ul>
- * @see LOS_SwtmrStop
- * @since Huawei LiteOS V100R001C00
- */
+/* This API is used to scan a software timer when a Tick interrupt occurs and determine whether
+ * the software timer expires. */
 extern VOID OsSwtmrScan(VOID);
 extern UINT32 OsSwtmrInit(VOID);
 extern VOID OsSwtmrTask(VOID);

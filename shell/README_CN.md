@@ -300,6 +300,10 @@ date  -r  Filename（开源版本暂不支持该命令）
 |-r|查询文件修改时间，需要使能LOSCFG_FS_VFS|N/A|
 
 #### 使用指南
+- 该命令依赖于`LOSCFG_SHELL_EXTENDED_CMDS`，该宏开关可以通过`make menuconfig`命令在菜单项中开启`Enable Shell Ext CMDs`使能。
+   ```
+   Debug  ---> Enable a Debug Version ---> Enable Shell ---> Enable Shell Ext CMDs
+   ```
 -  date参数缺省时，默认显示当前系统时间。
 -  --help、+Format、-s、-r不能混合使用。
 
@@ -1142,7 +1146,7 @@ dmesg > file
 #### 参数说明
 |参数|参数说明|取值范围|
 |:---:|:---|:---|
-|-c|打印缓存区内容并清空缓存区|N/A|
+|-c|打印缓存区内容并清空缓存区，此打印不受-D、-L影响|N/A|
 |-C|清空缓存区|N/A|
 |-D \| -E|关闭/开启控制台打印，开源版本暂不支持该参数|N/A|
 |-L \| -U|关闭/开启串口打印，开源版本暂不支持该参数|N/A|
@@ -1186,6 +1190,9 @@ Huawei LiteOS # dmesg
 
 Huawei LiteOS # dmesg
 ```
+
+>![](public_sys-resources/icon-notice.gif) **须知：**
+>dmesg -C是日志维测命令，只支持串口输出，不支持通过console输出到其他输出端口（Telnet、USB等）。
 
 ### stack
 
@@ -1240,6 +1247,9 @@ Huawei LiteOS # stack
   exc_stack      1        0x46b40        0x1000       0x0   
   exc_stack      0        0x47b40        0x1000       0x0
 ```
+
+>![](public_sys-resources/icon-notice.gif) **须知：**
+>stack是异常维测命令，只支持串口输出，不支持通过console输出到其他输出端口（Telnet、USB等）。
 
 ### cpup
 #### 命令功能
@@ -1307,6 +1317,10 @@ watch --over
 |--over|关闭当前的监听|N/A|N/A|
 
 #### 使用指南
+- 该命令依赖于`LOSCFG_SHELL_EXTENDED_CMDS`，该宏开关可以通过`make menuconfig`命令在菜单项中开启`Enable Shell Ext CMDs`使能。
+   ```
+   Debug  ---> Enable a Debug Version ---> Enable Shell ---> Enable Shell Ext CMDs
+   ```
 -  command参数必须是Shell命令，对于非Shell命令，会有错误提示“command is not fount”。
 -  如果要监听命令，command是必填参数。
 -  --over参数不能与其他参数混合使用。
@@ -1394,6 +1408,7 @@ trace_mask [MASK]
 
 -   如果不设置事件掩码，或者执行该命令时参数缺省，则默认仅开启任务和中断事件记录。
 -   trace_mask后加MASK，则开启对应模块的事件记录。
+-   具体的模块掩码MASK参见los_trace.h中定义的LOS_TRACE_MASK。
 
 #### 使用实例
 

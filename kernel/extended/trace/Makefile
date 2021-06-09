@@ -21,7 +21,7 @@ ifeq ($(LOSCFG_TRACE_PIPELINE_SERIAL), y)
 LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/kernel/extended/trace/pipeline/serial
 endif
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 
 include $(MODULE)
 

@@ -39,7 +39,6 @@
 #include "stdint.h"
 #include "los_sys.h"
 #include "los_tick_pri.h"
-#include "asm/hal_platform_ints.h"
 #include "los_tick.h"
 
 #ifdef __cplusplus
@@ -76,6 +75,8 @@ extern "C" {
 
 #define TV_SEC_MAX ((INT_MAX / 1000000L) - 2)
 #define TV_SEC_MIN ((INT_MIN / 1000000L) + 2)
+
+#define TIME_REMAINDER(number, unit) (((UINT64)(number) * LOSCFG_BASE_CORE_TICK_PER_SECOND) % (unit))
 
 STATIC INLINE BOOL ValidTimeval(const struct timeval *tv)
 {
@@ -319,7 +320,7 @@ int setlocalseconds(int seconds)
     return settimeofday(&tv, NULL);
 }
 
-STATIC INT32 OsGettimeOfDay(struct timeval64 *tv, struct timezone *tz)
+STATIC INT32 OsGettimeOfDay(struct timeval64 *tv, const struct timezone *tz)
 {
     UINT64 nowNsec;
     UINT32 intSave;
@@ -466,70 +467,56 @@ int clock_getres(clockid_t clockId, struct timespec *tp)
     TIME_RETURN(0);
 }
 
-STATIC INT32 DoSleep(UINT32 mseconds)
+int usleep(unsigned useconds)
 {
-    UINT32 interval;
-    UINT32 ret;
+    UINT64 ticks = 0;
 
-    if (mseconds == 0) {
-        interval = 0;
-    } else {
-        interval = LOS_MS2Tick(mseconds);
-        if (interval == 0) {
-            interval = 1;
+    if (useconds != 0) {
+        ticks = ((UINT64)useconds * LOSCFG_BASE_CORE_TICK_PER_SECOND) / OS_SYS_US_PER_SECOND;
+        if (TIME_REMAINDER(useconds, OS_SYS_US_PER_SECOND) && (ticks < UINT32_MAX)) {
+            ticks += 1;
+        } else if (ticks > UINT32_MAX) {
+            ticks = UINT32_MAX;
         }
     }
 
-    ret = LOS_TaskDelay(interval);
-    if (ret == LOS_OK) {
+    if (LOS_TaskDelay((UINT32)ticks) == LOS_OK) {
         return 0;
     }
     return -1;
 }
 
-int usleep(unsigned useconds)
-{
-    UINT32 interval;
-
-    /* the values not less than per Millisecond */
-    if (useconds < OS_SYS_MS_PER_SECOND) {
-        if (useconds != 0) {
-            interval = OS_SYS_MS_PER_SECOND / LOSCFG_BASE_CORE_TICK_PER_SECOND;
-        } else {
-            interval = 0;
-        }
-        return DoSleep(interval);
-    }
-
-    return DoSleep(useconds / OS_SYS_US_PER_MS);
-}
-
 int nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
 {
-    UINT64 useconds;
-    INT32 ret = -1;
+    UINT64 nanosec;
+    UINT64 ticks = 0;
 
     (VOID)rmtp;
     /* expire time */
     if (rqtp == NULL) {
         errno = EINVAL;
-        return ret;
+        return -1;
     }
 
     if (!ValidTimespec(rqtp)) {
         errno = EINVAL;
-        return ret;
+        return -1;
     }
 
-    useconds = (((UINT64)rqtp->tv_sec * OS_SYS_US_PER_SECOND) + (rqtp->tv_nsec / OS_SYS_NS_PER_US));
-    if ((useconds == 0) && (rqtp->tv_nsec != 0)) {
-        useconds = 1;
-    } else if (useconds > UINT32_MAX) {
-        useconds = UINT32_MAX;
+    nanosec = (UINT64)rqtp->tv_sec * OS_SYS_NS_PER_SECOND + rqtp->tv_nsec;
+    if (nanosec != 0) {
+        ticks = ((UINT64)nanosec * LOSCFG_BASE_CORE_TICK_PER_SECOND) / OS_SYS_NS_PER_SECOND;
+        if (TIME_REMAINDER(nanosec, OS_SYS_NS_PER_SECOND) && (ticks < UINT32_MAX)) {
+            ticks += 1;
+        } else if (ticks > UINT32_MAX) {
+            ticks = UINT32_MAX;
+        }
     }
 
-    ret = usleep((UINT32)useconds);
-    return ret;
+    if (LOS_TaskDelay((UINT32)ticks) == LOS_OK) {
+        return 0;
+    }
+    return -1;
 }
 
 unsigned int sleep(unsigned int seconds)

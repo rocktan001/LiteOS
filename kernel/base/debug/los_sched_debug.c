@@ -56,7 +56,7 @@ typedef struct {
 
 STATIC BOOL g_statisticsStartFlag = FALSE;
 STATIC UINT64 g_statisticsStartTime;
-STATIC StatPercpu g_statPercpu[LOSCFG_KERNEL_CORE_NUM] = {0};
+STATIC StatPercpu g_statPercpu[LOSCFG_KERNEL_CORE_NUM];
 
 STATIC VOID OsSchedStatisticsPerCpu(const LosTaskCB *runTask, const LosTaskCB *newTask)
 {
@@ -172,7 +172,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsShellCmdDumpSched(VOID)
 #ifdef LOSCFG_KERNEL_SMP
         affinity = (UINT32)taskCB->cpuAffiMask;
 #endif
-        PRINTK("%-30s0x%-6x%+16lf ms  %10d\n", taskCB->taskName, taskCB->taskId,
+        PRINTK("%-30s0x%-6x%+16lf ms  %10u\n", taskCB->taskName, taskCB->taskId,
                (DOUBLE)(taskCB->schedStat.allRuntime) / NS_PER_MS,
                taskCB->schedStat.allContextSwitch);
 
@@ -183,7 +183,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsShellCmdDumpSched(VOID)
             }
 #endif
             PRINTK("                                                                           "
-                   "CPU%d    %+16lf ms  %12d\n", cpuId,
+                   "CPU%u    %+16lf ms  %12u\n", cpuId,
                    (DOUBLE)(taskCB->schedStat.schedPercpu[cpuId].runtime) / NS_PER_MS,
                    taskCB->schedStat.schedPercpu[cpuId].contexSwitch);
         }
@@ -215,9 +215,9 @@ LITE_OS_SEC_TEXT_MINOR VOID OsStatisticsShow(UINT64 statisticsPastTime)
 
     for (cpuId = 0; cpuId < LOSCFG_KERNEL_CORE_NUM; cpuId++) {
 #ifdef LOSCFG_KERNEL_SMP
-        PRINTK("CPU%d   %+10lf%14d%14d   %+11lf   %+11lf%14d              %+11lf  %11d\n", cpuId,
+        PRINTK("CPU%u   %+10lf%14u%14u   %+11lf   %+11lf%14u              %+11lf  %11u\n", cpuId,
 #else
-        PRINTK("CPU%d   %+10lf%14d%14d   %+11lf   %+11lf%14d              %+11lf\n", cpuId,
+        PRINTK("CPU%u   %+10lf%14u%14u   %+11lf   %+11lf%14u              %+11lf\n", cpuId,
 #endif
                ((DOUBLE)(g_statPercpu[cpuId].idleRuntime) / statisticsPastTime) * DECIMAL_TO_PERCENTAGE,
                g_statPercpu[cpuId].contexSwitch,
@@ -248,8 +248,8 @@ LITE_OS_SEC_TEXT_MINOR VOID OsShellStatisticsStart(VOID)
     SCHEDULER_LOCK(intSave);
 
     if (g_statisticsStartFlag) {
-        PRINT_WARN("mp static has started\n");
         SCHEDULER_UNLOCK(intSave);
+        PRINT_WARN("mp static has started\n");
         return;
     }
 
@@ -298,8 +298,8 @@ LITE_OS_SEC_TEXT_MINOR VOID OsShellStatisticsStop(VOID)
     SCHEDULER_LOCK(intSave);
 
     if (g_statisticsStartFlag != TRUE) {
-        PRINT_WARN("Please set mp static start\n");
         SCHEDULER_UNLOCK(intSave);
+        PRINT_WARN("Please set mp static start\n");
         return;
     }
 

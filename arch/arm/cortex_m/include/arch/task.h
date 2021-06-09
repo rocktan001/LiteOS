@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 /**
- * @defgroup los_hw Hardware
+ * @defgroup los_task
  * @ingroup kernel
  */
 
@@ -43,6 +43,15 @@
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
+#if ((defined(__CC_ARM) && defined(__TARGET_FPU_VFP))                         \
+     || (defined(__CLANG_ARM) && defined(__VFP_FP__) && !defined(__SOFTFP__)) \
+     || (defined(__ICCARM__) && defined(__ARMVFP__ ))                          \
+     || (defined(__GNUC__) && defined(__VFP_FP__) && !defined(__SOFTFP__)))
+#define FPU_USED   1
+#else
+#define FPU_USED   0
+#endif
 
 #define LOSCFG_STACK_POINT_ALIGN_SIZE (sizeof(UINTPTR) * 2)
 
@@ -60,25 +69,6 @@ STATIC INLINE VOID ArchCurrTaskSet(VOID *val)
 }
 
 typedef struct tagContext {
-#if ((defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
-     (defined (__FPU_USED) && (__FPU_USED == 1U)))
-    UINT32 S16;
-    UINT32 S17;
-    UINT32 S18;
-    UINT32 S19;
-    UINT32 S20;
-    UINT32 S21;
-    UINT32 S22;
-    UINT32 S23;
-    UINT32 S24;
-    UINT32 S25;
-    UINT32 S26;
-    UINT32 S27;
-    UINT32 S28;
-    UINT32 S29;
-    UINT32 S30;
-    UINT32 S31;
-#endif
     UINT32 R4;
     UINT32 R5;
     UINT32 R6;
@@ -88,6 +78,9 @@ typedef struct tagContext {
     UINT32 R10;
     UINT32 R11;
     UINT32 PriMask;
+#if FPU_USED
+    UINT32 excReturn;
+#endif
     UINT32 R0;
     UINT32 R1;
     UINT32 R2;
@@ -96,27 +89,6 @@ typedef struct tagContext {
     UINT32 LR;
     UINT32 PC;
     UINT32 xPSR;
-#if ((defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
-     (defined (__FPU_USED) && (__FPU_USED == 1U)))
-    UINT32 S0;
-    UINT32 S1;
-    UINT32 S2;
-    UINT32 S3;
-    UINT32 S4;
-    UINT32 S5;
-    UINT32 S6;
-    UINT32 S7;
-    UINT32 S8;
-    UINT32 S9;
-    UINT32 S10;
-    UINT32 S11;
-    UINT32 S12;
-    UINT32 S13;
-    UINT32 S14;
-    UINT32 S15;
-    UINT32 FPSCR;
-    UINT32 NO_NAME;
-#endif
 } TaskContext;
 
 /*

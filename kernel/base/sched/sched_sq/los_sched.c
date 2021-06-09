@@ -92,13 +92,9 @@ VOID OsSchedResched(VOID)
     OsSchedStatistics(runTask, newTask);
 #endif
 
-    PRINT_TRACE("cpu%u (%s) status: %x -> (%s) status:%x\n", ArchCurrCpuid(),
-                runTask->taskName, runTask->taskStatus,
-                newTask->taskName, newTask->taskStatus);
-
 #ifdef LOSCFG_BASE_CORE_TIMESLICE
     if (newTask->timeSlice == 0) {
-        newTask->timeSlice = LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT;
+        newTask->timeSlice = KERNEL_TIMESLICE_TIMEOUT;
     }
 #endif
 

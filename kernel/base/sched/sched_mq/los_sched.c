@@ -156,8 +156,6 @@ UINT32 OsSchedPickCpu(LosTaskCB* task)
         cpuid = 0;
     }
 
-    PRINT_TRACE("cpu(%u) pick cpu(%u) to run task:%s\n", ArchCurrCpuid(), cpuid, task->taskName);
-
     return cpuid;
 }
 
@@ -319,12 +317,8 @@ VOID OsSchedResched(VOID)
         OsMpSetActive(cpuid);
     }
 
-    PRINT_TRACE("cpu%u (%s) status: %x -> (%s) status:%x\n", ArchCurrCpuid(),
-                runTask->taskName, runTask->taskStatus,
-                newTask->taskName, newTask->taskStatus);
-
 #ifdef LOSCFG_BASE_CORE_TIMESLICE
-    newTask->timeSlice = LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT;
+    newTask->timeSlice = KERNEL_TIMESLICE_TIMEOUT;
 #endif
 
     OsCurrTaskSet((VOID*)newTask);

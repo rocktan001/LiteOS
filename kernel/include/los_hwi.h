@@ -82,11 +82,16 @@ extern size_t IntActive(VOID);
 
 /**
  * @ingroup los_hwi
- * This represents the interrupt priority range, the larger number, the lower priority.
- * If the actual chip is the larger number, the higher priority,
- * needs to be modified at the controller implementation layer.
+ * This represents the interrupt priority range, the larger number, the lower priority, the interrupt processor is
+ * modified uniformly.
  */
 #define OS_HWI_PRIO_LOWEST (LOSCFG_HWI_PRIO_LIMIT - 1)
+
+/**
+ * @ingroup los_hwi
+ * The lower priority number, the higher priority, so OS_HWI_PRIO_LOWEST big than OS_HWI_PRIO_HIGHEST.
+ */
+#define HWI_PRI_VALID(pri) (((pri) >= OS_HWI_PRIO_HIGHEST) && ((pri) <= OS_HWI_PRIO_LOWEST))
 
 /**
  * @ingroup los_hwi
@@ -95,8 +100,13 @@ extern size_t IntActive(VOID);
  * Value: 0x02000900.
  *
  * Solution: Ensure that the interrupt number is valid.
+ * @attention
+ * <ul>
+ * <li>Please use macros starting with LOS, and macros starting with OS will not be supported.</li>
+ * </ul>
  */
-#define OS_ERRNO_HWI_NUM_INVALID                LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x00)
+#define LOS_ERRNO_HWI_NUM_INVALID               LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x00)
+#define OS_ERRNO_HWI_NUM_INVALID                LOS_ERRNO_HWI_NUM_INVALID
 
 /**
  * @ingroup los_hwi
@@ -105,8 +115,13 @@ extern size_t IntActive(VOID);
  * Value: 0x02000901.
  *
  * Solution: Pass in a valid non-null hardware interrupt handling function.
+ * @attention
+ * <ul>
+ * <li>Please use macros starting with LOS, and macros starting with OS will not be supported.</li>
+ * </ul>
  */
-#define OS_ERRNO_HWI_PROC_FUNC_NULL             LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x01)
+#define LOS_ERRNO_HWI_PROC_FUNC_NULL            LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x01)
+#define OS_ERRNO_HWI_PROC_FUNC_NULL             LOS_ERRNO_HWI_PROC_FUNC_NULL
 
 /**
  * @ingroup los_hwi
@@ -115,8 +130,9 @@ extern size_t IntActive(VOID);
  * Value: 0x02000902.
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
-#define OS_ERRNO_HWI_CB_UNAVAILABLE             LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x02)
+#define OS_ERRNO_HWI_CB_UNAVAILABLE LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x02)
 
 /**
  * @ingroup los_hwi
@@ -125,8 +141,13 @@ extern size_t IntActive(VOID);
  * Value: 0x02000903.
  *
  * Solution: Expand the configured memory.
+ * @attention
+ * <ul>
+ * <li>Please use macros starting with LOS, and macros starting with OS will not be supported.</li>
+ * </ul>
  */
-#define OS_ERRNO_HWI_NO_MEMORY                  LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x03)
+#define LOS_ERRNO_HWI_NO_MEMORY                 LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x03)
+#define OS_ERRNO_HWI_NO_MEMORY                  LOS_ERRNO_HWI_NO_MEMORY
 
 /**
  * @ingroup los_hwi
@@ -136,8 +157,13 @@ extern size_t IntActive(VOID);
  *
  * Solution: Check whether the interrupt specified by the passed-in interrupt number has
  * already been created.
+ * @attention
+ * <ul>
+ * <li>Please use macros starting with LOS, and macros starting with OS will not be supported.</li>
+ * </ul>
  */
-#define OS_ERRNO_HWI_ALREADY_CREATED            LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x04)
+#define LOS_ERRNO_HWI_ALREADY_CREATED           LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x04)
+#define OS_ERRNO_HWI_ALREADY_CREATED            LOS_ERRNO_HWI_ALREADY_CREATED
 
 /**
  * @ingroup los_hwi
@@ -146,8 +172,13 @@ extern size_t IntActive(VOID);
  * Value: 0x02000905.
  *
  * Solution: Ensure that the interrupt priority is valid.
+ * @attention
+ * <ul>
+ * <li>Please use macros starting with LOS, and macros starting with OS will not be supported.</li>
+ * </ul>
  */
-#define OS_ERRNO_HWI_PRIO_INVALID               LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x05)
+#define LOS_ERRNO_HWI_PRIO_INVALID              LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x05)
+#define OS_ERRNO_HWI_PRIO_INVALID               LOS_ERRNO_HWI_PRIO_INVALID
 
 /**
  * @ingroup los_hwi
@@ -156,8 +187,9 @@ extern size_t IntActive(VOID);
  * Value: 0x02000906.
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
-#define OS_ERRNO_HWI_MODE_INVALID               LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x06)
+#define OS_ERRNO_HWI_MODE_INVALID LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x06)
 
 /**
  * @ingroup los_hwi
@@ -166,6 +198,7 @@ extern size_t IntActive(VOID);
  * Value: 0x02000907.
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
 #define OS_ERRNO_HWI_FASTMODE_ALREADY_CREATED LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x07)
 
@@ -176,8 +209,13 @@ extern size_t IntActive(VOID);
  * Value: 0x02000908.
  *
  * Solution: This error code is not in use temporarily.
+ * @attention
+ * <ul>
+ * <li>Please use macros starting with LOS, and macros starting with OS will not be supported.</li>
+ * </ul>
  */
-#define OS_ERRNO_HWI_INTERR                     LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x08)
+#define LOS_ERRNO_HWI_INTERR                    LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x08)
+#define OS_ERRNO_HWI_INTERR                     LOS_ERRNO_HWI_INTERR
 
 /**
  * @ingroup los_hwi
@@ -187,8 +225,13 @@ extern size_t IntActive(VOID);
  *
  * Solution: Check the input params hwiMode and irqParam of LOS_HwiCreate or
  * LOS_HwiDelete whether adapt the current hardware interrupt.
+ * @attention
+ * <ul>
+ * <li>Please use macros starting with LOS, and macros starting with OS will not be supported.</li>
+ * </ul>
  */
-#define OS_ERRNO_HWI_SHARED_ERROR               LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x09)
+#define LOS_ERRNO_HWI_SHARED_ERROR              LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x09)
+#define OS_ERRNO_HWI_SHARED_ERROR               LOS_ERRNO_HWI_SHARED_ERROR
 
 /**
  * @ingroup los_hwi
@@ -197,8 +240,9 @@ extern size_t IntActive(VOID);
  * Value: 0x0200090a.
  *
  * Solution: This error code is not in use temporarily.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
  */
-#define OS_ERRNO_HWI_ARG_INVALID                LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x0a)
+#define OS_ERRNO_HWI_ARG_INVALID LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x0a)
 
 /**
  * @ingroup los_hwi
@@ -208,8 +252,13 @@ extern size_t IntActive(VOID);
  * Value: 0x0200090b.
  *
  * Solution: Check the irqParam->pDevId of LOS_HwiDelete, make sure the devid need to delete.
+ * @attention
+ * <ul>
+ * <li>Please use macros starting with LOS, and macros starting with OS will not be supported.</li>
+ * </ul>
  */
-#define OS_ERRNO_HWI_HWINUM_UNCREATE            LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x0b)
+#define LOS_ERRNO_HWI_HWINUM_UNCREATE           LOS_ERRNO_OS_ERROR(LOS_MOD_HWI, 0x0b)
+#define OS_ERRNO_HWI_HWINUM_UNCREATE            LOS_ERRNO_HWI_HWINUM_UNCREATE
 
 /**
  * @ingroup los_hwi
@@ -351,32 +400,31 @@ STATIC INLINE VOID LOS_IntRestore(UINT32 intSave)
  * <ul>
  * <li>The hardware interrupt module is usable only when the configuration item for
  * hardware interrupt tailoring is enabled.</li>
- * <li>Hardware interrupt number value range: [OS_USER_HWI_MIN, OS_USER_HWI_MAX]. </li>
- * <li>OS_HWI_MAX_NUM specifies the maximum number of interrupts that can be created.</li>
  * <li>Before executing an interrupt on a platform, refer to the chip manual of the platform.</li>
  * <li>The parameter handler of this interface is a interrupt handler, it should be correct, otherwise,
  * the system may be abnormal.</li>
  * <li>The input irqParam could be NULL, if not, it should be address which point to a struct HWI_IRQ_PARAM_S,
  * the parameter pDenId and pName should be constant.</li>
+ * <li>A smaller value indicates a higher interrupt priority, the interrupt processor is modified uniformly.</li>
  * </ul>
  *
- * @param  hwiNum     [IN] Type #HWI_HANDLE_T. The hardware interrupt number.
- *                                             for an ARM926 platform is [0,31].
+ * @param  hwiNum     [IN] Type #HWI_HANDLE_T. The hardware interrupt number. The value range is
+                                              [OS_USER_HWI_MIN, OS_USER_HWI_MAX].
  * @param  hwiPrio    [IN] Type #HWI_PRIOR_T. The hardware interrupt priority. The value range is
- *                                            [0, GIC_MAX_INTERRUPT_PREEMPTION_LEVEL - 1] << PRIORITY_SHIFT.
- * @param  hwiMode    [IN] Type #HWI_MODE_T. The hardware interrupt mode. Ignore this parameter temporarily.
+ *                                            [OS_HWI_PRIO_HIGHEST, OS_HWI_PRIO_LOWEST].
+ * @param  hwiMode    [IN] Type #HWI_MODE_T. The hardware interrupt mode.
  * @param  hwiHandler [IN] Type #HWI_PROC_FUNC. The interrupt handler used when a hardware interrupt is triggered.
  * @param  irqParam   [IN] Type #HWI_IRQ_PARAM_S. The input parameter of the interrupt handler used when
  *                                                a hardware interrupt is triggered.
  *
- * @retval #OS_ERRNO_HWI_PROC_FUNC_NULL              Null hardware interrupt handling function.
- * @retval #OS_ERRNO_HWI_NUM_INVALID                 Invalid interrupt number.
- * @retval #OS_ERRNO_HWI_NO_MEMORY                   Insufficient memory for hardware interrupt creation.
- * @retval #OS_ERRNO_HWI_ALREADY_CREATED             The interrupt handler being created has already been created.
- * @retval #OS_ERRNO_HWI_SHARED_ERROR                The interrupt can not be shared. The interrupt number has been
- *                                                   registered as a non-shared interrupt, or a shared interrupt is
- *                                                   specified to be created, but the device ID is empty.
- * @retval #LOS_OK                                   The interrupt is successfully created.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Null hardware interrupt handling function.
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_NO_MEMORY           Insufficient memory for hardware interrupt creation.
+ * @retval #LOS_ERRNO_HWI_ALREADY_CREATED     The interrupt handler being created has already been created.
+ * @retval #LOS_ERRNO_HWI_SHARED_ERROR        The interrupt can not be shared. The interrupt number has been
+ *                                            registered as a non-shared interrupt, or a shared interrupt is
+ *                                            specified to be created, but the device ID is empty.
+ * @retval #LOS_OK                            The interrupt is successfully created.
  * @par Dependency:
  * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
  * @see LOS_HwiDelete
@@ -400,7 +448,6 @@ extern UINT32 LOS_HwiCreate(HWI_HANDLE_T hwiNum,
  * <li>The hardware interrupt module is usable only when the configuration item for
  * hardware interrupt tailoring is enabled.</li>
  * <li>Hardware interrupt number value range: [OS_USER_HWI_MIN, OS_USER_HWI_MAX].</li>
- * <li>OS_HWI_MAX_NUM specifies the maximum number of interrupts that can be created.</li>
  * <li>Before executing an interrupt on a platform, refer to the chip manual of the platform.</li>
  * </ul>
  *
@@ -408,15 +455,16 @@ extern UINT32 LOS_HwiCreate(HWI_HANDLE_T hwiNum,
  * @param  irqParam [IN] Type #HWI_IRQ_PARAM_S *. ID of hardware interrupt which will base on
  *                                                when delete the hardware interrupt.
  *
- * @retval #OS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
- * @retval #OS_ERRNO_HWI_SHARED_ERROR        The interrupt number is a shared interrupt, but the device ID of the
- *                                           shared interrupt to be deleted is not specified.
- * @retval #OS_ERRNO_HWI_HWINUM_UNCREATE     The interrupt corresponded to the hwiNum(
- *                                           the hardware interrupt number) or
- *                                           irqParam->pDevId(the interrupt device id)
- *                                           has not been created.
- * @retval #LOS_OK                           The interrupt is successfully deleted.
-
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_SHARED_ERROR        The interrupt number is a shared interrupt, but the device ID of the
+ *                                            shared interrupt to be deleted is not specified.
+ * @retval #LOS_ERRNO_HWI_HWINUM_UNCREATE     The interrupt corresponded to the hwiNum(
+ *                                            the hardware interrupt number) or
+ *                                            irqParam->pDevId(the interrupt device id)
+ *                                            has not been created.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Not supported disable interrupt.
+ * @retval #LOS_OK                            The interrupt is successfully deleted.
+ *
  * @par Dependency:
  * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
  * @see LOS_HwiCreate
@@ -432,17 +480,16 @@ extern UINT32 LOS_HwiDelete(HWI_HANDLE_T hwiNum, HWI_IRQ_PARAM_S *irqParam);
  * The generation of external hardware interrupts is simulated by writing
  * the relevant registers of the interrupt controller.
  * @attention
- * This function depends on the hardware implementation of the interrupt
- * controller.
+ * This function depends on the hardware implementation of the interrupt controller.
  *
  * @param hwiNum   [IN] Type #HWI_HANDLE_T. The hardware interrupt number.
  *
- * @retval #OS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
- * @retval #LOS_OK                           The interrupt is successfully
- * deleted.
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Not supported by the interrupt controller.
+ * @retval #LOS_OK                            The interrupt is successfully triggered.
+ *
  * @par Dependency:
- * <ul><li>los_hwi.h: the header file that contains the API
- * declaration.</li></ul>
+ * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
  * @since Huawei LiteOS V200R005C00
  */
 extern UINT32 LOS_HwiTrigger(HWI_HANDLE_T hwiNum);
@@ -452,20 +499,18 @@ extern UINT32 LOS_HwiTrigger(HWI_HANDLE_T hwiNum);
  * @brief clear interrupts.
  *
  * @par Description:
- * Clear the status bit of the interrupt number corresponding to the
- * interrupt controller.
+ * Clear the status bit of the interrupt number corresponding to the interrupt controller.
  * @attention
- * This function depends on the hardware implementation of the interrupt
- * controller.
+ * This function depends on the hardware implementation of the interrupt controller.
  *
  * @param hwiNum   [IN] Type #HWI_HANDLE_T. The hardware interrupt number.
  *
- * @retval #OS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
- * @retval #LOS_OK                           The interrupt is successfully
- * deleted.
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Not supported by the interrupt controller.
+ * @retval #LOS_OK                            The interrupt is successfully cleared.
+ *
  * @par Dependency:
- * <ul><li>los_hwi.h: the header file that contains the API
- * declaration.</li></ul>
+ * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
  * @since Huawei LiteOS V200R005C00
  */
 extern UINT32 LOS_HwiClear(HWI_HANDLE_T hwiNum);
@@ -478,14 +523,14 @@ extern UINT32 LOS_HwiClear(HWI_HANDLE_T hwiNum);
  * Enable the corresponding interrupt mask of the interrupt controller, so
  * that the interrupt source can be sent to the CPU.
  * @attention
- * This function depends on the hardware implementation of the interrupt
- * controller.
+ * This function depends on the hardware implementation of the interrupt controller.
  *
  * @param hwiNum   [IN] Type #HWI_HANDLE_T. The hardware interrupt number.
  *
- * @retval #OS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
- * @retval #LOS_OK                           The interrupt is successfully
- * deleted.
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Not supported by the interrupt controller.
+ * @retval #LOS_OK                            The interrupt is successfully enabled.
+ *
  * @par Dependency:
  * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
  * @see LOS_HwiDisable
@@ -501,14 +546,13 @@ extern UINT32 LOS_HwiEnable(HWI_HANDLE_T hwiNum);
  * Disable the corresponding interrupt mask of the interrupt controller, so
  * that the interrupt source can be sent to the CPU.
  * @attention
- * This function depends on the hardware implementation of the interrupt
- * controller.
+ * This function depends on the hardware implementation of the interrupt controller.
  *
  * @param hwiNum   [IN] Type #HWI_HANDLE_T. The hardware interrupt number.
  *
- * @retval #OS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
- * @retval #LOS_OK                           The interrupt is successfully
- * deleted.
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Not supported by the interrupt controller.
+ * @retval #LOS_OK                            The interrupt is successfully disabled.
  * @par Dependency:
  * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
  * @see LOS_HwiEnable
@@ -516,6 +560,7 @@ extern UINT32 LOS_HwiEnable(HWI_HANDLE_T hwiNum);
  */
 extern UINT32 LOS_HwiDisable(HWI_HANDLE_T hwiNum);
 
+#ifdef LOSCFG_KERNEL_SMP
 /**
  * @ingroup los_hwi
  * @brief Send inter-core interrupts to designated cores.
@@ -527,17 +572,17 @@ extern UINT32 LOS_HwiDisable(HWI_HANDLE_T hwiNum);
  * controller and CPU architecture, Only used in SMP architecture.
  *
  * @param hwiNum   [IN] Type #HWI_HANDLE_T: hardware interrupt number.
- * @param cpuMask   [IN] Type #UINT32: CPU number.
+ * @param cpuMask  [IN] Type #UINT32: CPU number.
  *
- * @retval #OS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
- * @retval #LOS_OK                           The interrupt is successfully
- * deleted.
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Not supported by the interrupt controller.
+ * @retval #LOS_OK                            Inter-core interrupt sent successfully.
+ *
  * @par Dependency:
- * <ul><li>los_hwi.h: the header file that contains the API
- * declaration.</li></ul>
+ * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
  * @since Huawei LiteOS V200R005C00
  */
-extern UINT32 LOS_HwiSendIpi(UINT32 hwiNum, UINT32 cpuMask);
+extern UINT32 LOS_HwiSendIpi(HWI_HANDLE_T hwiNum, UINT32 cpuMask);
 
 /**
  * @ingroup los_hwi
@@ -552,15 +597,16 @@ extern UINT32 LOS_HwiSendIpi(UINT32 hwiNum, UINT32 cpuMask);
  * @param hwiNum   [IN] Type #HWI_HANDLE_T. The hardware interrupt number.
  * @param cpuMask  [IN] Type #UINT32. The CPU number.
  *
- * @retval #OS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
- * @retval #LOS_OK                           The interrupt is successfully
- * deleted.
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Not supported by the interrupt controller.
+ * @retval #LOS_OK                            The interrupt is successfully set affinity.
+ *
  * @par Dependency:
- * <ul><li>los_hwi.h: the header file that contains the API
- * declaration.</li></ul>
+ * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
  * @since Huawei LiteOS V200R005C00
  */
-extern UINT32 LOS_HwiSetAffinity(UINT32 hwiNum, UINT32 cpuMask);
+extern UINT32 LOS_HwiSetAffinity(HWI_HANDLE_T hwiNum, UINT32 cpuMask);
+#endif /* LOSCFG_KERNEL_SMP */
 
 /**
  * @ingroup los_hwi
@@ -573,25 +619,59 @@ extern UINT32 LOS_HwiSetAffinity(UINT32 hwiNum, UINT32 cpuMask);
  * controller and CPU architecture.
  *
  * @param hwiNum     [IN] Type #HWI_HANDLE_T: hardware interrupt number.
- * @param priority   [IN] Type #UINT32: interrupt priority to be set.
+ * @param priority   [IN] Type #HWI_PRIOR_T: interrupt priority to be set.
  *
- * @retval #OS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
- * @retval #OS_ERRNO_HWI_PRIO_INVALID        Invalid interrupt priority.
- * @retval #OS_ERRNO_HWI_PROC_FUNC_NULL      Not supported by the interrupt
- *                                           controller.
- * @retval #LOS_OK                           The interrupt is successfully
- *                                           deleted.
+ * @retval #LOS_ERRNO_HWI_NUM_INVALID         Invalid interrupt number.
+ * @retval #LOS_ERRNO_HWI_PRIO_INVALID        Invalid interrupt priority.
+ * @retval #LOS_ERRNO_HWI_PROC_FUNC_NULL      Not supported by the interrupt controller.
+ * @retval #LOS_OK                            The interrupt is successfully set priority.
+ *
  * @par Dependency:
  * <ul><li>los_hwi.h: the header file that contains the API
  * declaration.</li></ul>
  * @see None
  * @since Huawei LiteOS V200R005C00
  */
-extern UINT32 LOS_HwiSetPriority(HWI_HANDLE_T hwiNum, UINT32 priority);
+extern UINT32 LOS_HwiSetPriority(HWI_HANDLE_T hwiNum, HWI_PRIOR_T priority);
 
 #ifdef LOSCFG_KERNEL_LOWPOWER
-typedef VOID (*IntWakeupHookFn)(HWI_HANDLE_T hwiNum);
-extern VOID LOS_IntWakeupHookReg(IntWakeupHookFn hook);
+/**
+ * @ingroup los_hwi
+ * @brief Define the lowpower framework wakeup function type.
+ *
+ * @par Description:
+ * This API is used to define the lowpower framework wakeup function type.
+ *
+ * @attention None.
+ *
+ * @param  hwiNum [IN] The interrupt number.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
+ * @see None.
+ * @since Huawei LiteOS V200R005C10
+ */
+typedef VOID (*WAKEUPFROMINTHOOK)(HWI_HANDLE_T hwiNum);
+
+/**
+ * @ingroup  los_hwi
+ * @brief Register a hook to wakeup from interrupt.
+ *
+ * @par Description:
+ * This API is used to register a recovery function after wakeup from interrupt
+ *
+ * @attention None.
+ *
+ * @param  hook [IN] The lowpower wakeup hook.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>los_hwi.h: the header file that contains the API declaration.</li></ul>
+ * @see None.
+ * @since Huawei LiteOS V200R005C10
+ */
+extern VOID LOS_IntWakeupHookReg(WAKEUPFROMINTHOOK hook);
 #endif
 
 #ifdef __cplusplus

@@ -13,3 +13,7 @@ endif
 ifeq ($(LOSCFG_ARCH_RISCV), y)
 -include $(LITEOSTOPDIR)/arch/riscv/cpu.mk
 endif
+
+ifeq ($(LOSCFG_ARCH_CSKY), y)
+-include $(LITEOSTOPDIR)/arch/csky/cpu.mk
+endif

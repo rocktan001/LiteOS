@@ -33,6 +33,7 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
+_sstack = 0x20000000;    /* start of RAM */
 _estack = 0x20030000;    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x200;      /* required amount of heap  */
@@ -134,9 +135,9 @@ SECTIONS
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .data ALIGN(0x1000):
   {
-    __ram_data_start = _sdata;
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
+    __ram_data_start = _sdata;
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
     KEEP(*( SORT (.liteos.table.*)));
@@ -200,6 +201,7 @@ SECTIONS
   __los_heap_addr_start__ = .;
   __los_heap_addr_end__ = ORIGIN(RAM) + LENGTH(RAM) - _Min_Stack_Size - 1;
 
+  __fast_end = .;
   /* Remove information from the standard libraries */
   /DISCARD/ :
   {

@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: System Config HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -28,15 +28,16 @@
 
 /**
  * @defgroup los_config System configuration items
+ * @ingroup kernel
  */
 
 #ifndef _LOS_CONFIG_H
 #define _LOS_CONFIG_H
 
-#include "platform_config.h"
-#include "los_tick.h"
-#include "board.h"
+#include "los_typedef.h"
+#include "asm/memmap_config.h"
 #include "hisoc/clock.h"
+#include "asm/platform.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -69,30 +70,18 @@ extern UINT32  g_dlNxHeapSize;
 #define LOS_GET_DL_NX_HEAP_SIZE()     (g_dlNxHeapSize)
 #define LOS_SET_DL_NX_HEAP_SIZE(size) (g_dlNxHeapSize = (size))
 
-#undef  OS_SYS_CLOCK
-#define OS_SYS_CLOCK                                        g_osSysClock
-#undef  LOSCFG_BASE_CORE_TICK_PER_SECOND
-#define LOSCFG_BASE_CORE_TICK_PER_SECOND                    g_tickPerSecond
-#undef  LOSCFG_BASE_CORE_TSK_LIMIT
-#define LOSCFG_BASE_CORE_TSK_LIMIT                          g_taskLimit
-#undef  LOSCFG_TASK_MIN_STACK_SIZE
-#define LOSCFG_TASK_MIN_STACK_SIZE                          g_taskMinStkSize
-#undef  LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE
-#define LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE             g_taskDfltStkSize
-#undef  LOSCFG_BASE_CORE_TSK_IDLE_STACK_SIZE
-#define LOSCFG_BASE_CORE_TSK_IDLE_STACK_SIZE                g_taskIdleStkSize
-#undef  LOSCFG_BASE_CORE_TSK_SWTMR_STACK_SIZE
-#define LOSCFG_BASE_CORE_TSK_SWTMR_STACK_SIZE               g_taskSwtmrStkSize
-#undef  LOSCFG_BASE_CORE_SWTMR_LIMIT
-#define LOSCFG_BASE_CORE_SWTMR_LIMIT                        g_swtmrLimit
-#undef  LOSCFG_BASE_IPC_SEM_LIMIT
-#define LOSCFG_BASE_IPC_SEM_LIMIT                           g_semLimit
-#undef  LOSCFG_BASE_IPC_MUX_LIMIT
-#define LOSCFG_BASE_IPC_MUX_LIMIT                           g_muxLimit
-#undef  LOSCFG_BASE_IPC_QUEUE_LIMIT
-#define LOSCFG_BASE_IPC_QUEUE_LIMIT                         g_queueLimit
-#undef  LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT
-#define LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT                  g_timeSliceTimeOut
+#define OS_SYS_CLOCK                      g_osSysClock
+#define KERNEL_TICK_PER_SECOND            g_tickPerSecond
+#define KERNEL_TSK_LIMIT                  g_taskLimit
+#define KERNEL_TSK_MIN_STACK_SIZE         g_taskMinStkSize
+#define KERNEL_TSK_DEFAULT_STACK_SIZE     g_taskDfltStkSize
+#define KERNEL_TSK_IDLE_STACK_SIZE        g_taskIdleStkSize
+#define KERNEL_TSK_SWTMR_STACK_SIZE       g_taskSwtmrStkSize
+#define KERNEL_SWTMR_LIMIT                g_swtmrLimit
+#define KERNEL_SEM_LIMIT                  g_semLimit
+#define KERNEL_MUX_LIMIT                  g_muxLimit
+#define KERNEL_QUEUE_LIMIT                g_queueLimit
+#define KERNEL_TIMESLICE_TIMEOUT          g_timeSliceTimeOut
 
 #else /* LOSCFG_LIB_CONFIGURABLE */
 
@@ -112,10 +101,22 @@ extern UINT32  g_dlNxHeapSize;
 #define LOS_SET_DL_NX_HEAP_SIZE(size)
 #endif /* LOSCFG_KERNEL_NX */
 
+#define KERNEL_TICK_PER_SECOND            LOSCFG_BASE_CORE_TICK_PER_SECOND
+#define KERNEL_TSK_LIMIT                  LOSCFG_BASE_CORE_TSK_LIMIT
+#define KERNEL_TSK_MIN_STACK_SIZE         LOSCFG_BASE_CORE_TSK_MIN_STACK_SIZE
+#define KERNEL_TSK_DEFAULT_STACK_SIZE     LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE
+#define KERNEL_TSK_IDLE_STACK_SIZE        LOSCFG_BASE_CORE_TSK_IDLE_STACK_SIZE
+#define KERNEL_TSK_SWTMR_STACK_SIZE       LOSCFG_BASE_CORE_TSK_SWTMR_STACK_SIZE
+#define KERNEL_SWTMR_LIMIT                LOSCFG_BASE_CORE_SWTMR_LIMIT
+#define KERNEL_SEM_LIMIT                  LOSCFG_BASE_IPC_SEM_LIMIT
+#define KERNEL_MUX_LIMIT                  LOSCFG_BASE_IPC_MUX_LIMIT
+#define KERNEL_QUEUE_LIMIT                LOSCFG_BASE_IPC_QUEUE_LIMIT
+#define KERNEL_TIMESLICE_TIMEOUT          LOSCFG_BASE_CORE_TIMESLICE_TIMEOUT
+
 #endif /* LOSCFG_LIB_CONFIGURABLE */
 
 /**
- * int stack start addr
+ * system sections start and end address
  */
 extern CHAR __int_stack_start;
 extern CHAR __int_stack_end;
@@ -127,8 +128,11 @@ extern CHAR __text_start;
 extern CHAR __text_end;
 extern CHAR __ram_data_start;
 extern CHAR __ram_data_end;
+extern CHAR __exc_heap_start;
+extern CHAR __exc_heap_end;
 extern CHAR __heap_start;
-extern CHAR __heap_end;
+extern CHAR __init_array_start__;
+extern CHAR __init_array_end__;
 
 /****************************** System clock module configuration ****************************/
 /**
@@ -170,16 +174,9 @@ extern CHAR __heap_end;
  */
 #define SCHED_CLOCK_INTETRVAL_TICKS 100
 
+/****************************** Interrupt module configuration ****************************/
 /**
- * @ingroup los_config
- * External configuration item for timer tailoring
- */
-#ifndef LOSCFG_BASE_CORE_TICK_HW_TIME
-#define LOSCFG_BASE_CORE_TICK_HW_TIME NO
-#endif
-
-/**
- * @ingroup los_config
+ * @ingroup los_hwi
  * The macro is the binary point value that decides the maximum preemption level
  * when LOSCFG_ARCH_INTERRUPT_PREEMPTION is defined. If preemption supported, the
  * config value is [0, 1, 2, 3, 4, 5, 6], to the corresponding preemption level value
@@ -191,37 +188,37 @@ extern CHAR __heap_end;
 #endif
 #endif
 
-/****************************** Task module configuration ********************************/
+/****************************** Swtmr module configuration ********************************/
 #ifdef LOSCFG_BASE_IPC_QUEUE
 /**
- * @ingroup los_config
+ * @ingroup los_swtmr
  * Max number of software timers ID
  *
  * 0xFFFF: max number of all software timers
  */
 #ifndef OS_SWTMR_MAX_TIMERID
-#define OS_SWTMR_MAX_TIMERID ((0xFFFF / LOSCFG_BASE_CORE_SWTMR_LIMIT) * LOSCFG_BASE_CORE_SWTMR_LIMIT)
+#define OS_SWTMR_MAX_TIMERID ((0xFFFF / KERNEL_SWTMR_LIMIT) * KERNEL_SWTMR_LIMIT)
 #endif
 /**
- * @ingroup los_config
+ * @ingroup los_swtmr
  * Maximum size of a software timer queue. The default value of LOSCFG_BASE_CORE_SWTMR_LIMIT is 16.
  */
 #ifndef OS_SWTMR_HANDLE_QUEUE_SIZE
-#define OS_SWTMR_HANDLE_QUEUE_SIZE LOSCFG_BASE_CORE_SWTMR_LIMIT
+#define OS_SWTMR_HANDLE_QUEUE_SIZE KERNEL_SWTMR_LIMIT
 #endif
 #endif
 
 /****************************** Memory module configuration **************************/
 /**
- * @ingroup los_config
+ * @ingroup los_memory
  * Starting address of the system memory
  */
 #ifndef OS_SYS_MEM_ADDR
-#define OS_SYS_MEM_ADDR                        (&m_aucSysMem1[0])
+#define OS_SYS_MEM_ADDR          (&__heap_start)
 #endif
 
 /**
- * @ingroup los_config
+ * @ingroup los_dynload
  * Size of Dynload heap in bytes (1MB = 0x100000 Bytes)
  * Starting address of dynload heap
  */
@@ -234,20 +231,12 @@ extern CHAR __heap_end;
 #endif
 
 /**
- * @ingroup los_config
+ * @ingroup los_memory
  * Memory size
  */
 #ifndef OS_SYS_MEM_SIZE
 #define OS_SYS_MEM_SIZE ((g_sys_mem_addr_end) - \
-                         ((LOS_DL_HEAP_SIZE + g_excInteractMemSize + ((UINTPTR)&__bss_end) + (64 - 1)) & ~(64 - 1)))
-#endif
-
-/**
- * @ingroup los_config
- * The maximum memory usage statistics.
- */
-#ifdef LOSCFG_DEBUG_VERSION
-#define LOSCFG_MEM_WATERLINE   YES
+                         ((LOS_DL_HEAP_SIZE  + ((UINTPTR)&__heap_start) + (64 - 1)) & ~(64 - 1)))
 #endif
 
 /****************************** fw Interface configuration **************************/
@@ -269,7 +258,11 @@ extern CHAR __heap_end;
  * It's the total size of trace buffer. Its unit is char.
  */
 #ifdef LOSCFG_KERNEL_TRACE
-#define LOS_TRACE_BUFFER_SIZE                           2048
+#ifdef LOSCFG_RECORDER_MODE_OFFLINE
+#define LOS_TRACE_BUFFER_SIZE                           LOSCFG_TRACE_BUFFER_SIZE
+#else
+#define LOS_TRACE_BUFFER_SIZE 0
+#endif
 #endif
 
 /****************************** perf module configuration **************************/
@@ -289,14 +282,14 @@ extern CHAR __heap_end;
 #define HW_LITEOS_SEP                           " "
 #define _V(v)                                   _T(HW_LITEOS_SYSNAME)_T(HW_LITEOS_SEP)_T(v)
 
-#define HW_LITEOS_VERSION                       ""
-#define HW_LITEOS_VER                           _V(HW_LITEOS_VERSION"")
+#define HW_LITEOS_VERSION                       "V200R005C20B053"
+#define HW_LITEOS_VER                           _V(HW_LITEOS_VERSION"-SMP")
 
 /**
  * The Version number of Public
  */
 #define MAJ_V                                   5
-#define MIN_V                                   0
+#define MIN_V                                   1
 #define REL_V                                   0
 
 /**
@@ -317,13 +310,10 @@ extern CHAR __heap_end;
 #define HW_LITEOS_KERNEL_VERSION_STRING         HW_LITEOS_OPEN_VERSION_STRING
 #endif
 
-/****************************** Dynamic loading module configuration **************************/
-#ifndef OS_AUTOINIT_DYNLOADER
-#define OS_AUTOINIT_DYNLOADER                   YES
-#endif
-
 extern VOID OsStart(VOID);
 extern UINT32 OsMain(VOID);
+extern VOID *OsGetMainTask(VOID);
+extern VOID OsSetMainTask(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

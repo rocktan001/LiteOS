@@ -85,6 +85,7 @@ clean:
 	$(HIDE)for dir in $(LITEOS_SUBDIRS); \
 		do make -C $$dir clean|| exit 1; \
 	done
+	$(HIDE)$(RM) .config.old
 	$(HIDE)$(RM) $(__OBJS) $(LITEOS_TARGET) $(OUT) $(BUILD) $(LITEOS_MENUCONFIG_H) *.bak *~
 	$(HIDE)$(RM) -rf $(LITEOS_PLATFORM_MENUCONFIG_H)
 	$(HIDE)echo "clean $(LITEOS_PLATFORM) finish"

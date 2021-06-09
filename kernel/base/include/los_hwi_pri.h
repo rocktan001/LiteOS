@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Hwi Inner HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -44,35 +44,31 @@ typedef struct tagHwiHandleForm {
         HWI_ARG_T registerInfo; /* not the head node of the shared interrupt or no-shared interrupt: this parameter
                                    means address of a parameter registered by a user. */
     };
-#ifndef LOSCFG_NO_SHARED_IRQ
+#ifdef LOSCFG_SHARED_IRQ
     struct tagHwiHandleForm *next;
 #endif
     UINT32 respCount; /* Interrupt response counts */
 } HwiHandleInfo;
 
 typedef struct {
-    VOID (*triggerIrq)(HWI_HANDLE_T hwiNum);
+    UINT32 (*triggerIrq)(HWI_HANDLE_T hwiNum);
     UINT32 (*clearIrq)(HWI_HANDLE_T hwiNum);
-    VOID (*enableIrq)(HWI_HANDLE_T hwiNum);
-    VOID (*disableIrq)(HWI_HANDLE_T hwiNum);
+    UINT32 (*enableIrq)(HWI_HANDLE_T hwiNum);
+    UINT32 (*disableIrq)(HWI_HANDLE_T hwiNum);
     UINT32 (*setIrqPriority)(HWI_HANDLE_T hwiNum, UINT8 priority);
     UINT32 (*getCurIrqNum)(VOID);
     CHAR *(*getIrqVersion)(VOID);
-    HwiHandleInfo *(*getHandleForm)(HWI_HANDLE_T hwiNum);
+    HwiHandleInfo *(*getHandleForm)(HWI_HANDLE_T hwiNum); /* This function must be registered. */
     VOID (*handleIrq)(VOID);
 #ifdef LOSCFG_KERNEL_SMP
-    VOID (*setIrqCpuAffinity)(HWI_HANDLE_T hwiNum, UINT32 cpuMask);
-    VOID (*sendIpi)(UINT32 target, UINT32 ipi);
+    UINT32 (*setIrqCpuAffinity)(HWI_HANDLE_T hwiNum, UINT32 cpuMask);
+    UINT32 (*sendIpi)(UINT32 target, UINT32 ipi);
 #endif
 } HwiControllerOps;
 
+extern const HwiControllerOps *g_hwiOps;
+
 extern VOID OsHwiInit(VOID);
-extern UINT32 OsGetHwiFormCnt(UINT32 index);
-extern UINT32 OsIntNumGet(VOID);
-extern CHAR *OsIntVersionGet(VOID);
-extern BOOL OsIntIsRegisted(UINT32 num);
-extern HWI_ARG_T OsIntGetPara(UINT32 num);
-extern HwiHandleInfo *OsGetHwiForm(UINT32 hwiNum);
 extern size_t OsIrqNestingCntGet(VOID);
 extern VOID OsIrqNestingCntSet(size_t val);
 
@@ -82,6 +78,64 @@ extern VOID OsIrqNestingCntSet(size_t val);
  * will not respond. eg: Used for arm(cortex-a/r)/arm64.
  */
 extern VOID OsIntEntry(VOID);
+
+STATIC INLINE HwiHandleInfo *OsGetHwiForm(UINT32 hwiNum)
+{
+    if ((g_hwiOps == NULL) || (g_hwiOps->getHandleForm == NULL)) {
+        return NULL;
+    }
+    return g_hwiOps->getHandleForm(hwiNum);
+}
+
+STATIC INLINE UINT32 OsGetHwiFormCnt(UINT32 hwiNum)
+{
+    HwiHandleInfo *hwiForm = OsGetHwiForm(hwiNum);
+
+    if (hwiForm == NULL) {
+        return LOS_ERRNO_HWI_NUM_INVALID;
+    }
+    return hwiForm->respCount;
+}
+
+STATIC INLINE UINT32 OsIntNumGet(VOID)
+{
+    if ((g_hwiOps == NULL) || (g_hwiOps->getCurIrqNum == NULL)) {
+        return LOS_ERRNO_HWI_PROC_FUNC_NULL;
+    }
+    return g_hwiOps->getCurIrqNum();
+}
+
+STATIC INLINE BOOL OsIntIsRegisted(UINT32 num)
+{
+    HwiHandleInfo *hwiForm = OsGetHwiForm(num);
+
+    if (hwiForm == NULL) {
+        return false;
+    }
+#ifdef LOSCFG_SHARED_IRQ
+    return (hwiForm->next != NULL);
+#else
+    return (hwiForm->hook != NULL);
+#endif
+}
+
+STATIC INLINE HWI_ARG_T OsIntGetPara(UINT32 num)
+{
+    HwiHandleInfo *hwiForm = OsGetHwiForm(num);
+
+    if (hwiForm == NULL) {
+        return 0;
+    }
+    return hwiForm->registerInfo;
+}
+
+STATIC INLINE CHAR *OsIntVersionGet(VOID)
+{
+    if ((g_hwiOps == NULL) || (g_hwiOps->getIrqVersion == NULL)) {
+        return NULL;
+    }
+    return g_hwiOps->getIrqVersion();
+}
 
 /**
  * If the interrupt is in the scenario where the kernel does not take over,
@@ -97,7 +151,10 @@ extern VOID OsIntHandle(UINT32 hwiNum, HwiHandleInfo *handleForm);
  * HwiControllerOps need to be registered. If this function is not supported, you can call the LOS_Panic interface in
  * the implementation of the stub function to report an error in time.
  */
-extern VOID OsHwiControllerReg(const HwiControllerOps *ops);
+STATIC INLINE VOID OsHwiControllerReg(const HwiControllerOps *ops)
+{
+    g_hwiOps = ops;
+}
 
 #define HWI_IS_REGISTED(num) OsIntIsRegisted(num)
 

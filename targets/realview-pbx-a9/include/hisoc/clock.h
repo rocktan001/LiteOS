@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
- * Description: Clock Header File
+ * Description: Clock HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,

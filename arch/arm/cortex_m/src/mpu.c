@@ -36,8 +36,6 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifndef LOSCFG_ARCH_CORTEX_M33
-
 #define SIZE_4G 0x100000000ULL
 #define SIZE_2G 0x80000000ULL
 
@@ -216,8 +214,6 @@ UINT32 ArchProtectionRegionSet(MPU_REGION_INFO *mpuInfo)
 
     return LOS_OK;
 }
-
-#endif
 
 #ifdef __cplusplus
 #if __cplusplus

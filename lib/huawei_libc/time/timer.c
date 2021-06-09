@@ -61,7 +61,7 @@ int timer_create(clockid_t clockId, struct sigevent *evp, timer_t *timerId)
         return -1;
     }
 
-    swtmr = OS_SWT_FROM_SID(swtmrId);
+    swtmr = OS_SWT_FROM_SWTID(swtmrId);
     *timerId = swtmr;
 
     return 0;

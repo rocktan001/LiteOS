@@ -71,7 +71,6 @@
   *
   ******************************************************************************
   */
-
 /*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: LCD BSP Update
@@ -111,7 +110,7 @@ EndDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f769i_discovery_sdram.h"
-#include "platform_config.h"
+
 /** @addtogroup BSP
   * @{
   */

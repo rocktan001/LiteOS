@@ -119,6 +119,8 @@ extern VOID OsPowerMgrWakeUpFromInterrupt(UINT32 intNum);
 
 extern VOID OsPowerMgrWakeupFromReset(VOID);
 
+extern VOID OsLowpowerInit(const PowerMgrOps *pmOps);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

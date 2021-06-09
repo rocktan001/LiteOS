@@ -48,22 +48,22 @@ config LOSCFG_ARCH_ARM_V7M
     bool
     select LOSCFG_ARCH_ARM_CORTEX_M
 
-config LOSCFG_ARCH_ARM_V8R
-    bool
-    select LOSCFG_ARCH_ARM_CORTEX_R
-
 config LOSCFG_ARCH_ARM_V8M
     bool
     select LOSCFG_ARCH_ARM_CORTEX_M
 
+config LOSCFG_ARCH_ARM_V8R
+    bool
+    select LOSCFG_ARCH_ARM_CORTEX_R
+
 config LOSCFG_ARCH_ARM_VER
     string
-    default "armv6-m"       if LOSCFG_ARCH_ARM_V6M
-    default "armv7-a"       if LOSCFG_ARCH_ARM_V7A
-    default "armv7-r"       if LOSCFG_ARCH_ARM_V7R
-    default "armv7-m"       if LOSCFG_ARCH_ARM_V7M
-    default "armv8-a"       if LOSCFG_ARCH_ARM_V8A_AARCH32
-    default "armv8-r"       if LOSCFG_ARCH_ARM_V8R
+    default "armv6-m" if LOSCFG_ARCH_ARM_V6M
+    default "armv7-a" if LOSCFG_ARCH_ARM_V7A
+    default "armv7-r" if LOSCFG_ARCH_ARM_V7R
+    default "armv7-m" if LOSCFG_ARCH_ARM_V7M
+    default "armv8-a" if LOSCFG_ARCH_ARM_V8A_AARCH32
+    default "armv8-r" if LOSCFG_ARCH_ARM_V8R
     default "armv8-m.main"  if LOSCFG_ARCH_ARM_V8M
 
 #
@@ -127,6 +127,11 @@ config LOSCFG_ARCH_CORTEX_M0
     select LOSCFG_ARCH_ARM_V6M
     select LOSCFG_ARCH_ARM_AARCH32
 
+config LOSCFG_ARCH_CORTEX_M0_PLUS
+    bool
+    select LOSCFG_ARCH_ARM_V6M
+    select LOSCFG_ARCH_ARM_AARCH32
+
 config LOSCFG_ARCH_CORTEX_M3
     bool
     select LOSCFG_ARCH_ARM_V7M
@@ -175,12 +180,13 @@ config LOSCFG_ARCH_CORTEX_A53_AARCH32
 
 config LOSCFG_ARCH_CPU
     string
-    default "cortex-m0"  if LOSCFG_ARCH_CORTEX_M0
-    default "cortex-m3"  if LOSCFG_ARCH_CORTEX_M3
-    default "cortex-m4"  if LOSCFG_ARCH_CORTEX_M4
-    default "cortex-m7"  if LOSCFG_ARCH_CORTEX_M7
-    default "cortex-m33" if LOSCFG_ARCH_CORTEX_M33
-    default "cortex-a7"  if LOSCFG_ARCH_CORTEX_A7
-    default "cortex-a9"  if LOSCFG_ARCH_CORTEX_A9
-    default "cortex-a53" if LOSCFG_ARCH_CORTEX_A53_AARCH32
+    default "cortex-m0"      if LOSCFG_ARCH_CORTEX_M0
+    default "cortex-m0plus"  if LOSCFG_ARCH_CORTEX_M0_PLUS
+    default "cortex-m3"      if LOSCFG_ARCH_CORTEX_M3
+    default "cortex-m4"      if LOSCFG_ARCH_CORTEX_M4
+    default "cortex-m7"      if LOSCFG_ARCH_CORTEX_M7
+    default "cortex-m33"     if LOSCFG_ARCH_CORTEX_M33
+    default "cortex-a7"      if LOSCFG_ARCH_CORTEX_A7
+    default "cortex-a9"      if LOSCFG_ARCH_CORTEX_A9
+    default "cortex-a53"     if LOSCFG_ARCH_CORTEX_A53_AARCH32
 

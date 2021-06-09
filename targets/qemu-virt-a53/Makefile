@@ -4,10 +4,6 @@ MODULE_NAME := $(LITEOS_PLATFORM)
 
 LOCAL_SRCS := $(wildcard *.c)
 
-ifeq ($(LOSCFG_DRIVERS_USB), y)
-LOCAL_SRCS += $(wildcard $(USB_SRC)/*.c)
-endif
-
 ifeq ($(LOSCFG_PLATFORM_ADAPT), y)
 LOCAL_SRCS += $(wildcard os_adapt/*.c)
 endif
@@ -54,7 +50,6 @@ endif
 
 ALL_ASSRCS := $(wildcard *.S)
 ASSRCS := $(subst board.ld.S,,$(ALL_ASSRCS))
-
 LOCAL_SRCS += $(ASSRCS)
 
 LOCAL_INCLUDE += \
@@ -65,8 +60,6 @@ LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM) \
     -I $(LITEOSTOPDIR)/include
 
-BOARD_DEF += $(C_DEFS)
-
-LOCAL_FLAGS := $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 
 include $(MODULE)

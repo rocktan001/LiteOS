@@ -126,14 +126,14 @@ UINT32 FpbAddPatch(UINT32 oldAddr, UINT32 patchValue, FpbCompTypeEnum fpbType)
             return ret;
         }
 
-        PRINT_DEBUG("new_instr:%x, ", new_instr);
+        PRINT_DEBUG("new_instr:%x, ", newInstr);
 
         ret = FpbComparatorRegConfig(regIndex, oldAddr);
         if (ret != FPB_SUCCESS) {
             return ret;
         }
 
-        PRINT_DEBUG("use COMP:%d\r\n", reg_index);
+        PRINT_DEBUG("use COMP:%d\r\n", regIndex);
         *((UINT32 *)(UINTPTR)(REMAP_TABLE_ADDR + (regIndex * REMAP_UNIT_SIZE))) = newInstr;
     }
 

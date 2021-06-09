@@ -4,19 +4,19 @@
 #ifdef LOSCFG_FS_VFS
 #include "fs/fs.h"
 #endif
-#if defined(LOSCFG_HW_RANDOM_ENABLE) || defined(LOSCFG_DRIVERS_RANDOM)
+#if defined(LOSCFG_DRIVERS_RANDOM)
 #include "randomdev.h"
 #endif
 #include "sys/random.h"
 #include "sys/param.h"
 
-#if defined(LOSCFG_HW_RANDOM_ENABLE) || defined(LOSCFG_DRIVERS_RANDOM)
+#if defined(LOSCFG_DRIVERS_RANDOM)
 #define RANDOM_BUF_MAX_LEN 300
 #define RANDOM_BLOCKSIZE 16
 #endif
 
 static int getentropy_urandom(void *buf, size_t len) {
-#if defined(LOSCFG_HW_RANDOM_ENABLE) || defined(LOSCFG_DRIVERS_RANDOM)
+#if defined(LOSCFG_DRIVERS_RANDOM)
 	int ret;
 	u_int read_len;
 	uint8_t local_buf[RANDOM_BUF_MAX_LEN];

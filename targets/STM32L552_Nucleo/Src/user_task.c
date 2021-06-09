@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: User Task Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-02-03
+ * Create: 2021-04-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,7 +26,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-// #include "sys_init.h"
 #include "main.h"
 #include "demo_entry.h"
 #include "los_task_pri.h"
@@ -36,11 +35,11 @@
 STATIC UINT32 LedTask(VOID)
 {
     while (1) {
-        HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);
         LOS_TaskDelay(TASK_DELAY);
-        HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);
+        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
         LOS_TaskDelay(TASK_DELAY);
-        HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
         LOS_TaskDelay(TASK_DELAY);
     }
     return 0;
@@ -48,10 +47,14 @@ STATIC UINT32 LedTask(VOID)
 
 STATIC UINT32 LedTaskCreate(VOID)
 {
+    INT32 ret;
     UINT32 taskId = 0;
     TSK_INIT_PARAM_S ledTaskParam;
 
-    (VOID)memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return ret;
+    }
     ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask;
     ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     ledTaskParam.pcName = "ledTask";

@@ -46,7 +46,7 @@ LITE_OS_SEC_BSS LosSemCB *g_allSem = NULL;
 
 STATIC_INLINE VOID OsSemNodeRecycle(LosSemCB *semNode)
 {
-    semNode->semStat = OS_SEM_UNUSED;
+    semNode->semStat = LOS_UNUSED;
     LOS_ListTailInsert(&g_unusedSemList, &semNode->semList);
 }
 
@@ -56,14 +56,14 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsSemInit(VOID)
     UINT16 index; // support at most 65536 semaphores
 
     /* system resident memory, don't free */
-    g_allSem = (LosSemCB *)LOS_MemAlloc(m_aucSysMem0, (LOSCFG_BASE_IPC_SEM_LIMIT * sizeof(LosSemCB)));
+    g_allSem = (LosSemCB *)LOS_MemAlloc(m_aucSysMem0, (KERNEL_SEM_LIMIT * sizeof(LosSemCB)));
     if (g_allSem == NULL) {
         return LOS_ERRNO_SEM_NO_MEMORY;
     }
 
     LOS_ListInit(&g_unusedSemList);
 
-    for (index = 0; index < LOSCFG_BASE_IPC_SEM_LIMIT; index++) {
+    for (index = 0; index < KERNEL_SEM_LIMIT; index++) {
         semNode = ((LosSemCB *)g_allSem) + index;
         semNode->semId = (UINT32)index;
         OsSemNodeRecycle(semNode);
@@ -96,7 +96,7 @@ LITE_OS_SEC_TEXT_INIT STATIC UINT32 OsSemCreate(UINT16 count, UINT8 type, UINT32
     unusedSem = LOS_DL_LIST_FIRST(&g_unusedSemList);
     LOS_ListDelete(unusedSem);
     semCreated = GET_SEM_LIST(unusedSem);
-    semCreated->semStat = OS_SEM_USED;
+    semCreated->semStat = LOS_USED;
     semCreated->semType = type;
     semCreated->semCount = count;
     LOS_ListInit(&semCreated->semList);
@@ -112,7 +112,7 @@ LITE_OS_SEC_TEXT_INIT STATIC UINT32 OsSemCreate(UINT16 count, UINT8 type, UINT32
 
 LITE_OS_SEC_TEXT_INIT UINT32 LOS_SemCreate(UINT16 count, UINT32 *semHandle)
 {
-    if (count > OS_SEM_COUNT_MAX) {
+    if (count > LOS_SEM_COUNT_MAX) {
         return LOS_ERRNO_SEM_OVERFLOW;
     }
     return OsSemCreate(count, OS_SEM_COUNTING, semHandle);
@@ -129,9 +129,9 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_BinarySemCreate(UINT16 count, UINT32 *semHandle
 STATIC_INLINE UINT32 OsSemStateVerify(UINT32 semId, const LosSemCB *semNode)
 {
 #ifndef LOSCFG_RESOURCE_ID_NOT_USE_HIGH_BITS
-    if ((semNode->semStat == OS_SEM_UNUSED) || (semNode->semId != semId)) {
+    if ((semNode->semStat == LOS_UNUSED) || (semNode->semId != semId)) {
 #else
-    if (semNode->semStat == OS_SEM_UNUSED) {
+    if (semNode->semStat == LOS_UNUSED) {
 #endif
         return LOS_ERRNO_SEM_INVALID;
     }
@@ -140,7 +140,7 @@ STATIC_INLINE UINT32 OsSemStateVerify(UINT32 semId, const LosSemCB *semNode)
 
 STATIC UINT32 OsSemGetCBWithCheck(UINT32 semHandle, LosSemCB **semCB)
 {
-    if (GET_SEM_INDEX(semHandle) >= (UINT32)LOSCFG_BASE_IPC_SEM_LIMIT) {
+    if (GET_SEM_INDEX(semHandle) >= (UINT32)KERNEL_SEM_LIMIT) {
         return LOS_ERRNO_SEM_INVALID;
     }
 
@@ -278,7 +278,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_SemPost(UINT32 semHandle)
     /* Update the operate time, no matter the actual Post success or not */
     OsSemDbgTimeUpdateHook(semHandle);
 
-    maxCount = (semPosted->semType == OS_SEM_COUNTING) ? OS_SEM_COUNT_MAX : OS_SEM_BINARY_COUNT_MAX;
+    maxCount = (semPosted->semType == OS_SEM_COUNTING) ? LOS_SEM_COUNT_MAX : OS_SEM_BINARY_COUNT_MAX;
     if (semPosted->semCount >= maxCount) {
         ret = LOS_ERRNO_SEM_OVERFLOW;
         goto OUT;

@@ -1,5 +1,15 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
+ifneq ($(LOSCFG_COMPILER_THIRDPARTY_SUPPORT), y)
+    # If thirdparty compiler is not enabled, then empty $(CROSS_COMPILE)
+    # and use system chosen compiler.
+    # Attention: this override only affects the export environment. While
+    # 'make CROSS_COMPILE=' style's $(CROSS_COMPILE) cannot be overrided.
+    # In this case thirdparty support is mannually enabled which not controlled
+    # by this config $(LOSCFG_COMPILER_THIRDPARTY_SUPPORT)
+    CROSS_COMPILE :=
+endif
+
 ifeq ($(CROSS_COMPILE),)
     ifeq ($(LOSCFG_COMPILER_HIMIX_32), y)
         CROSS_COMPILE := arm-himix410-linux-
@@ -15,6 +25,12 @@ ifeq ($(CROSS_COMPILE),)
         CROSS_COMPILE := riscv32-linux-musl-
     else ifeq ($(LOSCFG_COMPILER_RISCV_UNKNOWN), y)
         CROSS_COMPILE := riscv32-unknown-elf-
+    else ifeq ($(LOSCFG_COMPILER_CSKYV2), y)
+        CROSS_COMPILE := csky-elfabiv2-
+    else ifeq ($(LOSCFG_COMPILER_RISCV_NULEI), y)
+        CROSS_COMPILE := riscv-nuclei-elf-
+    else ifeq ($(LOSCFG_COMPILER_RISCV64_UNKNOWN), y)
+        CROSS_COMPILE := riscv64-unknown-elf-
     endif
 endif
 
@@ -58,7 +74,7 @@ endif
 # 32 bit : $(LITEOS_GCCLIB) can be defined as CPU level lib path,
 #          if not define, use the common libs instead.
 # 64 bit : Default use lib64 path, if not exist, use lib instead.
-GCC_USE_CPU_OPT := n
+GCC_USE_CPU_OPT := y
 GCC_GCCLIB_PATH :=
 GCC_GXXLIB_PATH :=
 
@@ -69,19 +85,24 @@ CXXLIB_PATH_32 = $(LITEOS_COMPILER_PATH)/$(COMPILE_NAME)/lib
 CXXLIB_PATH_64 = $(LITEOS_COMPILER_PATH)/$(COMPILE_NAME)/lib64
 
 ifeq ($(findstring 64, $(CROSS_COMPILE)),)
-    GCC_USE_CPU_OPT := y
     GCC_GCCLIB_PATH := $(GCCLIB_PATH_32)
     GCC_GXXLIB_PATH := $(CXXLIB_PATH_32)
-    ifeq ($(wildcard $(GCC_GCCLIB_PATH)/$(LITEOS_GCCLIB)),)
-        GCC_USE_CPU_OPT := n
-    endif
 else
     ifneq ($(wildcard $(GCCLIB_PATH_64)),)
         GCC_GCCLIB_PATH := $(GCCLIB_PATH_64)
     else
         GCC_GCCLIB_PATH := $(GCCLIB_PATH_32)
     endif
-    GCC_GXXLIB_PATH := $(CXXLIB_PATH_64)
+
+    ifneq ($(wildcard $(GCC_GXXLIB_PATH)),)
+        GCC_GXXLIB_PATH := $(CXXLIB_PATH_64)
+    else
+        GCC_GXXLIB_PATH := $(CXXLIB_PATH_32)
+    endif
+endif
+
+ifeq ($(wildcard $(GCC_GCCLIB_PATH)/$(LITEOS_GCCLIB)),)
+    GCC_USE_CPU_OPT := n
 endif
 
 ifeq ($(GCC_USE_CPU_OPT), y)
@@ -95,7 +116,9 @@ LITEOS_COMPILER_GCC_INCLUDE = -I $(GCC_GCCLIB_PATH)/include
 
 LITEOS_COMPILER_CXX_PATH := $(LITEOS_COMPILER_PATH)/$(COMPILE_NAME)/include
 LITEOS_CXXINCLUDE += \
+    -I $(LITEOSTOPDIR)/lib/libcpp \
     -I $(LITEOS_COMPILER_CXX_PATH)/c++/$(VERSION_NUM) \
+    -I $(LITEOS_COMPILER_CXX_PATH)/c++/$(VERSION_NUM)/bits \
     -I $(LITEOS_COMPILER_CXX_PATH)/c++/$(VERSION_NUM)/ext \
     -I $(LITEOS_COMPILER_CXX_PATH)/c++/$(VERSION_NUM)/backward \
     -I $(LITEOS_COMPILER_CXX_PATH)/c++/$(VERSION_NUM)/$(COMPILE_ALIAS)

@@ -34,7 +34,6 @@ BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/bsp/common \
     -I $(LITEOSTOPDIR)/targets/bsp/include \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
-    -I $(LITEOSTOPDIR)/targets/bsp/drivers/st_timer \
     -I $(LITEOSTOPDIR)/targets/STM32L496_Nucleo/include \
     -I $(LITEOSTOPDIR)/kernel/extended/include \
     -I $(LITEOSTOPDIR)/kernel/include

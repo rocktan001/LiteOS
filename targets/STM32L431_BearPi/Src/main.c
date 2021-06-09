@@ -25,15 +25,16 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
+
 #include "main.h"
 #include "sys_init.h"
 
 #include "los_base.h"
 #include "los_task_pri.h"
+#include "arch/canary.h"
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "uart.h"
-#include "timer.h"
 
 #if defined(__CC_ARM)
 extern char Image$$RW_IRAM1$$ZI$$Limit[];
@@ -91,6 +92,12 @@ VOID HardwareInit(VOID)
 
 INT32 main(VOID)
 {
+#ifdef __GNUC__
+    ArchStackGuardInit();
+#endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+
     board_config();
     HardwareInit();
 

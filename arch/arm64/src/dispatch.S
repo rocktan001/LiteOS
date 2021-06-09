@@ -214,10 +214,8 @@
 OsStartToRun:
     msr     daifset, #3
 
-    ldr     x2, [x0, #8]
     mov     x3, #TASK_STATUS_RUNNING
-    orr     x2, x2, x3
-    str     x2, [x0, #8]
+    str     x3, [x0, #8]
 
     /* x0 is new task, save it on tpidr_elx */
     msr     TPIDR_ELx, X0
@@ -232,7 +230,7 @@ OsStartToRun:
 OsTaskSchedule:
     PUSH_AARCH64
 
-#ifdef LOSCFG_AARCH64_FPU
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     FPU_PUSH_REGS
 #endif
 
@@ -251,7 +249,7 @@ OsTaskContextLoad:
     mov     sp, x2
 
 osThrdContextLoad:
-#ifdef LOSCFG_AARCH64_FPU
+#ifdef LOSCFG_ARCH_FPU_ENABLE
     FPU_POP_REGS
 #endif
 
@@ -276,6 +274,9 @@ _osExceptIrqHdl:
 
     /* save irq stack */
     IRQ_PUSH_REGS
+#ifdef LOSCFG_ARCH_FPU_ENABLE
+    FPU_PUSH_REGS
+#endif
 
 #ifdef LOSCFG_IRQ_USE_STANDALONE_STACK
 #ifdef LOSCFG_KERNEL_SMP
@@ -298,7 +299,12 @@ _osExceptIrqHdl:
     mov     x9, sp
     str     x9, [x6]
 
+#ifdef LOSCFG_LIB_CONFIGURABLE
+    ldr     x9, =g_irqStackTop
+    ldr     x9, [x9]
+#else
     ldr     x9, =__irq_stack_top
+#endif
     mov     x7, #OS_EXC_IRQ_STACK_SIZE
     mul     x7, x7, x0 /* w0 is core id */
     sub     x9, x9, x7
@@ -329,6 +335,9 @@ ALREADY_IRQ_SP:
     bl      OsSchedPreempt
 
 exit:
+#ifdef LOSCFG_ARCH_FPU_ENABLE
+    FPU_POP_REGS
+#endif
     IRQ_POP_REGS
     eret
 

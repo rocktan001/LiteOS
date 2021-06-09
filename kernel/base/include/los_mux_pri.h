@@ -38,79 +38,42 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#define MUX_SCHEDULE    0x01
+#define MUX_NO_SCHEDULE 0x02
+
 /**
- * @ingroup los_mux
  * Mutex base object must be the same as the first three member names of LosMuxCB,
  * so that pthread_mutex_t can share the kernel mutex mechanism.
  */
 typedef struct {
-    LOS_DL_LIST muxList; /**< Mutex linked list */
-    LosTaskCB *owner; /**< The current thread that is locking a mutex */
-    UINT16 muxCount; /**< Times of locking a mutex */
+    LOS_DL_LIST muxList;    /* Mutex linked list */
+    LosTaskCB *owner;       /* The current thread that is locking a mutex */
+    UINT16 muxCount;        /* Times of locking a mutex */
 } MuxBaseCB;
 
-/**
- * @ingroup los_mux
- * Mutex object.
- */
 typedef struct {
-    LOS_DL_LIST muxList; /**< Mutex linked list */
-    LosTaskCB *owner; /**< The current thread that is locking a mutex */
-    UINT16 muxCount; /**< Times of locking a mutex */
-    UINT8 muxStat; /**< State OS_MUX_UNUSED, OS_MUX_USED */
-    UINT32 muxId; /**< Handle ID */
+    LOS_DL_LIST muxList; /* Mutex linked list */
+    LosTaskCB *owner;    /* The current thread that is locking a mutex */
+    UINT16 muxCount;     /* Times of locking a mutex */
+    UINT8 muxStat;       /* State LOS_UNUSED, LOS_USED */
+    UINT32 muxId;        /* Handle ID */
 } LosMuxCB;
 
-/**
- * @ingroup los_mux
- * Mutex state: not in use.
- */
-#define OS_MUX_UNUSED 0
-
-/**
- * @ingroup los_mux
- * Mutex state: in use.
- */
-#define OS_MUX_USED   1
-
-/**
- * @ingroup los_mux
- * Mutex global array address, which can be obtained by using a handle ID.
- */
+/* Mutex global array address, which can be obtained by using a handle ID. */
 extern LosMuxCB *g_allMux;
 
-/**
- * @ingroup los_mux
- * COUNT | INDEX  split bit
- */
+/* COUNT | INDEX  split bit */
 #define MUX_SPLIT_BIT 16
-/**
- * @ingroup los_mux
- * Set the mutex id
- */
+
+/* Set the mutex id */
 #define SET_MUX_ID(count, muxId)    (((count) << MUX_SPLIT_BIT) | (muxId))
-
-/**
- * @ingroup los_mux
- * get the mutex index
- */
 #define GET_MUX_INDEX(muxId)        ((muxId) & ((1U << MUX_SPLIT_BIT) - 1))
-
-/**
- * @ingroup los_mux
- * get the mutex count
- */
 #define GET_MUX_COUNT(muxId)        ((muxId) >> MUX_SPLIT_BIT)
-/**
- * @ingroup los_mux
- * Obtain the pointer to a mutex object of the mutex that has a specified handle.
- */
+
+/* Obtain the pointer to a mutex object of the mutex that has a specified handle. */
 #define GET_MUX(muxId)              (((LosMuxCB *)g_allMux) + GET_MUX_INDEX(muxId))
 
 extern UINT32 OsMuxInit(VOID);
-
-#define MUX_SCHEDULE    0x01
-#define MUX_NO_SCHEDULE 0x02
 extern UINT32 OsMuxPendOp(LosTaskCB *runTask, MuxBaseCB *muxPended, UINT32 timeout, UINT32 *intSave);
 extern UINT32 OsMuxPostOp(LosTaskCB *runTask, MuxBaseCB *muxPosted);
 #ifdef __cplusplus

@@ -22,11 +22,16 @@ choice
     prompt "Compiler"
     default LOSCFG_COMPILER_ARM_NONE_EABI
     help
-      Enable arm-himix100 or aarch64-himix100 or compiler.
+      Enable arm-none-eabi compiler.
 
 config LOSCFG_COMPILER_HIMIX_32
-    bool "arm-himix400-linux"
+    bool "arm-himix410-linux"
     depends on LOSCFG_ARCH_ARM_AARCH32
+    select LOSCFG_COMPILER_GCC
+
+config LOSCFG_COMPILER_CSKYV2
+    bool "csky-elfabiv2"
+    depends on LOSCFG_ARCH_CSKY_V2
     select LOSCFG_COMPILER_GCC
 
 config LOSCFG_COMPILER_HIMIX100_64
@@ -37,6 +42,21 @@ config LOSCFG_COMPILER_HIMIX100_64
 config LOSCFG_COMPILER_HCC_64
     bool "aarch64-hcc-linux"
     depends on LOSCFG_ARCH_ARM_AARCH64
+    select LOSCFG_COMPILER_GCC
+
+config LOSCFG_COMPILER_RISCV_NULEI
+    bool "riscv-nuclei-elf"
+    depends on LOSCFG_ARCH_RISCV_RV32IMC
+    select LOSCFG_COMPILER_GCC
+
+config LOSCFG_COMPILER_RISCV_UNKNOWN
+    bool "riscv32-unknown-elf"
+    depends on LOSCFG_ARCH_RISCV_RV32IMC
+    select LOSCFG_COMPILER_GCC
+
+config LOSCFG_COMPILER_RISCV64_UNKNOWN
+    bool "riscv64-unknown-elf"
+    depends on LOSCFG_ARCH_RISCV_RV32IMC
     select LOSCFG_COMPILER_GCC
 
 config LOSCFG_COMPILER_XTENSA_32
@@ -50,6 +70,51 @@ config LOSCFG_COMPILER_ARM_NONE_EABI
     select LOSCFG_COMPILER_GCC
 
 endchoice
+
+menu "Compiler Options"
+config LOSCFG_RISCV_COMPILER_OPTIONS_USER_DEFINED
+    string "User-defined Compiler Options"
+    default ""
+    depends on LOSCFG_COMPILER_RISCV_UNKNOWN || LOSCFG_COMPILER_RISCV
+    help
+      You can input your own compiler options.
+
+config LOSCFG_RISCV_COMPILER_OPTIONS_EMIT_LLI
+    bool "Enable -femit-lli"
+    default y
+    depends on LOSCFG_COMPILER_RISCV_UNKNOWN || LOSCFG_COMPILER_RISCV
+    help
+      Please confirm that your compiler or board supports it.
+
+config LOSCFG_RISCV_COMPILER_OPTIONS_LBU_SB
+    bool "Enable -Wa,-enable-c-lbu-sb"
+    default y
+    depends on LOSCFG_COMPILER_RISCV_UNKNOWN
+    help
+      Please confirm that your compiler or board supports it.
+
+config LOSCFG_RISCV_COMPILER_OPTIONS_NO_INLINE
+    bool "Enable -fno-inline-small-functions"
+    default n
+    depends on LOSCFG_COMPILER_RISCV_UNKNOWN
+    help
+      This is usually used to patch for ROM codes easily.
+
+choice
+    prompt "Function Stack Save Mode"
+    default LOSCFG_RISCV_COMPILER_OPTIONS_SAVE_RESTORE
+    depends on (LOSCFG_COMPILER_RISCV_UNKNOWN || LOSCFG_COMPILER_RISCV) && !LOSCFG_BACKTRACE
+    help
+    This Option will choose compile option for riscv.
+    Please confirm that your compiler or board supports it.
+
+config LOSCFG_RISCV_COMPILER_OPTIONS_SAVE_RESTORE
+    bool "Enable -msave-restore"
+config LOSCFG_RISCV_COMPILER_OPTIONS_PUSH_POP
+    bool "Enable -mpush-pop"
+endchoice
+
+endmenu
 
 choice
     prompt "Optimize Option"
@@ -70,7 +135,7 @@ endmenu
 menu "Targets"
 
 ######################### config options of bsp #####################
-source "targets/bsp/Kconfig"
+source "targets/Kconfig"
 
 ######################### config options of cpu #####################
 source "arch/Kconfig"
@@ -86,7 +151,6 @@ source "lib/Kconfig"
 osource "compat/Kconfig"
 ######################### config options of components ##############
 source "components/Kconfig"
-
 source "demos/Kconfig"
 ######################## config options of filesystem ##################
 #osource "fs/Kconfig"
@@ -126,18 +190,10 @@ config LOSCFG_PLATFORM_ADAPT
 
 config LOSCFG_BACKTRACE
     bool "Enable Backtrace"
-    default n
-
-    help
-      Answer Y to enable backtrace for LiteOS.
-
-config LOSCFG_BACKTRACE_WITH_FP
-    bool "Backtrace with frame pointer"
     default y
-    depends on LOSCFG_BACKTRACE && !LOSCFG_COMPILER_XTENSA_32
-
+    depends on !LOSCFG_ARCH_XTENSA
     help
-      Answer Y to enable frame-pointer for backtrace.
+        Answer Y to enable backtrace for LiteOS.
 
 #config LOSCFG_GDB
 #    bool "Enable GDB"
@@ -254,6 +310,7 @@ config LOSCFG_NET_LWIP_SACK_TFTP
     depends on LOSCFG_SHELL && LOSCFG_NET_LWIP_SACK && LOSCFG_DEBUG_VERSION
     help
       Answer Y to enable LiteOS support tftp cmd and tftp tool.
+
 #osource "net/telnet/Kconfig"
 config LOSCFG_EXC_INTERACTION
     bool "Enable exc interaction"
@@ -306,17 +363,12 @@ config LOSCFG_MEM_HEAD_BACKUP
     help
       Answer Y to enable node head backup
 
-config LOSCFG_MEM_RECORDINFO
-    bool "Enable Mem Record"
-    default n
-    depends on LOSCFG_MEM_DEBUG && LOSCFG_KERNEL_MEM_BESTFIT
-    help
-      Answer Y to enable mem record
-
 config LOSCFG_MEM_LEAKCHECK
     bool "Enable Function call stack of Mem operation recorded"
     default n
     depends on LOSCFG_MEM_DEBUG && LOSCFG_KERNEL_MEM_BESTFIT
+    depends on !LOSCFG_ARCH_ARM_CORTEX_M && !LOSCFG_COMPILER_XTENSA_32
+    select LOSCFG_BACKTRACE
     help
       Answer Y to enable record the LR of Function call stack of Mem operation, it can check the mem leak through the infomations of mem node.
 
@@ -341,25 +393,6 @@ config LOSCFG_NULL_ADDRESS_PROTECT
     depends on (LOSCFG_PLATFORM_HI3518EV200 || LOSCFG_PLATFORM_HI3516CV300) && LOSCFG_DEBUG_VERSION
     help
       Answer Y to set mem address 0~1M prohibit to access, read or write will trigger exception.
-
-#choice
-#    prompt "Enable Uart"
-#    default LOSCFG_DRIVERS_UART
-#    help
-#      Enable simple uart (without vfs) only for litekernel.
-#     Enable general uart (with vfs) for full code.
-#source "drivers/uart/Kconfig"
-#config LOSCFG_PLATFORM_UART_WITHOUT_VFS
-#    bool "Simple Uart"
-config LOSCFG_PLATFORM_UART_WITHOUT_VFS
-    bool "Enable Simple Uart"
-    default y
-    help
-      Answer Y to enable LiteOS simple uart
-#config LOSCFG_PLATFORM_NO_UART
-#    bool "NO Uart"
-
-#endchoice
 
 config LOSCFG_SERIAL_OUTPUT_ENABLE
     bool "Enable Serial Output"
@@ -390,10 +423,9 @@ config LOSCFG_FUZZ_DT
    bool "Enable Fuzz Testsuit"
 
 endchoice
-endmenu
-
 osource "test/Kconfig"
 osource "test/Kconfig_case"
+endmenu
 
 config LOSCFG_LLTREPORT
     bool "Enable LLT Report"
@@ -422,7 +454,7 @@ osource "kernel/extended/lms/Kconfig"
 endmenu
 
 ######################## config options os drivers ########################
-#source "drivers/Kconfig"
+source "drivers/Kconfig"
 
 menu "Stack Smashing Protector (SSP) Compiler Feature"
 

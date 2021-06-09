@@ -46,7 +46,7 @@ int posix_memalign(void **memAddr, size_t alignment, size_t size)
         return EINVAL;
     }
 
-    *memAddr = LOS_MemAllocAlign(OS_SYS_MEM_ADDR, size, alignment);
+    *memAddr = LOS_MemAllocAlign(OS_SYS_MEM_ADDR, (UINT32)size, (UINT32)alignment);
     if (*memAddr == NULL) {
         return ENOMEM;
     }

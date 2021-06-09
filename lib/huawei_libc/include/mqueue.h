@@ -39,7 +39,6 @@
 #include "limits.h"
 #include "time.h"
 #include "los_typedef.h"
-#include "los_queue_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -63,7 +62,7 @@ extern "C" {
 
 struct mqarray {
     UINT32 mq_id;
-    LosQueueCB *mqcb;
+    void *mqcb;
     struct mqpersonal *mq_personal;
     char mq_name[PATH_MAX];
     BOOL unlinkflag;

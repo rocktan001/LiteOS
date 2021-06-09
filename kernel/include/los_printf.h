@@ -35,6 +35,7 @@
 #define _LOS_PRINTF_H
 
 #include "stdarg.h"
+#include "los_config.h"
 #include "los_typedef.h"
 
 #ifdef __cplusplus
@@ -339,34 +340,6 @@ extern void dprintf(const char *fmt, ...);
  */
 #ifndef PRINT_RELEASE
 #define PRINT_RELEASE(fmt, ...)   dprintf(fmt, ##__VA_ARGS__)
-#endif
-
-/**
- * @ingroup los_printf
- * @brief Format and print trace log.
- *
- * @par Description:
- * Define function macros PRINT_TRACE. The Function can print trace log according to fmt
- * only when the DEBUG_TRACE is set.
- *
- * @attention
- * None.
- *
- * @param fmt  [IN] Type: const CHAR *. It controls the ouput format as in C printf.
- * @param args [IN] It point to the variable parameters.
- *
- * @retval None.
- * @par Dependency:
- * <ul><li>los_printf.h: the header file that contains the API declaration.</li></ul>
- * @see dprintf
- * @since Huawei LiteOS V100R001C00
- */
-#ifndef PRINT_TRACE
-#ifdef DEBUG_TRACE
-#define PRINT_TRACE(fmt, ...)   do {dprintf("[TRACE] "fmt, ##__VA_ARGS__);} while (0)
-#else
-#define PRINT_TRACE(fmt, ...)
-#endif
 #endif
 
 #ifdef __cplusplus

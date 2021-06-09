@@ -13,6 +13,7 @@ config  LOSCFG_COMPAT_POSIX
     depends on LOSCFG_LIB_LIBC
     select LOSCFG_BASE_IPC_MUX
     select LOSCFG_BASE_IPC_SEM
+    select LOSCFG_BASE_IPC_EVENT
     select LOSCFG_BASE_CORE_SWTMR
     help
       Answer Y to enable LiteOS support posix interface.
@@ -47,5 +48,12 @@ config LOSCFG_LIB_ZLIB
     select LOSCFG_LIB_LIBM
     help
       Answer Y to enable LiteOS support compress file library.
+
+config LOSCFG_LIB_CPP_EXTEND
+    bool "Enable libc++ extend"
+    default n
+    help
+      Answer Y to support libc++ extend.
+
 endmenu
 

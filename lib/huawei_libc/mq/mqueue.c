@@ -38,6 +38,7 @@
 #include "los_memory.h"
 #include "los_task.h"
 #include "los_sys.h"
+#include "los_queue_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -45,11 +46,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifndef LOSCFG_LIB_CONFIGURABLE
 STATIC struct mqarray g_queueTable[LOSCFG_BASE_IPC_QUEUE_LIMIT];
-#else
-__attribute__((section(".libc.mqueue"))) struct mqarray g_queueTable[LOSCFG_BASE_IPC_QUEUE_LIMIT_CONFIG];
-#endif
 STATIC pthread_mutex_t g_mqueueMutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 
 STATIC INLINE INT32 MqNameCheck(const CHAR *mqName)
@@ -154,14 +151,14 @@ STATIC struct mqpersonal *DoMqueueCreate(const struct mq_attr *attr, const CHAR 
         goto ERROUT_FREE_QUEUE;
     }
 
-    if (GetMqueueCBByID(mqueueCB->mq_id, &(mqueueCB->mqcb)) != LOS_OK) {
+    if (GetMqueueCBByID(mqueueCB->mq_id, (LosQueueCB **)&(mqueueCB->mqcb)) != LOS_OK) {
         errno = ENOSPC;
         goto ERROUT_FREE_QUEUE;
     }
 
     mqueueCB->mq_personal = (struct mqpersonal *)LOS_MemAlloc(OS_SYS_MEM_ADDR, sizeof(struct mqpersonal));
     if (mqueueCB->mq_personal == NULL) {
-        mqueueCB->mqcb->queueHandle = NULL;
+        ((LosQueueCB *)(mqueueCB->mqcb))->queueHandle = NULL;
         mqueueCB->mqcb = NULL;
         errno = ENOSPC;
         goto ERROUT_FREE_QUEUE;
@@ -376,9 +373,9 @@ int mq_getattr(mqd_t personal, struct mq_attr *mqAttr)
     }
 
     mqueueCB = privateMqPersonal->mq_posixdes;
-    mqAttr->mq_maxmsg = mqueueCB->mqcb->queueLen;
-    mqAttr->mq_msgsize = mqueueCB->mqcb->queueSize - sizeof(UINT32);
-    mqAttr->mq_curmsgs = mqueueCB->mqcb->readWriteableCnt[OS_QUEUE_READ];
+    mqAttr->mq_maxmsg = ((LosQueueCB *)(mqueueCB->mqcb))->queueLen;
+    mqAttr->mq_msgsize = ((LosQueueCB *)(mqueueCB->mqcb))->queueSize - sizeof(UINT32);
+    mqAttr->mq_curmsgs = ((LosQueueCB *)(mqueueCB->mqcb))->readWriteableCnt[OS_QUEUE_READ];
     mqAttr->mq_flags = privateMqPersonal->mq_flags;
     (VOID)pthread_mutex_unlock(&g_mqueueMutex);
     return 0;
@@ -476,7 +473,7 @@ int mq_timedsend(mqd_t personal, const char *msg, size_t msgLen,
     }
 
     mqueueCB = privateMqPersonal->mq_posixdes;
-    if (msgLen > (size_t)(mqueueCB->mqcb->queueSize - sizeof(UINT32))) {
+    if (msgLen > (size_t)(((LosQueueCB *)(mqueueCB->mqcb))->queueSize - sizeof(UINT32))) {
         errno = EMSGSIZE;
         goto ERROUT_UNLOCK;
     }
@@ -531,7 +528,7 @@ ssize_t mq_timedreceive(mqd_t personal, char *msg, size_t msgLen,
     }
 
     mqueueCB = privateMqPersonal->mq_posixdes;
-    if (msgLen < (size_t)(mqueueCB->mqcb->queueSize - sizeof(UINT32))) {
+    if (msgLen < (size_t)(((LosQueueCB *)(mqueueCB->mqcb))->queueSize - sizeof(UINT32))) {
         errno = EMSGSIZE;
         goto ERROUT_UNLOCK;
     }
@@ -545,7 +542,7 @@ ssize_t mq_timedreceive(mqd_t personal, char *msg, size_t msgLen,
         goto ERROUT_UNLOCK;
     }
 
-    receiveLen = msgLen;
+    receiveLen = (UINT32)msgLen;
     mqueueId = mqueueCB->mq_id;
     (VOID)pthread_mutex_unlock(&g_mqueueMutex);
 

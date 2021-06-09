@@ -47,6 +47,12 @@ extern "C" {
 
 /**
  * @ingroup los_sem
+ * Max count of counting semaphores
+ */
+#define LOS_SEM_COUNT_MAX  0xFFFE
+
+/**
+ * @ingroup los_sem
  * Semaphore error code: The memory is insufficient.
  *
  * Value: 0x02000700.
@@ -152,9 +158,10 @@ extern "C" {
  *            old usage: The API is called in software timer callback, which is forbidden (LOS_ERRNO_SEM_PEND_SWTERR).
  *
  * Value: 0x0200070A.
-*
-* Solution: Do not call the API in the system-level callback.
-*/
+ *
+ * Solution: Do not call the API in the system-level callback.
+ * @deprecated This error code is obsolete since LiteOS 5.0.0.
+ */
 #define LOS_ERRNO_SEM_PEND_IN_SYSTEM_TASK       LOS_ERRNO_OS_ERROR(LOS_MOD_SEM, 0x0A)
 
 /**
@@ -167,7 +174,7 @@ extern "C" {
  * @attention
  * None.
  *
- * @param count       [IN] Initial number of available semaphores. The value range is [0, OS_SEM_COUNT_MAX).
+ * @param count       [IN] Initial number of available semaphores. The value range is [0, LOS_SEM_COUNT_MAX).
  * @param semHandle   [OUT] ID of the semaphore control structure that is initialized.
  *
  * @retval #LOS_ERRNO_SEM_PTR_NULL  The passed-in semHandle value is NULL.

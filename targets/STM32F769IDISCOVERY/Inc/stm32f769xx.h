@@ -200,7 +200,12 @@ typedef enum
 #define __ICACHE_PRESENT          1       /*!< CM7 instruction cache present                 */
 #define __DCACHE_PRESENT          1       /*!< CM7 data cache present                        */
 #include "core_cm7.h"                     /*!< Cortex-M7 processor and core peripherals      */
-
+#undef  __FPU_USED
+#ifdef LOSCFG_ARCH_FPU_ENABLE
+#define __FPU_USED                1       /*!< FPU used                                      */
+#else
+#define __FPU_USED                0       /*!< FPU not used                                  */
+#endif
 
 #include "system_stm32f7xx.h"
 #include <stdint.h>

@@ -53,6 +53,7 @@ STATIC INLINE UINT32 ArchIntLocked(VOID)
 
 #ifdef __cplusplus
 #if __cplusplus
+}
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 

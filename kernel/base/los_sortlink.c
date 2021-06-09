@@ -120,7 +120,6 @@ LITE_OS_SEC_TEXT STATIC VOID OsCheckSortLink(const LOS_DL_LIST *listHead, const 
     }
 
     /* delete invalid sortlink node */
-    PRINT_ERR("the node is not on this sortlink!\n");
     OsBackTrace();
 }
 
@@ -301,7 +300,6 @@ LITE_OS_SEC_TEXT STATIC VOID OsCheckSortLink(const LOS_DL_LIST *listHead, const 
     }
 
     /* delete invalid sortlink node */
-    PRINT_ERR("the node is not on this sortlink!\n");
     OsBackTrace();
 }
 
@@ -346,8 +344,10 @@ LITE_OS_SEC_TEXT VOID OsSortLinkUpdateExpireTime(UINT32 sleepTicks, SortLinkAttr
     }
 
     listObject = sortLinkHeader->sortLink;
-    sortList = LOS_DL_LIST_ENTRY(listObject->pstNext, SortLinkList, sortLinkNode);
-    ROLLNUM_SUB(sortList->idxRollNum, sleepTicks - 1);
+    if (!LOS_ListEmpty(listObject)) {
+        sortList = LOS_DL_LIST_ENTRY(listObject->pstNext, SortLinkList, sortLinkNode);
+        ROLLNUM_SUB(sortList->idxRollNum, sleepTicks - 1);
+    }
 }
 
 LITE_OS_SEC_TEXT_MINOR UINT32 OsSortLinkGetTargetExpireTime(const SortLinkAttribute *sortLinkHeader,

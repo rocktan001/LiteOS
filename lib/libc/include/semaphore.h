@@ -19,14 +19,13 @@ typedef struct {
 	volatile int __val[4*sizeof(long)/sizeof(int)];
 } sem_t;
 #else
-#include "los_sem_pri.h"
 
 /**
  * @ingroup semaphore
  * API parameter sructure
  */
 typedef struct posix_sem {
-	LosSemCB *sem;
+	void *sem;
 } sem_t;
 #endif
 

@@ -36,22 +36,22 @@
 
 __attribute__((section(".data"))) STATIC const PowerMgrOps *g_pmOps = NULL;
 
-VOID LOS_LowpowerInit(const PowerMgrOps *pmOps)
+VOID OsLowpowerInit(const PowerMgrOps *pmOps)
 {
     if (pmOps == NULL) {
+#ifdef LOSCFG_KERNEL_POWER_MGR
         PRINT_ERR("\r\n [PM] PowerMgrOps must be non-null.\n");
         return;
+#endif
     } else if (pmOps->process == NULL) {
         PRINT_ERR("\r\n [PM] %s must be non-null.\n", __FUNCTION__);
         return;
     }
 
-#ifdef LOSCFG_KERNEL_POWER_MGR
     if (g_pmOps != NULL) {
         PRINT_ERR("\r\n [PM] Reassignment of PowerMgrOps is forbidden.\n");
         return;
     }
-#endif
     g_pmOps = pmOps;
 
     LOS_LowpowerHookReg(OsPowerMgrProcess);

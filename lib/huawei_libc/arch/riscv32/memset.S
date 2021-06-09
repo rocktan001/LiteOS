@@ -30,7 +30,7 @@
 .type memset,%function
 memset:
 #ifdef LOSCFG_BASE_MEM_NODE_SIZE_CHECK
-    addi    sp, sp, -20
+    addi    sp, sp, -32 /* use 20 bytes but sp must be 16 aligned when compile option -mpush-pop is on */
     sw      a0, 0(sp)
     sw      a1, 4(sp)
     sw      a2, 8(sp)
@@ -44,7 +44,7 @@ memset:
     lw      a2, 8(sp)
     lw      a1, 4(sp)
     lw      a0, 0(sp) /* restore registers. */
-    addi    sp, sp, 20
+    addi    sp, sp, 32
     li      a0, 0 /* if OsMemSysNodeCheck return LOS_OK, do memset as usual. */
     ret
 1:
@@ -53,7 +53,7 @@ memset:
     lw      a2, 8(sp)
     lw      a1, 4(sp)
     lw      a0, 0(sp)
-    addi    sp, sp, 20
+    addi    sp, sp, 32
 #endif
     move    t0, a0
     beqz    a2, 5f /* size is zero, go to 5f. */
