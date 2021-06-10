@@ -32,14 +32,33 @@
 #include <spiffs_config.h>
 #include <spiffs.h>
 
-extern int spiffs_init(void);
-int spiffs_mount(const char *path, u32_t phys_addr, u32_t phys_size,
-                 u32_t phys_erase_block, u32_t log_block_size,
-                 u32_t log_page_size,
-                 s32_t (*spi_rd)(struct spiffs_t *, u32_t, u32_t, u8_t *),
-                 s32_t (*spi_wr)(struct spiffs_t *, u32_t, u32_t, u8_t *),
-                 s32_t (*spi_er)(struct spiffs_t *, u32_t, u32_t));
-int spiffs_unmount(const char *path);
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+struct spiffs_drv_t {
+    void (*SpiDriverInit)(int);
+    s32_t (*SpiRead)(struct spiffs_t *, u32_t, u32_t, u8_t *);
+    s32_t (*SpiWrite)(struct spiffs_t *, u32_t, u32_t, u8_t *);
+    s32_t (*SpiErase)(struct spiffs_t *, u32_t, u32_t);
+    u32_t physAddr;
+    u32_t physSize;
+    u32_t phyEraseBlock;
+    u32_t logBlockSize;
+    u32_t logPageSize;
+};
+
+int SpiffsInit(int needErase, struct spiffs_drv_t *spiffsDriver);
+int SpiffsMount(const char *path, struct spiffs_drv_t *spiffsDrv);
+int SpiffsUnmount(const char *path);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif
 

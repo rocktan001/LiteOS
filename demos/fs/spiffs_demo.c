@@ -35,19 +35,12 @@
 static char g_demoFileName[NAME_LEN] = {0};
 static char g_demoDirName[NAME_LEN] = {0};
 
-extern int hal_spiffs_init(int need_erase);
-extern int spiffs_unmount(const char *path);
 
 void SpiffsDemo(void)
 {
     int ret = 0;
 
     printf("Spiffs file system demo task start to run.\n");
-    ret = hal_spiffs_init(0);
-    if (ret == LOS_NOK) {
-        FS_LOG_ERR("Spiffs init failed.");
-        return;
-    }
 
     ret = sprintf_s(g_demoFileName, sizeof(g_demoFileName), "%s/%s", SPIFFS_PATH, LOS_FILE);
     if (ret <= 0) {
@@ -60,6 +53,4 @@ void SpiffsDemo(void)
 
     los_vfs_io(g_demoFileName, g_demoDirName);
     printf("Spiffs file system demo task finished.\n");
-
-    spiffs_unmount("/spiffs/");
 }

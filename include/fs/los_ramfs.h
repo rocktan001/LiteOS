@@ -31,7 +31,19 @@
 
 #include <stddef.h>
 
-int ramfs_init(void);
-int ramfs_mount(const char *path, size_t block_size);
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+int RamfsInit(void);
+int RamfsMount(const char *path, size_t blockSize);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif

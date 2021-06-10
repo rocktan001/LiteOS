@@ -30,7 +30,6 @@
 #include <string.h>
 
 #include <los_printf.h>
-#include "bsp_fs_hal.h"
 
 #include "fs/los_vfs.h"
 #include "fs/los_littlefs.h"
@@ -87,7 +86,7 @@ static int LittlefsSync(const struct lfs_config *cfg)
     return LFS_ERR_OK;
 }
 
-const struct lfs_config cfg = {
+static struct lfs_config g_lfsConfig = {
     // block device operations
     .context = NULL,
     .read  = LittlefsRead,
@@ -105,20 +104,17 @@ const struct lfs_config cfg = {
     .block_cycles = BLOCK_CYCLES,
 };
 
-int LittlefsInit(int needErase)
+void LittlefsDriverInit(int needErase)
 {
     hal_spi_flash_config();
     if (needErase) {
-        (void)hal_spi_flash_erase(LITTLEFS_PHYS_ADDR, LITTLEFS_PHYS_SIZE);
+        hal_spi_flash_erase(LITTLEFS_PHYS_ADDR, LITTLEFS_PHYS_SIZE);
     }
+}
 
-    (void)littlefs_init();
-
-    if (littlefs_mount(LITTLEFS_PATH, &cfg) != LFS_ERR_OK) {
-        PRINT_ERR("failed to mount littlefs!\n");
-        return LOS_NOK;
-    }
-    return LOS_OK;
+struct lfs_config* LittlefsConfigGet(void)
+{
+    return &g_lfsConfig;
 }
 
 #ifdef __cplusplus

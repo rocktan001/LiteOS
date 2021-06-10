@@ -26,7 +26,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-/* Includes ----------------------------------------------------------------- */
 #include <stdio.h>
 #include <string.h>
 
@@ -38,24 +37,23 @@
 #include "fs/los_vfs.h"
 #include "fs/los_fatfs.h"
 #include "los_hwi.h"
-#include "fatfs_hal.h"
 #include "sd_diskio.h"
 
-static DSTATUS stm32f4xx_fatfs_status(BYTE lun)
+static DSTATUS Stm32f4FatfsStatus(BYTE lun)
 {
     DSTATUS status = STA_NOINIT;
     status = SD_status(lun);
     return status;
 }
 
-static DSTATUS stm32f4xx_fatfs_initialize(BYTE lun)
+static DSTATUS Stm32f4FatfsInit(BYTE lun)
 {
     DSTATUS status = STA_NOINIT;
     status = SD_initialize(lun);
     return status;
 }
 
-static DRESULT stm32f4xx_fatfs_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
+static DRESULT Stm32f4FatfsRead(BYTE lun, BYTE *buff, DWORD sector, UINT count)
 {
     DRESULT ret = RES_ERROR;
     LOS_IntLock();
@@ -64,7 +62,7 @@ static DRESULT stm32f4xx_fatfs_read(BYTE lun, BYTE *buff, DWORD sector, UINT cou
     return ret;
 }
 
-static DRESULT stm32f4xx_fatfs_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
+static DRESULT Stm32f4FatfsWrite(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 {
     DRESULT res = RES_ERROR;
     LOS_IntLock();
@@ -73,41 +71,34 @@ static DRESULT stm32f4xx_fatfs_write(BYTE lun, const BYTE *buff, DWORD sector, U
     return res;
 }
 
-static DRESULT stm32f4xx_fatfs_ioctl(BYTE lun, BYTE cmd, void *buff)
+static DRESULT Stm32f4FatfsIoctl(BYTE lun, BYTE cmd, void *buff)
 {
     DRESULT res = RES_PARERR;
     res = SD_ioctl(lun, cmd, buff);
     return res;
 }
 
-static struct diskio_drv fat_drv = {
-    stm32f4xx_fatfs_initialize,
-    stm32f4xx_fatfs_status,
-    stm32f4xx_fatfs_read,
-    stm32f4xx_fatfs_write,
-    stm32f4xx_fatfs_ioctl
+static struct diskio_drv g_fatfsConfig = {
+    Stm32f4FatfsInit,
+    Stm32f4FatfsStatus,
+    Stm32f4FatfsRead,
+    Stm32f4FatfsWrite,
+    Stm32f4FatfsIoctl
 };
-
-int hal_fatfs_init(int need_erase)
-{
-    int8_t drive = -1;
-
-    if (need_erase) {
-        BSP_SD_Erase(FF_PHYS_ADDR, FF_PHYS_SIZE);
-    }
-
-    (void)fatfs_init();
-
-    if (fatfs_mount("/fatfs/", &fat_drv, (uint8_t *)&drive) < 0) {
-        PRINT_ERR("failed to mount fatfs!\n");
-    }
-
-    return drive;
-}
 
 DWORD get_fattime(void)
 {
     return 0;
 }
 
-/* Private functions -------------------------------------------------------- */
+struct diskio_drv* FatfsConfigGet(void)
+{
+    return &g_fatfsConfig;
+}
+
+void FatfsDriverInit(int needErase)
+{
+    if (needErase) {
+        BSP_SD_Erase(FF_PHYS_ADDR, FF_PHYS_SIZE);
+    }
+}

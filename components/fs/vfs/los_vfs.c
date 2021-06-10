@@ -36,27 +36,35 @@
 #include "los_mux.h"
 #include "limits.h"
 
-#define LOS_FCNTL (O_NONBLOCK | O_NDELAY | O_APPEND | O_SYNC | FASYNC)
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
+#include "lwip/sockets.h"
+#endif
+
+#define LOS_FCNTL   (O_NONBLOCK | O_NDELAY | O_APPEND | O_SYNC | FASYNC)
+#define IOV_MAX_CNT 4
 
 struct file g_files[LOS_MAX_FILES];
 uint32_t g_fsMutex;
 struct mount_point *g_mountPoints = NULL;
 struct file_system *g_fileSystems = NULL;
 
-static int file_2_fd(struct file *file)
+static int FileToFd(struct file *file)
 {
     if (file == NULL) {
         return -1;
     }
-    return file - g_files;
+    return file - g_files + LOS_FD_OFFSET;
 }
 
-static struct file *fd_2_file(int fd)
+static struct file *FdToFile(int fd)
 {
-    return &g_files[fd];
+    if ((fd < LOS_FD_OFFSET) || (fd >= LOS_MAX_FD)) {
+        return NULL;
+    }
+    return &g_files[fd - LOS_FD_OFFSET];
 }
 
-static struct file *los_file_get(void)
+static struct file *LOS_FileGet(void)
 {
     int i;
     /* protected by g_fsMutex */
@@ -70,20 +78,20 @@ static struct file *los_file_get(void)
     return NULL;
 }
 
-static struct file *los_file_get_new(int fd)
+static struct file *LOS_FileGetNew(int fd)
 {
-    if ((fd < 0) || (fd >= LOS_MAX_FILES)) {
+    if ((fd < LOS_FD_OFFSET) || (fd >= LOS_MAX_FD)) {
         return NULL;
     }
-    if (g_files[fd].f_status == FILE_STATUS_NOT_USED) {
-        g_files[fd].f_status = FILE_STATUS_INITING;
-        return &g_files[fd];
+    if (g_files[fd - LOS_FD_OFFSET].f_status == FILE_STATUS_NOT_USED) {
+        g_files[fd - LOS_FD_OFFSET].f_status = FILE_STATUS_INITING;
+        return &g_files[fd - LOS_FD_OFFSET];
     }
 
     return NULL;
 }
 
-static void los_file_put(struct file *file)
+static void LOS_FilePut(struct file *file)
 {
     if (file == NULL) {
         return;
@@ -94,19 +102,20 @@ static void los_file_put(struct file *file)
     file->f_mp = NULL;
     file->f_offset = 0;
     file->f_owner = (uint32_t)-1;
+    file->full_path = NULL;
     file->f_status = FILE_STATUS_NOT_USED;
 }
 
-static struct mount_point *los_mp_find(const char *path, const char **path_in_mp)
+static struct mount_point *LOS_MpFind(const char *path, const char **pathInMp)
 {
     struct mount_point *mp = g_mountPoints;
-    struct mount_point *best_mp = NULL;
-    int best_matches = 0;
+    struct mount_point *bestMp = NULL;
+    int bestMatches = 0;
     if (path == NULL) {
         return NULL;
     }
-    if (path_in_mp != NULL) {
-        *path_in_mp = NULL;
+    if (pathInMp != NULL) {
+        *pathInMp = NULL;
     }
     while ((mp != NULL) && (mp->m_path != NULL)) {
         const char *m_path = mp->m_path;
@@ -114,10 +123,10 @@ static struct mount_point *los_mp_find(const char *path, const char **path_in_mp
         const char *t = NULL;
         int matches = 0;
         do {
-            while (*m_path == '/') {
+            while ((*m_path == '/') && (*(m_path + 1) != '/')) {
                 m_path++;
             }
-            while (*i_path == '/') {
+            while ((*i_path == '/') && (*(i_path + 1) != '/')) {
                 i_path++;
             }
 
@@ -141,29 +150,29 @@ static struct mount_point *los_mp_find(const char *path, const char **path_in_mp
             m_path += (t - m_path);
         } while (*m_path != '\0');
 
-        if (matches > best_matches) {
-            best_matches = matches;
-            best_mp = mp;
+        if (matches > bestMatches) {
+            bestMatches = matches;
+            bestMp = mp;
 
-            while (*i_path == '/') {
+            while ((*i_path == '/') && (*(i_path + 1) != '/')) {
                 i_path++;
             }
 
-            if (path_in_mp != NULL) {
-                *path_in_mp = i_path;
+            if (pathInMp != NULL) {
+                *pathInMp = i_path;
             }
         }
     next:
         mp = mp->m_next;
     }
-    return best_mp;
+    return bestMp;
 }
 
-static int los_open(const char *path, int flags)
+static int LOS_Open(const char *path, int flags)
 {
     struct file *file = NULL;
     int fd = -1;
-    const char *path_in_mp = NULL;
+    const char *pathInMp = NULL;
     struct mount_point *mp = NULL;
 
     if ((path == NULL) || (path[strlen(path) - 1] == '/')) {
@@ -174,18 +183,18 @@ static int los_open(const char *path, int flags)
         return fd;
     }
 
-    file = los_file_get();
-    mp = los_mp_find(path, &path_in_mp);
+    file = LOS_FileGet();
+    mp = LOS_MpFind(path, &pathInMp);
 
     (void)LOS_MuxPost(g_fsMutex);
 
-    if ((file == NULL) || (mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0') ||
-        (mp->m_fs->fs_fops == NULL) || (mp->m_fs->fs_fops->open == NULL)) {
+    if ((file == NULL) || (mp == NULL) || (pathInMp == NULL) || (*pathInMp == '\0') || (mp->m_fs->fs_fops == NULL) ||
+        (mp->m_fs->fs_fops->open == NULL)) {
         return fd;
     }
 
     if ((LOS_MuxPend(mp->m_mutex, LOS_WAIT_FOREVER) != LOS_OK)) {
-        los_file_put(file);
+        LOS_FilePut(file);
         return fd;
     }
 
@@ -195,12 +204,14 @@ static int los_open(const char *path, int flags)
     file->f_fops = mp->m_fs->fs_fops;
     file->f_mp = mp;
     file->f_owner = LOS_CurTaskIDGet();
-    if (file->f_fops->open(file, path_in_mp, flags) == 0) {
+    file->full_path = path;
+
+    if (file->f_fops->open(file, pathInMp, flags) == 0) {
         mp->m_refs++;
-        fd = file_2_fd(file);
+        fd = FileToFd(file);
         file->f_status = FILE_STATUS_READY; /* file now ready to use */
     } else {
-        los_file_put(file);
+        LOS_FilePut(file);
     }
     (void)LOS_MuxPost(mp->m_mutex);
 
@@ -209,17 +220,16 @@ static int los_open(const char *path, int flags)
 
 /* attach to a file and then set new status */
 
-static struct file *_los_attach_file(int fd, uint32_t status)
+static struct file *LOS_AttachFile(int fd, uint32_t status)
 {
     struct file *file = NULL;
 
-    if ((fd < 0) || (fd >= LOS_MAX_FILES)) {
+    if ((fd < 0) || (fd >= LOS_MAX_FD)) {
         VFS_ERRNO_SET(EBADF);
         return file;
     }
 
-    file = fd_2_file(fd);
-
+    file = FdToFile(fd);
     /*
      * Prevent file closed after the checking of:
      *
@@ -235,7 +245,7 @@ static struct file *_los_attach_file(int fd, uint32_t status)
      *
      * Consider the following code:
      *
-     * los_attach_file (...)
+     * LOS_AttachFileReady (...)
      * {
      * if (file->f_status == FILE_STATUS_READY)
      * {
@@ -260,10 +270,14 @@ static struct file *_los_attach_file(int fd, uint32_t status)
      * As this logic used in almost all the operation routines, this routine is
      * made to reduce the redundant code.
      */
-
+    if ((file == NULL) || (file->f_mp == NULL)) {
+        return NULL;
+    }
     while (LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER) != LOS_OK) {
     };
-
+    if (file->f_mp == NULL) {
+        return file;
+    }
     if (file->f_status == FILE_STATUS_READY) {
         while (LOS_MuxPend(file->f_mp->m_mutex, LOS_WAIT_FOREVER) != LOS_OK) {
         };
@@ -280,52 +294,52 @@ static struct file *_los_attach_file(int fd, uint32_t status)
     return file;
 }
 
-static struct file *los_attach_file(int fd)
+static struct file *LOS_AttachFileReady(int fd)
 {
-    return _los_attach_file(fd, FILE_STATUS_READY);
+    return LOS_AttachFile(fd, FILE_STATUS_READY);
 }
 
-static struct file *los_attach_file_with_status(int fd, int status)
+static struct file *LOS_AttachFileWithStatus(int fd, int status)
 {
-    return _los_attach_file(fd, (uint32_t)status);
+    return LOS_AttachFile(fd, (uint32_t)status);
 }
 
-static uint32_t los_detach_file(struct file *file)
+static void LOS_DetachFile(const struct file *file)
 {
     if ((file == NULL) || (file->f_mp == NULL)) {
-        return (uint32_t)VFS_ERROR;
+        return;
     }
-    return LOS_MuxPost(file->f_mp->m_mutex);
+    (void)LOS_MuxPost(file->f_mp->m_mutex);
 }
 
-static int los_close(int fd)
+static int LOS_Close(int fd)
 {
     struct file *file;
     int ret = -1;
 
-    file = los_attach_file_with_status(fd, FILE_STATUS_CLOSING);
+    file = LOS_AttachFileWithStatus(fd, FILE_STATUS_CLOSING);
     if (file == NULL) {
         return ret;
     }
 
-    if (file->f_fops->close != NULL) {
+    if ((file->f_fops != NULL) && (file->f_fops->close != NULL)) {
         ret = file->f_fops->close(file);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
     }
 
-    if (ret == 0) {
+    if ((ret == 0) && (file->f_mp != NULL)) {
         file->f_mp->m_refs--;
     }
 
-    (void)los_detach_file(file);
+    LOS_DetachFile(file);
 
-    los_file_put(file);
+    LOS_FilePut(file);
 
     return ret;
 }
 
-static ssize_t los_read(int fd, char *buff, size_t bytes)
+static ssize_t LOS_Read(int fd, char *buff, size_t bytes)
 {
     struct file *file = NULL;
     ssize_t ret = (ssize_t)-1;
@@ -335,14 +349,14 @@ static ssize_t los_read(int fd, char *buff, size_t bytes)
         return ret;
     }
 
-    file = los_attach_file(fd);
+    file = LOS_AttachFileReady(fd);
     if (file == NULL) {
         return ret;
     }
 
     if ((file->f_flags & O_ACCMODE) == O_WRONLY) {
         VFS_ERRNO_SET(EACCES);
-    } else if (file->f_fops->read != NULL) {
+    } else if ((file->f_fops != NULL) && (file->f_fops->read != NULL)) {
         ret = file->f_fops->read(file, buff, bytes);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
@@ -350,12 +364,12 @@ static ssize_t los_read(int fd, char *buff, size_t bytes)
 
     /* else ret will be -1 */
 
-    (void)los_detach_file(file);
+    LOS_DetachFile(file);
 
     return ret;
 }
 
-static ssize_t los_write(int fd, const void *buff, size_t bytes)
+static ssize_t LOS_Write(int fd, const void *buff, size_t bytes)
 {
     struct file *file = NULL;
     ssize_t ret = -1;
@@ -365,52 +379,52 @@ static ssize_t los_write(int fd, const void *buff, size_t bytes)
         return ret;
     }
 
-    file = los_attach_file(fd);
+    file = LOS_AttachFileReady(fd);
     if (file == NULL) {
         return ret;
     }
 
     if ((file->f_flags & O_ACCMODE) == O_RDONLY) {
         VFS_ERRNO_SET(EACCES);
-    } else if (file->f_fops->write != NULL) {
+    } else if ((file->f_fops != NULL) && (file->f_fops->write != NULL)) {
         ret = file->f_fops->write(file, buff, bytes);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
     }
 
     /* else ret will be -1 */
-    (void)los_detach_file(file);
+    LOS_DetachFile(file);
 
     return ret;
 }
 
-static off_t los_lseek(int fd, off_t off, int whence)
+static off_t LOS_Lseek(int fd, off_t off, int whence)
 {
     struct file *file;
     off_t ret = -1;
 
-    file = los_attach_file(fd);
+    file = LOS_AttachFileReady(fd);
     if (file == NULL) {
         return ret;
     }
 
-    if (file->f_fops->lseek == NULL) {
+    if ((file->f_fops == NULL) || (file->f_fops->lseek == NULL)) {
         ret = file->f_offset;
     } else {
         ret = file->f_fops->lseek(file, off, whence);
     }
 
-    (void)los_detach_file(file);
+    LOS_DetachFile(file);
 
     return ret;
 }
 
-static off64_t los_lseek64(int fd, off64_t off, int whence)
+static off64_t LOS_Lseek64(int fd, off64_t off, int whence)
 {
     struct file *file;
     off64_t ret = -1;
 
-    file = los_attach_file(fd);
+    file = LOS_AttachFileReady(fd);
     if ((file == NULL) || (file->f_fops == NULL)) {
         return ret;
     }
@@ -420,15 +434,15 @@ static off64_t los_lseek64(int fd, off64_t off, int whence)
         ret = file->f_fops->lseek64(file, off, whence);
     }
 
-    (void)los_detach_file(file);
+    LOS_DetachFile(file);
 
     return ret;
 }
 
-static int los_stat(const char *path, struct stat *stat)
+static int LOS_Stat(const char *path, struct stat *stat)
 {
     struct mount_point *mp = NULL;
-    const char *path_in_mp = NULL;
+    const char *pathInMp = NULL;
     int ret = -1;
 
     if ((path == NULL) || (stat == NULL)) {
@@ -441,15 +455,15 @@ static int los_stat(const char *path, struct stat *stat)
         return ret;
     }
 
-    mp = los_mp_find(path, &path_in_mp);
-    if ((mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0')) {
+    mp = LOS_MpFind(path, &pathInMp);
+    if ((mp == NULL) || (pathInMp == NULL) || (*pathInMp == '\0')) {
         VFS_ERRNO_SET(ENOENT);
         (void)LOS_MuxPost(g_fsMutex);
         return ret;
     }
 
     if (mp->m_fs->fs_fops->stat != NULL) {
-        ret = mp->m_fs->fs_fops->stat(mp, path_in_mp, stat);
+        ret = mp->m_fs->fs_fops->stat(mp, pathInMp, stat);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
     }
@@ -459,10 +473,10 @@ static int los_stat(const char *path, struct stat *stat)
     return ret;
 }
 
-static int los_unlink(const char *path)
+static int LOS_Unlink(const char *path)
 {
     struct mount_point *mp = NULL;
-    const char *path_in_mp = NULL;
+    const char *pathInMp = NULL;
     int ret = -1;
 
     if (path == NULL) {
@@ -472,25 +486,25 @@ static int los_unlink(const char *path)
 
     (void)LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER); /* prevent the file open/rename */
 
-    mp = los_mp_find(path, &path_in_mp);
-    if ((mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0') || (mp->m_fs->fs_fops->unlink == NULL)) {
+    mp = LOS_MpFind(path, &pathInMp);
+    if ((mp == NULL) || (pathInMp == NULL) || (*pathInMp == '\0') || (mp->m_fs->fs_fops->unlink == NULL)) {
         VFS_ERRNO_SET(ENOENT);
         (void)LOS_MuxPost(g_fsMutex);
         return ret;
     }
 
-    ret = mp->m_fs->fs_fops->unlink(mp, path_in_mp);
+    ret = mp->m_fs->fs_fops->unlink(mp, pathInMp);
 
     (void)LOS_MuxPost(g_fsMutex);
     return ret;
 }
 
-static int los_rename(const char *old, const char *new)
+static int LOS_Rename(const char *old, const char *new)
 {
-    struct mount_point *mp_old = NULL;
-    struct mount_point *mp_new = NULL;
-    const char *path_in_mp_old = NULL;
-    const char *path_in_mp_new = NULL;
+    struct mount_point *mpOld = NULL;
+    struct mount_point *mpNew = NULL;
+    const char *pathInMpOld = NULL;
+    const char *pathInMpNew = NULL;
     int ret = -1;
 
     if ((old == NULL) || (new == NULL)) {
@@ -500,36 +514,35 @@ static int los_rename(const char *old, const char *new)
 
     (void)LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER); /* prevent file open/unlink */
 
-    mp_old = los_mp_find(old, &path_in_mp_old);
+    mpOld = LOS_MpFind(old, &pathInMpOld);
 
-    if (path_in_mp_old == NULL) {
+    if (pathInMpOld == NULL) {
         VFS_ERRNO_SET(EINVAL);
         (void)LOS_MuxPost(g_fsMutex);
         return ret;
     }
 
-    if ((mp_old == NULL) || (*path_in_mp_old == '\0') || (mp_old->m_fs->fs_fops->unlink == NULL)) {
+    if ((mpOld == NULL) || (*pathInMpOld == '\0') || (mpOld->m_fs->fs_fops->unlink == NULL)) {
         VFS_ERRNO_SET(EINVAL);
         (void)LOS_MuxPost(g_fsMutex);
         return ret;
     }
 
-    mp_new = los_mp_find(new, &path_in_mp_new);
-    if ((mp_new == NULL) || (path_in_mp_new == NULL) || (*path_in_mp_new == '\0') ||
-        (mp_new->m_fs->fs_fops->unlink == NULL)) {
+    mpNew = LOS_MpFind(new, &pathInMpNew);
+    if ((mpNew == NULL) || (pathInMpNew == NULL) || (*pathInMpNew == '\0') || (mpNew->m_fs->fs_fops->unlink == NULL)) {
         VFS_ERRNO_SET(EINVAL);
         (void)LOS_MuxPost(g_fsMutex);
         return ret;
     }
 
-    if (mp_old != mp_new) {
+    if (mpOld != mpNew) {
         VFS_ERRNO_SET(EXDEV);
         (void)LOS_MuxPost(g_fsMutex);
         return ret;
     }
 
-    if (mp_old->m_fs->fs_fops->rename != NULL) {
-        ret = mp_old->m_fs->fs_fops->rename(mp_old, path_in_mp_old, path_in_mp_new);
+    if (mpOld->m_fs->fs_fops->rename != NULL) {
+        ret = mpOld->m_fs->fs_fops->rename(mpOld, pathInMpOld, pathInMpNew);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
     }
@@ -538,7 +551,7 @@ static int los_rename(const char *old, const char *new)
     return ret;
 }
 
-static int los_ioctl(int fd, int func, ...)
+static int LOS_Ioctl(int fd, int func, ...)
 {
     va_list ap;
     unsigned long arg;
@@ -549,47 +562,47 @@ static int los_ioctl(int fd, int func, ...)
     arg = va_arg(ap, unsigned long);
     va_end(ap);
 
-    file = los_attach_file(fd);
+    file = LOS_AttachFileReady(fd);
     if (file == NULL) {
         return ret;
     }
 
-    if (file->f_fops->ioctl != NULL) {
+    if ((file->f_fops != NULL) && (file->f_fops->ioctl != NULL)) {
         ret = file->f_fops->ioctl(file, func, arg);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
     }
 
-    (void)los_detach_file(file);
+    LOS_DetachFile(file);
 
     return ret;
 }
 
-static int los_sync(int fd)
+static int LOS_Sync(int fd)
 {
     struct file *file;
     int ret = -1;
 
-    file = los_attach_file(fd);
+    file = LOS_AttachFileReady(fd);
     if (file == NULL) {
         return ret;
     }
 
-    if (file->f_fops->sync != NULL) {
+    if ((file->f_fops != NULL) && (file->f_fops->sync != NULL)) {
         ret = file->f_fops->sync(file);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
     }
 
-    (void)los_detach_file(file);
+    LOS_DetachFile(file);
 
     return ret;
 }
 
-static struct dir *los_opendir(const char *path)
+static struct dir *LOS_Opendir(const char *path)
 {
     struct mount_point *mp = NULL;
-    const char *path_in_mp = NULL;
+    const char *pathInMp = NULL;
     struct dir *dir = NULL;
     uint32_t ret;
 
@@ -600,7 +613,7 @@ static struct dir *los_opendir(const char *path)
 
     dir = (struct dir *)malloc(sizeof(struct dir));
     if (dir == NULL) {
-        PRINT_ERR("fail to malloc memory in VFS, <malloc.c> is needed,"
+        printf("fail to malloc memory in VFS, <malloc.c> is needed,"
             "make sure it is added\n");
         VFS_ERRNO_SET(ENOMEM);
         return NULL;
@@ -612,8 +625,8 @@ static struct dir *los_opendir(const char *path)
         return NULL;
     }
 
-    mp = los_mp_find(path, &path_in_mp);
-    if ((mp == NULL) || (path_in_mp == NULL)) {
+    mp = LOS_MpFind(path, &pathInMp);
+    if ((mp == NULL) || (pathInMp == NULL)) {
         VFS_ERRNO_SET(ENOENT);
         (void)LOS_MuxPost(g_fsMutex);
         free(dir);
@@ -634,7 +647,7 @@ static struct dir *los_opendir(const char *path)
     dir->d_mp = mp;
     dir->d_offset = 0;
 
-    ret = (uint32_t)mp->m_fs->fs_fops->opendir(dir, path_in_mp);
+    ret = (uint32_t)mp->m_fs->fs_fops->opendir(dir, pathInMp);
     if (ret == 0) {
         mp->m_refs++;
     } else {
@@ -647,12 +660,12 @@ static struct dir *los_opendir(const char *path)
     return dir;
 }
 
-static struct dirent *los_readdir(struct dir *dir)
+static struct dirent *LOS_Readdir(struct dir *dir)
 {
     struct mount_point *mp = NULL;
     struct dirent *ret = NULL;
 
-    if (dir == NULL) {
+    if ((dir == NULL) || (dir->d_mp == NULL)) {
         VFS_ERRNO_SET(EINVAL);
         return NULL;
     }
@@ -664,7 +677,8 @@ static struct dirent *los_readdir(struct dir *dir)
         return NULL;
     }
 
-    if (dir->d_mp->m_fs->fs_fops->readdir != NULL) {
+    if ((dir->d_mp->m_fs != NULL) && (dir->d_mp->m_fs->fs_fops != NULL) &&
+        (dir->d_mp->m_fs->fs_fops->readdir != NULL)) {
         if (dir->d_mp->m_fs->fs_fops->readdir(dir, &dir->d_dent) == 0) {
             ret = &dir->d_dent;
         } else {
@@ -679,12 +693,12 @@ static struct dirent *los_readdir(struct dir *dir)
     return ret;
 }
 
-static int los_closedir(struct dir *dir)
+static int LOS_Closedir(struct dir *dir)
 {
     struct mount_point *mp = NULL;
     int ret = -1;
 
-    if (dir == NULL) {
+    if ((dir == NULL) || (dir->d_mp == NULL)) {
         VFS_ERRNO_SET(EBADF);
         return ret;
     }
@@ -696,28 +710,27 @@ static int los_closedir(struct dir *dir)
         return ret;
     }
 
-    if (dir->d_mp->m_fs->fs_fops->closedir != NULL) {
+    if ((dir->d_mp->m_fs != NULL) && (dir->d_mp->m_fs->fs_fops != NULL) &&
+        (dir->d_mp->m_fs->fs_fops->closedir != NULL)) {
         ret = dir->d_mp->m_fs->fs_fops->closedir(dir);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
     }
-
+    (void)LOS_MuxPost(mp->m_mutex);
     if (ret == 0) {
-        free(dir);
         mp->m_refs--;
     } else {
         VFS_ERRNO_SET(EBADF);
     }
-
-    (void)LOS_MuxPost(mp->m_mutex);
-
+    free(dir);
+    dir = NULL;
     return ret;
 }
 
-static int los_mkdir(const char *path, int mode)
+static int LOS_Mkdir(const char *path, int mode)
 {
     struct mount_point *mp = NULL;
-    const char *path_in_mp = NULL;
+    const char *pathInMp = NULL;
     int ret = -1;
 
     (void)mode;
@@ -732,8 +745,8 @@ static int los_mkdir(const char *path, int mode)
         return ret;
     }
 
-    mp = los_mp_find(path, &path_in_mp);
-    if ((mp == NULL) || (path_in_mp == NULL) || (*path_in_mp == '\0')) {
+    mp = LOS_MpFind(path, &pathInMp);
+    if ((mp == NULL) || (pathInMp == NULL) || (*pathInMp == '\0')) {
         VFS_ERRNO_SET(ENOENT);
         (void)LOS_MuxPost(g_fsMutex);
         return ret;
@@ -749,7 +762,7 @@ static int los_mkdir(const char *path, int mode)
     }
 
     if (mp->m_fs->fs_fops->mkdir != NULL) {
-        ret = mp->m_fs->fs_fops->mkdir(mp, path_in_mp);
+        ret = mp->m_fs->fs_fops->mkdir(mp, pathInMp);
     } else {
         VFS_ERRNO_SET(ENOTSUP);
         ret = -1;
@@ -760,25 +773,27 @@ static int los_mkdir(const char *path, int mode)
     return ret;
 }
 
-static int los_dup(int fd)
+static int LOS_Dup(int fd)
 {
+    int ret;
     struct file *file1 = NULL;
     struct file *file2 = NULL;
     const char *mpath = NULL;
     struct mount_point *mp = NULL;
 
-    if ((fd < 0) || (fd > LOS_MAX_FILES)) {
+    if ((fd < 0) || (fd > LOS_MAX_FD)) {
         VFS_ERRNO_SET(EBADF);
         return LOS_NOK;
     }
 
-    file1 = los_attach_file(fd);
+    file1 = LOS_AttachFileReady(fd);
     if (file1 == NULL) {
         return LOS_NOK;
     }
 
-    file2 = los_file_get();
+    file2 = LOS_FileGet();
     if (file2 == NULL) {
+        LOS_DetachFile(file1);
         VFS_ERRNO_SET(ENFILE);
         return LOS_NOK;
     }
@@ -792,41 +807,48 @@ static int los_dup(int fd)
     file2->f_mp = file1->f_mp;
 
     if ((file1->f_mp == NULL) || (file1->f_mp->m_path == NULL)) {
+        LOS_DetachFile(file1);
         return LOS_NOK;
     }
-    mp = los_mp_find(file1->f_mp->m_path, &mpath);
+    mp = LOS_MpFind(file1->f_mp->m_path, &mpath);
     if ((mp == NULL) || (file1->f_fops == NULL)) {
+        LOS_DetachFile(file1);
         return LOS_NOK;
     }
-    return file1->f_fops->open(file2, mpath, file1->f_flags);
+    ret = file1->f_fops->open(file2, mpath, file1->f_flags);
+    LOS_DetachFile(file1);
+    return ret;
 }
 
-static int los_dup2(int oldFd, int newFd)
+static int LOS_Dup2(int oldFd, int newFd)
 {
     struct file *file1 = NULL;
     struct file *file2 = NULL;
     const char *mpath = NULL;
     struct mount_point *mp = NULL;
 
-    file1 = los_attach_file(oldFd);
+    file1 = LOS_AttachFileReady(oldFd);
     if (file1 == NULL) {
         return LOS_NOK;
     }
 
-    file2 = los_attach_file(newFd);
+    file2 = LOS_AttachFileReady(newFd);
     if (file2 != NULL) {
-        (void)los_close(newFd);
+        LOS_DetachFile(file1);
+        LOS_DetachFile(file2);
+        (void)LOS_Close(newFd);
         return LOS_NOK;
     }
 
-    file2 = los_file_get_new(newFd);
+    file2 = LOS_FileGetNew(newFd);
     if (file2 == NULL) {
         VFS_ERRNO_SET(ENFILE);
-        PRINT_ERR("files no free!\n");
-
+        printf("files no free!\n");
+        LOS_DetachFile(file1);
         return LOS_NOK;
     }
     if (oldFd == newFd) {
+        LOS_DetachFile(file1);
         return oldFd;
     }
 
@@ -839,17 +861,21 @@ static int los_dup2(int oldFd, int newFd)
     file2->f_mp = file1->f_mp;
 
     if ((file1->f_mp == NULL) || (file1->f_mp->m_path == NULL)) {
+        LOS_DetachFile(file1);
         return LOS_NOK;
     }
-    mp = los_mp_find(file1->f_mp->m_path, &mpath);
+    mp = LOS_MpFind(file1->f_mp->m_path, &mpath);
     if ((mp == NULL) || (file1->f_fops == NULL)) {
+        LOS_DetachFile(file1);
         return LOS_NOK;
     }
     file1->f_fops->open(file2, mpath, file1->f_flags);
+    LOS_DetachFile(file1);
+
     return newFd;
 }
 
-static int los_vfcntl(struct file *filep, int cmd, va_list ap)
+static int LOS_Vfcntl(struct file *filep, int cmd, va_list ap)
 {
     int ret;
     int fd;
@@ -860,8 +886,8 @@ static int los_vfcntl(struct file *filep, int cmd, va_list ap)
     }
 
     if (cmd == F_DUPFD) {
-        fd = file_2_fd(filep);
-        ret = los_dup(fd);
+        fd = FileToFd(filep);
+        ret = LOS_Dup(fd);
     } else if (cmd == F_GETFL) {
         ret = (int)(filep->f_flags);
     } else if (cmd == F_SETFL) {
@@ -876,7 +902,7 @@ static int los_vfcntl(struct file *filep, int cmd, va_list ap)
     return ret;
 }
 
-static int los_fs_name_check(const char *name)
+static int LOS_FsNameCheck(const char *name)
 {
     char ch;
     int len = 0;
@@ -901,7 +927,7 @@ static int los_fs_name_check(const char *name)
     return len == 0 ? LOS_NOK : LOS_OK;
 }
 
-static struct file_system *los_fs_find(const char *name)
+static struct file_system *LOS_FsFind(const char *name)
 {
     struct file_system *fs;
 
@@ -914,13 +940,13 @@ static struct file_system *los_fs_find(const char *name)
     return fs;
 }
 
-int los_fs_register(struct file_system *fs)
+int LOS_FsRegister(struct file_system *fs)
 {
     if ((fs == NULL) || (fs->fs_fops == NULL) || (fs->fs_fops->open == NULL)) {
         return LOS_NOK;
     }
 
-    if (los_fs_name_check(fs->fs_name) != LOS_OK) {
+    if (LOS_FsNameCheck(fs->fs_name) != LOS_OK) {
         return LOS_NOK;
     }
 
@@ -928,7 +954,7 @@ int los_fs_register(struct file_system *fs)
         return LOS_NOK;
     }
 
-    if (los_fs_find(fs->fs_name) != NULL) {
+    if (LOS_FsFind(fs->fs_name) != NULL) {
         (void)LOS_MuxPost(g_fsMutex);
         return LOS_NOK;
     }
@@ -941,7 +967,7 @@ int los_fs_register(struct file_system *fs)
     return LOS_OK;
 }
 
-int los_fs_unregister(struct file_system *fs)
+int LOS_FsUnregister(struct file_system *fs)
 {
     struct file_system *prev = NULL;
     int ret = LOS_OK;
@@ -985,7 +1011,7 @@ int los_fs_unregister(struct file_system *fs)
     return ret;
 }
 
-int los_fs_mount(const char *fsname, const char *path, void *data)
+int LOS_FsMount(const char *fsname, const char *path, void *data)
 {
     struct file_system *fs = NULL;
     struct mount_point *mp = NULL;
@@ -996,13 +1022,13 @@ int los_fs_mount(const char *fsname, const char *path, void *data)
     }
     (void)LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER);
 
-    fs = los_fs_find(fsname);
+    fs = LOS_FsFind(fsname);
     if (fs == NULL) {
         (void)LOS_MuxPost(g_fsMutex);
         return LOS_NOK;
     }
 
-    mp = los_mp_find(path, &tmp);
+    mp = LOS_MpFind(path, &tmp);
     if ((mp != NULL) && (tmp != NULL) && (*tmp == '\0')) {
         (void)LOS_MuxPost(g_fsMutex);
         return LOS_NOK;
@@ -1010,8 +1036,7 @@ int los_fs_mount(const char *fsname, const char *path, void *data)
 
     mp = malloc(sizeof(struct mount_point));
     if (mp == NULL) {
-        PRINT_ERR("fail to malloc memory in VFS, <malloc.c> is needed,"
-            "make sure it is added\n");
+        printf("Fail to malloc memory in vfs\n");
         (void)LOS_MuxPost(g_fsMutex);
         return LOS_NOK;
     }
@@ -1043,7 +1068,7 @@ int los_fs_mount(const char *fsname, const char *path, void *data)
     return LOS_OK;
 }
 
-int los_fs_unmount(const char *path)
+int LOS_FsUnmount(const char *path)
 {
     struct mount_point *mp = NULL;
     struct mount_point *prev = NULL;
@@ -1056,7 +1081,7 @@ int los_fs_unmount(const char *path)
 
     (void)LOS_MuxPend(g_fsMutex, LOS_WAIT_FOREVER);
 
-    mp = los_mp_find(path, &tmp);
+    mp = LOS_MpFind(path, &tmp);
     if ((mp == NULL) || (tmp == NULL) || (*tmp != '\0') || (mp->m_refs != 0)) {
         (void)LOS_MuxPost(g_fsMutex);
         return ret;
@@ -1082,13 +1107,13 @@ int los_fs_unmount(const char *path)
     return LOS_OK;
 }
 
-int los_vfs_init(void)
+int LOS_VfsInit(void)
 {
     if (LOS_MuxCreate(&g_fsMutex) == LOS_OK) {
         return LOS_OK;
     }
 
-    PRINT_ERR("los_vfs_init fail!\n");
+    printf("Vfs init fail!\n");
 
     return LOS_NOK;
 }
@@ -1101,101 +1126,131 @@ static int MapToPosixRet(int ret)
 
 int open(const char *path, int flags, ...)
 {
-    int ret = los_open(path, flags);
+    int ret = LOS_Open(path, flags);
     return MapToPosixRet(ret);
 }
 
 int close(int fd)
 {
-    int ret = los_close(fd);
+    int ret;
+    if (fd < CONFIG_NFILE_DESCRIPTORS) {
+        ret = LOS_Close(fd);
+    } else {
+        ret = LOS_NOK;
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
+        ret = lwip_close(fd);
+        return ret;
+#endif /* LOSCFG_COMPONENTS_NET_LWIP */
+    }
     return MapToPosixRet(ret);
 }
 
 ssize_t read(int fd, void *buff, size_t bytes)
 {
-    ssize_t ret = los_read(fd, buff, bytes);
+    ssize_t ret;
+    if (fd < CONFIG_NFILE_DESCRIPTORS) {
+        ret = LOS_Read(fd, buff, bytes);
+    } else {
+        ret = LOS_NOK;
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
+        ret = lwip_read(fd, buff, bytes);
+        return ret;
+#endif /* LOSCFG_COMPONENTS_NET_LWIP */
+    }
     return MapToPosixRet(ret);
 }
 
 ssize_t write(int fd, const void *buff, size_t bytes)
 {
-    ssize_t ret = los_write(fd, buff, bytes);
+    if (fd == STDOUT) {
+        return uart_write((char *)buff, (int)bytes, 0);
+    }
+    ssize_t ret;
+    if (fd < CONFIG_NFILE_DESCRIPTORS) {
+        ret = LOS_Write(fd, buff, bytes);
+    } else {
+        ret = LOS_NOK;
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
+        ret = lwip_write(fd, buff, bytes);
+        return ret;
+#endif /* LOSCFG_COMPONENTS_NET_LWIP */
+    }
     return MapToPosixRet(ret);
 }
 
 off_t lseek(int fd, off_t off, int whence)
 {
-    off_t ret = los_lseek(fd, off, whence);
+    off_t ret = LOS_Lseek(fd, off, whence);
     return ret;
 }
 
 off64_t lseek64(int fd, off64_t off, int whence)
 {
-    off64_t ret = los_lseek64(fd, off, whence);
+    off64_t ret = LOS_Lseek64(fd, off, whence);
     return ret;
 }
 
 int stat(const char *path, struct stat *stat)
 {
-    int ret = los_stat(path, stat);
+    int ret = LOS_Stat(path, stat);
     return MapToPosixRet(ret);
 }
 
 int unlink(const char *path)
 {
-    int ret = los_unlink(path);
+    int ret = LOS_Unlink(path);
     return MapToPosixRet(ret);
 }
 
 int rename(const char *oldpath, const char *newpath)
 {
-    int ret = los_rename(oldpath, newpath);
+    int ret = LOS_Rename(oldpath, newpath);
     return MapToPosixRet(ret);
 }
 
 int fsync(int fd)
 {
-    int ret = los_sync(fd);
+    int ret = LOS_Sync(fd);
     return MapToPosixRet(ret);
 }
 
 struct dir *opendir(const char *path)
 {
-    return los_opendir(path);
+    return LOS_Opendir(path);
 }
 
 struct dirent *readdir(struct dir *dir)
 {
-    return los_readdir(dir);
+    return LOS_Readdir(dir);
 }
 
 int closedir(struct dir *dir)
 {
-    int ret = los_closedir(dir);
+    int ret = LOS_Closedir(dir);
     return MapToPosixRet(ret);
 }
 
 int mkdir(const char *path, mode_t mode)
 {
-    int ret = los_mkdir(path, (int)mode);
+    int ret = LOS_Mkdir(path, (int)mode);
     return MapToPosixRet(ret);
 }
 
 int rmdir(const char *path)
 {
-    int ret = los_unlink(path);
+    int ret = LOS_Unlink(path);
     return MapToPosixRet(ret);
 }
 
 int dup(int fd)
 {
-    int ret = los_dup(fd);
+    int ret = LOS_Dup(fd);
     return MapToPosixRet(ret);
 }
 
 int dup2(int oldFd, int newFd)
 {
-    int ret = los_dup2(oldFd, newFd);
+    int ret = LOS_Dup2(oldFd, newFd);
     return MapToPosixRet(ret);
 }
 
@@ -1207,11 +1262,14 @@ int lstat(const char *path, struct stat *buffer)
 int fstat(int fd, struct stat *buf)
 {
     struct file *filep;
-    filep = los_attach_file(fd);
-    if ((filep == NULL) || (filep->f_mp == NULL) || (filep->f_mp->m_path == NULL)) {
+    int ret;
+    filep = LOS_AttachFileReady(fd);
+    if ((filep == NULL) || (filep->f_mp == NULL) || filep->full_path == NULL) {
         return VFS_ERROR;
     }
-    return stat(filep->f_mp->m_path, buf);
+    ret = stat(filep->full_path, buf);
+    LOS_DetachFile(filep);
+    return ret;
 }
 
 int fcntl(int fd, int cmd, ...)
@@ -1221,11 +1279,17 @@ int fcntl(int fd, int cmd, ...)
     int ret;
     va_start(ap, cmd);
 
-    if ((uint32_t)fd < CONFIG_NFILE_DESCRIPTORS) {
-        filep = los_attach_file(fd);
-        ret = los_vfcntl(filep, cmd, ap);
+    if (fd < CONFIG_NFILE_DESCRIPTORS) {
+        filep = LOS_AttachFileReady(fd);
+        ret = LOS_Vfcntl(filep, cmd, ap);
+        LOS_DetachFile(filep);
     } else {
         ret = -EBADF;
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
+        int arg = va_arg(ap, int);
+        ret = lwip_fcntl(fd, (long)cmd, arg);
+        return ret;
+#endif /* LOSCFG_COMPONENTS_NET_LWIP */
     }
 
     va_end(ap);
@@ -1242,7 +1306,17 @@ int ioctl(int fd, int func, ...)
     int ret;
     va_list ap;
     va_start(ap, func);
-    ret = los_ioctl(fd, func, ap);
+    if (fd < CONFIG_NFILE_DESCRIPTORS) {
+        ret = LOS_Ioctl(fd, func, ap);
+    } else {
+        ret = -EBADF;
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
+        UINTPTR arg = va_arg(ap, UINTPTR);
+        ret = lwip_ioctl(fd, (long)func, (void *)arg);
+        return ret;
+#endif /* LOSCFG_COMPONENTS_NET_LWIP */
+    }
+
     va_end(ap);
     return ret;
 }
@@ -1259,7 +1333,7 @@ ssize_t readv(int fd, const struct iovec *iov, int iovcnt)
     ssize_t totalBytesRead;
     size_t totalLen;
 
-    if (iov == NULL) {
+    if ((iov == NULL) || (iovcnt <= 0) || (iovcnt > IOV_MAX_CNT)) {
         return VFS_ERROR;
     }
 
@@ -1315,7 +1389,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
     ssize_t totalBytesWritten;
     size_t totalLen;
 
-    if (iov == NULL) {
+    if ((iov == NULL) || (iovcnt <= 0) || (iovcnt > IOV_MAX_CNT)) {
         return VFS_ERROR;
     }
 
@@ -1339,7 +1413,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
         writeBuf = (char *)iov[i].iov_base;
         bytesToWrite = iov[i].iov_len;
         if (((ssize_t)totalLen <= 0) || ((ssize_t)bytesToWrite <= 0)) {
-            break;
+            continue;
         }
         ret = memcpy_s(curBuf, totalLen, writeBuf, bytesToWrite);
         if (ret != LOS_OK) {
@@ -1354,4 +1428,43 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
     free(buf);
 
     return totalBytesWritten;
+}
+
+int isatty(int fd)
+{
+    (void)fd;
+    return 0;
+}
+
+int access(const char *path, int amode)
+{
+    int result;
+    mode_t mode;
+    struct stat buf;
+
+    result = stat(path, &buf);
+    if (result != ENOERR) {
+        return -1;
+    }
+
+    mode = buf.st_mode;
+    if ((unsigned int)amode & R_OK) {
+        if ((mode & (S_IROTH | S_IRGRP | S_IRUSR)) == 0) {
+            set_errno(EACCES);
+            return -1;
+        }
+    }
+    if ((unsigned int)amode & W_OK) {
+        if ((mode & (S_IWOTH | S_IWGRP | S_IWUSR)) == 0) {
+            set_errno(EACCES);
+            return -1;
+        }
+    }
+    if ((unsigned int)amode & X_OK) {
+        if ((mode & (S_IXOTH | S_IXGRP | S_IXUSR)) == 0) {
+            set_errno(EACCES);
+            return -1;
+        }
+    }
+    return 0;
 }

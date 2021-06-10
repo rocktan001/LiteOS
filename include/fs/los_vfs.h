@@ -34,10 +34,25 @@
 #include <los_typedef.h>
 #include "sys/stat.h"
 
+#ifdef LOSCFG_COMPONENTS_NET_LWIP
+#include "lwipopts.h"
+#endif
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
 #define LOS_MAX_DIR_NAME_LEN 255
 #define LOS_MAX_FILE_NAME_LEN 32
 #define LOS_FS_MAX_NAME_LEN LOS_MAX_FILE_NAME_LEN
 #define LOS_MAX_FILES 8
+#define LOS_FD_OFFSET 3
+
+#define LOS_MAX_FD (LOS_MAX_FILES + LOS_FD_OFFSET)
+
+#define STDOUT     1
 
 struct file;
 struct mount_point;
@@ -110,6 +125,7 @@ struct file {
     struct mount_point *f_mp; /* can get private mount data here */
     UINT32 f_owner;           /* the task that openned this file */
     void *f_data;
+    const char *full_path;
 };
 
 struct dirent {
@@ -129,10 +145,16 @@ struct dir    *opendir(const char *path);
 struct dirent *readdir(struct dir *dir);
 int           closedir(struct dir *dir);
 
-int los_vfs_init(void);
-int los_fs_register(struct file_system *fs);
-int los_fs_unregister(struct file_system *fs);
-int los_fs_mount(const char *fsname, const char *path, void *data);
-int los_fs_unmount(const char *path);
+int LOS_VfsInit(void);
+int LOS_FsRegister(struct file_system *fs);
+int LOS_FsUnregister(struct file_system *fs);
+int LOS_FsMount(const char *fsname, const char *path, void *data);
+int LOS_FsUnmount(const char *path);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif

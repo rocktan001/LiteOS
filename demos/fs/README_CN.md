@@ -3,171 +3,28 @@
 ## VFS
 VFS是Virtual File System（虚拟文件系统）的缩写，是LiteOS文件系统的统一接口，其他文件系统基于VFS提供的接口实现。
 
-VFS实现的标准接口有`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`sync`，`opendir`，`readdir`，`closedir`，`mkdir`，`rmdir`，`dup`，`dup2`，`fcntl`，`ioctl`等，具体文件系统支持的接口在下文中有说明。
-### VFS提供的接口
-
-#### 初始化VFS
-```c
-int los_vfs_init (void);
-```
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-
-#### 注册文件系统
-```c
-int los_fs_register(struct file_system *fs);
-```
--  file_system：对应注册文件系统的结构体指针
-   ```c
-   struct file_system {
-       const char            fs_name [LOS_FS_MAX_NAME_LEN];
-       struct file_ops      *fs_fops;
-       struct file_system   *fs_next;
-       volatile uint32_t     fs_refs;
-   };
-   ```
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-
-#### 注销文件系统
-```c
-int los_fs_unregister(struct file_system *fs);
-```
--  file_system：对应注册文件系统的结构体指针
-   ```c
-   struct file_system {
-       const char            fs_name [LOS_FS_MAX_NAME_LEN];
-       struct file_ops      *fs_fops;
-       struct file_system   *fs_next;
-       volatile uint32_t     fs_refs;
-   };
-   ```
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-
-#### 挂载文件系统
-```c
-int los_fs_mount(const char *fsname, const char *path, void *data);
-```
--  fsname：文件系统名称
--  path：文件系统的挂载路径
--  data：挂载的文件系统指针
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-
-#### 卸载文件系统
-```c
-int los_fs_unmount(const char *path);
-```
--  path：文件系统的挂载路径
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
+VFS实现的标准接口有`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`sync`，`opendir`，`readdir`，`closedir`，`mkdir`，`rmdir`，`dup`，`dup2`，`fcntl`，`ioctl`等功能。
 
 ## RAMFS
 RAMFS是基于内存的文件系统。在RAMFS中，文件存储在内存中，所有的读/写操作均发生在内存中，由于访问内存比存储器快，从而可以提升文件读写效率。一般可用RAMFS来存储临时文件或者修改频繁的数据。LiteOS的RAMFS基于虚拟文件系统层（VFS)，不能格式化。
-
-### RAMFS提供的接口
-
--  初始化RAMFS
-
-   ```c
-   int ramfs_init(void);
-   ```
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-
--  挂载RAMFS
-   ```c
-   int ramfs_mount(const char *path, size_t block_size);
-   ```
--  path：RAMFS的挂载路径
--  block_size：RAMFS挂载的块大小
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
 
 ### 注意事项
 
 -  RAMFS文件系统支持的操作有：`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`opendir`，`readdir`，`closedir`，`mkdir`。
 -  RAMFS只能挂载一次，挂载成功后，后面不能继续挂载到其他目录。
--  RAMFS需要根据设备内存大小来调整挂载的大小，如超出系统剩余内存，会挂载失败。
+-  RAMFS需要根据设备内存大小来调整挂载的大小，如超出系统剩余内存，会挂载失败。在`targets/bsp/common/fs/fs_init.h`中可以设置RAMFS挂载的大小。
+    ```c
+    #define RAMFS_SIZE        (2 * 1024)
+    ```
 -  RAMFS需使能文件系统和RAMFS：
    ```
    Components --> FileSystem --> Enable FileSystem
    Components --> FileSystem --> Enable RAMFS
    ```
-
+    使能RAMFS后LiteOS会自动初始化并挂载RAMFS。
 ## SPIFFS
 
 SPIFFS是基于spi flash的嵌入式文件系统，它不需要设备具有很大内存，只需要一定的RAM作为缓存区，这让它可以适用在很多地方。
-
-### SPIFFS提供的接口
-
-#### 初始化SPIFFS
-
-```c
-int spiffs_init (void);
-```
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-
-#### 挂载SPIFFS
-
-```c
-int spiffs_mount(const char *path, u32_t phys_addr, u32_t phys_size,
-                  u32_t phys_erase_block, u32_t log_block_size,
-                  u32_t log_page_size,
-                  s32_t (*spi_rd) (struct spiffs_t *, u32_t, u32_t, u8_t *),
-                  s32_t (*spi_wr) (struct spiffs_t *, u32_t, u32_t, u8_t *),
-                  s32_t (*spi_er) (struct spiffs_t *, u32_t, u32_t));
-```
--  path：SPIFFS的挂载路径
--  phys_addr：spi flash的物理地址
--  phys_size：spi flash的存储空间大小
--  phys_erase_block：spi flash擦除块大小
--  log_block_size：log块大小
--  log_page_size：log页大小
--  spi_rd：spi flash读函数指针
--  spi_wr：spi flash写函数指针
--  spi_er：spi flash擦除函数指针
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-#### 卸载SPIFFS
-```c
-int spiffs_unmount(const char *path);
-```
--  path：SPIFFS的挂载路径
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
 
 ### 注意事项
 
@@ -178,113 +35,35 @@ int spiffs_unmount(const char *path);
    Components --> FileSystem --> Enable FileSystem
    Components --> FileSystem --> Enable SPIFFS
    ```
+    使能SPIFFS后LiteOS会自动初始化并挂载SPIFFS。
 
 ## FATFS
 FAT（File Allocation Table，即文件分配表）文件系统，是一种在Windows操作系统中常用的文件系统。FAT文件系统支持多种介质，在可移动存储介质（U盘、SD卡、移动硬盘等）上广泛使用。它可以使嵌入式设备和Windows、Linux等桌面操作系统保持良好的兼容性，方便用户管理和操作文件。
-
-### FATFS提供的接口
-
-#### 初始化FATFS
-```c
-int fatfs_init(void);
-```
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-
-#### 挂载FATFS
-```c
-int fatfs_mount(const char *path, struct diskio_drv *drv, uint8_t *drive);
-```
--  path：FATFS的挂载路径
--  drv：FATFS的设备驱动结构体指针
-   ```c
-   struct diskio_drv {
-       DSTATUS (*initialize)   (BYTE);                             /*!< Initialize Disk Drive  */
-       DSTATUS (*status)       (BYTE);                             /*!< Get Disk Status        */
-       DRESULT (*read)         (BYTE, BYTE *, DWORD, UINT);        /*!< Read Sector(s)         */
-       DRESULT (*write)        (BYTE, const BYTE *, DWORD, UINT);  /*!< Write Sector(s)        */
-       DRESULT (*ioctl)        (BYTE, BYTE, void *);               /*!< I/O control operation  */
-   };
-   ```
--  drive：注册FATFS的函数返回值，该返回值会在fatfs_mount函数内写入drive指向的内存
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
-
-#### 卸载FATFS
-```c
-int fatfs_unmount(const char *path, uint8_t drive);
-```
--  path：FATFS的挂载路径
--  drive：注册FATFS函数的返回值，通过fatfs_mount接口获取
--  返回值：
-
-    **LOS_OK**：成功
-
-    **LOS_NOK**：失败
 
 ### 注意事项
 
 - FATFS文件系统支持的操作有：`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`sync`，`opendir`，`readdir`，`closedir`，`mkdir`。
 - FATFS文件系统目前仅支持STM32F429和STM32F769开发板。
-- FATFSFATFS需使能文件系统和FATFS：
+- FATFS需使能文件系统和FATFS：
    ```
    Components --> FileSystem --> Enable FileSystem
    Components --> FileSystem --> Enable FATFS
    ```
+    使能FATFS后LiteOS会自动初始化并挂载FATFS。
 
 ## LITELEFS
 
 Littlefs是一种为微控制器设计的，适用于小内存设备的文件系统。它提供了掉电保护机制，如果掉电，文件系统将退回到上一个已知的良好状态。此外，它还提供了动态块的擦写均衡机制，可有效延长flash的使用寿命。
 
-#### 初始化LITELEFS
-
-```c
-int littlefs_init(void);;
-```
--  返回值：
-
-    **LOS_ERR_OK**：成功
-
-    **LOS_NOK**：失败
-
-#### 挂载LITELEFS
-```c
-int littlefs_mount(const char *path, const struct lfs_config *lfs_cfg)
-```
--  path：LITELEFS的挂载路径
--  lfs_cfg: LITELEFS初始化配置结构体
--  返回值：
-
-    **LFS_ERR_OK**：成功
-
-    **其他**：失败
-
-#### 卸载LITELEFS
-```c
-int littlefs_unmount(const char *path)；
-```
--  path：LITELEFS的挂载路径
--  返回值：
-
-    **LFS_ERR_OK**：成功
-
-    **其他**：失败
-
 ### 注意事项
 
 - LITELEFS文件系统支持的操作有：`open`，`close`，`read`，`write`，`lseek`，`stat`，`ulink`，`rename`，`sync`，`opendir`，`readdir`，`closedir`，`mkdir`。
 - LITELEFS文件系统目前仅支持STM32F429开发板。
-- LITELEFS需使能文件系统和FATFS：
+- LITELEFS需使能文件系统和LITELEFS：
    ```
    Components --> FileSystem --> Enable LITTLEFS
    ```
-
+    使能LITTLEFS后LiteOS会自动初始化并挂载LITTLEFS。
 
 ## 文件系统的使用
 
@@ -303,7 +82,8 @@ LiteOS的文件系统提供一套demo来演示文件系统的一些基本操作�
 
 - SD Card为介质时，需要在开发板上插入SD卡，否则会挂载失败。
 
-- 在STM32F429上，RAMFS、FATFS SD Card类型、SPIFFS或LITTLEFS三种文件系统可同时挂载。在STM32F769上，也可同时挂载RAMFS和FATFS。
+- 在STM32F429上，RAMFS、FATFS SD Card类型、SPIFFS或LITTLEFS三种文件系统可同时挂载。但是由于在STM32F429上SPIFFS和LITTLEFS使用相同介质，所以SPIFFS和LITTLEFS不能同时开启。
+- 在STM32F769上，可同时挂载RAMFS和FATFS。
 
 - 通过menuconfig使能demo后，编译LiteOS源码，生成系统镜像文件Huawei_LiteOS.bin，并将.bin文件烧写到开发板，复位重启开发板后，demo即启动。
 
@@ -405,8 +185,6 @@ void los_vfs_io(char *file_name, char *dir_name);
 
 <a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/fs/ramfs_demo.c" target="_blank">ramfs_demo.c</a>文件提供了一套ramfs的例程。
 
-通过调用`ramfs_init`函数初始化ramfs，并挂载`/ramfs`目录，然后调用`fs_common`中的函数进行文件和目录的读写操作，最后调用`los_fs_unmount`卸载`/ramfs`目录。
-
 #### 使能方法
 通过`make menuconfig`打开配置，因为RAMFS demo依赖RAMFS，所以首先使能RAMFS，然后再使能RAMFS demo。
 - 使能RAMFS
@@ -421,8 +199,6 @@ void los_vfs_io(char *file_name, char *dir_name);
 ### FATFS demo
 
 <a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/fs/fatfs_demo.c" target="_blank">fatfs_demo.c</a>文件提供了一套fatfs的例程。
-
-通过调用`hal_fatfs_init`初始化FATFS并挂载`/fatfs`目录，然后调用`los_vfs_io`函数进行文件和目录的读写操作，最后调用`fatfs_unmount`卸载`/fatfs`目录。
 
 #### 使能方法
 通过`make menuconfig`打开配置，因为FATFS demo依赖FATFS，所以首先使能FATFS，然后再使能FATFS demo。
@@ -444,8 +220,6 @@ void los_vfs_io(char *file_name, char *dir_name);
 
 <a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/fs/spiffs_demo.c" target="_blank">spiffs_demo.c</a>文件提供了一套spiffs的例程。
 
-通过调用`hal_spiffs_init`初始化SPIFFS并挂载`/spiffs`目录，然后调用`los_vfs_io`函数进行文件和目录的读写操作，最后调用`spiffs_unmount`卸载`/spiffs`目录。
-
 #### 使能方法
 通过`make menuconfig`打开配置，因为SPIFFS demo依赖SPIFFS，所以首先使能SPIFFS，然后再使能SPIFFS demo。
 - 使能SPIFFS
@@ -460,8 +234,6 @@ void los_vfs_io(char *file_name, char *dir_name);
 ### LITTLEFS demo
 
 <a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/fs/littlefs_demo.c" target="_blank">littlefs_demo.c</a>文件提供了一套littlefs的例程。
-
-通过调用`hal_littlefs_init`初始化SPIFFS并挂载`/littlefs`目录，然后调用`los_vfs_io`函数进行文件和目录的读写操作，最后调用`littlefs_unmount`卸载`/littlefs`目录。
 
 #### 使能方法
 

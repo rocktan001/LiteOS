@@ -29,8 +29,6 @@
 #include "fs_common.h"
 #include "fs/los_ramfs.h"
 
-#define RAMFS_PATH        "/ramfs"
-#define RAMFS_SIZE        (2 * 1024)
 #define DEMO_BUF_LEN      128
 
 void RamfsDemo(void)
@@ -42,16 +40,6 @@ void RamfsDemo(void)
     int bufLen;
 
     printf("Ramfs file system demo task start to run.\n");
-    ret = ramfs_init();
-    if (ret == LOS_NOK) {
-        FS_LOG_ERR("Ramfs init failed.");
-        return;
-    }
-    ret = ramfs_mount(RAMFS_PATH, RAMFS_SIZE);
-    if (ret == LOS_NOK) {
-        FS_LOG_ERR("Ramfs mount failed.");
-        return;
-    }
 
     bufLen = strlen(bufWrite);
     write_file("/ramfs/test.txt", bufWrite, bufLen);
@@ -90,6 +78,4 @@ void RamfsDemo(void)
         return;
     }
     printf("Ramfs file system demo task finished.\n");
-
-    los_fs_unmount("/ramfs");
 }

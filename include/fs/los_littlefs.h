@@ -38,9 +38,10 @@ extern "C" {
 #include "lfs.h"
 #include <stdint.h>
 
-int littlefs_init(void);
-int littlefs_mount(const char *path, const struct lfs_config *lfs_cfg);
-int littlefs_unmount(const char *path);
+void LittlefsDriverInit(int needErase);
+int LittlefsInit(int needErase, const struct lfs_config *lfsConfig);
+int LittlefsMount(const char *path, const struct lfs_config *lfsConfig);
+int LittlefsUnmount(const char *path);
 
 #ifdef __cplusplus
 #if __cplusplus

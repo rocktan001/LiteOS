@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: FS Common Hal HeadFile
+ * Description: Fs Init HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-03-03
+ * Create: 2021-04-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,8 +26,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _BSP_FS_HAL_H
-#define _BSP_FS_HAL_H
+#ifndef _FS_INIT_H
+#define _FS_INIT_H
+
+#ifdef LOSCFG_COMPONENTS_FS_SPIFFS
+#include "fs/los_spiffs.h"
+#endif
+#ifdef LOSCFG_COMPONENTS_FS_FATFS
+#include "fs/los_fatfs.h"
+#endif
+#ifdef LOSCFG_COMPONENTS_FS_LITTLEFS
+#include "fs/los_littlefs.h"
+#endif
+#ifdef LOSCFG_COMPONENTS_FS_RAMFS
+#include "fs/los_ramfs.h"
+
+#define RAMFS_PATH "/ramfs"
+#define RAMFS_SIZE (2 * 1024)
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,9 +51,11 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifdef LOSCFG_COMPONENTS_FS_LITTLEFS
-int LittlefsInit(int needErase);
-#endif
+struct spiffs_drv_t* SpiffsConfigGet(void);
+struct diskio_drv* FatfsConfigGet(void);
+struct lfs_config* LittlefsConfigGet(void);
+
+void FileSystemInit(void);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -45,4 +63,4 @@ int LittlefsInit(int needErase);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif /* _FS_INIT_H */

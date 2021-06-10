@@ -38,13 +38,12 @@
 #include "fs/los_vfs.h"
 #include "fs/los_fatfs.h"
 #include "los_hwi.h"
-#include "fatfs_hal.h"
 #include "hal_spi_flash.h"
 
 #define SPI_FLASH_ID             0xEF4019
 #define SPI_FLASH_SECTOR_SIZE    (4 * 1024)
 
-static DSTATUS stm32f4xx_fatfs_status(BYTE lun)
+static DSTATUS Stm32f4FatfsStatus(BYTE lun)
 {
     DSTATUS status = STA_NOINIT;
 
@@ -54,16 +53,16 @@ static DSTATUS stm32f4xx_fatfs_status(BYTE lun)
     return status;
 }
 
-static DSTATUS stm32f4xx_fatfs_initialize(BYTE lun)
+static DSTATUS Stm32f4FatfsInit(BYTE lun)
 {
     DSTATUS status = STA_NOINIT;
     hal_spi_flash_config();
     hal_spi_flash_wake_up();
-    status = stm32f4xx_fatfs_status(lun);
+    status = Stm32f4FatfsStatus(lun);
     return status;
 }
 
-static DRESULT stm32f4xx_fatfs_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
+static DRESULT Stm32f4FatfsRead(BYTE lun, BYTE *buff, DWORD sector, UINT count)
 {
     int ret;
     ret = hal_spi_flash_read(buff, count * SPI_FLASH_SECTOR_SIZE, FF_PHYS_ADDR + sector * SPI_FLASH_SECTOR_SIZE);
@@ -73,7 +72,7 @@ static DRESULT stm32f4xx_fatfs_read(BYTE lun, BYTE *buff, DWORD sector, UINT cou
     return RES_OK;
 }
 
-static DRESULT stm32f4xx_fatfs_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
+static DRESULT Stm32f4FatfsWrite(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 {
     int ret;
     ret = hal_spi_flash_erase_write(buff, count * SPI_FLASH_SECTOR_SIZE, FF_PHYS_ADDR + sector * SPI_FLASH_SECTOR_SIZE);
@@ -83,7 +82,7 @@ static DRESULT stm32f4xx_fatfs_write(BYTE lun, const BYTE *buff, DWORD sector, U
     return RES_OK;
 }
 
-static DRESULT stm32f4xx_fatfs_ioctl(BYTE lun, BYTE cmd, void *buff)
+static DRESULT Stm32f4FatfsIoctl(BYTE lun, BYTE cmd, void *buff)
 {
     DRESULT res = RES_PARERR;
 
@@ -104,35 +103,30 @@ static DRESULT stm32f4xx_fatfs_ioctl(BYTE lun, BYTE cmd, void *buff)
     return res;
 }
 
-static struct diskio_drv fat_drv = {
-    stm32f4xx_fatfs_initialize,
-    stm32f4xx_fatfs_status,
-    stm32f4xx_fatfs_read,
-    stm32f4xx_fatfs_write,
-    stm32f4xx_fatfs_ioctl
+static struct diskio_drv g_fatfsConfig = {
+    Stm32f4FatfsInit,
+    Stm32f4FatfsStatus,
+    Stm32f4FatfsRead,
+    Stm32f4FatfsWrite,
+    Stm32f4FatfsIoctl
 };
-
-int hal_fatfs_init(int need_erase)
-{
-    int8_t drive = -1;
-
-    if (need_erase) {
-        hal_spi_flash_config();
-        hal_spi_flash_erase(FF_PHYS_ADDR, FF_PHYS_SIZE);
-    }
-
-    (void)fatfs_init();
-
-    if (fatfs_mount("/fatfs/", &fat_drv, (uint8_t *)&drive) < 0) {
-        PRINT_ERR("failed to mount fatfs!\n");
-    }
-
-    return drive;
-}
 
 DWORD get_fattime(void)
 {
     return 0;
+}
+
+struct diskio_drv* FatfsConfigGet(void)
+{
+    return &g_fatfsConfig;
+}
+
+void FatfsDriverInit(int needErase)
+{
+    if (needErase) {
+        hal_spi_flash_config();
+        hal_spi_flash_erase(FF_PHYS_ADDR, FF_PHYS_SIZE);
+    }
 }
 
 /* Private functions -------------------------------------------------------- */

@@ -28,7 +28,6 @@
 
 /* Includes ----------------------------------------------------------------- */
 #include "fs_common.h"
-#include "fatfs_hal.h"
 #include "fs/los_fatfs.h"
 
 #define FATFS_PATH "/fatfs"
@@ -39,27 +38,19 @@ static char g_demoDirName[NAME_LEN] = {0};
 
 void FatfsDemo(void)
 {
-    int8_t drive;
     int ret;
 
     printf("Fatfs file system demo task start to run.\n");
-    drive = hal_fatfs_init(0);
-    if (drive < 0) {
-        FS_LOG_ERR("Fatfs init failed.");
-        return;
-    }
 
-    ret = sprintf_s(g_demoFileName, sizeof(g_demoFileName), "%s/%d:/%s", FATFS_PATH, (uint8_t)drive, LOS_FILE);
+    ret = sprintf_s(g_demoFileName, sizeof(g_demoFileName), "%s/%s", FATFS_PATH, LOS_FILE);
     if (ret <= 0) {
         FS_LOG_ERR("Execute sprintf_s file name failed.");
     }
-    ret = sprintf_s(g_demoDirName, sizeof(g_demoDirName), "%s/%d:/%s", FATFS_PATH, (uint8_t)drive, LOS_DIR);
+    ret = sprintf_s(g_demoDirName, sizeof(g_demoDirName), "%s/%s", FATFS_PATH, LOS_DIR);
     if (ret <= 0) {
         FS_LOG_ERR("Execute sprintf_s dir name failed.");
     }
 
     los_vfs_io(g_demoFileName, g_demoDirName);
     printf("Fatfs file system demo task finished.\n");
-
-    fatfs_unmount("/fatfs/", drive);
 }

@@ -40,44 +40,51 @@
 #include <hal_spi_flash.h>
 
 #define PHYS_ERASE_SIZE 64 * 1024
-#define LOG_BLOCK_SIZE  64 * 1024
-#define LOG_PAGE_SIZE   256
+#define LOG_BLOCK_SIZE 64 * 1024
+#define LOG_PAGE_SIZE 256
 
-static s32_t stm32f4xx_spiffs_read(struct spiffs_t *fs, u32_t addr, u32_t size, u8_t *buff)
+static void Stm32f4SpiffsInit(int needErase)
+{
+    hal_spi_flash_config();
+    if (needErase) {
+        hal_spi_flash_erase(SPIFFS_PHYS_ADDR, SPIFFS_PHYS_SIZE);
+    }
+}
+
+static s32_t Stm32f4SpiffsRead(struct spiffs_t *fs, u32_t addr, u32_t size, u8_t *buff)
 {
     (void)hal_spi_flash_read((void *)buff, size, addr);
 
     return SPIFFS_OK;
 }
 
-static s32_t stm32f4xx_spiffs_write(struct spiffs_t *fs, u32_t addr, u32_t size, u8_t *buff)
+static s32_t Stm32f4SpiffsWrite(struct spiffs_t *fs, u32_t addr, u32_t size, u8_t *buff)
 {
     (void)hal_spi_flash_write((void *)buff, size, (uint32_t *)&addr);
 
     return SPIFFS_OK;
 }
 
-static s32_t stm32f4xx_spiffs_erase(struct spiffs_t *fs, u32_t addr, u32_t size)
+static s32_t Stm32f4SpiffsErase(struct spiffs_t *fs, u32_t addr, u32_t size)
 {
     (void)hal_spi_flash_erase(addr, size);
 
     return SPIFFS_OK;
 }
 
-int hal_spiffs_init(int need_erase)
+static struct spiffs_drv_t g_spiffsConfig = {
+    Stm32f4SpiffsInit,
+    Stm32f4SpiffsRead,
+    Stm32f4SpiffsWrite,
+    Stm32f4SpiffsErase,
+    SPIFFS_PHYS_ADDR,
+    SPIFFS_PHYS_SIZE,
+    PHYS_ERASE_SIZE,
+    LOG_BLOCK_SIZE,
+    LOG_PAGE_SIZE
+};
+
+struct spiffs_drv_t* SpiffsConfigGet(void)
 {
-    hal_spi_flash_config();
-    if (need_erase) {
-        (void)hal_spi_flash_erase(SPIFFS_PHYS_ADDR, SPIFFS_PHYS_SIZE);
-    }
-
-    (void)spiffs_init();
-
-    if (spiffs_mount("/spiffs/", SPIFFS_PHYS_ADDR, SPIFFS_PHYS_SIZE, PHYS_ERASE_SIZE, LOG_BLOCK_SIZE, LOG_PAGE_SIZE,
-        stm32f4xx_spiffs_read, stm32f4xx_spiffs_write, stm32f4xx_spiffs_erase) != LOS_OK) {
-        PRINT_ERR("failed to mount spiffs!\n");
-        return LOS_NOK;
-    }
-
-    return LOS_OK;
+    return &g_spiffsConfig;
 }
