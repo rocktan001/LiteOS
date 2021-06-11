@@ -13,6 +13,8 @@ LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/include \
     -I $(LITEOSTOPDIR)/include/fs \
     -I $(LITEOSTOPDIR)/lib/libc/include
+
+LOCAL_INCLUDE += $(LWIP_INCLUDE)
 endif
 
 # FatFs

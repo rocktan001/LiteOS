@@ -211,9 +211,7 @@ LOCAL_SRCS += drivers/bsp_timer/timer.c
 endif
 
 LOCAL_SRCS += $(wildcard common/demo_entry.c)
-ifeq ($(LOSCFG_COMPONENTS_FS_LITTLEFS), y)
-LOCAL_SRCS += common/fs/littlefs_hal.c
-endif
+LOCAL_SRCS += $(wildcard common/fs/*.c)
 
 ifeq ($(LOSCFG_COMPONENTS_NET_AT), y)
 LOCAL_SRCS += $(wildcard drivers/at_hal/at_hal.c)

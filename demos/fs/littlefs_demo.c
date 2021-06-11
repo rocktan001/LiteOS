@@ -27,7 +27,6 @@
  * --------------------------------------------------------------------------- */
 
 #include "fs_common.h"
-#include "bsp_fs_hal.h"
 #include "fs/los_littlefs.h"
 
 #ifdef __cplusplus
@@ -47,25 +46,20 @@ void LittlefsDemo(void)
     int ret;
 
     printf("Littlefs file system demo task start to run.\n");
-    ret = LittlefsInit(0);
-    if (ret == LOS_NOK) {
-        FS_LOG_ERR("Littlefs init failed.");
-        return;
-    }
 
     ret = sprintf_s(g_demoFileName, sizeof(g_demoFileName), "%s/%s", LITTLEFS_PATH, LOS_FILE);
     if (ret <= 0) {
         FS_LOG_ERR("Execute sprintf_s file name failed.");
+        return;
     }
     ret = sprintf_s(g_demoDirName, sizeof(g_demoDirName), "%s/%s", LITTLEFS_PATH, LOS_DIR);
     if (ret <= 0) {
         FS_LOG_ERR("Execute sprintf_s dir name failed.");
+        return;
     }
 
     los_vfs_io(g_demoFileName, g_demoDirName);
     printf("Littlefs file system demo task finished.\n");
-
-    littlefs_unmount("/littlefs/");
 }
 
 #ifdef __cplusplus

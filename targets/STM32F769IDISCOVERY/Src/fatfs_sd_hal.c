@@ -53,17 +53,17 @@
 /* Global variables ---------------------------------------------------------*/
 /* Private function prototypes ----------------------------------------------*/
 /* Public functions ---------------------------------------------------------*/
-static DSTATUS stm32f7xx_fatfs_status(BYTE lun)
+static DSTATUS Stm32f7FatfsStatus(BYTE lun)
 {
     return SD_CheckStatus(lun);
 }
 
-static DSTATUS stm32f7xx_fatfs_initialize(BYTE lun)
+static DSTATUS Stm32f7FatfsInit(BYTE lun)
 {
     return SD_initialize(lun);
 }
 
-static DRESULT stm32f7xx_fatfs_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
+static DRESULT Stm32f7FatfsRead(BYTE lun, BYTE *buff, DWORD sector, UINT count)
 {
     LOS_IntLock();
     DRESULT ret = SD_read(lun, buff, sector, count);
@@ -71,7 +71,7 @@ static DRESULT stm32f7xx_fatfs_read(BYTE lun, BYTE *buff, DWORD sector, UINT cou
     return ret;
 }
 
-static DRESULT stm32f7xx_fatfs_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
+static DRESULT Stm32f7FatfsWrite(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 {
     LOS_IntLock();
     DRESULT ret =  SD_write(lun, buff, sector, count);
@@ -79,7 +79,7 @@ static DRESULT stm32f7xx_fatfs_write(BYTE lun, const BYTE *buff, DWORD sector, U
     return ret;
 }
 
-static DRESULT stm32f7xx_fatfs_ioctl(BYTE lun, BYTE cmd, void *buff)
+static DRESULT Stm32f7FatfsIoctl(BYTE lun, BYTE cmd, void *buff)
 {
     return SD_ioctl(lun, cmd, buff);
 }
@@ -88,35 +88,28 @@ static uint8_t BspSdErase(uint32_t StartAddr, uint32_t EndAddr) {
     return BSP_SD_Erase(StartAddr, EndAddr);
 }
 
-static struct diskio_drv spi_drv =
+static struct diskio_drv g_fatfsConfig =
 {
-    stm32f7xx_fatfs_initialize,
-    stm32f7xx_fatfs_status,
-    stm32f7xx_fatfs_read,
-    stm32f7xx_fatfs_write,
-    stm32f7xx_fatfs_ioctl
+    Stm32f7FatfsInit,
+    Stm32f7FatfsStatus,
+    Stm32f7FatfsRead,
+    Stm32f7FatfsWrite,
+    Stm32f7FatfsIoctl
 };
-
-int hal_fatfs_init(int need_erase)
-{
-    int8_t drive = -1;
-
-    if (need_erase) {
-        (void)BspSdErase(FF_PHYS_ADDR, FF_PHYS_SIZE);
-    }
-
-    (void)fatfs_init();
-
-    if (fatfs_mount("/fatfs/", &spi_drv, (uint8_t *)&drive) < 0) {
-        PRINT_ERR ("failed to mount fatfs!\n");
-    }
-
-    return drive;
-}
 
 DWORD get_fattime (void)
 {
     return 0;
 }
 
-/* Private functions --------------------------------------------------------*/
+struct diskio_drv* FatfsConfigGet(void)
+{
+    return &g_fatfsConfig;
+}
+
+void FatfsDriverInit(int needErase)
+{
+    if (needErase) {
+        BspSdErase(FF_PHYS_ADDR, FF_PHYS_SIZE);
+    }
+}

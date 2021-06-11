@@ -28,6 +28,7 @@
 
 #include "los_typedef.h"
 #include "los_task.h"
+#include "fs/fs_init.h"
 
 #ifdef CONFIG_FEATURE_FOTA
 #include "ota_port.h"
@@ -235,6 +236,9 @@ VOID AgenttinyDemoTask(VOID)
 VOID DemoEntry(VOID)
 {
     printf("Hello, welcome to liteos demo!\n");
+#ifdef LOSCFG_COMPONENTS_FS
+    FileSystemInit();
+#endif
 
 #ifdef LOSCFG_DEMOS_AI
     AiDemoTask();

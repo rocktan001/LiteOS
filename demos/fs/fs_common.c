@@ -117,7 +117,6 @@ int read_dir(const char *name, struct dir *dir)
     int flag = 1;
     struct dirent *pDirent = NULL;
 
-    dir = opendir(name);
     if ((name == NULL) || (dir == NULL)) {
         FS_LOG_ERR("Invalid parameter.");
         return -1;
@@ -128,6 +127,7 @@ int read_dir(const char *name, struct dir *dir)
         if ((pDirent == NULL) || (pDirent->name[0] == '\0')) {
             if (flag == 1) {
                 FS_LOG_ERR("Read dir %s failed.", name);
+                closedir(dir);
                 return -1;
             } else
                 break;
@@ -135,6 +135,7 @@ int read_dir(const char *name, struct dir *dir)
         flag = 0;
         printf("Read dir %s: name=%s, type=%d, size=%d.\n", name, pDirent->name, pDirent->type, pDirent->size);
     }
+    closedir(dir);
     return 0;
 }
 

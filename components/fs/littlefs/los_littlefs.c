@@ -53,7 +53,7 @@ LFS_P g_lfs_p;
 
 static lfs_t *littlefs_ptr;
 
-static int ret_to_errno(int result)
+static int RetToErrno(int result)
 {
     int err = 0;
     switch (result) {
@@ -101,7 +101,7 @@ static int ret_to_errno(int result)
     return err;
 }
 
-static int littlefs_flags_get(int oflags)
+static int LittlefsFlagsGet(int oflags)
 {
     int flags = 0;
     switch (oflags & O_ACCMODE) {
@@ -137,28 +137,28 @@ static int littlefs_flags_get(int oflags)
     return flags;
 }
 
-static int littlefs_op_open(struct file *file, const char *path_in_mp, int flags)
+static int LittlefsOperationOpen(struct file *file, const char *pathInMp, int flags)
 {
     LFS_P *p = (LFS_P *)file->f_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
     lfs_file_t *f = p->lfs_file;
-    int ret = lfs_file_open(lfs, f, path_in_mp, littlefs_flags_get(flags));
+    int ret = lfs_file_open(lfs, f, pathInMp, LittlefsFlagsGet(flags));
     if (ret == LFS_ERR_OK) {
         file->f_data = (void *)&f;
     }
-    return ret_to_errno(ret);
+    return RetToErrno(ret);
 }
 
-static int littlefs_op_close(struct file *file)
+static int LittlefsOperationClose(struct file *file)
 {
     LFS_P *p = (LFS_P *)file->f_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
     lfs_file_t *f = p->lfs_file;
     int ret = lfs_file_close(lfs, f);
-    return ret_to_errno(ret);
+    return RetToErrno(ret);
 }
 
-static ssize_t littlefs_op_read(struct file *file, char *buff, size_t bytes)
+static ssize_t LittlefsOperationRead(struct file *file, char *buff, size_t bytes)
 {
     LFS_P *p = (LFS_P *)file->f_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
@@ -166,13 +166,13 @@ static ssize_t littlefs_op_read(struct file *file, char *buff, size_t bytes)
     lfs_ssize_t ret;
     ret = lfs_file_read(lfs, f, (void *)buff, (lfs_size_t)bytes);
     if (ret < 0) {
-        PRINT_ERR("failed to read, read size=%d\n", (int)ret);
-        return ret_to_errno((int)ret);
+        PRINT_ERR("Failed to read, read size=%d\n", (int)ret);
+        return RetToErrno((int)ret);
     }
     return (ssize_t)ret;
 }
 
-static ssize_t littlefs_op_write(struct file *file, const char *buff, size_t bytes)
+static ssize_t LittlefsOperationWrite(struct file *file, const char *buff, size_t bytes)
 {
     LFS_P *p = (LFS_P *)file->f_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
@@ -184,13 +184,13 @@ static ssize_t littlefs_op_write(struct file *file, const char *buff, size_t byt
 
     ret = lfs_file_write(lfs, f, (const void *)buff, (lfs_size_t)bytes);
     if (ret < 0) {
-        PRINT_ERR("failed to write, write size=%d\n", (int)ret);
-        return ret_to_errno((int)ret);
+        PRINT_ERR("Failed to write, write size=%d\n", (int)ret);
+        return RetToErrno((int)ret);
     }
     return (ssize_t)ret;
 }
 
-static off_t littlefs_op_lseek(struct file *file, off_t off, int whence)
+static off_t LittlefsOperationLseek(struct file *file, off_t off, int whence)
 {
     LFS_P *p = (LFS_P *)file->f_mp->m_data;
     lfs_soff_t ret;
@@ -203,47 +203,47 @@ static off_t littlefs_op_lseek(struct file *file, off_t off, int whence)
     if (ret == LFS_ERR_OK) {
         return (off_t)off;
     } else {
-        return ret_to_errno(ret);
+        return RetToErrno(ret);
     }
 }
 
-static off64_t littlefs_op_lseek64(struct file *file, off64_t off, int whence)
+static off64_t LittlefsOperationLseek64(struct file *file, off64_t off, int whence)
 {
-    return (off64_t)littlefs_op_lseek(file, (off_t)off, whence);
+    return (off64_t)LittlefsOperationLseek(file, (off_t)off, whence);
 }
 
-int littlefs_op_stat(struct mount_point *mp, const char *path_in_mp, struct stat *stat)
+int LittlefsOperationStat(struct mount_point *mp, const char *pathInMp, struct stat *stat)
 {
     struct lfs_info info;
     (void)memset_s(stat, sizeof(struct stat), 0, sizeof(struct stat));
     LFS_P *p = (LFS_P *)mp->m_data;
     lfs_t *lfs = p->lfs_fs;
     int ret;
-    ret = lfs_stat(lfs, path_in_mp, &info);
+    ret = lfs_stat(lfs, pathInMp, &info);
     if (ret == LFS_ERR_OK) {
         stat->st_size = info.size;
         stat->st_mode = ((info.type == LFS_TYPE_DIR) ? S_IFDIR : S_IFREG);
     }
-    return ret_to_errno(ret);
+    return RetToErrno(ret);
 }
 
-static int littlefs_op_unlink(struct mount_point *mp, const char *path_in_mp)
+static int LittlefsOperationUlink(struct mount_point *mp, const char *pathInMp)
 {
     LFS_P *p = (LFS_P *)mp->m_data;
     lfs_t *lfs = p->lfs_fs;
-    int ret = lfs_remove(lfs, path_in_mp);
-    return ret_to_errno(ret);
+    int ret = lfs_remove(lfs, pathInMp);
+    return RetToErrno(ret);
 }
 
-static int littlefs_op_rename(struct mount_point *mp, const char *path_in_mp_old, const char *path_in_mp_new)
+static int LittlefsOperationRename(struct mount_point *mp, const char *pathInMpOld, const char *pathInMpNew)
 {
     LFS_P *p = (LFS_P *)mp->m_data;
     lfs_t *lfs = p->lfs_fs;
-    int ret = lfs_rename(lfs, path_in_mp_old, path_in_mp_new);
-    return ret_to_errno(ret);
+    int ret = lfs_rename(lfs, pathInMpOld, pathInMpNew);
+    return RetToErrno(ret);
 }
 
-static int littlefs_op_sync(struct file *file)
+static int LittlefsOperationSync(struct file *file)
 {
     int ret;
     LFS_P *p = (LFS_P *)file->f_mp->m_data;
@@ -254,10 +254,10 @@ static int littlefs_op_sync(struct file *file)
     }
 
     ret = lfs_file_sync(lfs, f);
-    return ret_to_errno(ret);
+    return RetToErrno(ret);
 }
 
-static int littlefs_op_opendir(struct dir *dir, const char *path)
+static int LittlefsOperationOpendir(struct dir *dir, const char *path)
 {
     int ret;
     LFS_P *p = NULL;
@@ -265,7 +265,7 @@ static int littlefs_op_opendir(struct dir *dir, const char *path)
     lfs_t *lfs = NULL;
 
     if (dir == NULL) {
-        PRINT_ERR("dir is null, open failed.\n");
+        PRINT_ERR("Dir is null, open failed.\n");
         return -ENOMEM;
     }
 
@@ -277,14 +277,14 @@ static int littlefs_op_opendir(struct dir *dir, const char *path)
     ret = lfs_dir_open(lfs, lfs_dir, path);
     if (ret != LFS_ERR_OK) {
         free(lfs_dir);
-        return ret_to_errno(ret);
+        return RetToErrno(ret);
     }
     dir->d_data = (void *)lfs_dir;
     dir->d_offset = 0;
     return LFS_ERR_OK;
 }
 
-static int littlefs_op_readdir(struct dir *dir, struct dirent *dent)
+static int LittlefsOperationReaddir(struct dir *dir, struct dirent *dent)
 {
     LFS_P *p = (LFS_P *)dir->d_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
@@ -313,7 +313,7 @@ static int littlefs_op_readdir(struct dir *dir, struct dirent *dent)
     return LOS_OK;
 }
 
-static int littlefs_op_closedir(struct dir *dir)
+static int LittlefsOperationClosedir(struct dir *dir)
 {
     int ret;
     LFS_P *p = (LFS_P *)dir->d_mp->m_data;
@@ -326,10 +326,10 @@ static int littlefs_op_closedir(struct dir *dir)
     if (ret == LFS_ERR_OK) {
         free(lfs_dir);
     }
-    return ret_to_errno(ret);
+    return RetToErrno(ret);
 }
 
-static int littlefs_op_mkdir(struct mount_point *mp, const char *path)
+static int LittlefsOperationMkdir(struct mount_point *mp, const char *path)
 {
     LFS_P *p = (LFS_P *)mp->m_data;
     lfs_t *lfs = p->lfs_fs;
@@ -342,48 +342,30 @@ static int littlefs_op_mkdir(struct mount_point *mp, const char *path)
         err = ENOENT;
         return err;
     }
-    return ret_to_errno(ret);
+    return RetToErrno(ret);
 }
 
-static struct file_ops littlefs_ops = {
-    littlefs_op_open,
-    littlefs_op_close,
-    littlefs_op_read,
-    littlefs_op_write,
-    littlefs_op_lseek,
-    littlefs_op_lseek64,
-    littlefs_op_stat,
-    littlefs_op_unlink,
-    littlefs_op_rename,
+static struct file_ops g_littlefsOps = {
+    LittlefsOperationOpen,
+    LittlefsOperationClose,
+    LittlefsOperationRead,
+    LittlefsOperationWrite,
+    LittlefsOperationLseek,
+    LittlefsOperationLseek64,
+    LittlefsOperationStat,
+    LittlefsOperationUlink,
+    LittlefsOperationRename,
     NULL, /* ioctl not supported for now */
-    littlefs_op_sync,
-    littlefs_op_opendir,
-    littlefs_op_readdir,
-    littlefs_op_closedir,
-    littlefs_op_mkdir
+    LittlefsOperationSync,
+    LittlefsOperationOpendir,
+    LittlefsOperationReaddir,
+    LittlefsOperationClosedir,
+    LittlefsOperationMkdir
     };
 
-static struct file_system littlefs_fs = { "littlefs", &littlefs_ops, NULL, 0 };
+static struct file_system g_littlefsFs = { "littlefs", &g_littlefsOps, NULL, 0 };
 
-int littlefs_init(void)
-{
-    static int littlefs_inited = FALSE;
-    if (littlefs_inited) {
-        return LFS_ERR_OK;
-    }
-    if (los_vfs_init() != LFS_ERR_OK) {
-        return LOS_NOK;
-    }
-    if (los_fs_register(&littlefs_fs) != LFS_ERR_OK) {
-        PRINT_ERR("failed to register fs!\n");
-        return LOS_NOK;
-    }
-    littlefs_inited = TRUE;
-    PRINT_INFO("register littlefs done!\n");
-    return LFS_ERR_OK;
-}
-
-int littlefs_mount(const char *path, const struct lfs_config *lfs_cfg)
+int LittlefsMount(const char *path, const struct lfs_config *lfsConfig)
 {
     int ret = -1;
     int err;
@@ -396,27 +378,27 @@ int littlefs_mount(const char *path, const struct lfs_config *lfs_cfg)
     g_lfs_p.lfs_file = f;
 
     if (fs == NULL) {
-        PRINT_ERR("malloc memory failed!\n");
+        PRINT_ERR("Malloc memory failed.\n");
         goto err_free;
     }
 
     (void)memset_s(fs, sizeof(lfs_t), 0, sizeof(lfs_t));
-    err = lfs_mount(fs, lfs_cfg);
+    err = lfs_mount(fs, lfsConfig);
     if (err == LFS_ERR_CORRUPT) {
-        lfs_format(fs, lfs_cfg);
-        err = lfs_mount(fs, lfs_cfg);
+        lfs_format(fs, lfsConfig);
+        err = lfs_mount(fs, lfsConfig);
     }
     if (err != LFS_ERR_OK) {
-        PRINT_ERR("format fail!\n");
+        PRINT_ERR("Format fail.\n");
         goto err_unmount;
     }
-    ret = los_fs_mount("littlefs", path, &g_lfs_p);
+    ret = LOS_FsMount("littlefs", path, &g_lfs_p);
     if (ret == LFS_ERR_OK) {
-        PRINT_INFO("littlefs mount at %s done!\n", path);
+        PRINT_INFO("Littlefs mount at %s done.\n", path);
         littlefs_ptr = fs;
         return LFS_ERR_OK;
     }
-    PRINT_ERR("failed to mount!\n");
+    PRINT_ERR("Failed to mount.\n");
 err_unmount:
     lfs_unmount(fs);
 err_free:
@@ -426,7 +408,7 @@ err_free:
     return ret;
 }
 
-int littlefs_unmount(const char *path)
+int LittlefsUnmout(const char *path)
 {
     int ret = LFS_ERR_OK;
     if (littlefs_ptr != NULL) {
@@ -434,7 +416,34 @@ int littlefs_unmount(const char *path)
         free(littlefs_ptr);
         littlefs_ptr = NULL;
     }
-    los_fs_unmount(path);
+    LOS_FsUnmount(path);
+    return ret;
+}
+
+int LittlefsInit(int needErase, const struct lfs_config *lfsConfig)
+{
+    int ret;
+    static int littlefsInited = FALSE;
+    if (littlefsInited) {
+        return LOS_OK;
+    }
+    if (LOS_VfsInit() != LOS_OK) {
+        return LOS_NOK;
+    }
+    if (LOS_FsRegister(&g_littlefsFs) != LOS_OK) {
+        PRINT_ERR("Failed to register fs.\n");
+        return LOS_NOK;
+    }
+    PRINT_INFO("Register littlefs done.\n");
+
+    LittlefsDriverInit(needErase);
+
+    ret = LittlefsMount("/littlefs/", lfsConfig);
+    if (ret == LFS_ERR_OK) {
+        littlefsInited = TRUE;
+        return LOS_OK;
+    }
+
     return ret;
 }
 

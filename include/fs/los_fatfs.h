@@ -34,7 +34,7 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
 /* Includes ----------------------------------------------------------------- */
@@ -67,15 +67,15 @@ struct disk_mnt {
 /* Extern variables --------------------------------------------------------- */
 /* Functions API ------------------------------------------------------------ */
 
-int fatfs_init(void);
-int fatfs_mount(const char *path, struct diskio_drv *drv, uint8_t *drive);
-int fatfs_unmount(const char *path, uint8_t drive);
-
+void FatfsDriverInit(int needErase);
+int FatfsInit(int needErase, struct diskio_drv *drv, uint8_t *drive);
+int FatfsMount(const char *path, struct diskio_drv *drv, uint8_t *drive);
+int FatfsUnmount(const char *path, uint8_t drive);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
 
