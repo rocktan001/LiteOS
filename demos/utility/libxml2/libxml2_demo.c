@@ -32,8 +32,6 @@
 #include "los_base.h"
 #include "los_task.h"
 #include "los_config.h"
-#include "fatfs_hal.h"
-#include "fs/los_fatfs.h"
 #include "libxml/xmlmemory.h"
 #include "libxml/parser.h"
 
@@ -57,30 +55,21 @@ STATIC INT32 DemoTaskEntry(VOID)
     xmlChar *tmpStr = NULL;
 
     printf("Libxml2 demo task start to run.\n");
-    INT32 driver = hal_fatfs_init(0);
-    if (driver < 0) {
-        (VOID)fatfs_unmount(FATFS_MAIN_DIR, (UINT8)driver);
-        printf("Fatfs init failed.\n");
-        return LOS_NOK;
-    }
 
     doc = xmlParseFile(XML2_FILENAME);
     if (doc == NULL) {
-        (VOID)fatfs_unmount(FATFS_MAIN_DIR, (UINT8)driver);
         printf("Parsefile failed.\n");
         return LOS_NOK;
     }
 
     curNode = xmlDocGetRootElement(doc);
     if ((curNode == NULL) || (curNode->name == NULL)) {
-        (VOID)fatfs_unmount(FATFS_MAIN_DIR, (UINT8)driver);
         printf("Getrootelement failed.\n");
         xmlFreeDoc(doc);
         return LOS_NOK;
     }
 
     if (xmlStrcmp(curNode->name, (const xmlChar *) "info")) {
-        (VOID)fatfs_unmount(FATFS_MAIN_DIR, (UINT8)driver);
         printf("Root element [%s] is not info.\n", curNode->name);
         return LOS_NOK;
     }
@@ -104,7 +93,6 @@ STATIC INT32 DemoTaskEntry(VOID)
     }
 
     xmlFreeDoc(doc);
-    (VOID)fatfs_unmount(FATFS_MAIN_DIR, (UINT8)driver);
     printf("Libxml2 demo task finished.\n");
 
     return LOS_OK;

@@ -44,14 +44,14 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* MACRO DEFINE */
-#ifdef LOSCFG_COMPONNETS_NET_AT_INFO
+#ifdef LOSCFG_COMPONENTS_NET_AT_INFO
 #define AT_LOG(fmt, arg...)  printf("[%lu][%s:%d][I]"fmt"\n", at_get_time(), __func__, __LINE__, ##arg)
 #else
 static inline void __do_nothing(const char *fmt, ...) { (void)fmt; }
 #define AT_LOG(fmt, arg...)  __do_nothing(fmt, ##arg)
 #endif
 
-#ifdef LOSCFG_COMPONNETS_NET_AT_DEBUG
+#ifdef LOSCFG_COMPONENTS_NET_AT_DEBUG
 #define AT_LOG_DEBUG(fmt, arg...)  printf("[%lu][%s:%d][D]"fmt"\n", at_get_time(), __func__, __LINE__, ##arg)
 #else
 #define AT_LOG_DEBUG(fmt, arg...)

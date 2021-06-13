@@ -136,7 +136,7 @@ UINT32 MutexDebug(VOID)
     while (!g_demoDoneFlag) {
         LOS_TaskDelay(DELAY_INTERVAL);
     }
-    
+
     return ret;
 }
 #endif

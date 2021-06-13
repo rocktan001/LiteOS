@@ -1,16 +1,16 @@
 menu "Network"
 
-config LOSCFG_COMPONNETS_NET_AT
+config LOSCFG_COMPONENTS_NET_AT
     bool "Enable AT"
     select LOSCFG_COMPONENTS_NETWORK
     default n
     help
-        Answer y to enable AT support.
+        Answer y to enable AT.
 
 choice
     prompt "Choose AT Device"
     default LOSCFG_COMPONENTS_NET_AT_BC95
-    depends on LOSCFG_COMPONNETS_NET_AT
+    depends on LOSCFG_COMPONENTS_NET_AT
 
     config LOSCFG_COMPONENTS_NET_AT_ESP8266
     bool "Enable esp8266"
@@ -27,14 +27,14 @@ choice
 
 endchoice
 
-config LOSCFG_COMPONNETS_NET_AT_INFO
+config LOSCFG_COMPONENTS_NET_AT_INFO
     bool "Enable AT INFO"
-    depends on LOSCFG_COMPONNETS_NET_AT
+    depends on LOSCFG_COMPONENTS_NET_AT
     default y
 
-config LOSCFG_COMPONNETS_NET_AT_DEBUG
+config LOSCFG_COMPONENTS_NET_AT_DEBUG
     bool "Enable AT DEBUG"
-    depends on LOSCFG_COMPONNETS_NET_AT
+    depends on LOSCFG_COMPONENTS_NET_AT
     default y
 
 config LOSCFG_COMPONENTS_NET_LWIP
@@ -42,7 +42,7 @@ config LOSCFG_COMPONENTS_NET_LWIP
     select LOSCFG_COMPONENTS_NETWORK
     default n
     help
-      Answer y to enable lwip support.
+      Answer y to enable lwip.
 
 choice
     prompt "Enable Ipv4 Or Ipv6"
@@ -62,7 +62,7 @@ config LOSCFG_COMPONENTS_NET_SAL
     select LOSCFG_COMPONENTS_NETWORK
     default n
     help
-      Answer y to enable sal support.
+      Answer y to enable sal.
 
 config LOSCFG_COMPONENTS_NETWORK
     bool

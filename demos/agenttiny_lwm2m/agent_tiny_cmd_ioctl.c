@@ -444,7 +444,7 @@ int atiny_cmd_ioctl(atiny_cmd_e cmd, char *arg, int len)
     }
 #endif
 
-#if defined(LOSCFG_COMPONNETS_NET_AT) && defined(USE_NB_NEUL95)
+#if defined(LOSCFG_COMPONENTS_NET_AT) && defined(USE_NB_NEUL95)
     case ATINY_TRIGER_SERVER_INITIATED_BS:
         nb_reattach();
         result = ATINY_OK;

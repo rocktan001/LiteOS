@@ -45,6 +45,12 @@ extern "C" {
 #ifdef LOSCFG_ARCH_ARM_CORTEX_M
 #define MEM_DYN_SIZE    512
 #endif
+#ifdef LOSCFG_ARCH_CSKY_V2
+#define MEM_DYN_SIZE    512
+#endif
+#ifdef LOSCFG_ARCH_RISCV_RV32IMC
+#define MEM_DYN_SIZE    1024
+#endif
 
 #define MEM_USE_SIZE    4
 #define MEM_USE_BUFF    828

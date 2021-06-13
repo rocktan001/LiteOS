@@ -29,6 +29,10 @@
 #ifndef _ASM_PLATFORM_H
 #define _ASM_PLATFORM_H
 
+#ifndef STM32F769xx
+#define STM32F769xx
+#endif
+
 #include "los_typedef.h"
 #include "stm32f769xx.h"
 #include "stm32f7xx.h"
@@ -43,10 +47,6 @@
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#ifndef STM32F769xx
-#define STM32F769xx
-#endif
 
 #ifdef LOSCFG_PLATFORM_OSAPPINIT
 extern VOID app_init(VOID);

@@ -1,5 +1,9 @@
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
+
+_sstack = 0x00010000;    /* start of RAM */
+_estack = 0x10010000;    /* end of RAM */
+
 MEMORY
 {
     ram : ORIGIN = 0x10000, LENGTH = 0x10000000

@@ -33,7 +33,6 @@
 #include <unistd.h>
 #include "fcntl.h"
 #include "los_task.h"
-#include "fs/los_ramfs.h"
 #include "fs/los_vfs.h"
 #include "iniparser.h"
 #include "securec.h"
@@ -44,9 +43,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define RAMFS_PATH                "/ramfs"
-#define RAMFS_SIZE                (2 * 1024)
-#define INI_FILE                  RAMFS_PATH"/example.ini"
+#define INI_FILE                  "/ramfs/example.ini"
 #define BUF_LEN                   512
 /* notfound Value to return in case of error */
 #define ERROR_INT                 (-1)
@@ -91,6 +88,8 @@ STATIC VOID CreateIniFile(VOID)
         "\n");
     if (ret < 0) {
         printf("Execute sprintf_s failed.\n");
+        (VOID)close(fd);
+        return;
     }
     len = sizeof(buff) - 1;
     ret = write(fd, buff, len);
@@ -148,24 +147,13 @@ STATIC VOID DemoTaskEntry(VOID)
     INT32 ret;
 
     printf("Iniparser demo task start to run.\n");
-    ret = ramfs_init();
-    if (ret == LOS_NOK) {
-        printf("Ramfs init failed.\n");
-        return;
-    }
-    ret = ramfs_mount(RAMFS_PATH, RAMFS_SIZE);
-    if (ret == LOS_NOK) {
-        printf("Ramfs mount failed.\n");
-        return;
-    }
+
     CreateIniFile();
     ret = ParseIniFile(INI_FILE);
     if (ret != LOS_OK) {
         printf("Parse ini file failed.");
-        (VOID)los_fs_unmount(RAMFS_PATH);
         return;
     }
-    (VOID)los_fs_unmount(RAMFS_PATH);
     printf("Iniparser demo task finished.\n");
 }
 

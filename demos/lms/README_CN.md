@@ -2,7 +2,7 @@
 
 ## 基本概念
 
-LMS全称为Lite Memory Sanitizer，是一种实时检测内存操作合法性的算法。LMS能够实时检测缓冲区溢出（buffer overflow），释放后使用（use after free），多重释放（double free）和释放野指针（wild pointer），在异常发生的第一时间通知操作系统，结合操作系统Backtrace等定位手段，能准确定位到问题根因，大大提升内存问题定位效率。
+LMS全称为Lite Memory Sanitizer，是一种实时检测内存操作合法性的算法。LMS能够实时检测缓冲区溢出（buffer overflow），释放后使用（use after free），多重释放（double free）和释放野指针（wild pointer），在异常发生的第一时间通知操作系统，结合操作系统Backtrace等定位手段，能准确定位到问题根因，极大提升内存问题定位效率。
 
 ## 使用场景
 

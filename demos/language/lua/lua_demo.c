@@ -44,9 +44,7 @@ extern "C" {
 
 #define LUA_ARGV              "lua"
 #define LUA_ARGC              2
-#define RAMFS_PATH            "/ramfs"
-#define RAMFS_SIZE            2048
-#define LUA_FILE_NAME         RAMFS_PATH"/test.lua"
+#define LUA_FILE_NAME         "/ramfs/test.lua"
 #define LUA_TASK_PRIORITY     7
 #define LUA_TASK_STACK_SIZE   0x3000
 
@@ -72,16 +70,6 @@ VOID LuaDemoEntry(VOID)
     INT32 fd = 0;
 
     printf("Lua demo task start to run.\n");
-    ret = ramfs_init();
-    if (ret == LOS_NOK) {
-        printf("Ramfs init failed.\n");
-        return;
-    }
-    ret = ramfs_mount(RAMFS_PATH, RAMFS_SIZE);
-    if (ret == LOS_NOK) {
-        printf("Ramfs mount failed.\n");
-        return;
-    }
 
     fd = open(LUA_FILE_NAME, O_CREAT | O_RDWR | O_TRUNC, S_IRUSR | S_IWUSR | S_IXUSR);
     if (fd < 0) {
@@ -105,7 +93,6 @@ VOID LuaDemoEntry(VOID)
     } else {
         printf("Run Lua file failed.\n");
     }
-    (VOID)los_fs_unmount("/ramfs");
     printf("Lua demo task finished.\n");
 }
 

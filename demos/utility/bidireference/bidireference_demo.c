@@ -34,10 +34,8 @@
 #include "los_task.h"
 
 #define INPUT_ARG                2
-#define RAMFS_PATH               "/ramfs"
-#define RAMFS_SIZE               (2 * 1024)
-#define UNICODE_FILENAME         RAMFS_PATH"/unicode.txt"
-#define BRACKETS_FILENAME        RAMFS_PATH"/BidiBrackets.txt"
+#define UNICODE_FILENAME         "/ramfs/unicode.txt"
+#define BRACKETS_FILENAME        "/ramfs/BidiBrackets.txt"
 #define BIDIREFC_TASK_PRIORITY   7
 #define BIDIREFC_TASK_STACK_SIZE 2048
 
@@ -50,21 +48,11 @@ CHAR g_demoBidiRefBrackets[] = "0028; 0029; o # LEFT PARENTHESIS\n0029; 0028; c 
 
 STATIC VOID DemoTaskEntry(VOID)
 {
-    printf("Bidireference demo task start to run.\n");
     FILE *fdi = NULL;
-    INT32 ret;
     CHAR *algorithmType[] = {"-u63", "-z", "-d3"};
 
-    ret = ramfs_init();
-    if (ret == LOS_NOK) {
-        printf("Ramfs init failed.\n");
-        return;
-    }
-    ret = ramfs_mount(RAMFS_PATH, RAMFS_SIZE);
-    if (ret == LOS_NOK) {
-        printf("Ramfs mount failed.\n");
-        return;
-    }
+    printf("Bidireference demo task start to run.\n");
+
     fdi = fopen(UNICODE_FILENAME, "w");
     if (fdi == NULL) {
         printf("Fopen %s failed.\n", UNICODE_FILENAME);
@@ -79,7 +67,6 @@ STATIC VOID DemoTaskEntry(VOID)
     fwrite(g_demoBidiRefBrackets, 1, strlen(g_demoBidiRefBrackets) + 1, fdi);
     fclose(fdi);
     EnterBidiAlgo(INPUT_ARG, algorithmType);
-    (VOID)los_fs_unmount(RAMFS_PATH);
     printf("Bidireference demo task finished.\n");
 }
 
