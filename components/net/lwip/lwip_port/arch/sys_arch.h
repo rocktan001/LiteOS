@@ -27,12 +27,16 @@
 #include "los_sem_pri.h"
 #include "los_typedef.h"
 #include "los_memory.h"
+#include "semaphore.h"
 
+#if  !LWIP_LITEOS_COMPAT
 typedef struct los_sem {
     LosSemCB* sem;        /**< Semaphore attribute structure*/
 } sem_t;
-
 typedef struct los_sem sys_sem_t;
+#else
+typedef sem_t sys_sem_t;
+#endif
 
 struct sys_mbox {
     int first, last;

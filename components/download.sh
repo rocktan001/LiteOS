@@ -235,8 +235,10 @@ DownloadSourceCode()
             curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.rar
         elif [ "${packageType2}" = ".tar.gz" ]; then
             curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.tar.gz
-        elif [ "${downloadMethod1}" = "sh" ]; then
+        elif [ "${packageType}" = "sh" ]; then
             ${g_componentDownloadAddr}
+        elif [ "${packageType}" = "" ]; then
+            break
         else
             echo "[Info]: Download method support."
             iNum=0
@@ -269,7 +271,11 @@ GetSourceCode()
 {
     local ret=0
     local i=0
-    local packageType=(".zip" ".tar.gz" ".rar")
+    local packageType=("zip" "tar.gz" "rar")
+
+    if [ ${g_componentName} = "origin.patch" ]; then
+        return 0
+    fi
 
     cd ${g_componentPath}
     while [ $i -lt ${#packageType[@]} ]

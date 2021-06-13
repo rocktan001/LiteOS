@@ -74,6 +74,35 @@
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
+/*
+    Lwip add new macro definition to Avoid conflict with netdb.h
+*/
+#ifndef LWIP_LITEOS_COMPAT
+#define LWIP_LITEOS_COMPAT  1
+#endif
+
+#if LWIP_LITEOS_COMPAT
+#include "sys/select.h"
+#include "sys/ioctl.h"
+
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <net/route.h>
+#include <ifaddrs.h>
+#include <errno.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
+#include <netpacket/packet.h>
+
+#include <netinet/in.h>
+#include <netinet/icmp6.h>
+#endif
+
 #define ETHARP_TRUST_IP_MAC      0
 #define IP_REASSEMBLY            1
 #define IP_FRAG                  1
@@ -118,7 +147,7 @@
 
 /* MEM_SIZE: the size of the heap memory. If the application will send
 a lot of data that needs to be copied, this should be set high. */
-#define MEM_SIZE                (5 * 1024)
+#define MEM_SIZE                (10 * 1024)
 
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this
@@ -213,10 +242,10 @@ The STM32F4xx allows computing and verifying the IP, UDP, TCP and ICMP checksums
 #define PPP_SUPPORT        1
 #define PAP_SUPPORT        1
 #define PPP_IPV4_SUPPORT   1
-#else
-#define CHECKSUM_BY_HARDWARE
-
 #endif
+
+#undef CHECKSUM_BY_HARDWARE
+
 
 #ifdef CHECKSUM_BY_HARDWARE
   /* CHECKSUM_GEN_IP==0: Generate checksums by hardware for outgoing IP packets.*/
@@ -299,6 +328,135 @@ The STM32F4xx allows computing and verifying the IP, UDP, TCP and ICMP checksums
 */
 #define SO_REUSE                         1
 
+/*
+    Lwip add new macro definition to Avoid conflict with netdb.h
+*/
+#ifndef LWIP_LITEOS_COMPAT
+#define LWIP_LITEOS_COMPAT  1
+#endif
+
+
+#ifndef LWIP_COMPAT_SOCKETS
+#define LWIP_COMPAT_SOCKETS 2
+#define LWIP_POSIX_SOCKETS_IO_NAMES 0
+#define LWIP_FCNTL 1
+#endif
+
+#define LWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS 1
+
+#ifndef LWIP_SOCKET_POLL
+#define LWIP_SOCKET_POLL 1
+#endif
+
+#ifndef LWIP_SO_RCVTIMEO
+#define LWIP_SO_RCVTIMEO               1
+#endif
+
+#if LWIP_DNS
+#ifndef LWIP_DNS_REVERSE
+#define LWIP_DNS_REVERSE 1
+#endif
+#else
+#undef LWIP_DNS_REVERSE
+#define LWIP_DNS_REVERSE 0
+#endif
+
+#define LWIP_STATIC static
+
+/** Defines the maximum number of IP addresses supported.**/
+#ifndef DNS_MAX_IPADDR
+#define DNS_MAX_IPADDR                10
+#endif
+
+/** Defines the maximum DNS label length as per RFC. **/
+#ifndef DNS_MAX_LABEL_LENGTH
+#define DNS_MAX_LABEL_LENGTH          63
+#endif
+
+#ifndef CONFIG_NFILE_DESCRIPTORS
+#define CONFIG_NFILE_DESCRIPTORS 256
+#endif
+
+#ifndef LWIP_SOCKET_OFFSET
+#define LWIP_SOCKET_OFFSET CONFIG_NFILE_DESCRIPTORS
+#endif
+
+#ifndef LWIP_RAW
+#define LWIP_RAW                      1
+#endif
+
+#ifndef LWIP_NETIF_IFINDEX_MAX
+#define LWIP_NETIF_IFINDEX_MAX 0xFE
+#endif
+
+#ifndef LWIP_NETIF_API
+#define LWIP_NETIF_API                1
+#endif
+
+#define LWIP_IOCTL_IF                 1
+
+#ifndef DEFAULT_RAW_RECVMBOX_SIZE
+#define DEFAULT_RAW_RECVMBOX_SIZE     16
+#endif
+
+#ifndef LWIP_MAX_PF_RAW_SEND_SIZE
+#define LWIP_MAX_PF_RAW_SEND_SIZE (0xFFFF - 40) /* - IPv6 header */
+#endif
+
+#ifndef LWIP_MAX_UDP_RAW_SEND_SIZE
+#define LWIP_MAX_UDP_RAW_SEND_SIZE    65432
+#endif /* LWIP_MAX_UDP_RAW_SEND_SIZE */
+
+#ifndef LWIP_NETIF_IFINDEX_START
+#define LWIP_NETIF_IFINDEX_START      1
+#endif /* LWIP_NETIF_IFINDEX_START */
+
+#ifndef MEMP_NUM_NETCONN
+#define MEMP_NUM_NETCONN              8
+#endif
+
+#ifndef NUM_SOCKETS
+#define NUM_SOCKETS MEMP_NUM_NETCONN
+#endif
+
+/*
+* Enables pf packet raw sockets.
+* Requires LWIP_RAW == 1 to be enabled.
+*/
+#if LWIP_RAW
+#ifdef LOSCFG_PF_PACKET_SOCKET
+#undef PF_PACKET_SOCKET
+#define PF_PACKET_SOCKET             1
+#endif
+#else
+#undef PF_PACKET_SOCKET
+#define PF_PACKET_SOCKET             0
+#endif
+
+/*
+* If enable upnp demo.
+* Requires LWIP_NETIF_LOOPBACK == 1 to be enabled.
+*/
+#ifdef LOSCFG_COMPONENTS_UPNP
+#ifndef LWIP_NETIF_LOOPBACK
+#define LWIP_NETIF_LOOPBACK           1
+#endif
+
+#define LWIP_INET_ADDR_FUNC           1
+
+/*
+   ----------------------------------
+   ---------- IGMP options ----------
+   ----------------------------------
+*/
+/**
+ * LWIP_IGMP == 1: Turn on IGMP module.
+ */
+#ifndef LWIP_IGMP
+#define LWIP_IGMP                     1
+#endif
+#endif /* LOSCFG_COMPONENTS_UPNP */
+
 
 /*
    ---------------------------------
@@ -319,15 +477,16 @@ The STM32F4xx allows computing and verifying the IP, UDP, TCP and ICMP checksums
 #define LWIP_COMPAT_MUTEX               1
 
 #define LWIP_DEBUG
-#define NETIF_DEBUG LWIP_DBG_OFF
-#define INET_DEBUG  LWIP_DBG_OFF
-#define DHCP_DEBUG  LWIP_DBG_OFF
-#define IGMP_DEBUG  LWIP_DBG_ON
-#define MDNS_DEBUG  LWIP_DBG_ON
-#define UDP_DEBUG   LWIP_DBG_OFF
-#define SNTP_DEBUG  LWIP_DBG_OFF
-#define SYS_DEBUG   LWIP_DBG_OFF
-
+#define NETIF_DEBUG     LWIP_DBG_OFF
+#define INET_DEBUG      LWIP_DBG_OFF
+#define DHCP_DEBUG      LWIP_DBG_OFF
+#define IGMP_DEBUG      LWIP_DBG_OFF
+#define MDNS_DEBUG      LWIP_DBG_OFF
+#define UDP_DEBUG       LWIP_DBG_OFF
+#define SNTP_DEBUG      LWIP_DBG_OFF
+#define SYS_DEBUG       LWIP_DBG_OFF
+#define SOCKETS_DEBUG   LWIP_DBG_OFF
+#define TCP_DEBUG       LWIP_DBG_OFF
 #endif /* __LWIPOPTS_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

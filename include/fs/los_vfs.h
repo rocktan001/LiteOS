@@ -34,10 +34,6 @@
 #include <los_typedef.h>
 #include "sys/stat.h"
 
-#ifdef LOSCFG_COMPONENTS_NET_LWIP
-#include "lwipopts.h"
-#endif
-
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -111,10 +107,6 @@ struct mount_point {
 
 #define VFS_TYPE_FILE           0
 #define VFS_TYPE_DIR            1
-
-#ifndef CONFIG_NFILE_DESCRIPTORS
-#define CONFIG_NFILE_DESCRIPTORS 256
-#endif
 
 struct file {
     struct file_ops *f_fops;

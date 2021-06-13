@@ -81,7 +81,6 @@ void *atiny_net_bind(const char *host, const char *port, int proto)
     sock_addr.sin_family = AF_INET;
     sock_addr.sin_port = lwip_htons(port_i);
     sock_addr.sin_addr.s_addr = (host == NULL ? IPADDR_ANY : inet_addr(host));
-    sock_addr.sin_len = sizeof(struct sockaddr_in);
 
     ctx->fd = socket(AF_INET,
         proto == ATINY_PROTO_TCP ? SOCK_STREAM : SOCK_DGRAM,

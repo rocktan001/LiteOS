@@ -83,6 +83,7 @@
 #include "ethernetif.h"
 #include <string.h>
 #include "lwip/tcpip.h"
+#include "lwip/raw.h"
 
 /* Define those to better describe your network interface. */
 #define IFNAME0 's'
@@ -139,6 +140,14 @@ static void low_level_init(struct netif *netif)
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
     err_t err = ERR_IF;
+
+#if PF_PACKET_SOCKET
+    if (get_all_packet_raw_pcbs() != NULL) {
+        p->flags = (u16_t)(p->flags & ~(PBUF_FLAG_LLMCAST | PBUF_FLAG_LLBCAST | PBUF_FLAG_HOST));
+        p->flags |= PBUF_FLAG_OUTGOING;
+        raw_packet_input(p, netif, NULL);
+    }
+#endif /* PF_PACKET_SOCKET */
 
     if (s_eth_api.output) {
         err = s_eth_api.output(netif, p);

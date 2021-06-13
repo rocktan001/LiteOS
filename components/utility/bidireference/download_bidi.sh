@@ -17,7 +17,7 @@ DownloadSourceCode()
     mkdir ${g_dirName}/source
     mkdir ${g_dirName}/include
 
-    while [ $i -le 8 ]
+    while [ $i -lt 8 ]
     do
         let i++
         file="g_file$i"
