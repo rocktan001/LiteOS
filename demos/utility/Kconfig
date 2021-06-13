@@ -6,5 +6,6 @@ source "demos/utility/iconv/Kconfig"
 source "demos/utility/iniparser/Kconfig"
 source "demos/utility/json-c/Kconfig"
 source "demos/utility/libxml2/Kconfig"
+source "demos/utility/sqlite/Kconfig"
 
 endmenu

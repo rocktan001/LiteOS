@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: Platform HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Description: At Hal HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,36 +26,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ASM_PLATFORM_H
-#define _ASM_PLATFORM_H
+#ifndef _AT_HAL_H
+#define _AT_HAL_H
 
-#ifndef STM32F429xx
-#define STM32F429xx
-#endif
+#include "at_frame/at_main.h"
 
-#include "los_typedef.h"
-#include "stm32f429xx.h"
-#include "stm32f4xx.h"
-#include "uart.h"
-#include "tim.h"
+int32_t at_usart_init(void);
+void at_usart_deinit(void);
+void at_transmit(uint8_t *cmd, int32_t len, int flag);
+void write_at_task_msg(at_msg_type_e type);
+int read_resp(uint8_t *buf, recv_buff *recv_buf);
 
-#include "interrupt_config.h"
-#include "memmap_config.h"
-
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern VOID app_init(VOID);
-#endif
-
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif /* _ASM_PLATFORM_H */
+#endif /* _AT_HAL_H */

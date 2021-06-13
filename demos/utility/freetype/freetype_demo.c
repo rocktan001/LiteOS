@@ -33,8 +33,6 @@
 #include "freetype_demo.h"
 #include "stdio.h"
 #include "string.h"
-#include "fatfs_hal.h"
-#include "fs/los_fatfs.h"
 #include "ft2build.h"
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -166,7 +164,6 @@ STATIC VOID DemoTaskEntry(VOID)
     FtCharParam charParam;
     FT_Error ftError;
     INT32 ret;
-    INT32 driver;
     charParam.charWidth = FT_CHAR_WIDTH;
     charParam.charHeight = FT_CHAR_HEIGHT;
     charParam.horzResolution = FT_HORZ_RESOLUTION;
@@ -178,12 +175,7 @@ STATIC VOID DemoTaskEntry(VOID)
         printf("Ft handle memset failed.\n");
         return;
     }
-    driver = hal_fatfs_init(0);
-    if (driver != LOS_OK) {
-        (VOID)fatfs_unmount(FATFS_PATH, (UINT8)driver);
-        printf("Fatfs init failed.\n");
-        return;
-    }
+
     ftError = LoadFtNewFace(&ftHandle, &charParam, TTF_FILE);
     if (ftError != LOS_OK) {
         printf("Load new face failed.\n");
@@ -191,7 +183,6 @@ STATIC VOID DemoTaskEntry(VOID)
     }
     ShowFtBitmap(&ftHandle, 'H');
     FtHandleFree(&ftHandle);
-    (VOID)fatfs_unmount(FATFS_PATH, (UINT8)driver);
     printf("Freetype demo task finished.\n");
 }
 

@@ -75,7 +75,7 @@ STATIC VOID SendTaskEntry(UINT32 param)
 STATIC VOID ReceiveTaskEntry(UINT32 param)
 {
     UINT32 ret;
-    UINTPTR readBuf;
+    UINTPTR readBuf = 0;
     UINT32 msgCount = 0;
 
     while (1) {

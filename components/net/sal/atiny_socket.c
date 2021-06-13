@@ -43,7 +43,7 @@
 #include "lwip/sockets.h"
 #include "lwip/netdb.h"
 #include "lwip/errno.h"
-#elif defined(LOSCFG_COMPONNETS_NET_AT)
+#elif defined(LOSCFG_COMPONENTS_NET_AT)
 #include "at_frame/at_api.h"
 
 #else
@@ -119,7 +119,7 @@ exit_failed:
         atiny_free(ctx);
         return NULL;
 
-#elif defined(LOSCFG_COMPONNETS_NET_AT)
+#elif defined(LOSCFG_COMPONENTS_NET_AT)
     atiny_net_context *ctx;
     ctx = atiny_malloc(sizeof(atiny_net_context));
     if (ctx == NULL) {
@@ -322,7 +322,7 @@ int atiny_net_connect(atiny_net_context *ctx, const char *host, const char *port
     } else { /* proto == ATINY_PROTO_TCP */
         SOCKET_LOG("TCP connect to server succeed");
     }
-#elif defined(LOSCFG_COMPONNETS_NET_AT)
+#elif defined(LOSCFG_COMPONENTS_NET_AT)
     if (ctx == NULL) {
         SOCKET_LOG("malloc failed for socket context");
         return -1;
@@ -357,7 +357,7 @@ int atiny_net_recv(void *ctx, unsigned char *buf, size_t len)
     int fd = ((atiny_net_context *)ctx)->fd;
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     ret = recv(fd, buf, len, 0);
-#elif defined(LOSCFG_COMPONNETS_NET_AT)
+#elif defined(LOSCFG_COMPONENTS_NET_AT)
     ret = at_api_recv(fd, buf, len);
 #elif defined(WITH_WIZNET)
     ret = wiznet_recv(fd, buf, len);
@@ -416,7 +416,7 @@ int atiny_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t t
 
     ret = atiny_net_recv(ctx, buf, len);
 
-#elif defined(LOSCFG_COMPONNETS_NET_AT)
+#elif defined(LOSCFG_COMPONENTS_NET_AT)
     ret = at_api_recv_timeout(fd, buf, len, NULL,NULL,timeout);
 #elif defined(WITH_WIZNET)
     ret = wiznet_recv_timeout(fd, buf, len, timeout);
@@ -438,7 +438,7 @@ int atiny_net_send(void *ctx, const unsigned char *buf, size_t len)
 
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     ret = send(fd, buf, len, 0);
-#elif defined(LOSCFG_COMPONNETS_NET_AT)
+#elif defined(LOSCFG_COMPONENTS_NET_AT)
     ret = at_api_send(fd, buf, len);
 #elif defined(WITH_WIZNET)
     ret = wiznet_send(fd, buf, len);
@@ -451,7 +451,7 @@ int atiny_net_send(void *ctx, const unsigned char *buf, size_t len)
         if ((errno == EAGAIN) || (errno == EWOULDBLOCK) || (errno == EINTR)) {
             return 0;
         } else {
-            SOCKET_LOG("error occurred when send: 0x%x", errno);
+            SOCKET_LOG("error accured when send: 0x%x", errno);
             return -1;
         }
     }
@@ -466,7 +466,7 @@ void atiny_net_close(void *ctx)
     if (fd >= 0) {
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
         close(fd);
-#elif defined(LOSCFG_COMPONNETS_NET_AT)
+#elif defined(LOSCFG_COMPONENTS_NET_AT)
         at_api_close(fd);
 #elif defined(WITH_WIZNET)
         wiznet_close(fd);
@@ -496,7 +496,7 @@ int atiny_net_send_timeout(void *ctx, const unsigned char *buf, size_t len, uint
 {
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     return atiny_net_write_sock(ctx, buf, len, timeout);
-#elif defined(LOSCFG_COMPONNETS_NET_AT)
+#elif defined(LOSCFG_COMPONENTS_NET_AT)
         int fd;
         fd = ((atiny_net_context *)ctx)->fd;
         return at_api_send(fd, buf, (uint32_t)len);

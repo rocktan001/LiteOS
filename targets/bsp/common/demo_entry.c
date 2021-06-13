@@ -38,10 +38,10 @@
 #include "sys_init.h"
 #endif /* LOSCFG_COMPONENTS_NET_LWIP */
 
-#ifdef LOSCFG_COMPONNETS_NET_AT
+#ifdef LOSCFG_COMPONENTS_NET_AT
 #include "nb_iot/los_nb_api.h"
 #include "at_frame/at_api.h"
-#endif /* LOSCFG_COMPONNETS_NET_AT */
+#endif /* LOSCFG_COMPONENTS_NET_AT */
 
 #ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
 #include "esp8266.h"
@@ -150,6 +150,10 @@
 #include "libxml2_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_SQLITE
+#include "sqlite_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #define AGENT_DEMO_TASK_SIZE        0x1000
@@ -165,7 +169,7 @@ STATIC VOID AtinyDemoTaskEntry(VOID)
     net_init();
 #endif
 
-#ifdef LOSCFG_COMPONNETS_NET_AT
+#ifdef LOSCFG_COMPONENTS_NET_AT
 #ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
     Esp8266Register();
 #elif defined LOSCFG_COMPONENTS_NET_AT_BG36
@@ -212,7 +216,7 @@ VOID AgenttinyDemoTask(VOID)
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
     }
@@ -228,7 +232,7 @@ VOID AgenttinyDemoTask(VOID)
 #endif
     ret = LOS_TaskCreate(&g_atinyTaskId, &taskInitParam);
     if (ret != LOS_OK) {
-        PRINT_ERR("Create agenttiny demo task failed.\n");
+        printf("Create agenttiny demo task failed.\n");
     }
 }
 #endif
@@ -236,6 +240,7 @@ VOID AgenttinyDemoTask(VOID)
 VOID DemoEntry(VOID)
 {
     printf("Hello, welcome to liteos demo!\n");
+
 #ifdef LOSCFG_COMPONENTS_FS
     FileSystemInit();
 #endif
@@ -318,10 +323,14 @@ VOID DemoEntry(VOID)
     FreeTypeDemoTask();
 #endif
 
+#ifdef LOSCFG_DEMOS_SQLITE
+    SqliteDemoTask();
+#endif
+
 #ifdef LOSCFG_SHELL
     (VOID)ShellQueueCreat();
     if (OsShellInit(0) != LOS_OK) {
-        PRINT_ERR("Shell init failed.\n");
+        printf("Shell init failed.\n");
     }
 #endif
 }

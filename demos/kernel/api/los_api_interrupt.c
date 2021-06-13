@@ -39,7 +39,14 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#ifdef LOSCFG_ARCH_CSKY_V2
+#define SOFT_IRQ_NUM    31
+#elif defined  LOSCFG_ARCH_RISCV_RV32IMC
+#define SOFT_IRQ_NUM    3
+#else
 #define SOFT_IRQ_NUM    39
+#endif
+
 #define BUTTON_IRQ_NUM  (EXTI0_IRQn + 16)
 
 #ifdef LOSCFG_PLATFORM_STM32F429IGTX

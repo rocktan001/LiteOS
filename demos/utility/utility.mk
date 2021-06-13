@@ -29,3 +29,9 @@ ifeq ($(LOSCFG_DEMOS_LIBXML2), y)
 include $(LITEOSTOPDIR)/demos/utility/libxml2/libxml2.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_LIBXML2_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_SQLITE), y)
+include $(LITEOSTOPDIR)/demos/utility/sqlite/sqlite.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_SQLITE_INCLUDE)
+endif
+

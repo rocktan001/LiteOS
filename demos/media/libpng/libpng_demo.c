@@ -42,7 +42,6 @@ extern "C" {
 
 #define PNG_TASK_STACK_SIZE   0x2000
 #define PNG_TASK_PRIORITY     6
-#define FATFS_MAIN_DIR        "/fatfs"
 #define SRC_FILE              "/fatfs/liteos_png.png"
 #define DEST_FILE             "/fatfs/new_png.png"
 
@@ -51,15 +50,7 @@ STATIC UINT32 g_demoTaskId;
 STATIC INT32 DemoTaskEntry(VOID)
 {
     printf("Libpng demo task start to run.\n");
-    INT32 driver = hal_fatfs_init(0);
-    if (driver < 0) {
-        (VOID)fatfs_unmount(FATFS_MAIN_DIR, (UINT8)driver);
-        printf("Fatfs init failed.\n");
-        return LOS_NOK;
-    }
-
     PngTranscode(SRC_FILE, DEST_FILE);
-    fatfs_unmount(FATFS_MAIN_DIR, (UINT8)driver);
     printf("Libpng demo task finished.\n");
 
     return LOS_OK;

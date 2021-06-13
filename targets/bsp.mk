@@ -78,6 +78,7 @@ HAL_DRIVER_SRC := drivers/$(HAL_DRIVER_TYPE)
 LITEOS_PLATFORM  := $(subst $\",,$(LOSCFG_PLATFORM))
 
 PLATFORM_INCLUDE := -I $(LITEOSTOPDIR)/targets/bsp/common \
+                    -I $(LITEOSTOPDIR)/targets/bsp/drivers/at_hal \
                     -I $(LITEOSTOPDIR)/targets/bsp/drivers/bsp_timer \
                     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
                     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \

@@ -29,3 +29,9 @@ ifeq ($(LOSCFG_COMPONENTS_LIBXML2), y)
 include $(LITEOSTOPDIR)/components/utility/libxml2/libxml2.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_LIBXML2_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_SQLITE), y)
+include $(LITEOSTOPDIR)/components/utility/sqlite/sqlite.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_SQLITE_INCLUDE)
+endif
+
