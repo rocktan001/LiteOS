@@ -5,4 +5,5 @@ LWIP_INCLUDE += \
     -I $(LITEOSTOPDIR)/components/net/lwip/lwip_port/OS \
     -I $(LITEOSTOPDIR)/components/net/lwip/lwip_port/arch \
     -I $(LITEOSTOPDIR)/components/net/lwip/ppp_port/osport \
-    -I $(LITEOSTOPDIR)/components/net/lwip/$(LWIP_VERSION)/src/include
+    -I $(LITEOSTOPDIR)/components/net/lwip/$(LWIP_VERSION)/src/include \
+    -I $(LITEOSTOPDIR)/components/net/lwip/$(LWIP_VERSION)/src/include/lwip/apps

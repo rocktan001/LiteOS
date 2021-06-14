@@ -10,6 +10,7 @@ STM32L5xx_HAL_Driver       &#& targets/bsp/drivers/STM32L5xx_Firmware &#& LOSCFG
 CMSIS                      &#& targets/bsp/drivers/STM32L5xx_Firmware &#& LOSCFG_PLATFORM_STM32L552_NUCLEO=y        &#& https://github.com/STMicroelectronics/cmsis_device_l5/archive/refs/tags/v1.0.4.zip       &#& STM32L552_Nucleo
 
 gcc            &#& lib                                    &#& LOSCFG_LIB_CPP_EXTEND=y           &#& https://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-10.2.0.zip
+origin.patch   &#& components/net/lwip                    &#& LOSCFG_COMPONENTS_NET_LWIP=y      &#&
 
 BidireferenceC-8.0.0 &#& components/utility/bidireference &#& LOSCFG_COMPONENTS_BIDIREFERENCE=y &#& sh download_bidi.sh BidireferenceC-8.0.0
 curl-7.54.1    &#& components/utility/curl                &#& LOSCFG_COMPONENTS_CURL=y          &#& https://github.com/curl/curl/archive/refs/tags/curl-7_54_1.zip

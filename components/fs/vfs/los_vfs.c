@@ -37,7 +37,12 @@
 #include "limits.h"
 
 #ifdef LOSCFG_COMPONENTS_NET_LWIP
+#include "lwipopts.h"
 #include "lwip/sockets.h"
+#endif
+
+#ifndef CONFIG_NFILE_DESCRIPTORS
+#define CONFIG_NFILE_DESCRIPTORS 256
 #endif
 
 #define LOS_FCNTL   (O_NONBLOCK | O_NDELAY | O_APPEND | O_SYNC | FASYNC)

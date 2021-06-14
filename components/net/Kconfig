@@ -40,6 +40,7 @@ config LOSCFG_COMPONENTS_NET_AT_DEBUG
 config LOSCFG_COMPONENTS_NET_LWIP
     bool "Enable Lwip"
     select LOSCFG_COMPONENTS_NETWORK
+    select LOSCFG_COMPONENTS_FS_VFS
     default n
     help
       Answer y to enable lwip.
@@ -67,4 +68,5 @@ config LOSCFG_COMPONENTS_NET_SAL
 config LOSCFG_COMPONENTS_NETWORK
     bool
 
+osource "components/net/tftp_server/Kconfig"
 endmenu

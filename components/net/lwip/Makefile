@@ -13,6 +13,7 @@ LWIP_SRCS = \
     $(wildcard $(LWIP_VERION)/src/apps/sntp/*.c)          \
     $(wildcard $(LWIP_VERION)/src/apps/mdns/*.c)          \
     $(wildcard $(LWIP_VERION)/src/apps/netbiosns/*.c)     \
+    $(wildcard $(LWIP_VERION)/src/apps/tftp/*.c)          \
     $(wildcard $(LWIP_VERION)/src/core/*.c)               \
     $(wildcard $(LWIP_VERION)/src/core/ipv4/*.c)          \
     $(wildcard $(LWIP_VERION)/src/core/ipv6/*.c)          \

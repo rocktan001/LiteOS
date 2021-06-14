@@ -15,3 +15,7 @@ include $(LITEOSTOPDIR)/components/net/at_device/at.mk
 COMPONENTS_NET_INCLUDE += $(COMPONENTS_AT_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_TFTP_SERVER), y)
+include $(LITEOSTOPDIR)/components/net/tftp_server/tftp_server.mk
+COMPONENTS_NET_INCLUDE += $(COMPONENTS_TFTP_SERVER_INCLUDE)
+endif

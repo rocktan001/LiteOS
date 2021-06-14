@@ -31,11 +31,15 @@ C_SOURCES += $(BSP_DRIVER_SRC)
 USER_SRC = \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/os_adapt/os_adapt.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/main.c \
+    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/eth.c \
+    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/sys_init.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/user_task.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/tim.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/platform_init.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/stm32f7xx_it.c \
-    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/system_stm32f7xx.c
+    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/system_stm32f7xx.c \
+    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/flash_adaptor.c \
+    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/hal_rng.c
     C_SOURCES += $(USER_SRC)
 
 # C includes
@@ -85,7 +89,7 @@ C_DEFS =  \
     -D STM32F7 \
     -D USE_HAL_DRIVER \
     -D USE_STM32F769I_DISCO \
-    -D USE_STM32769I_DISCOVERY \
+    -D USE_STM32F769I_DISCOVERY \
     -D MBEDTLS_CONFIG_FILE=\"mbedtls_config.h\" \
     -D HAVE_STDINT_H
 
