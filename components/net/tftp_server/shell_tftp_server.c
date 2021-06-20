@@ -84,7 +84,7 @@ STATIC VOID* TftpOpen(const CHAR *fname, const CHAR *mode, UINT8 write)
         return NULL;
     }
     if (CheckPath(fileName) < 0){
-        printf("check is err\n");
+        printf("check is err.\n");
         return NULL;
     }
     if (write) {

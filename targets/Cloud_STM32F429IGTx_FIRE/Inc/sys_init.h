@@ -47,32 +47,6 @@
 #include "usart.h"
 #include "dwt.h"
 
-#ifdef LOSCFG_COMPONENTS_NET_LWIP
-#include "lwip/netif.h"
-#if defined ( __CC_ARM )  /* MDK ARM Compiler */
-#include "lwip/sio.h"
-#endif /* MDK ARM Compiler */
-#include "lwip/opt.h"
-#include "lwip/mem.h"
-#include "lwip/memp.h"
-#include "netif/etharp.h"
-#include "lwip/sockets.h"
-#include "lwip/tcpip.h"
-#include "lwip/init.h"
-#include "lwip/dhcp.h"
-#include "lwip/netif.h"
-#include "lwip/ip_addr.h"
-#include "lwip/timeouts.h"
-#include "ethernetif.h"
-
-#ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
-#include "mbedtls/net.h"
-#include "mbedtls/ssl.h"
-#endif
-
-#include "eth.h"
-#endif
-
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

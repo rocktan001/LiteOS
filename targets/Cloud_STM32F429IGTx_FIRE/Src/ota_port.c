@@ -70,12 +70,12 @@ static int hal_write_flash(ota_flash_type_e type, const void *buf, int32_t len, 
         return ERR;
     }
 
-    return flash_adaptor_write(g_flash_base_addrs[type] + location, (const uint8_t *)buf, len);
+    return FlashAdaptorWrite(g_flash_base_addrs[type] + location, (const uint8_t *)buf, len);
 }
 
 void hal_init_ota(void)
 {
-    flash_adaptor_init();
+    FlashAdaptorInit();
 }
 
 void hal_get_ota_opt(ota_opt_s *opt)

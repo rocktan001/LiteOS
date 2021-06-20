@@ -97,6 +97,7 @@ static struct ethernet_api s_eth_api;
 #else
 static void arp_timer(void *arg);
 #endif
+
 int8_t ethernetif_api_register(struct ethernet_api *api)
 {
     if (api == NULL) {

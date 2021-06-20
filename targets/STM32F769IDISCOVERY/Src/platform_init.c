@@ -65,7 +65,6 @@
 
 #include "platform_init.h"
 #include "cmsis_os.h"
-#include "timer.h"
 #include "hal_rng.h"
 
 #define LTCD_LINE                   0
@@ -489,6 +488,7 @@ void HardwareInit(void)
 
     /* Initialize the SDRAM */
     BSP_SDRAM_Init();
+    HalRngConfig();
 }
 
 

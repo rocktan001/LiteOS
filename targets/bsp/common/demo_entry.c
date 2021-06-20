@@ -156,8 +156,11 @@
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
-#define AGENT_DEMO_TASK_SIZE        0x1000
+#if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
 #define AGENT_DEMO_TASK_MQTT_SIZE   0x2000
+#else
+#define AGENT_DEMO_TASK_SIZE        0x1000
+#endif
 STATIC UINT32 g_atinyTaskId;
 #endif
 
@@ -186,11 +189,11 @@ STATIC VOID AtinyDemoTaskEntry(VOID)
 #endif
 
 #ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
-    flash_adaptor_init();
+    FlashAdaptorInit();
     demo_param_s demoParam = {
         .init = NULL,
-        .write_flash_info = flash_adaptor_write_mqtt_info,
-        .read_flash_info = flash_adaptor_read_mqtt_info
+        .write_flash_info = FlashAdaptorWriteMqttInfo,
+        .read_flash_info = FlashAdaptorReadMqttInfo
     };
     AgentTinyDemoInit(&demoParam);
 #endif
