@@ -44,10 +44,10 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void flash_adaptor_init(void);
-int flash_adaptor_write(uint32_t offset, const uint8_t *buffer, uint32_t len);
-int flash_adaptor_write_mqtt_info(const void *buffer, uint32_t len);
-int flash_adaptor_read_mqtt_info(void *buffer, uint32_t len);
+void FlashAdaptorInit(void);
+int FlashAdaptorWrite(uint32_t offset, const uint8_t *buffer, uint32_t len);
+int FlashAdaptorWriteMqttInfo(const void *buffer, uint32_t len);
+int FlashAdaptorReadMqttInfo(void *buffer, uint32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

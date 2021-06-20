@@ -40,10 +40,6 @@
 /* The time to block waiting for input. */
 #define TIME_WAITING_FOR_INPUT                      500u
 
-/* Semaphore to signal incoming packets */
-static sys_sem_t s_xSemaphore;
-
-
 /* Private variables ---------------------------------------------------------*/
 #if defined ( __ICCARM__ ) /*!< IAR Compiler */
 #pragma data_alignment=4
@@ -65,9 +61,10 @@ __ALIGN_BEGIN uint8_t Rx_Buff[ETH_RXBUFNB][ETH_RX_BUF_SIZE] __ALIGN_END; /* Ethe
 #endif
 __ALIGN_BEGIN uint8_t Tx_Buff[ETH_TXBUFNB][ETH_TX_BUF_SIZE] __ALIGN_END; /* Ethernet Transmit Buffer */
 
+/* Semaphore to signal incoming packets */
+static sys_sem_t s_xSemaphore;
 /* Global Ethernet handle */
 static ETH_HandleTypeDef heth;
-static uint8_t MACAddr[6];
 
 /* Os ethernet interrupt handler */
 void ETH_IRQHandler(void)
@@ -126,9 +123,7 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *ethHandle)
         HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
 
         HAL_GPIO_WritePin(GPIOI, GPIO_PIN_1, GPIO_PIN_RESET);
-        HAL_Delay(1000);
         HAL_GPIO_WritePin(GPIOI, GPIO_PIN_1, GPIO_PIN_SET);
-        HAL_Delay(1000);
 
         GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_4 | GPIO_PIN_5;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -157,6 +152,10 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *ethHandle)
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
         GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
         HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+        /* Peripheral interrupt init */
+        HAL_NVIC_SetPriority(ETH_IRQn, 5, 0);
+        HAL_NVIC_EnableIRQ(ETH_IRQn);
         /* USER CODE BEGIN ETH_MspInit 1 */
 
         /* USER CODE END ETH_MspInit 1 */
@@ -208,25 +207,29 @@ static int8_t eth_init(struct netif *netif)
 {
     HAL_StatusTypeDef hal_eth_init_status;
 
+    /* Init ETH */
+    uint8_t MACAddr[6];
+    heth.Instance = ETH;
+    heth.Init.AutoNegotiation = ETH_AUTONEGOTIATION_ENABLE;
+    heth.Init.Speed = ETH_SPEED_100M;
+    heth.Init.DuplexMode = ETH_MODE_FULLDUPLEX;
+    heth.Init.PhyAddress = LAN8742A_PHY_ADDRESS;
     MACAddr[0] = 0x00;
     MACAddr[1] = 0x80;
     MACAddr[2] = 0xE1;
     MACAddr[3] = 0x00;
     MACAddr[4] = 0x00;
     MACAddr[5] = 0x00;
-
-    /* Init ETH */
-    heth.Instance = ETH;
-    heth.Init.AutoNegotiation = ETH_AUTONEGOTIATION_ENABLE;
-    heth.Init.PhyAddress = LAN8742A_PHY_ADDRESS;
-
     heth.Init.MACAddr = &MACAddr[0];
     heth.Init.RxMode = ETH_RXINTERRUPT_MODE;
+#ifdef CHECKSUM_BY_HARDWARE
     heth.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
+#else
+    heth.Init.ChecksumMode = ETH_CHECKSUM_BY_SOFTWARE;
+#endif
     heth.Init.MediaInterface = ETH_MEDIA_INTERFACE_RMII;
 
     hal_eth_init_status = HAL_ETH_Init(&heth);
-
     if (hal_eth_init_status == HAL_OK) {
         /* Set netif link flag */
         netif->flags |= NETIF_FLAG_LINK_UP;
@@ -238,7 +241,7 @@ static int8_t eth_init(struct netif *netif)
         uint8_t ipv6_multicast_mac[6] = {0x33, 0x33, 0, 0, 0, 0};
         const uint32_t enable_bitmap = 0x30;
         (void)HAL_ETH_EnableMulticastMacAddr(&heth, ETH_MAC_ADDRESS1, ipv6_multicast_mac, enable_bitmap);
-     }
+    }
 #endif
 
     /* Initialize Tx Descriptors list: Chain Mode */
@@ -275,7 +278,11 @@ static int8_t eth_init(struct netif *netif)
     netif->flags |= NETIF_FLAG_MLD6;
 #endif
 
-    if (ERR_OK != sys_sem_new(&s_xSemaphore, 1)) {
+#if LWIP_IGMP
+    netif->flags |= NETIF_FLAG_IGMP;
+#endif /* LWIP_IGMP */
+
+    if (sys_sem_new(&s_xSemaphore, 1) != ERR_OK) {
         return -1;
     }
     /* create the task that handles the ETH_MAC */
@@ -292,11 +299,11 @@ static int8_t eth_init(struct netif *netif)
 static int8_t eth_output(struct netif *netif, struct pbuf *p)
 {
     err_t errval;
-    struct pbuf *q;
+    struct pbuf *q = NULL;
     uint8_t *buffer = (uint8_t *)(heth.TxDesc->Buffer1Addr);
     __IO ETH_DMADescTypeDef *DmaTxDesc;
     uint32_t framelength = 0;
-    uint32_t bufferoffset = 0;
+    uint32_t bufferoffset;
     uint32_t byteslefttocopy = 0;
     uint32_t payloadoffset = 0;
     DmaTxDesc = heth.TxDesc;
@@ -317,7 +324,10 @@ static int8_t eth_output(struct netif *netif, struct pbuf *p)
         /* Check if the length of data to copy is bigger than Tx buffer size */
         while ((byteslefttocopy + bufferoffset) > ETH_TX_BUF_SIZE) {
             /* Copy data to Tx buffer */
-            memcpy((uint8_t *)((uint8_t *)buffer + bufferoffset), (uint8_t *)((uint8_t *)q->payload + payloadoffset), (ETH_TX_BUF_SIZE - bufferoffset));
+            (VOID)memcpy_s((uint8_t *)((uint8_t *)buffer + bufferoffset),
+                (ETH_TX_BUF_SIZE - bufferoffset),
+                (uint8_t *)((uint8_t *)q->payload + payloadoffset),
+                (ETH_TX_BUF_SIZE - bufferoffset));
 
             /* Point to next descriptor */
             DmaTxDesc = (ETH_DMADescTypeDef *)(DmaTxDesc->Buffer2NextDescAddr);
@@ -337,7 +347,10 @@ static int8_t eth_output(struct netif *netif, struct pbuf *p)
         }
 
         /* Copy the remaining bytes */
-        memcpy((uint8_t *)((uint8_t *)buffer + bufferoffset), (uint8_t *)((uint8_t *)q->payload + payloadoffset), byteslefttocopy);
+        (VOID)memcpy_s((uint8_t *)((uint8_t *)buffer + bufferoffset),
+            byteslefttocopy,
+            (uint8_t *)((uint8_t *)q->payload + payloadoffset),
+            byteslefttocopy);
         bufferoffset = bufferoffset + byteslefttocopy;
         framelength = framelength + byteslefttocopy;
     }
@@ -365,16 +378,16 @@ static struct pbuf *eth_input(struct netif *netif)
 {
     struct pbuf *p = NULL;
     struct pbuf *q = NULL;
-    uint16_t len = 0;
-    uint8_t *buffer;
+    uint16_t len;
+    uint8_t *buffer = NULL;
     __IO ETH_DMADescTypeDef *dmarxdesc;
     uint32_t bufferoffset = 0;
     uint32_t payloadoffset = 0;
     uint32_t byteslefttocopy = 0;
-    uint32_t i = 0;
+    uint32_t i;
 
     /* get received frame */
-    if (HAL_ETH_GetReceivedFrame(&heth) != HAL_OK) {
+    if (HAL_ETH_GetReceivedFrame_IT(&heth) != HAL_OK) {
         return NULL;
     }
 
@@ -398,7 +411,10 @@ static struct pbuf *eth_input(struct netif *netif)
             /* Check if the length of bytes to copy in current pbuf is bigger than Rx buffer size */
             while ((byteslefttocopy + bufferoffset) > ETH_RX_BUF_SIZE) {
                 /* Copy data to pbuf */
-                memcpy((uint8_t *)((uint8_t *)q->payload + payloadoffset), (uint8_t *)((uint8_t *)buffer + bufferoffset), (ETH_RX_BUF_SIZE - bufferoffset));
+                (VOID)memcpy_s((uint8_t *)((uint8_t *)q->payload + payloadoffset),
+                    (ETH_RX_BUF_SIZE - bufferoffset),
+                    (uint8_t *)((uint8_t *)buffer + bufferoffset),
+                    (ETH_RX_BUF_SIZE - bufferoffset));
 
                 /* Point to next descriptor */
                 dmarxdesc = (ETH_DMADescTypeDef *)(dmarxdesc->Buffer2NextDescAddr);
@@ -410,7 +426,10 @@ static struct pbuf *eth_input(struct netif *netif)
             }
 
             /* Copy remaining data in pbuf */
-            memcpy((uint8_t *)((uint8_t *)q->payload + payloadoffset), (uint8_t *)((uint8_t *)buffer + bufferoffset), byteslefttocopy);
+            (VOID)memcpy_s((uint8_t *)((uint8_t *)q->payload + payloadoffset),
+                byteslefttocopy,
+                (uint8_t *)((uint8_t *)buffer + bufferoffset),
+                byteslefttocopy);
             bufferoffset = bufferoffset + byteslefttocopy;
         }
     }
@@ -439,9 +458,13 @@ static struct pbuf *eth_input(struct netif *netif)
     return p;
 }
 
-struct ethernet_api g_eth_api = {
-    .init     = eth_init,
-    .output   = eth_output,
-    .input    = eth_input,
-};
+struct ethernet_api EthInterface(void)
+{
+    struct ethernet_api ethApi = {
+        .init = eth_init,
+        .output = eth_output,
+        .input = eth_input,
+    };
+    return ethApi;
+}
 #endif

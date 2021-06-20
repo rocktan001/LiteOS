@@ -102,6 +102,11 @@ ApplyPatch()
             ClearDownload
             echo "[Error]: Apply patch failed!"
         else
+            rm -rf ${g_componentName}.zip > /dev/null 2>&1
+            rm ${g_srcSha256File} ${g_patchSha256File} > /dev/null 2>&1
+            if [ "${g_componentDownloadAddr}" != "" ]; then
+                rm ${g_patchFile} > /dev/null 2>&1
+            fi
             echo "[Info]: Apply patch success."
         fi
     fi
@@ -273,7 +278,7 @@ GetSourceCode()
     local i=0
     local packageType=("zip" "tar.gz" "rar")
 
-    if [ ${g_componentName} = "origin.patch" ]; then
+    if [ "${g_componentDownloadAddr}" = "" ]; then
         return 0
     fi
 

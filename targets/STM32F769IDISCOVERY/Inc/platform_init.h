@@ -34,6 +34,7 @@
 *
 ******************************************************************************
 */
+
 #ifndef __PLATFORM_INIT_H
 #define __PLATFORM_INIT_H
 #include <ctype.h>
@@ -52,7 +53,6 @@
 #include "stm32f7xx_hal_flash.h"
 
 void    platform_Init(void);
-void    HardwareInit(void);
 
 #ifdef LOSCFG_GUI_ENABLE
 uint32_t  LCD_SwapBuffer(void);
@@ -60,7 +60,7 @@ void    LCD_WaitVSync(void);
 void    LCD_Vsync_Init(void);
 #endif
 
+void    HardwareInit(void);
 extern  LTDC_HandleTypeDef hltdc_discovery;
 extern  DSI_HandleTypeDef  hdsi_discovery;
-
 #endif

@@ -40,6 +40,9 @@ ifeq ($(LOSCFG_COMPONENTS_FS), y)
         FS_SRC += \
             Src/spiffs_hal.c
     endif
+    ifeq ($(LOSCFG_COMPONENTS_FS_LITTLEFS), y)
+        FS_SRC += Src/littlefs_hal.c
+    endif
     C_SOURCES += $(FS_SRC)
 endif
 

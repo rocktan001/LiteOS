@@ -37,7 +37,7 @@
 #define FLASH_BLOCK_SIZE 0x1000
 #define FLASH_BLOCK_MASK 0xfff
 
-int flash_adaptor_write(uint32_t offset, const uint8_t *buffer, uint32_t len)
+int FlashAdaptorWrite(uint32_t offset, const uint8_t *buffer, uint32_t len)
 {
     int ret = ERR;
     uint8_t *block_buff;
@@ -79,22 +79,22 @@ EXIT:
     return ret;
 }
 
-void flash_adaptor_init(void)
+void FlashAdaptorInit(void)
 {
     hal_spi_flash_config();
 }
 
-int flash_adaptor_write_mqtt_info(const void *buffer, uint32_t len)
+int FlashAdaptorWriteMqttInfo(const void *buffer, uint32_t len)
 {
     if (len > MQTT_INFO_SIZE) {
         HAL_OTA_LOG("err offset len %lu",  len);
         return ERR;
     }
 
-    return flash_adaptor_write(MQTT_INFO_ADDR, (const uint8_t *)buffer, len);
+    return FlashAdaptorWrite(MQTT_INFO_ADDR, (const uint8_t *)buffer, len);
 }
 
-int flash_adaptor_read_mqtt_info(void *buffer, uint32_t len)
+int FlashAdaptorReadMqttInfo(void *buffer, uint32_t len)
 {
     if (len > MQTT_INFO_SIZE) {
         HAL_OTA_LOG("err offset len %lu",  len);
