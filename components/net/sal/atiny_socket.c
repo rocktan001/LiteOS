@@ -128,7 +128,7 @@ exit_failed:
 
     ctx->fd = at_api_bind(host, port, proto);
     if (ctx->fd < 0) {
-        SOCKET_LOG("unkown host or port");
+        SOCKET_LOG("unknown host or port");
         atiny_free(ctx);
         ctx = NULL;
     }
@@ -311,7 +311,7 @@ int atiny_net_connect(atiny_net_context *ctx, const char *host, const char *port
     freeaddrinfo(addr_list);
 
     if (ctx->fd < 0) {
-        SOCKET_LOG("unkown host or port");
+        SOCKET_LOG("unknown host or port");
         atiny_free(ctx);
         return -1;
     }
@@ -329,7 +329,7 @@ int atiny_net_connect(atiny_net_context *ctx, const char *host, const char *port
 
     ctx->fd = at_api_connect(host, port, proto);
     if (ctx->fd < 0) {
-        SOCKET_LOG("unkown host or port");
+        SOCKET_LOG("unknown host or port");
         atiny_free(ctx);
         ctx = NULL;
     }
@@ -341,7 +341,7 @@ int atiny_net_connect(atiny_net_context *ctx, const char *host, const char *port
 
     ctx->fd = wiznet_connect(host, port, proto);
     if (ctx->fd < 0) {
-        SOCKET_LOG("unkown host or port");
+        SOCKET_LOG("unknown host or port");
         atiny_free(ctx);
         ctx = NULL;
     }
