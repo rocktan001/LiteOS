@@ -5,6 +5,7 @@ source "components/utility/freetype/Kconfig"
 source "components/utility/iconv/Kconfig"
 source "components/utility/iniparser/Kconfig"
 source "components/utility/json-c/Kconfig"
+source "components/utility/jsoncpp/Kconfig"
 source "components/utility/libxml2/Kconfig"
 source "components/utility/sqlite/Kconfig"
 

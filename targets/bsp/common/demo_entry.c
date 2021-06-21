@@ -30,6 +30,10 @@
 #include "los_task.h"
 #include "fs/fs_init.h"
 
+#ifdef LOSCFG_KERNEL_CPPSUPPORT
+#include "los_cppsupport.h"
+#endif
+
 #ifdef CONFIG_FEATURE_FOTA
 #include "ota_port.h"
 #endif /* CONFIG_FEATURE_FOTA */
@@ -124,6 +128,10 @@
 
 #ifdef LOSCFG_DEMOS_JSON_C
 #include "json_c_demo.h"
+#endif
+
+#ifdef LOSCFG_DEMOS_JSONCPP
+#include "jsoncpp_demo.h"
 #endif
 
 #ifdef LOSCFG_DEMOS_LIBPNG
@@ -246,6 +254,18 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_COMPONENTS_FS
     FileSystemInit();
+#endif
+
+#ifdef LOSCFG_KERNEL_CPPSUPPORT
+    extern UINT32 __init_array_start, __init_array_end;
+    INT32 ret = LOS_CppSystemInit((UINT32)&__init_array_start, (UINT32)&__init_array_end, NO_SCATTER);
+    if (ret != LOS_OK) {
+        printf("LiteOS Cpp Init fail.\n");
+    }
+#endif
+
+#ifdef LOSCFG_DEMOS_JSONCPP
+    JsoncppDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_AI
