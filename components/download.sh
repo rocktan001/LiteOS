@@ -231,19 +231,17 @@ DownloadSourceCode()
         fi
 
         # get source code
-        if [ "${packageType}" = "git" -o "${packageType1}" = ".git" ]; then
-            git config --global core.autocrlf input
-            ${g_componentDownloadAddr} ${g_componentName}
-        elif [ "${packageType1}" = ".zip" ]; then
+        if [ "${packageType1}" = ".zip" ]; then
             curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.zip
         elif [ "${packageType1}" = ".rar" ]; then
             curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.rar
         elif [ "${packageType2}" = ".tar.gz" ]; then
             curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.tar.gz
+        elif [ "${packageType}" = "git" -o "${packageType1}" = ".git" ]; then
+            git config --global core.autocrlf input
+            ${g_componentDownloadAddr} ${g_componentName}
         elif [ "${packageType}" = "sh" ]; then
             ${g_componentDownloadAddr}
-        elif [ "${packageType}" = "" ]; then
-            break
         else
             echo "[Info]: Download method support."
             iNum=0
