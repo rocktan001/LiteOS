@@ -35,3 +35,7 @@ include $(LITEOSTOPDIR)/components/utility/sqlite/sqlite.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_SQLITE_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_JSONCPP), y)
+include $(LITEOSTOPDIR)/components/utility/jsoncpp/jsoncpp.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_JSONCPP_INCLUDE)
+endif

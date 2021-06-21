@@ -35,3 +35,7 @@ include $(LITEOSTOPDIR)/demos/utility/sqlite/sqlite.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_SQLITE_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_JSONCPP), y)
+include $(LITEOSTOPDIR)/demos/utility/jsoncpp/jsoncpp.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_JSONCPP_INCLUDE)
+endif
