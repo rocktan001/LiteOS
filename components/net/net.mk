@@ -15,7 +15,17 @@ include $(LITEOSTOPDIR)/components/net/at_device/at.mk
 COMPONENTS_NET_INCLUDE += $(COMPONENTS_AT_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_IPERF), y)
+include $(LITEOSTOPDIR)/components/net/los_iperf/iperf.mk
+COMPONENTS_NET_INCLUDE += $(COMPONENTS_IPERF_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_COMPONENTS_TFTP_SERVER), y)
 include $(LITEOSTOPDIR)/components/net/tftp_server/tftp_server.mk
 COMPONENTS_NET_INCLUDE += $(COMPONENTS_TFTP_SERVER_INCLUDE)
+endif
+
+ifeq ($(LOSCFG_COMPONENTS_PCAP), y)
+include $(LITEOSTOPDIR)/components/net/pcap/pcap.mk
+COMPONENTS_NET_INCLUDE += $(COMPONENTS_PCAP_INCLUDE)
 endif
