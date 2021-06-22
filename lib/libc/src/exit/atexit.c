@@ -6,10 +6,14 @@
 #include "errno.h"
 #endif
 
-#ifndef __LITEOS__
+void *__dso_handle = &__dso_handle;
+void *_impure_ptr;
+void *_ctype_;
+
 /* Ensure that at least 32 atexit handlers can be registered without malloc */
 #define COUNT 32
 
+#ifndef __LITEOS__
 static struct fl
 {
 	struct fl *next;
@@ -81,3 +85,17 @@ int atexit(void (*func)(void))
 	return -1;
 #endif
 }
+
+int __cxa_atexit(void (*func)(void *), void *arg, void *dso)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int __locale_mb_cur_max(void)
+{
+	return COUNT;
+}
+
+void __sync_synchronize(void)
+{}
