@@ -189,6 +189,13 @@ GD32VF103VET6_GD_SRC = \
     $(wildcard drivers/GD32VF103_Firmware/GD32VF103_Firmware_Library/Firmware/RISCV/drivers/*.c) \
     $(wildcard drivers/GD32VF103_Firmware/GD32VF103_Firmware_Library/Firmware/RISCV/stubs/*.c)
     LOCAL_SRCS = $(GD32VF103VET6_GD_SRC)
+else ifeq ($(LOSCFG_PLATFORM_HIFIVE1_REV1_B01), y)
+FE310_SIFIVE_SRC = \
+    $(wildcard  $(HAL_DRIVER_SRC)/src/drivers/*.c) \
+    $(wildcard  $(HAL_DRIVER_SRC)/src/*.c) \
+    $(wildcard  $(HAL_DRIVER_SRC)/src/*.S) \
+    $(wildcard  $(HAL_DRIVER_SRC)/gloss/*.S)
+    LOCAL_SRCS = $(FE310_SIFIVE_SRC)
 endif
 
 LOCAL_INCLUDE += $(PLATFORM_INCLUDE) \

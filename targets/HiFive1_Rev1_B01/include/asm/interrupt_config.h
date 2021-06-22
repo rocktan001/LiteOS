@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Platform HeadFile
+ * Description: Interrupt Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-04-02
+ * Create: 2020-05-20
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,17 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ASM_PLATFORM_H
-#define _ASM_PLATFORM_H
-
-#include "los_typedef.h"
-#include "gd32vf103.h"
-#include "uart.h"
-#include "tim.h"
-
-#include "interrupt_config.h"
-#include "memmap_config.h"
-#include "register_config.h"
+#ifndef _ASM_INTERRUPT_CONFIG_H
+#define _ASM_INTERRUPT_CONFIG_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -44,9 +35,13 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern VOID app_init(VOID);
-#endif
+#define TIM_IRQ                   TIMER1_IRQn
+#define OS_TICK_INT_NUM           (LOSCFG_PLATFORM_HWI_LIMIT + 1)
+#define NUM_HAL_INTERRUPT_UART    3
+
+#define CLINT_IRQ_NUM             2
+#define OS_HWI_MAX_NUM            (LOSCFG_PLATFORM_HWI_LIMIT + CLINT_IRQ_NUM)
+#define OS_HWI_MAX                ((OS_HWI_MAX_NUM) - 1)
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,4 +49,4 @@ extern VOID app_init(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ASM_PLATFORM_H */
+#endif /* _ASM_INTERRUPT_CONFIG_H */

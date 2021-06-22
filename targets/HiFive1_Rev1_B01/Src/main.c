@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Platform HeadFile
+ * Description: Main Process Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-04-02
+ * Create: 2021-05-13
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,32 +26,46 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ASM_PLATFORM_H
-#define _ASM_PLATFORM_H
-
-#include "los_typedef.h"
-#include "gd32vf103.h"
-#include "uart.h"
-#include "tim.h"
-
-#include "interrupt_config.h"
-#include "memmap_config.h"
-#include "register_config.h"
+#include "los_task_pri.h"
+#include "arch/canary.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern VOID app_init(VOID);
 #endif
+#endif /* __cplusplus */
 
+VOID board_config(VOID)
+{
+    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+}
+
+INT32 main(VOID)
+{
+#ifdef __GNUC__
+    ArchStackGuardInit();
+#endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+
+    board_config();
+    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
+                  "\nLiteOS Kernel Version : %s\n"
+                  "build data : %s %s\n\n"
+                  "**********************************\n",
+                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
+
+    UINT32 ret = OsMain();
+    if (ret != LOS_OK) {
+        return LOS_NOK;
+    }
+
+    OsStart();
+
+    return LOS_OK;
+}
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#endif /* _ASM_PLATFORM_H */

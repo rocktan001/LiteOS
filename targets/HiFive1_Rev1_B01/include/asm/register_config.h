@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Platform HeadFile
+ * Description: Register Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-04-02
+ * Create: 2021-05-20
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,17 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ASM_PLATFORM_H
-#define _ASM_PLATFORM_H
-
-#include "los_typedef.h"
-#include "gd32vf103.h"
-#include "uart.h"
-#include "tim.h"
-
-#include "interrupt_config.h"
-#include "memmap_config.h"
-#include "register_config.h"
+#ifndef _ASM_REGISTER_CONFIG_H
+#define _ASM_REGISTER_CONFIG_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -44,9 +35,21 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern VOID app_init(VOID);
-#endif
+#define LFROSC_CLOCK                    (32768U)
+
+#define IO_ADDRESS(x)                   (x)
+
+#define HAL_READ_UINT8(addr, data)      READ_UINT8(data, addr)
+
+#define HAL_WRITE_UINT8(addr, data)     WRITE_UINT8(data, addr)
+
+#define HAL_READ_UINT32(addr, data)     READ_UINT32(data, addr)
+
+#define HAL_WRITE_UINT32(addr, data)    WRITE_UINT32(data, addr)
+
+/* RISC-V NMI config */
+#define REG_BASE_PERI_CTRL              0x20000
+#define NMI_REG_BASE                    (REG_BASE_PERI_CTRL + 0xC18)
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,4 +57,4 @@ extern VOID app_init(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ASM_PLATFORM_H */
+#endif /* _ASM_REGISTER_CONFIG_H */

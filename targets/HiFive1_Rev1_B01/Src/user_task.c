@@ -1,8 +1,8 @@
-/* ----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Platform HeadFile
+ * Description: User Task Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-04-02
+ * Create: 2021-05-13
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -25,18 +25,9 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-
-#ifndef _ASM_PLATFORM_H
-#define _ASM_PLATFORM_H
-
-#include "los_typedef.h"
-#include "gd32vf103.h"
-#include "uart.h"
-#include "tim.h"
-
-#include "interrupt_config.h"
-#include "memmap_config.h"
-#include "register_config.h"
+#include "metal/led.h"
+#include "los_task_pri.h"
+#include "demo_entry.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -44,14 +35,49 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern VOID app_init(VOID);
-#endif
+#define TASK_DELAY 1000
+
+STATIC UINT32 LedTask(VOID)
+{
+    struct metal_led *ledGreen = NULL;
+
+    ledGreen = metal_led_get_rgb("LD0", "green");
+    if (ledGreen == NULL) {
+        return LOS_NOK;
+    }
+
+    metal_led_enable(ledGreen);
+    metal_led_off(ledGreen);
+    while (1) {
+        LOS_TaskDelay(TASK_DELAY);
+        metal_led_toggle(ledGreen);
+    }
+    return LOS_OK;
+}
+
+STATIC UINT32 LedTaskCreate(VOID)
+{
+    UINT32 taskId = 0;
+    TSK_INIT_PARAM_S ledTaskParam;
+
+    (VOID)memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask;
+    ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    ledTaskParam.pcName = "ledTask";
+    ledTaskParam.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+    ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    return LOS_TaskCreate(&taskId, &ledTaskParam);
+}
+
+VOID app_init(VOID)
+{
+    printf("app init!\n");
+    (VOID)LedTaskCreate();
+    DemoEntry();
+}
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#endif /* _ASM_PLATFORM_H */
