@@ -183,6 +183,12 @@ STM32L552ZET6Q_HAL_SRC = \
     $(HAL_DRIVER_SRC)/Src/stm32l5xx_hal.c \
     $(HAL_DRIVER_SRC)/Src/stm32l5xx_hal_dma.c
     LOCAL_SRCS = $(STM32L552ZET6Q_HAL_SRC)
+else ifeq ($(LOSCFG_PLATFORM_GD32VF103V_EVAL), y)
+GD32VF103VET6_GD_SRC = \
+    $(wildcard drivers/$(GD_DRIVER_TYPE)/Source/*.c) \
+    $(wildcard drivers/GD32VF103_Firmware/GD32VF103_Firmware_Library/Firmware/RISCV/drivers/*.c) \
+    $(wildcard drivers/GD32VF103_Firmware/GD32VF103_Firmware_Library/Firmware/RISCV/stubs/*.c)
+    LOCAL_SRCS = $(GD32VF103VET6_GD_SRC)
 endif
 
 LOCAL_INCLUDE += $(PLATFORM_INCLUDE) \
