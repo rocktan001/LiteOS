@@ -1,0 +1,21 @@
+config LOSCFG_PLATFORM
+    string
+    default "GD32VF103V_EVAL"       if LOSCFG_PLATFORM_GD32VF103V_EVAL
+
+choice
+    prompt "Board"
+    depends on LOSCFG_FAMILY_GD
+    default LOSCFG_PLATFORM_GD32VF103V_EVAL
+    help
+      GD32VF103V_EVAL
+
+
+config LOSCFG_PLATFORM_GD32VF103V_EVAL
+    bool "GD32VF103V_EVAL"
+    select LOSCFG_USING_BOARD_LD
+    select LOSCFG_ARCH_RISCV_RV32IMC
+    select LOSCFG_RISCV32_M_TIMER
+    select LOSCFG_PLATFORM_BSP_RISCV_ECLIC
+    select LOSCFG_DRIVER_GD_LIB
+
+endchoice
