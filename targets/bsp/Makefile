@@ -144,6 +144,9 @@ STM32F072RBTX_HAL_SRC = \
     drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.c \
     drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.c
     LOCAL_SRCS = $(STM32F072RBTX_HAL_SRC)
+else ifeq ($(LOSCFG_PLATFORM_CB2201), y)
+    CSKY_HAL_SRC = $(wildcard $(HAL_DRIVER_SRC)/Src/*.c) 
+    LOCAL_SRCS = $(CSKY_HAL_SRC)
 else ifeq ($(LOSCFG_PLATFORM_GD32E103C_START), y)
     GD32E103CBT6_DRIVER_SRC = $(wildcard drivers/$(GD_DRIVER_TYPE)/Source/*.c)
     LOCAL_SRCS = $(GD32E103CBT6_DRIVER_SRC)
