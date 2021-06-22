@@ -162,6 +162,10 @@
 #include "sqlite_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_OPENEXIF
+#include "openexif_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -266,6 +270,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_JSONCPP
     JsoncppDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_OPENEXIF
+    OpenExifDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_AI
