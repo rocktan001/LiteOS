@@ -16,6 +16,10 @@ config LOSCFG_FAMILY_CSKY
 config LOSCFG_FAMILY_SIFIVE
     bool "SIFIVE"
 
+config LOSCFG_FAMILY_FMSH
+    bool "FMSH"
+
+
 endchoice
 
 
@@ -24,6 +28,7 @@ osource "targets/Kconfig.qemu"
 osource "targets/Kconfig.gd"
 osource "targets/Kconfig.csky"
 osource "targets/Kconfig.sifive"
+osource "targets/Kconfig.fmsh"
 
 config LOSCFG_HW_SD_CARD
     bool

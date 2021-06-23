@@ -1,8 +1,8 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
- * Description : LiteOS arm-m flash patch module implemention.
- * Author : Huawei LiteOS Team
- * Create : 2018-03-07
+/*----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Sys Init HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -24,37 +24,44 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * ---------------------------------------------------------------------------- */
-#include "stdint.h"
-#include "los_errno.h"
+ * --------------------------------------------------------------------------- */
 
-#ifndef _ARCH_FPB_H
-#define _ARCH_FPB_H
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef _SYS_H
+#define _SYS_H
 
-#define FPB_SUCCESS              LOS_OK
-#define FPB_COMP_REPEAT_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x00)
-#define FPB_NO_COMP_ERR          LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x01)
-#define FPB_TYPE_ERR             LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x02)
-#define FPB_NO_FREE_COMP_ERR     LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x03)
-#define FPB_ADDR_NOT_ALIGN_ERR   LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x04)
-#define FPB_TARGET_ADDR_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x05)
-#define FPB_BUSY_ERR             LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x06)
-#define FPB_ERROR_INPUT_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x07)
+/* Includes ------------------------------------------------------------------*/
 
-typedef enum {
-    FPB_TYPE_INSTR        = 0,
-    FPB_TYPE_LITERAL      = 1,
-    FPB_TYPE_MAX
-} FpbCompTypeEnum;
+/* Includes LiteOS------------------------------------------------------------------*/
 
-void FpbInit(void);
+#include "los_base.h"
+#include "los_config.h"
+#include "los_sys.h"
+#include "los_typedef.h"
+#include "los_task_pri.h"
 
-UINT32 FpbAddPatch(UINT32 oldAddr, UINT32 patchValue, FpbCompTypeEnum fpbType);
+#include "stdlib.h"
+#include "string.h"
+#include "stdio.h"
+#include "usart.h"
+#include "dwt.h"
 
-UINT32 FpbDeletePatch(UINT32 oldAddr, FpbCompTypeEnum fpbType);
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-void FpbDisable(void);
+uint32_t HAL_GetTick(void);
+void SystemClock_Config(void);
+void _Error_Handler(char *, int);
 
-void FpbLock(void);
+#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
 
-#endif /* _ARCH_FPB_H */
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif /* _SYS_H */

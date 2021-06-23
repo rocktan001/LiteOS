@@ -205,6 +205,10 @@ FE310_SIFIVE_SRC = \
     $(wildcard  $(HAL_DRIVER_SRC)/src/*.S) \
     $(wildcard  $(HAL_DRIVER_SRC)/gloss/*.S)
     LOCAL_SRCS = $(FE310_SIFIVE_SRC)
+else ifeq ($(LOSCFG_PLATFORM_FM33LC0XX_DEMO), y)
+FM33LC0XX_HAL_SRC = \
+    $(wildcard  $(HAL_DRIVER_SRC)/Src/*.c)
+    LOCAL_SRCS = $(FM33LC0XX_HAL_SRC)
 endif
 
 LOCAL_INCLUDE += $(PLATFORM_INCLUDE) \

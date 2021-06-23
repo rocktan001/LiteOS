@@ -1,8 +1,8 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
- * Description : LiteOS arm-m flash patch module implemention.
- * Author : Huawei LiteOS Team
- * Create : 2018-03-07
+/*----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: Clock HeadFile
+ * Author: Huawei LiteOS Team
+ * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -24,37 +24,25 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * ---------------------------------------------------------------------------- */
-#include "stdint.h"
-#include "los_errno.h"
+ * --------------------------------------------------------------------------- */
 
-#ifndef _ARCH_FPB_H
-#define _ARCH_FPB_H
+#ifndef _CLOCK_H
+#define _CLOCK_H
 
-#define FPB_SUCCESS              LOS_OK
-#define FPB_COMP_REPEAT_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x00)
-#define FPB_NO_COMP_ERR          LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x01)
-#define FPB_TYPE_ERR             LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x02)
-#define FPB_NO_FREE_COMP_ERR     LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x03)
-#define FPB_ADDR_NOT_ALIGN_ERR   LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x04)
-#define FPB_TARGET_ADDR_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x05)
-#define FPB_BUSY_ERR             LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x06)
-#define FPB_ERROR_INPUT_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x07)
+#include "asm/platform.h"
 
-typedef enum {
-    FPB_TYPE_INSTR        = 0,
-    FPB_TYPE_LITERAL      = 1,
-    FPB_TYPE_MAX
-} FpbCompTypeEnum;
+#ifdef __cplusplus
+#if __cplusplus
+extern "C"{
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-void FpbInit(void);
+#define get_bus_clk()    SystemCoreClock
 
-UINT32 FpbAddPatch(UINT32 oldAddr, UINT32 patchValue, FpbCompTypeEnum fpbType);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-UINT32 FpbDeletePatch(UINT32 oldAddr, FpbCompTypeEnum fpbType);
-
-void FpbDisable(void);
-
-void FpbLock(void);
-
-#endif /* _ARCH_FPB_H */
+#endif /* _CLOCK_H */
