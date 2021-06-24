@@ -120,6 +120,10 @@ ifneq ($(OS), Linux)
     LITEOS_BASELIB += -l$(LITEOS_PLATFORM) -lsec -lbase -linit -lbsp -lc -lm -losdepends
 
     LITEOS_BASELIB += -linterrupt -ltimer
+    ifeq ($(LOSCFG_KERNEL_LOWPOWER), y)
+        LITEOS_BASELIB += -llowpower
+    endif
+
     ifeq ($(LOSCFG_DRIVERS_UART_ARM_PL011), y)
         LITEOS_BASELIB += -larm_pl011
     endif
