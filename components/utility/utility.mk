@@ -39,3 +39,8 @@ ifeq ($(LOSCFG_COMPONENTS_JSONCPP), y)
 include $(LITEOSTOPDIR)/components/utility/jsoncpp/jsoncpp.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_JSONCPP_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_FASTLZ), y)
+include $(LITEOSTOPDIR)/components/utility/fastlz/fastlz.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_FASTLZ_INCLUDE)
+endif

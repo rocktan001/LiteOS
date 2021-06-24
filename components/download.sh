@@ -16,7 +16,20 @@ ClearDownload()
 {
     rm -rf ${g_componentName} > /dev/null 2>&1
     rm -rf ${g_componentName}.zip > /dev/null 2>&1
+    rm -rf ${g_componentName}.rar > /dev/null 2>&1
+    rm -rf ${g_componentName}.tar.gz > /dev/null 2>&1
     rm ${g_patchFile} ${g_srcSha256File} ${g_patchSha256File} > /dev/null 2>&1
+}
+
+ClearDir()
+{
+    rm -rf ${g_componentName}.zip > /dev/null 2>&1
+    rm -rf ${g_componentName}.rar > /dev/null 2>&1
+    rm -rf ${g_componentName}.tar.gz > /dev/null 2>&1
+    rm ${g_srcSha256File} ${g_patchSha256File} > /dev/null 2>&1
+    if [ "${g_componentDownloadAddr}" != "" ]; then
+        rm ${g_patchFile} > /dev/null 2>&1
+    fi
 }
 
 Sha256sumCheck()
@@ -102,14 +115,11 @@ ApplyPatch()
             ClearDownload
             echo "[Error]: Apply patch failed!"
         else
-            rm -rf ${g_componentName}.zip > /dev/null 2>&1
-            rm ${g_srcSha256File} ${g_patchSha256File} > /dev/null 2>&1
-            if [ "${g_componentDownloadAddr}" != "" ]; then
-                rm ${g_patchFile} > /dev/null 2>&1
-            fi
+            ClearDir
             echo "[Info]: Apply patch success."
         fi
     fi
+    ClearDir
     cd -
     return 0
 }
