@@ -3,5 +3,6 @@ menu "Media"
 source "components/media/libpng/Kconfig"
 source "components/media/openexif/Kconfig"
 source "components/media/opus/Kconfig"
+source "components/media/upnp/Kconfig"
 
 endmenu
