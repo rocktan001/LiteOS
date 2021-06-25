@@ -68,3 +68,6 @@ DEMOS_INCLUDE += $(DEMOS_MEDIA_INCLUDE)
 
 include $(LITEOSTOPDIR)/demos/language/language.mk
 DEMOS_INCLUDE += $(DEMOS_LANGUAGE_INCLUDE)
+
+include $(LITEOSTOPDIR)/demos/security/security.mk
+DEMOS_INCLUDE += $(DEMOS_SECURITY_INCLUDE)

@@ -13,4 +13,6 @@ config LOSCFG_COMPONENTS_SECURITY_MBEDTLS
     help
       Answer y to enable Mbed TLS.
 
+source "components/security/openssl/Kconfig"
+
 endmenu
