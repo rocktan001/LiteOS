@@ -89,7 +89,6 @@ C_DEFS =  \
     -D USE_HAL_DRIVER \
     -D USE_STM32F769I_DISCO \
     -D USE_STM32F769I_DISCOVERY \
-    -D MBEDTLS_CONFIG_FILE=\"mbedtls_config.h\" \
     -D HAVE_STDINT_H
 
 ifeq ($(WITH_FILESYSTEM), yes)
