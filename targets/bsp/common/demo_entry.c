@@ -170,6 +170,10 @@
 #include "fastlz_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_OPENSSL
+#include "openssl_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -356,6 +360,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_FREETYPE
     FreeTypeDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_OPENSSL
+    OpensslDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_SQLITE

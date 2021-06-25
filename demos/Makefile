@@ -17,5 +17,6 @@ MODULE_$(LOSCFG_DEMOS_AI) += ai
 MODULE_y += utility
 MODULE_y += media
 MODULE_y += language
+MODULE_y += security
 
 include $(MODULE)
