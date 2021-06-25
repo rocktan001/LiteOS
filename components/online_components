@@ -23,7 +23,7 @@ harfbuzz-2.8.0 &#& components/utility/harfbuzz            &#& LOSCFG_COMPONENTS_
 libiconv-1.14  &#& components/utility/iconv               &#& LOSCFG_COMPONENTS_ICONV=y         &#& https://github.com/winlibs/libiconv/archive/refs/tags/libiconv-1.14.zip
 libpcap-1.7.3  &#& components/net/pcap                    &#& LOSCFG_COMPONENTS_PCAP=y          &#& https://github.com/the-tcpdump-group/libpcap/archive/refs/tags/libpcap-1.7.3.zip
 libpng-1.6.29  &#& components/media/libpng                &#& LOSCFG_COMPONENTS_LIBPNG=y        &#& https://github.com/glennrp/libpng/archive/refs/tags/v1.6.29.zip
-libupnp-1.6.22 &#& components/media/upnp                  &#& LOSCFG_COMPONENTS_UPNP=y          &#& https://codeload.github.com/pupnp/pupnp/zip/refs/tags/release-1.6.22
+libupnp-1.6.22 &#& components/media/upnp                  &#& LOSCFG_COMPONENTS_UPNP=y          &#& https://github.com/pupnp/pupnp/archive/refs/tags/release-1.6.22.zip
 libxml2-2.6.24 &#& components/utility/libxml2             &#& LOSCFG_COMPONENTS_LIBXML2=y       &#& https://github.com/GNOME/libxml2/archive/refs/tags/LIBXML2_2_6_24.zip
 littlefs-2.3.0 &#& components/fs/littlefs                 &#& LOSCFG_COMPONENTS_FS_LITTLEFS=y   &#& https://github.com/littlefs-project/littlefs/archive/refs/tags/v2.3.0.zip
 lua-5.4.2      &#& components/language/lua                &#& LOSCFG_COMPONENTS_LUA=y           &#& https://github.com/lua/lua/archive/refs/tags/v5.4.2.zip

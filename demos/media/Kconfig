@@ -3,5 +3,6 @@ menu "Media Demo"
 source "demos/media/libpng/Kconfig"
 source "demos/media/openexif/Kconfig"
 source "demos/media/opus/Kconfig"
+source "demos/media/upnp/Kconfig"
 
 endmenu
