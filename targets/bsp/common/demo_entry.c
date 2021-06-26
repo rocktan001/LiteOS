@@ -146,6 +146,10 @@
 #include "freetype_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_HARFBUZZ
+#include "harfbuzz_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_LUA
 #include "lua_demo.h"
 #endif
@@ -361,6 +365,11 @@ VOID DemoEntry(VOID)
 #ifdef LOSCFG_DEMOS_FREETYPE
     FreeTypeDemoTask();
 #endif
+
+#ifdef LOSCFG_DEMOS_HARFBUZZ
+    HarfbuzzDemoTask();
+#endif
+
 
 #ifdef LOSCFG_DEMOS_OPENSSL
     OpensslDemoTask();
