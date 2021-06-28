@@ -40,6 +40,13 @@ include $(LITEOSTOPDIR)/demos/utility/jsoncpp/jsoncpp.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_JSONCPP_INCLUDE)
 endif
 
+
+ifeq ($(LOSCFG_DEMOS_TINYXML2), y)
+include $(LITEOSTOPDIR)/demos/utility/tinyxml2/tinyxml2.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_TINYXML2_INCLUDE)
+endif
+
+
 ifeq ($(LOSCFG_DEMOS_HARFBUZZ), y)
 include $(LITEOSTOPDIR)/demos/utility/harfbuzz/harfbuzz.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_HARFBUZZ_INCLUDE)
