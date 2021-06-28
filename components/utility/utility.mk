@@ -40,6 +40,11 @@ include $(LITEOSTOPDIR)/components/utility/jsoncpp/jsoncpp.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_JSONCPP_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_THTTPD), y)
+include $(LITEOSTOPDIR)/components/utility/thttpd/thttpd.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_THTTPD_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_COMPONENTS_TINYXML2), y)
 include $(LITEOSTOPDIR)/components/utility/tinyxml2/tinyxml2.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_TINYXML2_INCLUDE)
