@@ -31,11 +31,17 @@
 
 #include "at_frame/at_main.h"
 
+#ifndef WIFI_SSID
 #define WIFI_SSID                 "HWTEST"
+#endif
+#ifndef WIFI_PASSWD
 #define WIFI_PASSWD               ""
+#endif
 
 #define AT_MODU_NAME              "ESP8266"
+#ifndef AT_USART_PORT
 #define AT_USART_PORT             2
+#endif
 #define AT_BUARDRATE              115200
 #define AT_CMD_TIMEOUT            10000 // ms
 #define AT_MAX_LINK_NUM           4
