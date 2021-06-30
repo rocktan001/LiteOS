@@ -76,7 +76,7 @@ LOCAL_INCLUDE := \
     -I $(LITEOS_LIBC_PATH)/src/locale \
     -I $(LITEOS_LIBC_PATH)/src/math \
     -I $(LITEOS_LIBC_PATH)/src/multibyte \
-    -I $(LITEOS_LIBC_PATH)/src/networknetwork \
+    -I $(LITEOS_LIBC_PATH)/src/network \
     -I $(LITEOS_LIBC_PATH)/src/passwd \
     -I $(LITEOS_LIBC_PATH)/src/prng \
     -I $(LITEOS_LIBC_PATH)/src/process \

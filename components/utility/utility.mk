@@ -30,6 +30,11 @@ include $(LITEOSTOPDIR)/components/utility/libxml2/libxml2.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_LIBXML2_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_CURL), y)
+include $(LITEOSTOPDIR)/components/utility/curl/curl.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_CURL_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_COMPONENTS_SQLITE), y)
 include $(LITEOSTOPDIR)/components/utility/sqlite/sqlite.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_SQLITE_INCLUDE)
@@ -54,7 +59,6 @@ ifeq ($(LOSCFG_COMPONENTS_HARFBUZZ), y)
 include $(LITEOSTOPDIR)/components/utility/harfbuzz/harfbuzz.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_HARFBUZZ_INCLUDE)
 endif
-
 
 ifeq ($(LOSCFG_COMPONENTS_FASTLZ), y)
 include $(LITEOSTOPDIR)/components/utility/fastlz/fastlz.mk

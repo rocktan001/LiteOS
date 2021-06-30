@@ -52,7 +52,6 @@ STATIC VOID DemoTaskEntry(VOID)
     CHAR *algorithmType[] = {"-u63", "-z", "-d3"};
 
     printf("Bidireference demo task start to run.\n");
-
     fdi = fopen(UNICODE_FILENAME, "w");
     if (fdi == NULL) {
         printf("Fopen %s failed.\n", UNICODE_FILENAME);

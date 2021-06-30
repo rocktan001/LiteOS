@@ -1,6 +1,7 @@
 menu "Utility"
 
 source "components/utility/bidireference/Kconfig"
+source "components/utility/curl/Kconfig"
 source "components/utility/fastlz/Kconfig"
 source "components/utility/freetype/Kconfig"
 source "components/utility/harfbuzz/Kconfig"
