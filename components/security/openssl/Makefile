@@ -19,14 +19,30 @@ LOCAL_DIRS_y := \
 SSL_SRCS := \
     $(wildcard $(OPENSSL_VERSION)/ssl/*.c) \
     $(wildcard $(OPENSSL_VERSION)/ssl/statem/*.c) \
-    $(wildcard $(OPENSSL_VERSION)/ssl/record/*.c)
+    $(wildcard $(OPENSSL_VERSION)/ssl/record/*.c) \
+    $(wildcard $(OPENSSL_VERSION)/crypto/async/arch/async_null.c) \
+    $(wildcard $(OPENSSL_VERSION)/crypto/pkcs7/pk7_lib.c) \
+    $(wildcard $(OPENSSL_VERSION)/crypto/pkcs7/pkcs7err.c)
 
 CRYPTO_SRCS := \
     $(wildcard $(OPENSSL_VERSION)/crypto/*.c) \
     $(foreach dir,$(LOCAL_DIRS_y), $(wildcard $(OPENSSL_VERSION)/crypto/$(dir)/*.c))
 
-LOCAL_SRCS := $(SSL_SRCS)
-LOCAL_SRCS += $(CRYPTO_SRCS)
+OUT_SRCS := \
+    $(OPENSSL_VERSION)/crypto/bf/bf_cbc.c \
+    $(OPENSSL_VERSION)/crypto/x509v3/tabtest.c \
+    $(OPENSSL_VERSION)/crypto/x509v3/v3conf.c \
+    $(OPENSSL_VERSION)/crypto/x509v3/v3prin.c \
+    $(OPENSSL_VERSION)/crypto/LPdir_nyi.c \
+    $(OPENSSL_VERSION)/crypto/LPdir_unix.c \
+    $(OPENSSL_VERSION)/crypto/LPdir_vms.c \
+    $(OPENSSL_VERSION)/crypto/LPdir_win.c \
+    $(OPENSSL_VERSION)/crypto/LPdir_win32.c \
+    $(OPENSSL_VERSION)/crypto/LPdir_wince.c \
+    $(OPENSSL_VERSION)/crypto/o_dir.c
+
+OPENSSL_SRCS := $(SSL_SRCS) $(CRYPTO_SRCS)
+LOCAL_SRCS := $(filter-out $(OUT_SRCS), $(OPENSSL_SRCS))
 
 DEFS := -DOPENSSLDIR="\"$(OPENSSLDIR)\"" -DENGINESDIR="\"$(ENGINESDIR)\""
 

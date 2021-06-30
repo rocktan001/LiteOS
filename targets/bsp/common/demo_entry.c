@@ -162,6 +162,14 @@
 #include "libxml2_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_CURL
+#include "curl_demo.h"
+#endif
+
+#ifdef LOSCFG_DEMOS_OPENSSL
+#include "openssl_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_SQLITE
 #include "sqlite_demo.h"
 #endif
@@ -170,12 +178,16 @@
 #include "openexif_demo.h"
 #endif
 
-#ifdef LOSCFG_DEMOS_FASTLZ
-#include "fastlz_demo.h"
+#ifdef LOSCFG_DEMOS_TINYXML2
+#include "tinyxml2_demo.h"
 #endif
 
-#ifdef LOSCFG_DEMOS_OPENSSL
-#include "openssl_demo.h"
+#ifdef LOSCFG_DEMOS_UPNP
+#include "upnp_demo.h"
+#endif
+
+#ifdef LOSCFG_DEMOS_FASTLZ
+#include "fastlz_demo.h"
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
@@ -370,6 +382,9 @@ VOID DemoEntry(VOID)
     HarfbuzzDemoTask();
 #endif
 
+#ifdef LOSCFG_DEMOS_CURL
+    CurlDemoTask();
+#endif
 
 #ifdef LOSCFG_DEMOS_OPENSSL
     OpensslDemoTask();
@@ -377,6 +392,14 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_SQLITE
     SqliteDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_TINYXML2
+    Tinyxml2DemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_UPNP
+    UpnpDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_FASTLZ
