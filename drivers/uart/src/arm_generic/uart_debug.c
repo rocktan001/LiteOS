@@ -81,6 +81,8 @@ UINT8 uart_getc(VOID)
     if (miniUart->LSR & UART_RXREADY_FLAG) {
         ch = (UINT8)(miniUart->IO & 0xff);
     }
+#elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
+    (VOID)HAL_UART_Receive(&huart3, &ch, sizeof(UINT8), 0);
 #else
     (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
 #endif
@@ -144,6 +146,14 @@ INT32 uart_hwiCreate(VOID)
     LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
     miniUart->IER = 0x1;
     LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+#elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
+    if (huart3.Instance == NULL) {
+        return LOS_NOK;
+    }
+    HAL_NVIC_EnableIRQ(USART3_IRQn);
+    __HAL_UART_CLEAR_FLAG(&huart3, UART_FLAG_TC);
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    __HAL_UART_ENABLE_IT(&huart3, UART_IT_RXNE);
 #else
     if (huart1.Instance == NULL) {
         return LOS_NOK;
@@ -208,6 +218,8 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
         while(!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};
         miniUart->IO = buf[i];
     }
+#elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
+    (VOID)HAL_UART_Transmit(&huart3, (UINT8 *)buf, (UINT16)len, DEFAULT_TIMEOUT);
 #else
     (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)buf, (UINT16)len, DEFAULT_TIMEOUT);
 #endif
