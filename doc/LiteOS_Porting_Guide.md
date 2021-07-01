@@ -289,15 +289,25 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 <h4 id="编写测试程序">编写测试程序</h4>
 
-下面在裸机工程Core\\Src\\main.c文件中编写测试代码，实现串口循环输出并且LED灯闪烁：
+1.  使用LiteOS Studio打开裸机工程。
 
-1.  添加头文件：
+    a. 打开LiteOS Studio软件：
+    
+    ![](figures/porting/LiteOS_Studo.png)
+
+    b. 点击工具栏Open Project图标，选择生成的裸机工程，如下图所示：
+
+    ![](figures/porting/open_dare_code.png)
+
+2.  在裸机工程Core\\Src\\main.c文件中编写串口循环输出并且LED灯闪烁测试代码。
+
+    a. 添加头文件：
 
     ```c
     #include <stdio.h>
     ```
 
-2.  在main\(\)函数的while\(1\)循环中添加如下代码：
+    b. 在main\(\)函数的while\(1\)循环中添加如下代码：
 
     ```c
     printf("hello\n");
@@ -305,7 +315,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
     HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9);
     ```
 
-3.  /\* USER CODE BEGIN 4 \*/中添加函数：
+    c. 在/\* USER CODE BEGIN 4 \*/中添加函数：
 
     ```c
     __attribute__((used)) int _write(int fd, char *ptr, int len)
@@ -315,59 +325,42 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
     }
     ```
 
-<h4 id="使用LiteOS-Studio打开裸机工程">使用LiteOS Studio打开裸机工程</h4>
-
-4.  打开LiteOS-Studio
-5.  打开已有工程
-    单击打开已有工程（Open Project Ctrl+K Ctrl+O）按钮，按钮位置如下图所示：
-
-    ![](https://images.gitee.com/uploads/images/2021/0620/160532_739fd6d7_9280259.png "打开已有工程.png")
-
-6.  选择裸机工程路径
-    在弹出的窗口中选择裸机工程路径，然后单击“选择文件夹”按钮即可，如下图所示：
-    
-    ![](https://images.gitee.com/uploads/images/2021/0620/155929_898bc474_9280259.png "ui.png")
-    
-    打开后，回到LiteOS-Studio界面如下图所示：
-
-    ![](https://images.gitee.com/uploads/images/2021/0620/160713_ffdac1d8_9280259.png "打开后.PNG")
-    
-<h4 id="使用LiteOS-Studio测试裸机工程">使用LiteOS Studio测试裸机工程</h4>
-
-
-7.  配置目标板。
+3.  配置目标板。
 
     在“工程配置”界面中点击“目标板”，在“操作”列中点击“+”后，在出现的空行中填入STM32F407开发板信息，选中新增的开发板后，点击确认按钮保存，如下图所示：
 
     ![](figures/porting/target_board_configuration.png)
 
-8.  编译。
+    注：新增开发板需要注意目标板名称要以STM32开头，当前Huawei LiteOS Studio软件暂时只能识别STM32开头的目标板名称（在LiteOS工程中，目标板名称对应LiteOS\\targets目录下开发板名称）。
+
+4.  编译。
 
     在裸机工程根目录下的Makefile文件上点击右键-\>设置为Makefile文件，然后编译工程，编译生成的二进制镜像文件在工程根目录的build目录下，如下图所示：
 
     **图 1**  编译裸机工程<a name="fig11370205501817"></a>
     ![](figures/porting/build_bare_project.png "编译裸机工程")
 
-9.  烧录。
-    1)  配置烧录器。
+5.  烧录。
 
-        在“工程配置”界面中点击“烧录器”，参照下图进行配置，要烧录的二进制镜像文件就是上一步编译生成的bin文件，配置项中的“连接速率”、“加载地址”保持默认即可。
+    a. 配置烧录器。
 
-        ![](figures/porting/burner_configuration.png)
+    在“工程配置”界面中点击“烧录器”，参照下图进行配置，要烧录的二进制镜像文件就是上一步编译生成的bin文件，配置项中的“连接速率”、“加载地址”保持默认即可。
 
-    2)  点击“工具栏”上的“烧录”按钮，进行烧录。
+    ![](figures/porting/burner_configuration.png)
 
-        ![](figures/porting/burn_button.png)
+    b. 点击“工具栏”上的“烧录”按钮，进行烧录。
 
-        烧录成功后，可以在终端界面看到如下输出：
+    ![](figures/porting/burn_button.png)
 
-        ![](figures/porting/output_of_successful_burning.png)
+    烧录成功后，可以在终端界面看到如下输出：
 
-    3)  查看串口输出。
+    ![](figures/porting/output_of_successful_burning.png)
 
-        点击“工具栏”上“串口终端”图标![](figures/porting/serial_terminal_button.png)，打开串口终端界面。如下图，只需设置与开发板连接的实际端口号，并打开串口开关。开发板按下复位RESET按钮后，即可在“串口终端”界面中看到不断输出hello，同时也可以观察到开发板的LED灯闪烁。
+    c. 查看串口输出。
 
-        ![](figures/porting/serial_output_of_bare_project.png)
+    点击“工具栏”上“串口终端”图标![](figures/porting/serial_terminal_button.png)，打开串口终端界面。如下图，只需设置与开发板连接的实际端口号，并打开串口开关。开发板按下复位RESET按钮后，即可在“串口终端”界面中看到不断输出hello，同时也可以观察到开发板的LED灯闪烁。
+
+    ![](figures/porting/serial_output_of_bare_project.png)
 
 
 
@@ -519,7 +512,6 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
         HAL_Init();
         SystemClock_Config();
         MX_USART1_UART_Init();
-        删除hal_rng_config();
         dwt_delay_init(SystemCoreClock);
     }
     ```
