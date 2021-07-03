@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS Kernel Dynamic Memory Demo Implementation
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Main Process Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -25,79 +25,65 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-
-#include "los_api_dynamic_mem.h"
-#include "los_memory.h"
-#include "los_inspect_entry.h"
+ 
+#include "usart.h"
+#include "canary.h"
+#include "los_task_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#ifdef LOSCFG_ARCH_CORTEX_A7
-#define MEM_DYN_SIZE    2048
-#endif
-#ifdef LOSCFG_ARCH_CORTEX_A53
-#define MEM_DYN_SIZE    2048
-#endif
-#ifdef LOSCFG_ARCH_CORTEX_A9
-#define MEM_DYN_SIZE    1024
-#endif
-#ifdef LOSCFG_ARCH_ARM_CORTEX_M
-#define MEM_DYN_SIZE    512
-#endif
-#ifdef LOSCFG_ARCH_CSKY_V2
-#define MEM_DYN_SIZE    512
-#endif
-#ifdef LOSCFG_ARCH_RISCV_RV32IMC
-#define MEM_DYN_SIZE    1024
-#endif
 
-#define MEM_USE_SIZE    4
-#define MEM_USE_BUFF    828
-
-STATIC UINT32 g_demoDynMem[MEM_DYN_SIZE / 4];
-
-UINT32 DynMemDemo(VOID)
+VOID cpuInit(VOID)
 {
-    UINT32 *mem = NULL;
-    UINT32 ret;
-    printf("Kernel dynamic memory demo start to run.\n");
-    ret = LOS_MemInit(g_demoDynMem, MEM_DYN_SIZE);
+    __asm__ (
+	"msr	cpsr_c, %1\n\t"
+	"mov	sp,     %0\n\t"
+	"msr	cpsr_c, %3\n\t"
+	"mov	sp,     %2\n\t"
+	"msr	cpsr_c, %5\n\t"
+	"mov	sp,     %4\n\t"
+	"msr	cpsr_c, %7\n\t"
+    "mov	sp,     %6\n\t"
+    "msr	cpsr_c, %8\n\t"
+	    :
+	    : "r" (__irq_stack_top),
+	      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_IRQ_MODE),
+	      "r" (__abt_stack_top),
+	      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_ABT_MODE),
+	      "r" (__undef_stack_top),
+	      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_UNDEF_MODE),
+	      "r" (__fiq_stack_top),
+	      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_FIQ_MODE),
+          "I" (PSR_F_BIT | PSR_I_BIT | CPSR_SVC_MODE)
+	    : "r14");
+}
+
+INT32 main(VOID)
+{
+	#ifdef __GNUC__
+    ArchStackGuardInit();
+	#endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+
+    cpuInit();
+    UartInit();
+
+    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
+                  "\nLiteOS Kernel Version : %s\n"
+                  "build data : %s %s\n\n"
+                  "**********************************\n",
+                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
+
+    UINT32 ret = OsMain();
     if (ret != LOS_OK) {
-        printf("Mempool init failed.\n");
         return LOS_NOK;
     }
-    printf("Mempool init successfully.\n");
 
-    /* mem alloc */
-    mem = (UINT32 *)LOS_MemAlloc(g_demoDynMem, MEM_USE_SIZE);
-    if (mem == NULL) {
-        printf("Mem alloc failed.\n");
-        return LOS_NOK;
-    }
-    printf("Mem alloc successfully.\n");
-
-    /* assignment */
-    *mem = MEM_USE_BUFF;
-    printf("*mem = %d.\n", *mem);
-
-    /* mem free */
-    ret = LOS_MemFree(g_demoDynMem, mem);
-    if (ret != LOS_OK) {
-        printf("Mem free failed.\n");
-        ret = InspectStatusSetById(LOS_INSPECT_DMEM, LOS_INSPECT_STU_ERROR);
-        if (ret != LOS_OK) {
-            printf("Set inspect status failed.\n");
-        }
-        return LOS_NOK;
-    }
-    printf("Mem free successfully.\n");
-    ret = InspectStatusSetById(LOS_INSPECT_DMEM, LOS_INSPECT_STU_SUCCESS);
-    if (ret != LOS_OK) {
-        printf("Set inspect status failed.\n");
-    }
+    OsStart();
 
     return LOS_OK;
 }

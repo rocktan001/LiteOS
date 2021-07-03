@@ -73,6 +73,9 @@ ifeq ($(OS), Linux)
 	$(call update_from_baselib_file)
 endif
 	$(LD) $(LITEOS_LDFLAGS) $(LITEOS_TABLES_LDFLAGS) $(LITEOS_DYNLDFLAGS) -Map=$(OUT)/$@.map -o $(OUT)/$@.elf --start-group $(LITEOS_BASELIB) --end-group
+ifeq ($(LOSCFG_FAMILY_RASPBERRY), y)
+	$(OBJCOPY) -O binary $(OUT)/$@.elf $(OUT)/kernel7.img
+endif
 	$(OBJCOPY) -O binary $(OUT)/$@.elf $(OUT)/$@.bin
 	$(OBJDUMP) -t $(OUT)/$@.elf |sort >$(OUT)/$@.sym.sorted
 	$(OBJDUMP) -d $(OUT)/$@.elf >$(OUT)/$@.asm

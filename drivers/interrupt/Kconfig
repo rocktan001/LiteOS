@@ -36,3 +36,8 @@ config LOSCFG_PLATFORM_BSP_RISCV_ECLIC
     depends on LOSCFG_ARCH_RISCV
     help
       GD32VF103 Riscv Platform Level Interrupt Controller
+
+config LOSCFG_PLATFORM_ARM_CONTROL
+    bool
+    help
+      Arm control
