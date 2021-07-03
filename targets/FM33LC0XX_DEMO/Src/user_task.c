@@ -1,8 +1,8 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
- * Description : LiteOS arm-m flash patch module implemention.
- * Author : Huawei LiteOS Team
- * Create : 2018-03-07
+/*----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: User Task Implementation
+ * Author: Huawei LiteOS Team
+ * Create: 2020-12-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -24,37 +24,50 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * ---------------------------------------------------------------------------- */
-#include "stdint.h"
-#include "los_errno.h"
+ * --------------------------------------------------------------------------- */
 
-#ifndef _ARCH_FPB_H
-#define _ARCH_FPB_H
+#include "los_task_pri.h"
+#include "demo_entry.h"
+#include "user_init.h"
 
-#define FPB_SUCCESS              LOS_OK
-#define FPB_COMP_REPEAT_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x00)
-#define FPB_NO_COMP_ERR          LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x01)
-#define FPB_TYPE_ERR             LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x02)
-#define FPB_NO_FREE_COMP_ERR     LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x03)
-#define FPB_ADDR_NOT_ALIGN_ERR   LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x04)
-#define FPB_TARGET_ADDR_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x05)
-#define FPB_BUSY_ERR             LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x06)
-#define FPB_ERROR_INPUT_ERR      LOS_ERRNO_OS_ERROR(LOS_MOD_FPB, 0x07)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-typedef enum {
-    FPB_TYPE_INSTR        = 0,
-    FPB_TYPE_LITERAL      = 1,
-    FPB_TYPE_MAX
-} FpbCompTypeEnum;
+STATIC UINT32 LedTask(VOID)
+{
+    while(1) {
+        LED0_TOG();
+		LOS_TaskDelay(1000);
+    }
+    return 0;
+}
 
-void FpbInit(void);
+STATIC UINT32 LedTaskCreate(VOID)
+{
+    UINT32 taskId = 0;
+    TSK_INIT_PARAM_S ledTaskParam;
 
-UINT32 FpbAddPatch(UINT32 oldAddr, UINT32 patchValue, FpbCompTypeEnum fpbType);
+    (VOID)memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask;
+    ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    ledTaskParam.pcName = "ledTask";
+    ledTaskParam.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+    ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    return LOS_TaskCreate(&taskId, &ledTaskParam);
+}
 
-UINT32 FpbDeletePatch(UINT32 oldAddr, FpbCompTypeEnum fpbType);
+VOID app_init(VOID)
+{
+    printf("app init!\n");
+    (VOID)LedTaskCreate();
+    DemoEntry();
+}
 
-void FpbDisable(void);
-
-void FpbLock(void);
-
-#endif /* _ARCH_FPB_H */
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */

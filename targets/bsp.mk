@@ -71,6 +71,10 @@ else ifeq ($(LOSCFG_PLATFORM_STM32L552_NUCLEO), y)
 ######################### HiFive1_Rev1_B01 Options###############################
 else ifeq ($(LOSCFG_PLATFORM_HIFIVE1_REV1_B01), y)
     HAL_DRIVER_TYPE := Hifive1_Revb_Firmware/freedom-metal
+######################### FM33LC0XX_DEMO Options #############################
+else ifeq ($(LOSCFG_PLATFORM_FM33LC0XX_DEMO), y)
+    LITEOS_CMACRO_TEST += -DFM33LC0XX
+    HAL_DRIVER_TYPE := FM33LC0xx_LL_Driver
 endif
 
 HAL_DRIVER_SRC := drivers/$(HAL_DRIVER_TYPE)

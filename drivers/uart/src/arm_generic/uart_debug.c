@@ -75,6 +75,8 @@ UINT8 uart_getc(VOID)
         INT32 tmp;
         metal_tty_getc(&tmp);
         ch =  (UINT8)tmp;
+#elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
+	(VOID)HAL_UART_Receive(UART5, &ch, sizeof(UINT8), 0);
 #else
     (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
 #endif
@@ -128,6 +130,12 @@ INT32 uart_hwiCreate(VOID)
     LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 1, 0, UartHandler, NULL);
     LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
     *(UINT32 volatile *)(METAL_SIFIVE_UART0_10013000_BASE_ADDRESS + METAL_SIFIVE_UART0_IE) |= (1 << 1);
+#elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
+    NVIC_DisableIRQ(UART5_IRQn);
+	NVIC_SetPriority(UART5_IRQn,1);
+	NVIC_EnableIRQ(UART5_IRQn);
+    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 1, 0, UartHandler, NULL);
+    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
 #else
     if (huart1.Instance == NULL) {
         return LOS_NOK;
@@ -184,6 +192,8 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
     for (i = 0; i < len; i++) {
         metal_tty_putc(buf[i]);
     }
+#elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
+    HAL_UART_Transmit(UART5, (void*)buf, len, DEFAULT_TIMEOUT);
 #else
     (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)buf, (UINT16)len, DEFAULT_TIMEOUT);
 #endif
