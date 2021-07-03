@@ -39,3 +39,8 @@ config LOSCFG_CSKY_SYSTICK
     bool
     help
       CSKY systick.
+
+config LOSCFG_Raspberry_Pi2B_SYSTICK
+    bool
+    help
+      Raspberry Pi2BSystick.
