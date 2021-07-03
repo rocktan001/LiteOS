@@ -132,6 +132,10 @@ extern "C" {
 #define CTZ(value)                                  (__builtin_ctz(value))
 #endif
 
+#ifndef FFS
+#define FFS(value)                                  (__builtin_ffs(value))
+#endif
+
 #else
 #error Unknown compiler.
 #endif

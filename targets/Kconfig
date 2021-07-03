@@ -19,6 +19,8 @@ config LOSCFG_FAMILY_SIFIVE
 config LOSCFG_FAMILY_FMSH
     bool "FMSH"
 
+config LOSCFG_FAMILY_RASPBERRY
+    bool "raspberry"
 
 endchoice
 
@@ -29,6 +31,7 @@ osource "targets/Kconfig.gd"
 osource "targets/Kconfig.csky"
 osource "targets/Kconfig.sifive"
 osource "targets/Kconfig.fmsh"
+osource "targets/Kconfig.raspberry"
 
 config LOSCFG_HW_SD_CARD
     bool
