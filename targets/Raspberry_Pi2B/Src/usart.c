@@ -69,14 +69,14 @@ VOID UartInit(VOID)
     gpio->GPPUDCLK[0] = 0;
 
     miniUart = MINI_UART;
-    miniUart->BAUD  = 270;
-    miniUart->CNTL  = 3;
+    *((volatile UINT32 *)(AUX_ENABLES)) |= 1;
     miniUart->LCR   = 3;
     miniUart->IER   = 0;
     miniUart->CNTL  = 0;
     miniUart->MCR   = 0;
     miniUart->IIR   = 0xC6;
-    *((volatile UINT32 *)(AUX_ENABLES)) |= 1;
+    miniUart->BAUD  = 270;
+    miniUart->CNTL  = 3;
 }
 
 #ifdef __cplusplus
