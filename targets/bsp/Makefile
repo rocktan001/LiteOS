@@ -2,9 +2,9 @@ include $(LITEOSTOPDIR)/config.mk
 
 MODULE_NAME := bsp
 
-STM32F769IDISCOVERY_HAL_SRC = $(wildcard $(HAL_DRIVER_SRC)/Src/*.c)
-ifeq ($(LOSCFG_PLATFORM_STM32F769IDISCOVERY), y)
-STM32F769IDISCOVERY_HAL_OUT = \
+STM32F7xx_HAL_SRC = $(wildcard $(HAL_DRIVER_SRC)/Src/*.c)
+ifeq ($(LOSCFG_PLATFORM_STM32F769IDISCOVERY)$(LOSCFG_PLATFORM_STM32F746_NUCLEO), y)
+STM32F7xx_HAL_OUT = \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_crc.c \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_usb.c \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_utils.c \
@@ -28,8 +28,8 @@ STM32F769IDISCOVERY_HAL_OUT = \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_tim.c \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_usart.c \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_utils.c
-    STM32F769IDISCOVERY_HAL_SRC := $(filter-out $(STM32F769IDISCOVERY_HAL_OUT), $(STM32F769IDISCOVERY_HAL_SRC))
-    LOCAL_SRCS = $(STM32F769IDISCOVERY_HAL_SRC)
+    STM32F7xx_HAL_SRC := $(filter-out $(STM32F7xx_HAL_OUT), $(STM32F7xx_HAL_SRC))
+    LOCAL_SRCS = $(STM32F7xx_HAL_SRC)
 else ifeq ($(LOSCFG_PLATFORM_STM32F429IGTX), y)
 STM32F429IGTX_HAL_SRC = \
     drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
