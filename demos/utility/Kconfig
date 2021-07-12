@@ -10,6 +10,7 @@ source "demos/utility/iniparser/Kconfig"
 source "demos/utility/json-c/Kconfig"
 source "demos/utility/jsoncpp/Kconfig"
 source "demos/utility/libxml2/Kconfig"
+source "demos/utility/pdfgen/Kconfig"
 source "demos/utility/sqlite/Kconfig"
 source "demos/utility/tinyxml2/Kconfig"
 
