@@ -49,25 +49,53 @@ static void at_usart_adapter(uint32_t port)
     g_atIRQn = LPUART1_IRQn;
     return;
 #endif
+
+#if  defined(STM32F072xB)
     switch (port) {
-        case 1: // 1: usart1
-            g_atUSART = USART1;
-            g_atIRQn = USART1_IRQn;
-            break;
-        case 2: // 2: usart2
-            g_atUSART = USART2;
-            g_atIRQn = USART2_IRQn;
-            break;
         case 3: // 3: usart3
             g_atUSART = USART3;
-#ifdef STM32F072xB
         case 4:
             g_atIRQn = USART3_4_IRQn;
+            return;
+            break;
+    }
+#endif
+
+    switch (port) {
+        case 6: // 6: usart6
+#if  defined(USART6)  
+            g_atUSART = USART6;
+            g_atIRQn = USART6_IRQn;
 #else
+            return;
+#endif
+            break;
+        case 1: // 1: usart1
+#if  defined(USART1)        
+            g_atUSART = USART1;
+            g_atIRQn = USART1_IRQn;
+#else
+            return;
+#endif
+            break;
+        case 2: // 2: usart2
+#if  defined(USART2)        
+            g_atUSART = USART2;
+            g_atIRQn = USART2_IRQn;
+#else
+            return;
+#endif
+            break;
+        case 3: // 3: usart3
+#if  defined(USART3)        
+            g_atUSART = USART3;
             g_atIRQn = USART3_IRQn;
+#else
+            return;
 #endif
             break;
         default:
+            return;
             break;
     }
 }
