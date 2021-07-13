@@ -16,6 +16,7 @@ BidireferenceC-8.0.0 &#& components/utility/bidireference &#& LOSCFG_COMPONENTS_
 curl-7.54.1    &#& components/utility/curl                &#& LOSCFG_COMPONENTS_CURL=y          &#& https://github.com/curl/curl/archive/refs/tags/curl-7_54_1.zip
 fastlz-0.5.0   &#& components/utility/fastlz              &#& LOSCFG_COMPONENTS_FASTLZ=y        &#& https://github.com/ariya/FastLZ/archive/refs/tags/0.5.0.zip
 freetype-2.4.0 &#& components/utility/freetype            &#& LOSCFG_COMPONENTS_FREETYPE=y      &#& https://github.com/freetype/freetype/archive/refs/tags/VER-2-4-0.zip
+inih-r53       &#& components/utility/inih                &#& LOSCFG_COMPONENTS_INIH=y          &#& https://github.com/benhoyt/inih/archive/refs/tags/r53.zip
 iniparser-4.1  &#& components/utility/iniparser           &#& LOSCFG_COMPONENTS_INIPARSER=y     &#& https://github.com/ndevilla/iniparser/archive/refs/tags/v4.1.zip
 json-c-0.13.1  &#& components/utility/json-c              &#& LOSCFG_COMPONENTS_JSON_C=y        &#& https://github.com/json-c/json-c/archive/refs/tags/json-c-0.13.1-20180305.zip
 jsoncpp-1.9.4  &#& components/utility/jsoncpp             &#& LOSCFG_COMPONENTS_JSONCPP=y       &#& https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.4.zip

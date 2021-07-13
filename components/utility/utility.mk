@@ -69,3 +69,9 @@ ifeq ($(LOSCFG_COMPONENTS_PDFGEN), y)
 include $(LITEOSTOPDIR)/components/utility/pdfgen/pdfgen.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_PDFGEN_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_INIH), y)
+include $(LITEOSTOPDIR)/components/utility/inih/inih.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_INIH_INCLUDE)
+endif
+
