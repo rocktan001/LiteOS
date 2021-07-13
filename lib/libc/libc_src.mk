@@ -57,7 +57,7 @@ LIBC_SIGNAL_SRC := sigrtmax.c sigrtmin.c
 LIBC_SIGNAL_SRC := $(addprefix $(LIBC_RELATIVE_PATH)/src/signal/, $(LIBC_SIGNAL_SRC))
 
 # dir network
-LIBC_NETWORK_SRC := dn_comp.c
+LIBC_NETWORK_SRC := dn_comp.c gai_strerror.c
 LIBC_NETWORK_SRC := $(addprefix $(LIBC_RELATIVE_PATH)/src/network/, $(LIBC_NETWORK_SRC))
 
 # dir unistd

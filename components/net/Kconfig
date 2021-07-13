@@ -73,5 +73,6 @@ osource "components/net/los_iperf/Kconfig"
 osource "components/net/pcap/Kconfig"
 osource "components/net/ping/Kconfig"
 osource "components/net/tftp_server/Kconfig"
+osource "components/net/librws/Kconfig"
 
 endmenu

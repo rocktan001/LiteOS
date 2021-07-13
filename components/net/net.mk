@@ -29,3 +29,8 @@ ifeq ($(LOSCFG_COMPONENTS_PCAP), y)
 include $(LITEOSTOPDIR)/components/net/pcap/pcap.mk
 COMPONENTS_NET_INCLUDE += $(COMPONENTS_PCAP_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_LIBRWS), y)
+include $(LITEOSTOPDIR)/components/net/pcap/pcap.mk
+COMPONENTS_NET_INCLUDE += $(COMPONENTS_LIBRWS_INCLUDE)
+endif
