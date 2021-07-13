@@ -64,3 +64,8 @@ ifeq ($(LOSCFG_COMPONENTS_FASTLZ), y)
 include $(LITEOSTOPDIR)/components/utility/fastlz/fastlz.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_FASTLZ_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_PDFGEN), y)
+include $(LITEOSTOPDIR)/components/utility/pdfgen/pdfgen.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_PDFGEN_INCLUDE)
+endif
