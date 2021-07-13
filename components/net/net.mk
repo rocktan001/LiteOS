@@ -31,6 +31,6 @@ COMPONENTS_NET_INCLUDE += $(COMPONENTS_PCAP_INCLUDE)
 endif
 
 ifeq ($(LOSCFG_COMPONENTS_LIBRWS), y)
-include $(LITEOSTOPDIR)/components/net/pcap/pcap.mk
+include $(LITEOSTOPDIR)/components/net/librws/librws.mk
 COMPONENTS_NET_INCLUDE += $(COMPONENTS_LIBRWS_INCLUDE)
 endif
