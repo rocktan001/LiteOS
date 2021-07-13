@@ -7,8 +7,8 @@ LOCAL_SRCS := $(wildcard $(LIBRWS_VERSION)/src/*.c)
 
 LOCAL_INCLUDE := -I $(LITEOSTOPDIR)/components/net/librws/$(LIBRWS_VERSION)/src
 
-LOCAL_EXT_FLAG := -Wno-unused-variable -Wno-strict-prototypes
+LOCAL_EXT_FLAG := -Wno-unused-variable -fstack-protector-strong
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LOCAL_EXT_FLAG)
 
 include $(MODULE)

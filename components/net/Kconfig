@@ -45,6 +45,13 @@ config LOSCFG_COMPONENTS_NET_LWIP
     help
       Answer y to enable lwip.
 
+config LOSCFG_COMPONENTS_LWIP_DHCP
+    bool "Enable DHCP"
+    depends on LOSCFG_COMPONENTS_NET_LWIP
+    default y
+    help
+      Answer y to enable lwip dhcp.
+
 choice
     prompt "Enable Ipv4 Or Ipv6"
     default LOSCFG_LWIP_IPV4

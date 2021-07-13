@@ -208,8 +208,11 @@ a lot of data that needs to be copied, this should be set high. */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. DHCP is not implemented in lwIP 0.5.1, however, so
    turning this on does currently not work. */
+#ifdef LOSCFG_COMPONENTS_LWIP_DHCP
+#define LWIP_DHCP                 1
+#else
 #define LWIP_DHCP                 0
-
+#endif
 
 /* ---------- UDP options ----------- */
 #define LWIP_UDP                  1
