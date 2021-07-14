@@ -46,9 +46,15 @@ STATIC VOID OnSocketReceivedText(rws_socket socket, const CHAR *text, const UINT
     INT32 ret;
     CHAR buff[TEXT_BUFF_LEN] = {0};
     ret = memcpy_s(buff, TEXT_BUFF_LEN, text, length);
-    if (ret != EOK) {
-        printf("Websocket receive failed.\n");
+    if ((data == NULL) || (length == 0)) {
+        printf("Websocket text receive failed.\n");
+        return;
     }
+    if (ret != EOK) {
+        printf("Websocket text receive failed.\n");
+        return;
+    }
+
     buff[length] = 0;
 
     printf("Websocket receive text:\n%s\n", text);
@@ -58,10 +64,16 @@ STATIC VOID OnSocketReceivedBin(rws_socket socket, const VOID *data, const UINT3
 {
     INT32 ret;
     CHAR buff[BIN_BUFF_LEN];
+    if ((data == NULL) || (length == 0)) {
+        printf("Websocket bin receive failed.\n");
+        return;
+    }
     ret = memcpy_s(buff, BIN_BUFF_LEN, data, length);
     if (ret != EOK) {
         printf("Websocket bin receive failed.\n");
+        return;
     }
+
     buff[length] = 0;
 
     printf("Websocket receive bin:\n<%s>\n", buff);
