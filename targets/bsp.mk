@@ -286,6 +286,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_FASTLZ), y)
         LITEOS_BASELIB += -lfastlz
     endif
+    ifeq ($(LOSCFG_COMPONENTS_LIBRWS), y)
+        LITEOS_BASELIB += -llibrws
+    endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
     endif
@@ -375,6 +378,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_FASTLZ), y)
         LITEOS_BASELIB += -lfastlz_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_LIBRWS), y)
+        LITEOS_BASELIB += -llibrws_demo
     endif
 endif
 

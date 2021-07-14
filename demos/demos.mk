@@ -60,6 +60,11 @@ include $(LITEOSTOPDIR)/demos/ai/ai.mk
 DEMOS_INCLUDE += $(DEMOS_AI_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_LIBRWS), y)
+include $(LITEOSTOPDIR)/demos/librws/librws.mk
+DEMOS_INCLUDE += $(DEMOS_LIBRWS_INCLUDE)
+endif
+
 include $(LITEOSTOPDIR)/demos/utility/utility.mk
 DEMOS_INCLUDE += $(DEMOS_UTILITY_INCLUDE)
 
