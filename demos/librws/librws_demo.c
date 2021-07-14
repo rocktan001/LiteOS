@@ -33,7 +33,7 @@
 
 #define TEXT_BUFF_LEN                   1024
 #define BIN_BUFF_LEN                    1024
-#define WEBSOCKET_DEMO_SERVER           "192.168.10.182"
+#define WEBSOCKET_DEMO_SERVER           "your.ip.address"
 #define WEBSOCKET_DEMO_PORT             8000
 #define LIBRWS_TASK_PRIORITY            6
 #define LIBRWS_TASK_STACK_SIZE          0x1400
