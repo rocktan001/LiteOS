@@ -422,8 +422,9 @@ CheckToolIsExist()
     do
         let i++
         toolName="`eval echo '$'${i}`"
-        if [ -z "${toolName}" ]; then
-            ret=$i
+        toolPath="`which $toolName`"
+        if [ -z "${toolPath}" ]; then
+            let ret++
             echo -e "\033[31m[Info]: The '${toolName}' tool needs to be installed.\033[0m"
         fi
     done
@@ -432,11 +433,7 @@ CheckToolIsExist()
 
 Main()
 {
-    pathExe="`which patch`"
-    sha256sumExe="`which sha256sum`"
-    curlExe="`which curl`"
-    unzipExe="`which unzip`"
-    CheckToolIsExist "${pathExe}" "${sha256sumExe}" "${curlExe}" "${unzipExe}"
+    CheckToolIsExist "patch" "sha256sum" "curl" "unzip"
     if [ $? -ne 0 ]; then
         return 1
     fi
