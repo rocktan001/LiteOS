@@ -27,10 +27,6 @@ WebSocket是一种在单个TCP连接上进行全双工通信的协议。详情�
 
 ## 编译运行Librws Demo
 
-使能Librws Demo后，
-
-
-
 ### 服务端配置
 
 服务端代码路径为LiteOS/demos/librws/websocketserver.py，需要python3环境可运行。
@@ -65,7 +61,16 @@ Librws Demo需要网络连接，在STM32F769开发板插入网线，并确保网
     #define LIBRWS_TASK_STACK_SIZE          0x1400
     ```
     **注意：**  改为域名需要开启LWIP_DHCP(DNS需要DHCP来初始化，在Linux下编译，使能LWIP会默认开启DHCP)。
-2. 编译烧录
+
+2. 修改Kernel中默认任务栈大小。在LiteOS源码根目录下执行`make menuconfig`命令，按如下菜单路径设置，修改为4096。
+    ```
+    Kernel  --->
+        Basic Config  --->
+            Task  --->
+                (4096) Task Defalut Stack Size
+    ```
+
+3. 编译烧录
 在LiteOS源码根目录下执行`make clean; make -j`命令编译LiteOS工程，编译成功后会在`out/{platform}/lib`路径下生成`liblibrws.a`和`liblibrws_demo.a`文件，系统镜像文件为Huawei_LiteOS.bin。
 
 烧录操作请参考<a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/LiteOS_Quick_Start.md" target="_blank">快速入门</a>。
