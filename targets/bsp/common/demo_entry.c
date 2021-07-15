@@ -194,6 +194,10 @@
 #include "pdfgen_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_LIBRWS
+#include "librws_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -249,6 +253,10 @@ STATIC VOID AtinyDemoTaskEntry(VOID)
 #ifdef LOSCFG_DEMOS_AGENT_TINY_LWM2M
     AgentTinyLwm2mDemoEntry();
 #endif
+#endif
+
+#ifdef LOSCFG_DEMOS_LIBRWS
+    LibrwsDemo();
 #endif
 }
 #endif
