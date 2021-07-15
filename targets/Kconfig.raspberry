@@ -7,7 +7,7 @@ choice
     depends on LOSCFG_FAMILY_RASPBERRY
     default LOSCFG_PLATFORM_Raspberry_Pi2B
     help
-      CB2201
+      Raspberry_Pi2B
 
 config LOSCFG_PLATFORM_Raspberry_Pi2B
     bool "Raspberry_Pi2B"
