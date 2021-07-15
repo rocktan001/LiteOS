@@ -37,6 +37,7 @@
 #define WEBSOCKET_DEMO_PORT             8000
 #define LIBRWS_TASK_PRIORITY            6
 #define LIBRWS_TASK_STACK_SIZE          0x1400
+#define LIBRWS_DEMO_WAIT_TIME           20000
 
 STATIC UINT32 g_demoTaskId;
 STATIC rws_socket g_socket = NULL;
@@ -115,7 +116,7 @@ STATIC VOID WebsocketConnect(VOID)
 STATIC VOID DemoTaskEntry(VOID)
 {
     printf("Librws demo start to run.\n");
-    LOS_TaskDelay(20000);    // wait lwip dhcp get ip.
+    LOS_TaskDelay(LIBRWS_DEMO_WAIT_TIME);    // wait lwip dhcp get ip.
     WebsocketConnect();
 }
 
