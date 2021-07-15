@@ -33,7 +33,7 @@
 
 #define TEXT_BUFF_LEN                   1024
 #define BIN_BUFF_LEN                    1024
-#define WEBSOCKET_DEMO_SERVER           "your.ip.address"
+#define WEBSOCKET_DEMO_SERVER           "192.168.10.182"
 #define WEBSOCKET_DEMO_PORT             8000
 #define LIBRWS_TASK_PRIORITY            6
 #define LIBRWS_TASK_STACK_SIZE          0x1400
@@ -45,39 +45,47 @@ STATIC rws_socket g_socket = NULL;
 STATIC VOID OnSocketReceivedText(rws_socket socket, const CHAR *text, const UINT32 length)
 {
     INT32 ret;
-    CHAR buff[TEXT_BUFF_LEN] = {0};
-    ret = memcpy_s(buff, TEXT_BUFF_LEN, text, length);
-    if ((data == NULL) || (length == 0)) {
+    if ((text == NULL) || (length == 0)) {
         printf("Websocket text receive failed.\n");
         return;
     }
+    CHAR *buff = (CHAR *)malloc(length);
+    if (buff == NULL) {
+        printf("Websocket text receive failed.\n");
+        return;
+    }
+    ret = memcpy_s(buff, length, text, length);
     if (ret != EOK) {
         printf("Websocket text receive failed.\n");
         return;
     }
 
-    buff[length] = 0;
-
-    printf("Websocket receive text:\n%s\n", text);
+    printf("Websocket receive len:%d text:\n%s\n", length, text);
+    free(buff);
+    buff = NULL;
 }
 
 STATIC VOID OnSocketReceivedBin(rws_socket socket, const VOID *data, const UINT32 length)
 {
     INT32 ret;
-    CHAR buff[BIN_BUFF_LEN];
     if ((data == NULL) || (length == 0)) {
         printf("Websocket bin receive failed.\n");
         return;
     }
-    ret = memcpy_s(buff, BIN_BUFF_LEN, data, length);
+    CHAR *buff = (CHAR *)malloc(length);
+    if (buff == NULL) {
+        printf("Websocket bin receive failed.\n");
+        return;
+    }
+    ret = memcpy_s(buff, length, data, length);
     if (ret != EOK) {
         printf("Websocket bin receive failed.\n");
         return;
     }
 
-    buff[length] = 0;
-
     printf("Websocket receive bin:\n<%s>\n", buff);
+    free(buff);
+    buff = NULL;
 }
 
 STATIC VOID OnSocketConnected(rws_socket socket)
