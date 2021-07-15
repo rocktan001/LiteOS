@@ -36,29 +36,34 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+VOID board_config(VOID)
+{
+    g_sys_mem_addr_end = (UINTPTR)LOS_HEAP_ADDR_END;
+}
+
 VOID cpuInit(VOID)
 {
     __asm__ (
-	"msr	cpsr_c, %1\n\t"
-	"mov	sp,     %0\n\t"
-	"msr	cpsr_c, %3\n\t"
-	"mov	sp,     %2\n\t"
-	"msr	cpsr_c, %5\n\t"
-	"mov	sp,     %4\n\t"
-	"msr	cpsr_c, %7\n\t"
+    "msr	cpsr_c, %1\n\t"
+    "mov	sp,     %0\n\t"
+    "msr	cpsr_c, %3\n\t"
+    "mov	sp,     %2\n\t"
+    "msr	cpsr_c, %5\n\t"
+    "mov	sp,     %4\n\t"
+    "msr	cpsr_c, %7\n\t"
     "mov	sp,     %6\n\t"
     "msr	cpsr_c, %8\n\t"
-	    :
-	    : "r" (__irq_stack_top),
-	      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_IRQ_MODE),
-	      "r" (__abt_stack_top),
-	      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_ABT_MODE),
-	      "r" (__undef_stack_top),
-	      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_UNDEF_MODE),
-	      "r" (__fiq_stack_top),
-	      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_FIQ_MODE),
-          "I" (PSR_F_BIT | PSR_I_BIT | CPSR_SVC_MODE)
-	    : "r14");
+    :
+    : "r" (__irq_stack_top),
+      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_IRQ_MODE),
+      "r" (__abt_stack_top),
+      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_ABT_MODE),
+      "r" (__undef_stack_top),
+      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_UNDEF_MODE),
+      "r" (__fiq_stack_top),
+      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_FIQ_MODE),
+      "I" (PSR_F_BIT | PSR_I_BIT | CPSR_SVC_MODE)
+      : "r14");
 }
 
 INT32 main(VOID)
@@ -69,6 +74,7 @@ INT32 main(VOID)
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
 
+	board_config();
     cpuInit();
     UartInit();
 
