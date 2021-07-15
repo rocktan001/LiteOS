@@ -105,19 +105,19 @@ STATIC VOID CreateIniFile(VOID)
 int FileHandler(void* user, const char* section, const char* name,
                 const char* value)
 {
-    iniFile* pconfig = (iniFile*)user;
+    iniFile* pConfig = (iniFile*)user;
 
     if (MATCH("INIH", "components")) {
-        pconfig->components = strdup(value);
+        pConfig->components = strdup(value);
     } else if (MATCH("INIH", "author")) {
-        pconfig->author = strdup(value);
+        pConfig->author = strdup(value);
     } else if (MATCH("INIH", "date")) {
-        pconfig->date = atoi(value);
+        pConfig->date = atoi(value);
     } else if (MATCH("INIH", "description")) {
-        pconfig->description = strdup(value);
+        pConfig->description = strdup(value);
     } else {
         /* unknown section/name, error */
-        return 0;
+        return LOS_OK;
     }
     return 1;
 }
@@ -128,7 +128,7 @@ int StringHandler(void* user, const char* section, const char* name,
     UINT32 ret;
     if (strcmp(section, g_prevSection)) {
         printf("[%s]\n", section);
-        ret = memcpy_s(g_prevSection, SECTION_LEN, section, sizeof(g_prevSection));
+        ret = memcpy_s(g_prevSection,sizeof(g_prevSection)/sizeof(CHAR), section, SECTION_LEN);
 	if (ret != EOK) {
             return ret;
 	}
@@ -143,12 +143,11 @@ VOID StringParseDemo(const CHAR* string)
     STATIC UINT32 num;
     UINT32 ret;
 
-    *g_prevSection = '\0';
+    g_prevSection[0] = '\0';
     ret = ini_parse_string(string, StringHandler, &num);
     if (ret != LOS_OK) {
         printf("Ini parse string failed, ret = %d\n", ret);
     }
-    num++;
 }
 
 
@@ -163,7 +162,7 @@ STATIC VOID DemoTaskEntry(VOID)
         return;
     }
     printf("[INIH]\ncomponents = %s\nauthor = %s\ndate = %d\ndescription = %s\n\n",
-        config.components, config.author, config.date, config.description);
+           config.components, config.author, config.date, config.description);
 
     StringParseDemo(INI_STRING_DATE);
     StringParseDemo(INI_STRING_TIME);
@@ -193,6 +192,7 @@ VOID InihDemoTask(VOID)
     taskInitParam.pcName = "InihDemoTask";
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
     taskInitParam.uwStackSize = INIH_TASK_STACK_SIZE;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create inih demo task failed.\n");
