@@ -64,3 +64,8 @@ ifeq ($(LOSCFG_DEMOS_PDFGEN), y)
 include $(LITEOSTOPDIR)/demos/utility/pdfgen/pdfgen.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_PDFGEN_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_INIH), y)
+include $(LITEOSTOPDIR)/demos/utility/inih/inih.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_INIH_INCLUDE)
+endif
