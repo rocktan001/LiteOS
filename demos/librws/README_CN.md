@@ -37,7 +37,7 @@ WebSocket是一种在单个TCP连接上进行全双工通信的协议。详情�
     ```python
     # creat websockets server， please change ip as your ip address.
     ip = ''
-    startServer = websockets.serve(MainLogic， ip， 8000)
+    startServer = websockets.serve(MainLogic, ip, 8000)
     ```
 2. 通过python pip命令安装websocket包。
     ```
