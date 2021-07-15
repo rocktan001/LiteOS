@@ -415,15 +415,15 @@ void hal_spi_flash_wake_up(void)
 void prv_spi_flash_transmit(uint8_t *buf, uint32_t size)
 {
     SPI_FLASH_CS_ENABLE();
-    HAL_SPI_Transmit(&g_spi_flash, (uint8_t*)buf, size, 1000);
+    HAL_SPI_Transmit(&g_spi_flash, (uint8_t*)buf, size, 1000); // set timeout duration 1000
     SPI_FLASH_CS_DISABLE();
 }
 
 void prv_spi_flash_transmit_and_receive(uint8_t *t_buf,  uint32_t t_size, uint8_t *r_buf,uint32_t r_size)
 {
     SPI_FLASH_CS_ENABLE();
-    HAL_SPI_Transmit(&g_spi_flash, t_buf, t_size, 1000);
-    HAL_SPI_Receive(&g_spi_flash, r_buf, r_size, 1000);
+    HAL_SPI_Transmit(&g_spi_flash, t_buf, t_size, 1000); // set timeout duration 1000
+    HAL_SPI_Receive(&g_spi_flash, r_buf, r_size, 1000); // set timeout duration 1000
     SPI_FLASH_CS_DISABLE();
 }
 
