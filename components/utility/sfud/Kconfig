@@ -24,4 +24,3 @@ config LOSCFG_SFUD_USING_FLASH_INFO_TABLE
     help
       Answer y to enable using flash info table.
 
-
