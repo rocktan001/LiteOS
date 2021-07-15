@@ -144,6 +144,6 @@ VOID LibrwsDemo(VOID)
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
     if (ret != LOS_OK) {
-        printf("Create Librws demo task failed.\n");
+        printf("Create librws demo task failed.\n");
     }
 }
