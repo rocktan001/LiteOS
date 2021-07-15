@@ -192,7 +192,7 @@ VOID InihDemoTask(VOID)
     taskInitParam.pcName = "InihDemoTask";
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
     taskInitParam.uwStackSize = INIH_TASK_STACK_SIZE;
-    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create inih demo task failed.\n");
