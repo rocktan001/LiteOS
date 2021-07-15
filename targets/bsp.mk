@@ -289,6 +289,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_LIBRWS), y)
         LITEOS_BASELIB += -llibrws
     endif
+    ifeq ($(LOSCFG_COMPONENTS_SFUD), y)
+        LITEOS_BASELIB += -lsfud
+    endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
     endif
