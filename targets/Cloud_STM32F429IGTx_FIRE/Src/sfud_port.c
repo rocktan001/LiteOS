@@ -37,9 +37,15 @@
 
 typedef struct {
     uint32_t muxId;
+<<<<<<< HEAD
 } SpiUserData;
 
 static SpiUserData g_spiData;
+=======
+} spi_user_data;
+
+static spi_user_data g_spiData;
+>>>>>>> b36c2a04e49882db21740c61bace0de0685559bb
 
 static char g_logBuf[256];
 
@@ -72,7 +78,11 @@ static void SetDelay(void)
 
 static void SpiSetLock(const sfud_spi *spi) {
     SFUD_ASSERT(spi);
+<<<<<<< HEAD
     SpiUserData *data = (SpiUserData *)spi->user_data;
+=======
+    spi_user_data *data = (spi_user_data *)spi->user_data;
+>>>>>>> b36c2a04e49882db21740c61bace0de0685559bb
     SFUD_ASSERT(data);
     int ret = LOS_MuxPend(data->muxId, LOS_WAIT_FOREVER);
     if (ret != LOS_OK) {
@@ -82,7 +92,11 @@ static void SpiSetLock(const sfud_spi *spi) {
 
 static void SpiSetUnlock(const sfud_spi *spi) {
     SFUD_ASSERT(spi);
+<<<<<<< HEAD
     SpiUserData *data = (SpiUserData *)spi->user_data;
+=======
+    spi_user_data *data = (spi_user_data *)spi->user_data;
+>>>>>>> b36c2a04e49882db21740c61bace0de0685559bb
     SFUD_ASSERT(data);
    int ret = LOS_MuxPost(data->muxId);
    if (ret != LOS_OK) {
