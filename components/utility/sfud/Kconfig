@@ -24,3 +24,10 @@ config LOSCFG_SFUD_USING_FLASH_INFO_TABLE
     help
       Answer y to enable using flash info table.
 
+config LOSCFG_SFUD_USING_QSPI
+    bool "Enable using qspi"
+    default n
+    depends on LOSCFG_COMPONENTS_SFUD
+    help
+      Answer y to enable using qspi.
+

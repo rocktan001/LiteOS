@@ -65,7 +65,7 @@ enum {
     }                               \
 }
 
-#ifdef LOSCFG_USING_QSPI
+#ifdef LOSCFG_SFUD_USING_QSPI
 #define SFUD_USING_QSPI
 #endif /* LOSCFG_USING_QSPI */
 
