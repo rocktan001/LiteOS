@@ -53,3 +53,6 @@ config LOSCFG_HW_SPI_FLASH
 
 config LOSCFG_USING_BOARD_LD
     bool
+
+config LOSCFG_HW_QSPI
+    bool "Qspi peripherals"
