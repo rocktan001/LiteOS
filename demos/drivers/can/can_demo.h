@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Main Process
+ * Description: Can Send Receive Demo HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,58 +26,23 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "main.h"
-#include "sys_init.h"
-#include "los_base.h"
-#include "los_task_pri.h"
-#include "arch/canary.h"
+#ifndef _CAN_DEMO_H
+#define _CAN_DEMO_H
+
 #include "los_typedef.h"
-#include "los_sys.h"
-#include "hal_rng.h"
-#ifdef LOSCFG_DEMO_CAN
-#include "can.h"
-#endif
 
-VOID board_config(VOID)
-{
-    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+VOID CanDemoTask(VOID);
+
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-VOID HardwareInit(VOID)
-{
-    SystemClock_Config();
-    MX_USART1_UART_Init();
-    StmTimerInit();
-#ifdef LOSCFG_DEMO_CAN
-    MX_CAN1_Init();
-#endif
-    hal_rng_config();
-    dwt_delay_init(SystemCoreClock);
-}
-
-INT32 main(VOID)
-{
-#ifdef __GNUC__
-    ArchStackGuardInit();
-#endif
-    OsSetMainTask();
-    OsCurrTaskSet(OsGetMainTask());
-
-    board_config();
-    HardwareInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-
-    return 0;
-}
+#endif /* _CAN_DEMO_H */
