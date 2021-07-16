@@ -198,6 +198,10 @@
 #include "librws_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_INIH
+#include "inih_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -420,6 +424,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_PDFGEN
     PdfgenDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_INIH
+    InihDemoTask();
 #endif
 
 #ifdef LOSCFG_SHELL
