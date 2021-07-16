@@ -105,7 +105,7 @@ STATIC VOID CreateIniFile(VOID)
 INT32 FileHandler(VOID *user, const CHAR *section, const CHAR *name,
                   const CHAR *value)
 {
-    iniFile *pConfig = (iniFile*)user;
+    iniFile *pConfig = (iniFile *)user;
 
     if (MATCH("INIH", "components")) {
         pConfig->components = strdup(value);
@@ -168,13 +168,13 @@ STATIC VOID DemoTaskEntry(VOID)
     StringParseDemo(INI_STRING_TIME);
 
     if (config.components != NULL) {
-        free((VOID*)config.components);
+        free((VOID *)config.components);
     }
     if (config.author != NULL) {
-        free((VOID*)config.author);
+        free((VOID *)config.author);
     }
     if (config.description != NULL) {
-        free((VOID*)config.description);
+        free((VOID *)config.description);
     }
     printf("Inih demo task finished.\n");
 }
