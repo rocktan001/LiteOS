@@ -57,9 +57,9 @@ CHAR g_prevSection[SECTION_LEN] = { 0 };
 typedef struct
 {
     UINT32 date;
-    const CHAR* components;
-    const CHAR* author;
-    const CHAR* description;
+    const CHAR *components;
+    const CHAR *author;
+    const CHAR *description;
 } iniFile;
 
 STATIC VOID CreateIniFile(VOID)
@@ -102,10 +102,10 @@ STATIC VOID CreateIniFile(VOID)
     (VOID)close(fd);
 }
 
-int FileHandler(void* user, const char* section, const char* name,
-                const char* value)
+INT32 FileHandler(VOID *user, const CHAR *section, const CHAR *name,
+                  const CHAR *value)
 {
-    iniFile* pConfig = (iniFile*)user;
+    iniFile *pConfig = (iniFile*)user;
 
     if (MATCH("INIH", "components")) {
         pConfig->components = strdup(value);
@@ -119,11 +119,11 @@ int FileHandler(void* user, const char* section, const char* name,
         /* unknown section/name, error */
         return LOS_OK;
     }
-    return 1;
+    return LOS_NOK;
 }
 
-int StringHandler(void* user, const char* section, const char* name,
-                  const char* value)
+INT32 StringHandler(VOID *user, const CHAR *section, const CHAR *name,
+                    const CHAR *value)
 {
     UINT32 ret;
     if (strcmp(section, g_prevSection)) {
@@ -135,10 +135,10 @@ int StringHandler(void* user, const char* section, const char* name,
         g_prevSection[sizeof(g_prevSection) - 1] = '\0';
     }
     printf("%s = %s;\n", name, value);
-    return 1;
+    return LOS_NOK;
 }
 
-VOID StringParseDemo(const CHAR* string)
+VOID StringParseDemo(const CHAR *string)
 {
     STATIC UINT32 num;
     UINT32 ret;
@@ -168,13 +168,13 @@ STATIC VOID DemoTaskEntry(VOID)
     StringParseDemo(INI_STRING_TIME);
 
     if (config.components != NULL) {
-        free((void*)config.components);
+        free((VOID*)config.components);
     }
     if (config.author != NULL) {
-        free((void*)config.author);
+        free((VOID*)config.author);
     }
     if (config.description != NULL) {
-        free((void*)config.description);
+        free((VOID*)config.description);
     }
     printf("Inih demo task finished.\n");
 }
