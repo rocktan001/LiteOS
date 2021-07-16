@@ -42,7 +42,7 @@ extern "C" {
 
 STATIC UINT32 g_demoTaskId;
 
-INT32 SfudDemoEntry(void) 
+INT32 SfudDemoEntry(VOID) 
 {
     INT32 ret = sfud_init();
     if (ret != SFUD_SUCCESS) {
@@ -53,15 +53,15 @@ INT32 SfudDemoEntry(void)
     const sfud_flash *flash = sfud_get_device_table() + SFUD_W25Q256JV_DEVICE_INDEX;
     INT32 addr = 0; // operate on spi falsh address 0.
     INT32 size = 0x200; //set the size of 512 data to operate.
-    UINT8 *buff = (UINT8 *) malloc(size);
+    UINT8 *buff = (UINT8 *)malloc(size);
     if (buff == NULL) {
         return 1;
     } else {
             for (INT32 i = 0, j = 0; i < size; i++, j++) {
-                buff[i] = j;
-                if (buff[i] == 0xFF) {
+                 buff[i] = j;
+                 if (buff[i] == 0xFF) {
                     j = 0;
-                }
+                 }
             }
     }
     // The following are write and read, erase example operations.
@@ -80,10 +80,10 @@ INT32 SfudDemoEntry(void)
         printf("Sfud read success.\n");
     }
     for (INT32 i = 0; i < size; ++i) {
-        printf("%02x ", buff[i]);
-        if (((i + 1) % 0x10) == 0) { // Each row displays 16 pieces of data.
-            printf("\n");
-        }
+         printf("%02x ", buff[i]);
+         if (((i + 1) % 0x10) == 0) { // Each row displays 16 pieces of data.
+             printf("\n");
+         }
     }
     printf("\n");
 
@@ -96,7 +96,7 @@ INT32 SfudDemoEntry(void)
 }
 
 
-void SfudDemoTask(void)
+VOID SfudDemoTask(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
