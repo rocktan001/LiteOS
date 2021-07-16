@@ -56,3 +56,4 @@ config LOSCFG_USING_BOARD_LD
 
 config LOSCFG_HW_QSPI
     bool "Qspi peripherals"
+
