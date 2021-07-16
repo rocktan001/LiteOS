@@ -47,7 +47,7 @@ INT32 SfudDemoEntry(VOID)
     INT32 ret = sfud_init();
     if (ret != SFUD_SUCCESS) {
         printf("Sfud init failed\n");
-        return 1;
+        return LOS_NOK;
     }
     // In sfdu device table, pointer is offset to SFUD_W25Q256JV_DEVICE_INDEX.
     const sfud_flash *flash = sfud_get_device_table() + SFUD_W25Q256JV_DEVICE_INDEX;
@@ -55,30 +55,37 @@ INT32 SfudDemoEntry(VOID)
     INT32 size = 0x200; //set the size of 512 data to operate.
     UINT8 *buff = (UINT8 *)malloc(size);
     if (buff == NULL) {
-        return 1;
-    } else {
-            for (INT32 i = 0, j = 0; i < size; i++, j++) {
-                 buff[i] = j;
-                 if (buff[i] == 0xFF) {
-                    j = 0;
-                 }
-            }
+        return LOS_NOK;
     }
+    for (INT32 i = 0, j = 0; i < size; i++, j++) {
+         buff[i] = j;
+         if (buff[i] == 0xFF) {
+             j = 0;
+         }
+    }
+
     // The following are write and read, erase example operations.
     printf("Do sfud write.\n");
     ret = sfud_write(flash, addr, size, buff);
-    if (ret == SFUD_SUCCESS) {
-        printf("Sfud write success.\n");
+    if (ret != SFUD_SUCCESS) {
+        printf("Sfud write failed.\n");
+        free(buff);
+        return LOS_NOK;
     }
+    printf("Sfud write success.\n");
+
     ret = memset_s(buff, size, 0, size);
     if (ret != EOK) {
-       return 1;
+       return LOS_NOK;
     }
     printf("Do sfud read.\n");
     ret = sfud_read(flash, addr, size, buff);
-    if (ret == SFUD_SUCCESS) {
-        printf("Sfud read success.\n");
+    if (ret != SFUD_SUCCESS) {
+        printf("Sfud read failed.\n");
+        free(buff);
+        return LOS_NOK;
     }
+    printf("Sfud read success.\n");
     for (INT32 i = 0; i < size; ++i) {
          printf("%02x ", buff[i]);
          if (((i + 1) % 0x10) == 0) { // Each row displays 16 pieces of data.
@@ -89,10 +96,14 @@ INT32 SfudDemoEntry(VOID)
 
     printf("Do sfud erase.\n");
     ret = sfud_erase(flash, addr, size);
-    if (ret == SFUD_SUCCESS) {
-        printf("Sfud erase success.\n");
+    if (ret != SFUD_SUCCESS) {
+        printf("Sfud erase failed.\n");
+        free(buff);
+        return LOS_NOK;
     }
-    return 0;
+    printf("Sfud erase success.\n");
+    free(buff);
+    return LOS_OK;
 }
 
 
