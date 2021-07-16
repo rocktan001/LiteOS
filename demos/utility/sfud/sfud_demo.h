@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Sfud Cfg HeadFile
+ * Description: Sfud Demo HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-07-10
+ * Create: 2021-07-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,12 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _SFUD_PORT_H
-#define _SFUD_PORT_H
-
-#ifdef LOSCFG_COMPONENTS_SFUD
-
-#include <stdint.h>
+#ifndef _SFUD_DEMO_H
+#define _SFUD_DEMO_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -39,8 +35,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void sfud_log_debug(const char *file, const long line, const char *format, ...);
-void sfud_log_info(const char *format, ...);
+void SfudDemoTask(void);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,6 +43,4 @@ void sfud_log_info(const char *format, ...);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* LOSCFG_COMPONENTS_SFUD */
-
-#endif /* _SFUD_PORT_H */
+#endif /* _SFUD_DEMO_H */

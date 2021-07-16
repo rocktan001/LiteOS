@@ -391,6 +391,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_INIH), y)
         LITEOS_BASELIB += -linih_demo
     endif
+    ifeq ($(LOSCFG_DEMOS_SFUD), y)
+        LITEOS_BASELIB += -lsfud_demo
+    endif
 endif
 
 ifeq ($(LOSCFG_DEMOS_AI), y)
