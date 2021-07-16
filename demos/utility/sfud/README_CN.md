@@ -1,4 +1,3 @@
-
 # Sfud Demo说明文档
 `Sfud`是一个开源 SPI FLASH 驱动库，该库集合了常用的flash型号参数表，通过查找`内置的常用flash参数表`或`SFDP参数表`，实现对flash的读写，擦除等操作。
 
