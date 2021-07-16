@@ -15,6 +15,7 @@ source "components/utility/pdfgen/Kconfig"
 source "components/utility/sqlite/Kconfig"
 source "components/utility/thttpd/Kconfig"
 source "components/utility/tinyxml2/Kconfig"
+source "components/utility/sfud/Kconfig"
 
 endmenu
 

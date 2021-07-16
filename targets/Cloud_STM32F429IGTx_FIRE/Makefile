@@ -53,6 +53,11 @@ BSP_DRIVER_SRC = \
     C_SOURCES += $(BSP_DRIVER_SRC)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_SFUD), y)
+C_SOURCES += \
+    Src/sfud_port.c
+endif
+
 # C includes
 HAL_DRIVER_INC = \
    -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F4xx_HAL_Driver/Inc \
