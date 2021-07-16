@@ -51,15 +51,15 @@ INT32 SfudDemoEntry(VOID)
     }
     // In sfdu device table, pointer is offset to SFUD_W25Q256JV_DEVICE_INDEX.
     const sfud_flash *flash = sfud_get_device_table() + SFUD_W25Q256JV_DEVICE_INDEX;
-    INT32 addr = 0; // operate on spi falsh address 0.
-    INT32 size = 0x200; //set the size of 512 data to operate.
+    INT32 addr = 0; // Operate on spi falsh address 0.
+    INT32 size = 0x200; // Set the size of 512 data to operate.
     UINT8 *buff = (UINT8 *)malloc(size);
     if (buff == NULL) {
         return LOS_NOK;
     }
     for (INT32 i = 0, j = 0; i < size; i++, j++) {
          buff[i] = j;
-         if (buff[i] == 0xFF) {
+         if (buff[i] == 0xFF) { // The maximum value of a byte is 0xFF;
              j = 0;
          }
     }
