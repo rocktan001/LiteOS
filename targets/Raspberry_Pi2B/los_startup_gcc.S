@@ -73,6 +73,13 @@ continue:
     mcr     p15, #0, r0, c1, c0, #0    @ clear mmu bit
     dsb
 
+    /* enable fpu+neon */
+    LDR     r0, =(0xF << 20)
+    MCR     p15, 0, r0, c1, c0, 2
+
+    MOV     r3, #0x40000000
+    VMSR    FPEXC, r3
+
     /* set the cpu to SVC32 mode and disable interrupt */
     mrs     r0, cpsr
     bic     r0, r0, #0x1f

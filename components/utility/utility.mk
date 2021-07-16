@@ -75,3 +75,7 @@ include $(LITEOSTOPDIR)/components/utility/inih/inih.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_INIH_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_SFUD), y)
+include $(LITEOSTOPDIR)/components/utility/sfud/sfud.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_SFUD_INCLUDE)
+endif
