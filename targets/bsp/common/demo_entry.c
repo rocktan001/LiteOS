@@ -166,6 +166,10 @@
 #include "curl_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMO_CAN
+#include "can_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_OPENSSL
 #include "openssl_demo.h"
 #endif
@@ -400,6 +404,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_CURL
     CurlDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMO_CAN
+    CanDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_OPENSSL

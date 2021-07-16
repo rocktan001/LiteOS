@@ -18,6 +18,7 @@ USER_SRC = \
     Src/main.c \
     Src/system_stm32f4xx.c \
     Src/usart.c \
+    Src/can.c \
     Src/eth.c \
     Src/sys_init.c \
     Src/flash_adaptor.c \

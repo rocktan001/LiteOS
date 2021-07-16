@@ -32,6 +32,7 @@ STM32F7xx_HAL_OUT = \
     LOCAL_SRCS = $(STM32F7xx_HAL_SRC)
 else ifeq ($(LOSCFG_PLATFORM_STM32F429IGTX), y)
 STM32F429IGTX_HAL_SRC = \
+    drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c \
     drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
     drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c \
     drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \

@@ -18,6 +18,7 @@ MODULE_$(LOSCFG_DEMOS_LIBRWS) += librws
 MODULE_y += utility
 MODULE_y += media
 MODULE_y += language
+MODULE_y += drivers
 MODULE_y += security
 
 include $(MODULE)
