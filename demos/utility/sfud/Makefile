@@ -9,7 +9,10 @@ LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/demos/utility/sfud \
     -I $(LITEOSTOPDIR)/include
 
-LOCAL_INCLUDE += $(COMPONENTS_SFUD_INCLUDE)
+LOCAL_EXT_FLAG := \
+    -fstack-protector-strong
+
+LOCAL_INCLUDE += $(COMPONENTS_SFUD_INCLUDE) $(LOCAL_EXT_FLAG)
 
 LOCAL_FLAGS := $(LOCAL_INCLUDE)
 include $(MODULE)
