@@ -71,20 +71,16 @@ LiteOS的文件系统提供一套demo来演示文件系统的一些基本操作�
 
 - 对于不同开发板，目前文件系统的支持情况如下：
 
-  |开发板|RAMFS|FATFS|SPIFFS|LITTLEFS|
-  |:---:|:---:|:---:|:---:|----|
-  |STM32F429|支持|支持|支持|支持|
-  |STM32F769|支持|支持|不支持|不支持|
-  |STM32L431|支持|不支持|不支持|不支持|
-
+|  开发板   | RAMFS | FATFS  | SPIFFS | LITTLEFS |
+| :-------: | :---: | :----: | :----: | :------: |
+| STM32F429 | 支持  |  支持  |  支持  |   支持   |
+| STM32F769 | 支持  |  支持  | 不支持 |  不支持  |
+| STM32L431 | 支持  | 不支持 | 不支持 |  不支持  |
 - 其中STM32F429的FAT文件系统支持两种介质，SPI Flash或SD Card，可以选择，默认为SD Card。
 而STM32F769的FAT文件系统目前暂时只支持SD Card。
-
 - SD Card为介质时，需要在开发板上插入SD卡，否则会挂载失败。
-
 - 在STM32F429上，RAMFS、FATFS SD Card类型、SPIFFS或LITTLEFS三种文件系统可同时挂载。但是由于在STM32F429上SPIFFS和LITTLEFS使用相同介质，所以SPIFFS和LITTLEFS不能同时开启。
 - 在STM32F769上，可同时挂载RAMFS和FATFS。
-
 - 通过menuconfig使能demo后，编译LiteOS源码，生成系统镜像文件Huawei_LiteOS.bin，并将.bin文件烧写到开发板，复位重启开发板后，demo即启动。
 
 下面介绍各个demo及其使能方法。
