@@ -45,10 +45,73 @@ extern "C" {
 
 STATIC UINT32 g_demoTaskId;
 
-STATIC INT32 DemoTaskEntry(VOID)
+STATIC VOID TextDemo(struct pdf_doc *pdf)
 {
     UINT32 i, j;
     CHAR addText[ADD_TEXT_LEN] = {0};
+    /* Generate multiplication table */
+    for (i = 1; i < 10; i++) {      /* 10: multiplication table */
+        for (j = i; j < 10; j++) {  /* 10: multiplication table */
+            sprintf(addText, "%d*%d=%d", i, j, (i * j));
+
+            /* 
+             * 12: text size.
+             * (i * 60.0f): abscissa.
+             * (PDF_A4_HEIGHT - 50 - (j * 20.0f)): ordinate.
+             */
+            pdf_add_text(pdf, NULL, addText, 
+                         12,                                 /* 12: text size. */
+                         (i * 60.0f),                        /* (i * 60.0f): abscissa. */
+                         (PDF_A4_HEIGHT - 50 - (j * 20.0f)), /* 50 - (j * 20.0f)): ordinate */
+                         PDF_BLACK);
+        }
+    }
+}
+
+STATIC VOID LineDemo(struct pdf_doc *pdf)
+{
+    /* 50: x1, 500: y1, 150: x2, 500: y2, 6: width */
+    pdf_add_line(pdf, NULL, 50, 500, 150, 500, 6, PDF_RGB(0, 0xff, 0xff));
+    /* 50: x1, 400: y1, 150: x2, 400: y2, 6: width */
+    pdf_add_line(pdf, NULL, 50, 400, 150, 400, 6, PDF_RGB(0xff, 0, 0));
+    /* 50: x1, 500: y1, 50: x2, 400: y2, 6: width */
+    pdf_add_line(pdf, NULL, 50, 500, 50, 400, 6, PDF_BLACK);
+    /* 150: x1, 500: y1, 150: x2, 400: y2, 6: width */
+    pdf_add_line(pdf, NULL, 150, 500, 150, 400, 6, PDF_RGB(0xff, 0, 0xff));
+
+    /* 200: x1, 500: y1, 300: x2, 400: y2, 6: width */
+    pdf_add_line(pdf, NULL, 200, 500, 300, 400, 6, PDF_RGB(0, 0xff, 0));
+    /* 300: x1, 500: y1, 200: x2, 400: y2, 6: width */
+    pdf_add_line(pdf, NULL, 300, 500, 200, 400, 6, PDF_RGB(0, 0, 0xff));
+}
+
+STATIC VOID RectangleDemo(struct pdf_doc *pdf)
+{
+    /* 350: x, 500: y, 100: width, -100: height, 4: border width */
+    pdf_add_rectangle(pdf, NULL, 350, 500, 100, -100, 4, PDF_RGB(0xff, 0xff, 0));
+    /* 400: x, 450: y, 4: width, 4: height, 4: border width */
+    pdf_add_rectangle(pdf, NULL, 400, 450, 4, 4, 4, PDF_RGB(0xff, 0, 0));
+    /* 500: x, 420: y, 50: width, 50: height, 4: border width */
+    pdf_add_filled_rectangle(pdf, NULL, 500, 420, 50, 50, 4, PDF_RGB(0xff, 0, 0));
+}
+
+STATIC VOID CircleAndCurveDemo(struct pdf_doc *pdf)
+{
+    /* 200 200: center of a circle, 50: radius, 5: width */
+    pdf_add_circle(pdf, NULL, 200, 200, 50, 5, PDF_RGB(0xff, 0, 0), PDF_TRANSPARENT);
+    /* 200 200: center of a circle, 40: x radius, 30: y radius, 2: width */
+    pdf_add_ellipse(pdf, NULL, 200, 200, 40, 30, 2, PDF_RGB(0xff, 0xff, 0), PDF_RGB(0, 0, 0));
+
+    /* 300: x1, 240: y1, 440: x2, 240: y2, 340: xq1, 260: yq1, 4: width */
+    pdf_add_quadratic_bezier(pdf, NULL, 300, 240, 440, 240, 340, 260, 4, PDF_RGB(0, 0, 0xff));
+    /* 300: x1, 200: y1, 440: x2, 200: y2, 290: xq1, 130: yq1, 350: xq1, 130: yq2, 4: width */
+    pdf_add_cubic_bezier(pdf, NULL, 300, 200, 440, 200, 290, 130, 350, 130, 4, PDF_RGB(0, 0xff, 0));
+    /* 350 200: center of a circle, 30: x radius, 20: y radius, 2: width */
+    pdf_add_ellipse(pdf, NULL, 350, 200, 30, 20, 2, PDF_RGB(0xff, 0xff, 0), PDF_RGB(0, 0, 0));
+}
+
+STATIC INT32 DemoTaskEntry(VOID)
+{
     struct pdf_doc *pdf = NULL;
 
     struct pdf_info info = {
@@ -72,72 +135,11 @@ STATIC INT32 DemoTaskEntry(VOID)
     pdf_set_font(pdf, "Times-Roman");
     pdf_append_page(pdf);
 
-    /* Generate multiplication table */
-    for (i = 1; i < 10; i++) {      /* 10: multiplication table */
-        for (j = i; j < 10; j++) {  /* 10: multiplication table */
-            sprintf(addText, "%d*%d=%d", i, j, (i * j));
+    TextDemo(pdf);
+    LineDemo(pdf);
+    RectangleDemo(pdf);
+    CircleAndCurveDemo(pdf);
 
-            /* 
-             * 12: text size.
-             * (i * 60.0f): abscissa.
-             * (PDF_A4_HEIGHT - 50 - (j * 20.0f)): ordinate.
-             */
-            pdf_add_text(pdf, NULL, addText, 12, (i * 60.0f),
-                         (PDF_A4_HEIGHT - 50 - (j * 20.0f)), PDF_BLACK);
-        }
-    }
-
-    /* 
-     * The numbers shown below indicate the horizontal and vertical coordinates,
-     * font size or line width, three primary colors.
-     * eg:
-     *    50 500     : starting point coordinates.
-     *    150 500    : end point coordinates.
-     *    6          : width.
-     *    0 0xff 0xff: colour.
-     */
-
-    /* 50: x1, 500: y1, 150: x2, 500: y2, 6: width */
-    pdf_add_line(pdf, NULL, 50, 500, 150, 500, 6, PDF_RGB(0, 0xff, 0xff));
-    /* 50: x1, 400: y1, 150: x2, 400: y2, 6: width */
-    pdf_add_line(pdf, NULL, 50, 400, 150, 400, 6, PDF_RGB(0xff, 0, 0));
-    /* 50: x1, 500: y1, 50: x2, 400: y2, 6: width */
-    pdf_add_line(pdf, NULL, 50, 500, 50, 400, 6, PDF_BLACK);
-    /* 150: x1, 500: y1, 150: x2, 400: y2, 6: width */
-    pdf_add_line(pdf, NULL, 150, 500, 150, 400, 6, PDF_RGB(0xff, 0, 0xff));
-
-    /* 200: x1, 500: y1, 300: x2, 400: y2, 6: width */
-    pdf_add_line(pdf, NULL, 200, 500, 300, 400, 6, PDF_RGB(0, 0xff, 0));
-    /* 300: x1, 500: y1, 200: x2, 400: y2, 6: width */
-    pdf_add_line(pdf, NULL, 300, 500, 200, 400, 6, PDF_RGB(0, 0, 0xff));
-
-    /* 350: x, 500: y, 100: width, -100: height, 4: border width */
-    pdf_add_rectangle(pdf, NULL, 350, 500, 100, -100, 4,
-                      PDF_RGB(0xff, 0xff, 0));
-    /* 400: x, 450: y, 4: width, 4: height, 4: border width */
-    pdf_add_rectangle(pdf, NULL, 400, 450, 4, 4, 4, PDF_RGB(0xff, 0, 0));
-
-    /* 500: x, 420: y, 50: width, 50: height, 4: border width */
-    pdf_add_filled_rectangle(pdf, NULL, 500, 420, 50, 50,
-                             4, PDF_RGB(0xff, 0, 0));
-
-    /* 200 200: center of a circle, 50: radius, 5: width */
-    pdf_add_circle(pdf, NULL, 200, 200, 50, 5,
-                   PDF_RGB(0xff, 0, 0), PDF_TRANSPARENT);
-    /* 200 200: center of a circle, 40: x radius, 30: y radius, 2: width */
-    pdf_add_ellipse(pdf, NULL, 200, 200, 40, 30, 2,
-                    PDF_RGB(0xff, 0xff, 0), PDF_RGB(0, 0, 0));
-
-    /* 300: x1, 240: y1, 440: x2, 240: y2, 340: xq1, 260: yq1, 4: width */
-    pdf_add_quadratic_bezier(pdf, NULL, 300, 240, 440, 240, 340, 260,
-                             4, PDF_RGB(0, 0, 0xff));
-    /* 300: x1, 200: y1, 440: x2, 200: y2, 290: xq1, 130: yq1,
-       350: xq1, 130: yq2, 4: width */
-    pdf_add_cubic_bezier(pdf, NULL, 300, 200, 440, 200, 290, 130, 350, 130,
-                         4, PDF_RGB(0, 0xff, 0));
-    /* 350 200: center of a circle, 30: x radius, 20: y radius, 2: width */
-    pdf_add_ellipse(pdf, NULL, 350, 200, 30, 20, 2,PDF_RGB(0xff, 0xff, 0),
-                    PDF_RGB(0, 0, 0));
     pdf_save(pdf, OUTPUT_FILENAME);
     pdf_destroy(pdf);
 
