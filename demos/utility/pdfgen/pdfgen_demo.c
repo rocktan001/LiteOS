@@ -108,6 +108,7 @@ STATIC VOID CircleAndCurveDemo(struct pdf_doc *pdf)
     pdf_add_cubic_bezier(pdf, NULL, 300, 200, 440, 200, 290, 130, 350, 130, 4, PDF_RGB(0, 0xff, 0));
     /* 350 200: center of a circle, 30: x radius, 20: y radius, 2: width */
     pdf_add_ellipse(pdf, NULL, 350, 200, 30, 20, 2, PDF_RGB(0xff, 0xff, 0), PDF_RGB(0, 0, 0));
+    pdf_add_ellipse(pdf, NULL, 350, 200, 30, 20, 2, PDF_RGB(0xff, 0xff, 0), PDF_RGB(0, 0, 0));
 }
 
 STATIC INT32 DemoTaskEntry(VOID)
