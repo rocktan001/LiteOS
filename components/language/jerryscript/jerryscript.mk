@@ -7,3 +7,4 @@ COMPONENTS_JERRYSCRIPT_INCLUDE := \
 ifneq ($(OS), Linux)
     LITEOS_BASELIB += -ljerryscript
 endif
+
