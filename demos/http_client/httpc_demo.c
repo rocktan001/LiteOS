@@ -50,11 +50,11 @@ STATIC err_t HttpcRecv(VOID *arg, struct altcp_pcb *pcb, struct pbuf *p, err_t e
 
     LWIP_ASSERT("p != NULL", p != NULL);
 
-    printf("http receive:\n");
+    printf("Http receive:\n");
     for (q = p; q != NULL; q = q->next) {
         printf("%s", (char *)q->payload);
     }
-    printf("http receive finished.\n");
+    printf("Http receive finished.\n");
     altcp_recved(pcb, p->tot_len);
     pbuf_free(p);
     return ERR_OK;
@@ -68,7 +68,7 @@ STATIC err_t HttpcHeaderDone(httpc_state_t *connection, VOID *arg, struct pbuf *
 STATIC VOID HttpcResult(VOID *arg, httpc_result_t httpc_result, UINT32 rx_content_len, UINT32 srv_res, err_t err)
 {
     if (httpc_result != HTTPC_RESULT_OK) {
-        printf("http close failed result :%d.\n", httpc_result);
+        printf("Http close failed result :%d.\n", httpc_result);
     }
 }
 
