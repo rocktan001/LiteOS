@@ -1,5 +1,6 @@
 include $(LITEOSTOPDIR)/config.mk
 
+MODULE_$(LOSCFG_COMPONENTS_JERRYSCRIPT) += jerryscript
 MODULE_$(LOSCFG_COMPONENTS_LUA) += lua
 
 include $(MODULE)
