@@ -77,7 +77,7 @@ UINT8 uart_getc(VOID)
         ch =  (UINT8)tmp;
 #elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
 	(VOID)HAL_UART_Receive(UART5, &ch, sizeof(UINT8), 0);
-#elif defined (LOSCFG_PLATFORM_Raspberry_Pi2B)
+#elif defined (LOSCFG_FAMILY_RASPBERRY)
     if (miniUart->LSR & UART_RXREADY_FLAG) {
         ch = (UINT8)(miniUart->IO & 0xff);
     }
@@ -97,7 +97,7 @@ STATIC VOID UartHandler(VOID)
 
 INT32 ShellQueueCreat(VOID)
 {
-    return (INT32)LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);;
+    return (INT32)LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
 }
 
 INT32 uart_hwiCreate(VOID)
@@ -138,13 +138,16 @@ INT32 uart_hwiCreate(VOID)
     *(UINT32 volatile *)(METAL_SIFIVE_UART0_10013000_BASE_ADDRESS + METAL_SIFIVE_UART0_IE) |= (1 << 1);
 #elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
     NVIC_DisableIRQ(UART5_IRQn);
-	NVIC_SetPriority(UART5_IRQn,1);
-	NVIC_EnableIRQ(UART5_IRQn);
+    NVIC_SetPriority(UART5_IRQn, 1);
+    NVIC_EnableIRQ(UART5_IRQn);
     LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 1, 0, UartHandler, NULL);
     LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
-#elif defined (LOSCFG_PLATFORM_Raspberry_Pi2B)
+#elif defined (LOSCFG_FAMILY_RASPBERRY)
     LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    miniUart->IER = 0x1;
+    miniUart->IIR = 0x1;
+    if (miniUart->LSR & UART_RXREADY_FLAG) {
+        (VOID)(miniUart->IO & 0xff); /* Clear Uart Rx Irq */
+    }
     LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
 #elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
     if (huart3.Instance == NULL) {
@@ -211,8 +214,8 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
         metal_tty_putc(buf[i]);
     }
 #elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
-    HAL_UART_Transmit(UART5, (void*)buf, len, DEFAULT_TIMEOUT);
-#elif defined (LOSCFG_PLATFORM_Raspberry_Pi2B)
+    HAL_UART_Transmit(UART5, (VOID *)buf, len, DEFAULT_TIMEOUT);
+#elif defined (LOSCFG_FAMILY_RASPBERRY)
     UINT32 i;
     for (i = 0; i < len; i++) {
         while(!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};

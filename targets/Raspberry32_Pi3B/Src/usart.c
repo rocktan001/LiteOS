@@ -1,9 +1,8 @@
-
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Usart Init Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-07-01
+ * Create: 2021-07-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -52,7 +51,7 @@ MINIUART_INFO *miniUart;
 #define PER_GPFSEL_GPIONUM  10
 #define GPIO_FSEL_BITNUM    3
 
-VOID UartInit(VOID)
+VOID MiniUartInit(VOID)
 {
     UINT32 value;
     GPIO_INFO * gpio = GPIO_REG_BASE;
@@ -70,13 +69,13 @@ VOID UartInit(VOID)
 
     miniUart = MINI_UART;
     *((volatile UINT32 *)(AUX_ENABLES)) |= 1;   /* Mini UART enable */
-    miniUart->LCR   = 3;    /* UART works in 8-bit mode */
-    miniUart->IIR   = 0;    /* disable receive interrupt,transmit interrupt */
-    miniUart->CNTL  = 0;    /* disable receive,transmit  */
-    miniUart->MCR   = 0;    /* RTS set 0 */
-    miniUart->IER   = 0xC6; /* Enable FIFO, Clear FIFO */
-    miniUart->BAUD  = 270;  /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
-    miniUart->CNTL  = 3;     /* enable receive,transmit  */
+    miniUart->LCR = 3;    /* UART works in 8-bit mode */
+    miniUart->IIR = 0;    /* disable receive interrupt,transmit interrupt */
+    miniUart->CNTL = 0;   /* disable receive,transmit */
+    miniUart->MCR = 0;    /* RTS set 0 */
+    miniUart->IER = 0xC6; /* Enable FIFO, Clear FIFO */
+    miniUart->BAUD = 270; /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
+    miniUart->CNTL = 3;   /* enable receive,transmit */
 }
 
 #ifdef __cplusplus
@@ -84,3 +83,4 @@ VOID UartInit(VOID)
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+

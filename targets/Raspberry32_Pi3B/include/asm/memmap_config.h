@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Platform HeadFile
+ * Description: Memory Map Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-07-01
+ * Create: 2021-07-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,15 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ASM_PLATFORM_H
-#define _ASM_PLATFORM_H
-
-#include "los_typedef.h"
-#include "uart.h"
-
-#include "interrupt_config.h"
-#include "memmap_config.h"
-#include "register_config.h"
+#ifndef _MEMMAP_CONFIG_H
+#define _MEMMAP_CONFIG_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -42,11 +35,9 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define SYS_MEM_BASE    (UINT32)(&__bss_end)
-
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern VOID app_init(VOID);
-#endif
+#define OS_SYS_MEM_ADDR        ((void *)(&__bss_end))
+#define LOS_HEAP_ADDR_END      (void*)(4 * 1024 * 1024)
+#define OS_SYS_MEM_SIZE        (UINT32)(((UINT32)LOS_HEAP_ADDR_END - (UINT32)OS_SYS_MEM_ADDR + (64 - 1)) & ~(64 - 1))
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,4 +45,5 @@ extern VOID app_init(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ASM_PLATFORM_H */
+#endif /* _MEMMAP_CONFIG_H */
+

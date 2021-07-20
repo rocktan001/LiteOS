@@ -2,7 +2,7 @@
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Platform HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-07-01
+ * Create: 2021-07-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -55,3 +55,4 @@ extern VOID app_init(VOID);
 #endif /* __cplusplus */
 
 #endif /* _ASM_PLATFORM_H */
+

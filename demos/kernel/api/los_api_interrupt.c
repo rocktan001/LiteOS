@@ -43,7 +43,7 @@ extern "C" {
 #define SOFT_IRQ_NUM    31
 #elif defined  LOSCFG_ARCH_RISCV_RV32IMC
 #define SOFT_IRQ_NUM    3
-#elif defined LOSCFG_PLATFORM_Raspberry_Pi2B
+#elif defined (LOSCFG_FAMILY_RASPBERRY)
 #define SOFT_IRQ_NUM    MAILBOX2_IRQ
 #else
 #define SOFT_IRQ_NUM    39

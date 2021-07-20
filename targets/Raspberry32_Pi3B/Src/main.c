@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Platform HeadFile
+ * Description: Main Process Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-07-01
+ * Create: 2021-07-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -25,16 +25,10 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-
-#ifndef _ASM_PLATFORM_H
-#define _ASM_PLATFORM_H
-
-#include "los_typedef.h"
-#include "uart.h"
-
-#include "interrupt_config.h"
-#include "memmap_config.h"
-#include "register_config.h"
+ 
+#include "usart.h"
+#include "canary.h"
+#include "los_task_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -42,11 +36,60 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define SYS_MEM_BASE    (UINT32)(&__bss_end)
+VOID CpuInit(VOID)
+{
+    UINT32 coreId = 0;
+    asm("mrc p15, 0, %0, c0, c0, 5":"=r"(coreId)::);
+    coreId = coreId & MPIDR_CPUID_MASK;
+    __asm__ (
+    "msr cpsr_c, %1\n\t"
+    "mov sp, %0\n\t"
+    "msr cpsr_c, %3\n\t"
+    "mov sp, %2\n\t"
+    "msr cpsr_c, %5\n\t"
+    "mov sp, %4\n\t"
+    "msr cpsr_c, %7\n\t"
+    "mov sp, %6\n\t"
+    "msr cpsr_c, %8\n\t"
+    :
+    : "r" (__irq_stack_top - OS_EXC_IRQ_STACK_SIZE * coreId),
+    "I" (PSR_F_BIT | PSR_I_BIT | CPSR_IRQ_MODE),
+    "r" (__abt_stack_top - OS_EXC_ABT_STACK_SIZE * coreId),
+    "I" (PSR_F_BIT | PSR_I_BIT | CPSR_ABT_MODE),
+    "r" (__undef_stack_top - OS_EXC_UNDEF_STACK_SIZE * coreId),
+    "I" (PSR_F_BIT | PSR_I_BIT | CPSR_UNDEF_MODE),
+    "r" (__fiq_stack_top - OS_EXC_FIQ_STACK_SIZE * coreId),
+    "I" (PSR_F_BIT | PSR_I_BIT | CPSR_FIQ_MODE),
+    "I" (PSR_F_BIT | PSR_I_BIT | CPSR_SVC_MODE)
+    : "r14");
+}
 
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern VOID app_init(VOID);
+INT32 main(VOID)
+{
+#ifdef __GNUC__
+    ArchStackGuardInit();
 #endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+
+    CpuInit();
+    MiniUartInit();
+
+    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
+                  "\nLiteOS Kernel Version : %s\n"
+                  "build data : %s %s\n\n"
+                  "**********************************\n",
+                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
+
+    UINT32 ret = OsMain();
+    if (ret != LOS_OK) {
+        return LOS_NOK;
+    }
+    
+    OsStart();
+
+    return LOS_OK;
+}
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,4 +97,3 @@ extern VOID app_init(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ASM_PLATFORM_H */
