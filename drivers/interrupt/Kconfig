@@ -40,4 +40,5 @@ config LOSCFG_PLATFORM_BSP_RISCV_ECLIC
 config LOSCFG_PLATFORM_ARM_CONTROL
     bool
     help
-      Arm control
+      Raspberry Pi 2B/3B Arm Interrupt control
+

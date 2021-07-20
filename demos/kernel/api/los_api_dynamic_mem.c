@@ -35,10 +35,8 @@
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#ifdef LOSCFG_ARCH_CORTEX_A7
-#define MEM_DYN_SIZE    2048
-#endif
-#ifdef LOSCFG_ARCH_CORTEX_A53
+
+#if defined (LOSCFG_ARCH_CORTEX_A53_AARCH32) || defined (LOSCFG_ARCH_CORTEX_A7) || defined (LOSCFG_ARCH_CORTEX_A53)
 #define MEM_DYN_SIZE    2048
 #endif
 #ifdef LOSCFG_ARCH_CORTEX_A9

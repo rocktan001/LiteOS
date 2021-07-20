@@ -27,7 +27,7 @@ config LOSCFG_SFUD_USING_FLASH_INFO_TABLE
 config LOSCFG_SFUD_USING_QSPI
     bool "Enable using qspi"
     default n
-    depends on LOSCFG_COMPONENTS_SFUD
+    depends on LOSCFG_COMPONENTS_SFUD && LOSCFG_HW_QSPI
     help
       Answer y to enable using qspi.
 

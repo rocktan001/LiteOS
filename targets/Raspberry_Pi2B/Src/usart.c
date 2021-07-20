@@ -69,14 +69,14 @@ VOID UartInit(VOID)
     gpio->GPPUDCLK[0] = 0;
 
     miniUart = MINI_UART;
-    *((volatile UINT32 *)(AUX_ENABLES)) |= 1;
-    miniUart->LCR   = 3;
-    miniUart->IER   = 0;
-    miniUart->CNTL  = 0;
-    miniUart->MCR   = 0;
-    miniUart->IIR   = 0xC6;
-    miniUart->BAUD  = 270;
-    miniUart->CNTL  = 3;
+    *((volatile UINT32 *)(AUX_ENABLES)) |= 1;   /* Mini UART enable */
+    miniUart->LCR   = 3;    /* UART works in 8-bit mode */
+    miniUart->IIR   = 0;    /* disable receive interrupt,transmit interrupt */
+    miniUart->CNTL  = 0;    /* disable receive,transmit  */
+    miniUart->MCR   = 0;    /* RTS set 0 */
+    miniUart->IER   = 0xC6; /* Enable FIFO, Clear FIFO */
+    miniUart->BAUD  = 270;  /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
+    miniUart->CNTL  = 3;     /* enable receive,transmit  */
 }
 
 #ifdef __cplusplus

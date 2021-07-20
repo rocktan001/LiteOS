@@ -394,6 +394,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_HTTP_CLIENT), y)
         LITEOS_BASELIB += -lhttpc_demo
     endif
+    ifeq ($(LOSCFG_DEMOS_SFUD), y)
+        LITEOS_BASELIB += -lsfud_demo
+    endif
 endif
 
 ifeq ($(LOSCFG_DEMOS_AI), y)

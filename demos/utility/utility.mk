@@ -69,3 +69,9 @@ ifeq ($(LOSCFG_DEMOS_INIH), y)
 include $(LITEOSTOPDIR)/demos/utility/inih/inih.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_INIH_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_SFUD), y)
+include $(LITEOSTOPDIR)/demos/utility/sfud/sfud.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_SFUD_INCLUDE)
+endif
+

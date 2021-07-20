@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Sfud Cfg HeadFile
+ * Description: Usart Init Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-07-10
+ * Create: 2021-07-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,12 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _SFUD_PORT_H
-#define _SFUD_PORT_H
-
-#ifdef LOSCFG_COMPONENTS_SFUD
-
-#include <stdint.h>
+#include "usart.h"
+#include "register_config.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -39,8 +35,48 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void sfud_log_debug(const char *file, const long line, const char *format, ...);
-void sfud_log_info(const char *format, ...);
+MINIUART_INFO *miniUart;
+
+#define GPIO_MODE_INPUT     0
+#define GPIO_MODE_OUTPUT    1
+#define GPIO_ALT_FUNC0      4
+#define GPIO_ALT_FUNC1      5
+#define GPIO_ALT_FUNC2      6
+#define GPIO_ALT_FUNC3      7
+#define GPIO_ALT_FUNC4      3
+#define GPIO_ALT_FUNC5      2
+#define GPIO_FSEL_MASK      0x7
+#define MINI_UART_TX        14
+#define MINI_UART_RX        15
+#define PER_GPFSEL_GPIONUM  10
+#define GPIO_FSEL_BITNUM    3
+
+VOID MiniUartInit(VOID)
+{
+    UINT32 value;
+    GPIO_INFO * gpio = GPIO_REG_BASE;
+
+    value = gpio->GPFSEL[1];
+    value &= ~(GPIO_FSEL_MASK << ((MINI_UART_TX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM));
+    value |= GPIO_ALT_FUNC5 << ((MINI_UART_TX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM) ;
+    value &= ~(GPIO_FSEL_MASK << ((MINI_UART_RX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM));
+    value |= GPIO_ALT_FUNC5 << ((MINI_UART_RX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM) ;
+    gpio->GPFSEL[1] = value;
+
+    gpio->GPPUD = 0;
+    gpio->GPPUDCLK[0] = (1 << MINI_UART_TX) | (1 << MINI_UART_RX);
+    gpio->GPPUDCLK[0] = 0;
+
+    miniUart = MINI_UART;
+    *((volatile UINT32 *)(AUX_ENABLES)) |= 1;   /* Mini UART enable */
+    miniUart->LCR = 3;    /* UART works in 8-bit mode */
+    miniUart->IIR = 0;    /* disable receive interrupt,transmit interrupt */
+    miniUart->CNTL = 0;   /* disable receive,transmit */
+    miniUart->MCR = 0;    /* RTS set 0 */
+    miniUart->IER = 0xC6; /* Enable FIFO, Clear FIFO */
+    miniUart->BAUD = 270; /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
+    miniUart->CNTL = 3;   /* enable receive,transmit */
+}
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,6 +84,3 @@ void sfud_log_info(const char *format, ...);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* LOSCFG_COMPONENTS_SFUD */
-
-#endif /* _SFUD_PORT_H */
