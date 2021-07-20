@@ -206,6 +206,10 @@
 #include "inih_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_HTTP_CLIENT
+#include "httpc_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -265,6 +269,10 @@ STATIC VOID AtinyDemoTaskEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_LIBRWS
     LibrwsDemo();
+#endif
+
+#ifdef LOSCFG_DEMOS_HTTP_CLIENT
+    HttpClientDemoTask();
 #endif
 }
 #endif

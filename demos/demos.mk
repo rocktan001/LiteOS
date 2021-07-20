@@ -65,6 +65,11 @@ include $(LITEOSTOPDIR)/demos/librws/librws.mk
 DEMOS_INCLUDE += $(DEMOS_LIBRWS_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_HTTP_CLIENT), y)
+include $(LITEOSTOPDIR)/demos/http_client/http_client.mk
+DEMOS_INCLUDE += $(DEMOS_HTTP_CLIENT_INCLUDE)
+endif
+
 include $(LITEOSTOPDIR)/demos/utility/utility.mk
 DEMOS_INCLUDE += $(DEMOS_UTILITY_INCLUDE)
 
