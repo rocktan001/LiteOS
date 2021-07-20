@@ -52,7 +52,7 @@ STATIC err_t HttpcRecv(VOID *arg, struct altcp_pcb *pcb, struct pbuf *p, err_t e
 
     printf("Http receive:\n");
     for (q = p; q != NULL; q = q->next) {
-        printf("%s", (char *)q->payload);
+        printf("%s", (CHAR *)q->payload);
     }
     printf("Http receive finished.\n");
     altcp_recved(pcb, p->tot_len);
@@ -78,7 +78,7 @@ STATIC httpc_connection_t g_setting = {
     .result_fn = HttpcResult,
 };
 
-err_t HttpcGet(const char *server, uint16_t port, const char *url, altcp_recv_fn recv_fn)
+err_t HttpcGet(const CHAR *server, UINT16 port, const CHAR *url, altcp_recv_fn recv_fn)
 {
     return httpc_get_file_dns(server, port, url, &g_setting, recv_fn, NULL, NULL);
 }
@@ -86,7 +86,7 @@ err_t HttpcGet(const char *server, uint16_t port, const char *url, altcp_recv_fn
 STATIC VOID DemoTaskEntry(VOID)
 {
     printf("Http client demo start to run.\n");
-    LOS_TaskDelay(20000);   // wait lwip dhcp get ip.
+    LOS_TaskDelay(HTTP_CLIENT_WAIT_TIME);   // wait lwip dhcp get ip.
     (VOID)HttpcGet(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_URL, (altcp_recv_fn)HttpcRecv);
 }
 
