@@ -34,3 +34,8 @@ ifeq ($(LOSCFG_COMPONENTS_LIBRWS), y)
 include $(LITEOSTOPDIR)/components/net/librws/librws.mk
 COMPONENTS_NET_INCLUDE += $(COMPONENTS_LIBRWS_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_HTTP_PARSER), y)
+include $(LITEOSTOPDIR)/components/net/http_parser/http_parser.mk
+COMPONENTS_NET_INCLUDE += $(COMPONENTS_HTTP_PARSER_INCLUDE)
+endif

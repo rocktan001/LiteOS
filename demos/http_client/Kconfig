@@ -2,7 +2,7 @@ menu "Http Client Demo"
 
 config LOSCFG_DEMOS_HTTP_CLIENT
     bool "Enable Http Client Demo"
-    select LOSCFG_COMPONENTS_HTTP_CLIENT
+    select LOSCFG_COMPONENTS_HTTP_PARSER
     default n
     help
       Answer y to enable http client demo.
