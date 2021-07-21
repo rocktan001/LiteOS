@@ -114,6 +114,7 @@ STATIC VOID ArrayDemo(VOID)
     INT32 a =  5;
     INT32 b = 2;
     INT32 c = 7;
+
     ret = arraylist_append(arrayList, &a);
     if (ret != LOS_NOK) {
         printf("Arraylist append %d failed.\n", a);
@@ -170,6 +171,7 @@ STATIC VOID ListDemo(VOID)
     INT32 listLen;
     INT32 len;
     INT32 i;
+
     len = sizeof(a) / sizeof(int);
     for (i = 0; i < len; i++) {
         list_append(&appendList, &a[i]);
@@ -203,10 +205,9 @@ STATIC VOID ListDemo(VOID)
     findRet = list_find_data(appendList, int_equal, &a[1]);
     findData = (INT32 *)list_data(findRet);
     printf("Find array a second data is [%d].\n", *findData);
+
     list_free(prependList);
     list_free(appendList);
-    list_free(findRet);
-    list_free(entry);
 }
 
 STATIC VOID DemoTaskEntry(VOID)
