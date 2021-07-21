@@ -61,7 +61,7 @@ STATIC INT32 JerryTest(VOID)
     }
 
     if (jerry_value_is_error(retValue)) {
-        printf("Script Error!");
+        printf("Script error!");
         retCode = -1;
     }
 
