@@ -18,7 +18,7 @@ fastlz-0.5.0   &#& components/utility/fastlz              &#& LOSCFG_COMPONENTS_
 freetype-2.4.0 &#& components/utility/freetype            &#& LOSCFG_COMPONENTS_FREETYPE=y      &#& https://github.com/freetype/freetype/archive/refs/tags/VER-2-4-0.zip
 inih-r53       &#& components/utility/inih                &#& LOSCFG_COMPONENTS_INIH=y          &#& https://github.com/benhoyt/inih/archive/refs/tags/r53.zip
 iniparser-4.1  &#& components/utility/iniparser           &#& LOSCFG_COMPONENTS_INIPARSER=y     &#& https://github.com/ndevilla/iniparser/archive/refs/tags/v4.1.zip
-jerryscript-2.4.0  &#& components/language/jerryscript    &#& LOSCFG_COMPONENTS_JERRYSCRIPT=y   &#& https://github.com/jerryscript-project/jerryscript/archive/refs/tags/v2.0.zip
+jerryscript-2.4.0  &#& components/language/jerryscript    &#& LOSCFG_COMPONENTS_JERRYSCRIPT=y   &#& https://github.com/jerryscript-project/jerryscript/archive/refs/tags/v2.4.0.zip
 json-c-0.13.1  &#& components/utility/json-c              &#& LOSCFG_COMPONENTS_JSON_C=y        &#& https://github.com/json-c/json-c/archive/refs/tags/json-c-0.13.1-20180305.zip
 jsoncpp-1.9.4  &#& components/utility/jsoncpp             &#& LOSCFG_COMPONENTS_JSONCPP=y       &#& https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.4.zip
 harfbuzz-2.8.0 &#& components/utility/harfbuzz            &#& LOSCFG_COMPONENTS_HARFBUZZ=y      &#& https://github.com/harfbuzz/harfbuzz/archive/refs/tags/2.8.0.zip
