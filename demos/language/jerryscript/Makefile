@@ -1,7 +1,7 @@
 include $(LITEOSTOPDIR)/config.mk
 include $(LITEOSTOPDIR)/components/language/jerryscript/jerryscript.mk
 
-MODULE_NAME :=jerryscript_demo
+MODULE_NAME := jerryscript_demo
 
 LOCAL_SRCS := $(wildcard jerryscript_demo.c)
 
