@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Http Client HeadFile
+ * Description: Http Client Demo HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2021-07-20
  * Redistribution and use in source and binary forms, with or without modification,
