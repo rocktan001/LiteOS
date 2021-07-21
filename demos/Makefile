@@ -15,6 +15,7 @@ MODULE_$(LOSCFG_DEMOS_TRACE) += trace
 MODULE_$(LOSCFG_DEMOS_IPV6_CLIENT) += ipv6_client
 MODULE_$(LOSCFG_DEMOS_AI) += ai
 MODULE_$(LOSCFG_DEMOS_LIBRWS) += librws
+MODULE_$(LOSCFG_DEMOS_HTTP_CLIENT) += http_client
 MODULE_y += utility
 MODULE_y += media
 MODULE_y += language

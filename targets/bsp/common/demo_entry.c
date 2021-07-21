@@ -206,6 +206,10 @@
 #include "inih_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_HTTP_CLIENT
+#include "httpc_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_SFUD
 #include "sfud_demo.h"
 #endif
@@ -269,6 +273,10 @@ STATIC VOID AtinyDemoTaskEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_LIBRWS
     LibrwsDemo();
+#endif
+
+#ifdef LOSCFG_DEMOS_HTTP_CLIENT
+    HttpClientDemoTask();
 #endif
 }
 #endif
