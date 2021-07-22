@@ -28,9 +28,7 @@
 
 #include "http_client.h"
 #include "los_task.h"
-#ifdef LOSCFG_COMPONENTS_HTTP_PARSER
 #include "http_parser.h"
-#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -40,14 +38,13 @@ extern "C" {
 
 #define TASK_PRIORITY           7
 #define TASK_STACK_SIZE         0x2000
-#define DEFAULT_HOST            "192.168.10.182"
+#define DEFAULT_HOST            "your.host.address"
 #define DEFAULT_PORT            80
 #define DEFAULT_URL             "/index.html"
 #define HTTP_CLIENT_WAIT_TIME   20000
 
 STATIC UINT32 g_demoTaskId;
 
-#ifdef LOSCFG_COMPONENTS_HTTP_PARSER
 STATIC INT32 OnmessageBegin(http_parser *parser)
 {
     printf("\n***MESSAGE BEGIN***\n\n");
@@ -116,7 +113,6 @@ STATIC VOID HttpParse(const CHAR *data, UINT32 dataLen)
                 http_errno_name(HTTP_PARSER_ERRNO(&parser)));
     }
 }
-#endif
 
 STATIC err_t HttpcRecv(VOID *arg, struct altcp_pcb *pcb, struct pbuf *p, err_t err)
 {
@@ -134,13 +130,11 @@ STATIC err_t HttpcRecv(VOID *arg, struct altcp_pcb *pcb, struct pbuf *p, err_t e
 
 STATIC err_t HttpcHeaderDone(httpc_state_t *connection, VOID *arg, struct pbuf *hdr, UINT16 hdr_len, UINT32 content_len)
 {
-#ifdef LOSCFG_COMPONENTS_HTTP_PARSER
     struct pbuf *q;
     LWIP_ASSERT("p != NULL", hdr != NULL);
     for (q = hdr; q != NULL; q = q->next) {
         HttpParse((CHAR *)q->payload, q->len);
     }
-#endif
     return ERR_OK;
 }
 
@@ -149,6 +143,7 @@ STATIC VOID HttpcResult(VOID *arg, httpc_result_t httpc_result, UINT32 rx_conten
     if (httpc_result != HTTPC_RESULT_OK) {
         printf("Http close failed result :%d.\n", httpc_result);
     }
+    printf("Http client demo finished.\n");
 }
 
 STATIC httpc_connection_t g_setting = {
@@ -166,7 +161,7 @@ STATIC VOID DemoTaskEntry(VOID)
 {
     printf("Http client demo start to run.\n");
     LOS_TaskDelay(HTTP_CLIENT_WAIT_TIME); // wait lwip dhcp get ip.
-    (VOID) HttpcGet(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_URL, (altcp_recv_fn)HttpcRecv);
+    (VOID)HttpcGet(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_URL, (altcp_recv_fn)HttpcRecv);
 }
 
 VOID HttpClientDemoTask(VOID)

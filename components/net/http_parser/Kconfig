@@ -3,4 +3,4 @@ config LOSCFG_COMPONENTS_HTTP_PARSER
     select LOSCFG_COMPONENTS_NETWORK
     default n
     help
-    Answer y to enable http parser.
+      Answer y to enable http parser.
