@@ -26,9 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "http_client.h"
-#include "los_task.h"
+#include "lwip/apps/http_client.h"
 #include "http_parser.h"
+#include "los_task.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -38,12 +38,40 @@ extern "C" {
 
 #define TASK_PRIORITY           7
 #define TASK_STACK_SIZE         0x2000
-#define DEFAULT_HOST            "your.host.address"
+#define DEFAULT_HOST            "192.168.10.142"
 #define DEFAULT_PORT            80
 #define DEFAULT_URL             "/index.html"
 #define HTTP_CLIENT_WAIT_TIME   20000
 
 STATIC UINT32 g_demoTaskId;
+
+typedef enum ehttpc_parse_state {
+  HTTPC_PARSE_WAIT_FIRST_LINE = 0,
+  HTTPC_PARSE_WAIT_HEADERS,
+  HTTPC_PARSE_RX_DATA
+} httpc_parse_state_t;
+
+typedef struct _httpc_state
+{
+  struct altcp_pcb* pcb;
+  ip_addr_t remote_addr;
+  u16_t remote_port;
+  int timeout_ticks;
+  struct pbuf *request;
+  struct pbuf *rx_hdrs;
+  u16_t rx_http_version;
+  u16_t rx_status;
+  altcp_recv_fn recv_fn;
+  const httpc_connection_t *conn_settings;
+  void* callback_arg;
+  u32_t rx_content_len;
+  u32_t hdr_content_len;
+  httpc_parse_state_t parse_state;
+#if HTTPC_DEBUG_REQUEST
+  char* server_name;
+  char* uri;
+#endif
+} httpc_state_t;
 
 STATIC INT32 OnmessageBegin(http_parser *parser)
 {
@@ -109,8 +137,8 @@ STATIC VOID HttpParse(const CHAR *data, UINT32 dataLen)
     http_parser_init(&parser, HTTP_BOTH);
     ret = http_parser_execute(&parser, &settings, data, dataLen);
     if (ret != dataLen) {
-        printf("Error: %s (%s)\n", http_errno_description(HTTP_PARSER_ERRNO(&parser)),
-                http_errno_name(HTTP_PARSER_ERRNO(&parser)));
+        printf("%s (%s)\n", http_errno_description(HTTP_PARSER_ERRNO(&parser)),
+               http_errno_name(HTTP_PARSER_ERRNO(&parser)));
     }
 }
 
@@ -154,7 +182,13 @@ STATIC httpc_connection_t g_setting = {
 
 err_t HttpcGet(const CHAR *server, UINT16 port, const CHAR *url, altcp_recv_fn recv_fn)
 {
-    return httpc_get_file_dns(server, port, url, &g_setting, recv_fn, NULL, NULL);
+    struct pbuf *q;
+    httpc_state_t *states;
+    httpc_get_file_dns(server, port, url, &g_setting, recv_fn, NULL, &states);
+    for(q = states->request; q != NULL; q = q->next) {
+        HttpParse((char *)q->payload, q->len);
+    }
+    return ERR_OK;
 }
 
 STATIC VOID DemoTaskEntry(VOID)
