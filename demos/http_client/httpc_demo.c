@@ -53,23 +53,23 @@ typedef enum ehttpc_parse_state {
 
 typedef struct _httpc_state
 {
-  struct altcp_pcb* pcb;
+  struct altcp_pcb *pcb;
   ip_addr_t remote_addr;
-  u16_t remote_port;
-  int timeout_ticks;
+  UINT16 remote_port;
+  INT32 timeout_ticks;
   struct pbuf *request;
   struct pbuf *rx_hdrs;
-  u16_t rx_http_version;
-  u16_t rx_status;
+  UINT16 rx_http_version;
+  UINT16 rx_status;
   altcp_recv_fn recv_fn;
   const httpc_connection_t *conn_settings;
-  void* callback_arg;
-  u32_t rx_content_len;
-  u32_t hdr_content_len;
+  VOID *callback_arg;
+  UINT32 rx_content_len;
+  UINT32 hdr_content_len;
   httpc_parse_state_t parse_state;
 #if HTTPC_DEBUG_REQUEST
-  char* server_name;
-  char* uri;
+  CHAR* server_name;
+  CHAR* uri;
 #endif
 } httpc_state_t;
 
@@ -186,7 +186,7 @@ err_t HttpcGet(const CHAR *server, UINT16 port, const CHAR *url, altcp_recv_fn r
     httpc_state_t *states;
     httpc_get_file_dns(server, port, url, &g_setting, recv_fn, NULL, &states);
     for(q = states->request; q != NULL; q = q->next) {
-        HttpParse((char *)q->payload, q->len);
+        HttpParse((CHAR *)q->payload, q->len);
     }
     return ERR_OK;
 }
