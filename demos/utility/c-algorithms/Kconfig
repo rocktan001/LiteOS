@@ -1,5 +1,5 @@
 config LOSCFG_DEMOS_C_ALGORITHMS
-    bool "Enable c-algorithms Demo"
+    bool "Enable C-algorithms Demo"
     select LOSCFG_COMPONENTS_C_ALGORITHMS
     default n
     help

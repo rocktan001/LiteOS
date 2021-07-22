@@ -53,7 +53,8 @@ STATIC VOID QueueDemo(VOID)
 {
     INT32 ret;
     QueueValue qValue;
-    Queue *q = queue_new();
+    Queue *q = NULL;
+    q = queue_new();
     ret = queue_is_empty(q);
     if (ret == LOS_NOK) {
         printf("Queue is empty.\n");
@@ -109,12 +110,14 @@ STATIC VOID ArrayDemoPrt(ArrayList *a)
 
 STATIC VOID ArrayDemo(VOID)
 {
-    ArrayList *arrayList = arraylist_new(0);
     INT32 ret;
+    /* These numbers are for testing */
     INT32 a = 5;
     INT32 b = 2;
     INT32 c = 7;
 
+    ArrayList *arrayList = NULL;
+    arrayList = arraylist_new(0);
     ret = arraylist_append(arrayList, &a);
     if (ret != LOS_NOK) {
         printf("Arraylist append %d failed.\n", a);
@@ -124,7 +127,7 @@ STATIC VOID ArrayDemo(VOID)
         printf("Arraylist append %d failed.\n", c);
     }
     ArrayDemoPrt(arrayList);
-    printf("Insert num %d\n", b);
+    printf("Insert the number %d in the second digit\n", b);
     ret = arraylist_insert(arrayList, 1, &b);
     if (ret != LOS_NOK) {
         printf("Arraylist insert %d failed.\n", b);
@@ -138,8 +141,9 @@ STATIC VOID ArrayDemo(VOID)
 
 STATIC VOID HashDemo(VOID)
 {
-    char *hashValue;
-    HashTable* hash = hash_table_new(int_hash, int_equal);
+    char *hashValue = NULL;
+    HashTable *hash = NULL;
+    hash = hash_table_new(int_hash, int_equal);
     hash_table_insert(hash, "1", "one");
     hash_table_insert(hash, "2", "four");
     hash_table_insert(hash, "3", "nine");
@@ -151,7 +155,7 @@ STATIC VOID HashDemo(VOID)
 STATIC VOID ListDemoPrt(ListEntry *list, INT32 len)
 {
     INT32 i;
-    INT32 *listValue;
+    INT32 *listValue = NULL;
     for (i = 0; i < len; i++) {
         listValue = (INT32 *)list_nth_data(list, i);
         printf("%d ", *listValue);
@@ -165,14 +169,14 @@ STATIC VOID ListDemo(VOID)
     ListEntry *prependList = NULL;
     ListEntry *entry = NULL;
     ListEntry *findRet = NULL;
-    INT32 *findData;
+    INT32 *findData = NULL;
     INT32 a[] = {1, 3, 5, 2, 4, 6};
     INT32 ret;
     INT32 listLen;
     INT32 len;
     INT32 i;
 
-    len = sizeof(a) / sizeof(int);
+    len = sizeof(a) / sizeof(INT32);
     for (i = 0; i < len; i++) {
         list_append(&appendList, &a[i]);
     }
@@ -213,16 +217,15 @@ STATIC VOID ListDemo(VOID)
 STATIC VOID DemoTaskEntry(VOID)
 {
     printf("C algorithms demo task to run.\n");
-    printf("-----queue-------\n");
+    printf("Queue demo start to run.\n");
     QueueDemo();
-    printf("-----array-------\n");
+    printf("Array demo start to run.\n");
     ArrayDemo();
-    printf("-----hash--------\n");
+    printf("Hash demo start to run.\n");
     HashDemo();
-    printf("-----list--------\n");
+    printf("List demo start to run.\n");
     ListDemo();
     printf("C algorithms demo task to finished.\n");
-
 }
 
 VOID AlgorithmsDemoTask(VOID)
