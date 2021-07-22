@@ -117,13 +117,16 @@ STATIC VOID ArrayDemoPrt(ArrayList *a)
 STATIC VOID ArrayDemo(VOID)
 {
     INT32 ret;
-    /* These numbers are for testing */
+    /* Number 5,2,7 for testing */
     INT32 a = 5;
     INT32 b = 2;
     INT32 c = 7;
 
     ArrayList *arrayList = NULL;
     arrayList = arraylist_new(0);
+    if (arrayList == NULL) {
+        return;
+    }
     ret = arraylist_append(arrayList, &a);
     if (ret != LOS_NOK) {
         printf("Arraylist append %d failed.\n", a);
@@ -153,13 +156,36 @@ STATIC VOID ArrayDemo(VOID)
 
 STATIC VOID HashDemo(VOID)
 {
+    INT32 ret;
     char *hashValue = NULL;
     HashTable *hash = NULL;
     hash = hash_table_new(int_hash, int_equal);
-    hash_table_insert(hash, "1", "one");
-    hash_table_insert(hash, "2", "four");
-    hash_table_insert(hash, "3", "nine");
+    if (hash == NULL) {
+        return;
+    }
+    ret hash_table_insert(hash, "1", "one");
+    if (ret != LOS_NOK) {
+        printf("Hash table insert failed.\n");
+        hash_table_free(hash);
+        return;
+    }
+    ret = hash_table_insert(hash, "2", "four");
+    if (ret != LOS_NOK) {
+        printf("Hash table insert failed.\n");
+        hash_table_free(hash);
+        return;
+    }
+    ret = hash_table_insert(hash, "3", "nine");
+    if (ret != LOS_NOK) {
+        printf("Hash table insert failed.\n");
+        hash_table_free(hash);
+        return;
+    }
     hashValue = hash_table_lookup(hash, "1");
+    if (hashValue == HASH_TABLE_NULL) {
+        hash_table_free(hash);
+        return;
+    }
     printf("%s \n", hashValue);
     hash_table_free(hash);
 }
