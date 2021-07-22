@@ -154,13 +154,11 @@ app init!
 Hello, welcome to liteos demo!
 C algorithms demo task to run.
 Queue demo start to run.
-Queue is empty.
 First in line is xiaohong.
 Last in line is xiaoqiang.
 xiaohong bought a sandwich.
 Now xiaoming turn is it to buy rice.
-Someone's cutting to the front of the line
-Now xiaobing is first in line.
+xiaobing cutting to the front change first in line.
 Array demo start to run.
 position[0]->value[5]
 position[1]->value[7]
