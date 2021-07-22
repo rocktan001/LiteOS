@@ -38,7 +38,7 @@ extern "C" {
 
 #define TASK_PRIORITY           7
 #define TASK_STACK_SIZE         0x2000
-#define DEFAULT_HOST            "192.168.10.142"
+#define DEFAULT_HOST            "your.ip.address"
 #define DEFAULT_PORT            80
 #define DEFAULT_URL             "/index.html"
 #define HTTP_CLIENT_WAIT_TIME   20000
