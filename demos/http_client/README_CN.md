@@ -42,7 +42,7 @@ python -m http.server 80
 ### 客户端配置
 Http Client Demo需要网络连接，在开发板插入网线，并确保网络连接。
 - 客户端操作步骤如下：
-1. 修改LiteOS/demos/librws/librws_demo.c中的`DEFAULT_HOST`为服务端IP或域名。
+1. 修改LiteOS/demos/http_client/httpc_demo.c中的`DEFAULT_HOST`为服务端IP或域名。
     ```c
     #define TASK_PRIORITY           7
     #define TASK_STACK_SIZE         0x2000
