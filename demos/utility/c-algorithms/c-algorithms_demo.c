@@ -46,6 +46,11 @@ extern "C" {
 
 #define ALGORITHMS_TASK_PRIORITY    6
 #define ALGORITHMS_TASK_STACK_SIZE  0x2000
+#define JUDGERET(ret, msg) \
+    if (ret != LOS_NOK) {  \
+        printf("%s\n", msg); \
+        return; \
+    }
 
 STATIC UINT32 g_demoTaskId;
 
@@ -55,47 +60,47 @@ STATIC VOID QueueDemo(VOID)
     QueueValue qValue;
     Queue *q = NULL;
     q = queue_new();
+    if (q == NULL) {
+        return;
+    }
     ret = queue_is_empty(q);
     if (ret == LOS_NOK) {
         printf("Queue is empty.\n");
     }
     ret = queue_push_tail(q, "xiaohong");
-    if (ret != LOS_NOK) {
-        printf("Push to queue tail failed.\n");
-    }
+    JUDGERET(ret, "Push to queue tail failed.");
     ret = queue_push_tail(q, "xiaoming");
-    if (ret != LOS_NOK) {
-        printf("Push to queue tail failed.\n");
-    }
+    JUDGERET(ret, "Push to queue tail failed.");
     ret = queue_push_tail(q, "xiaoqiang");
-    if (ret != LOS_NOK) {
-        printf("Push to queue tail failed.\n");
-    }
+    JUDGERET(ret, "Push to queue tail failed.");
     qValue = queue_peek_head(q);
-    if (qValue != NULL) {
-        printf("First in line is %s.\n", qValue);
+    if (qValue == NULL) {
+        return;
     }
+    printf("First in line is %s.\n", qValue);
     qValue = queue_peek_tail(q);
-    if (qValue != NULL) {
-        printf("Last in line is %s.\n", qValue);
+    if (qValue == NULL) {
+        return;
     }
+    printf("Last in line is %s.\n", qValue);
     qValue = queue_pop_head(q);
-    if (qValue != NULL) {
-        printf("%s bought a sandwich.\n", qValue);
+    if (qValue == NULL) {
+        return;
     }
+    printf("%s bought a sandwich.\n", qValue);
     qValue = queue_peek_head(q);
-    if (qValue != NULL) {
-        printf("Now %s turn is it to buy rice.\n", qValue);
+    if (qValue == NULL) {
+        return;
     }
+    printf("Now %s turn is it to buy rice.\n", qValue);
     printf("Someone's cutting to the front of the line\n");
     ret = queue_push_head(q, "xiaobing");
-    if (ret != LOS_NOK) {
-        printf("Cutting to the front of the line failed.\n");
-    }
+    JUDGERET(ret, "Cutting to the front of the line failed.");
     qValue = queue_peek_head(q);
-    if (qValue != NULL) {
-        printf("Now %s is first in line.\n", qValue);
+    if (qValue == NULL) {
+        return;
     }
+    printf("Now %s is first in line.\n", qValue);
     queue_free(q);
 }
 
@@ -121,16 +126,19 @@ STATIC VOID ArrayDemo(VOID)
     ret = arraylist_append(arrayList, &a);
     if (ret != LOS_NOK) {
         printf("Arraylist append %d failed.\n", a);
+        return;
     }
     ret = arraylist_append(arrayList, &c);
     if (ret != LOS_NOK) {
         printf("Arraylist append %d failed.\n", c);
+        return;
     }
     ArrayDemoPrt(arrayList);
     printf("Insert the number %d in the second digit\n", b);
     ret = arraylist_insert(arrayList, 1, &b);
     if (ret != LOS_NOK) {
         printf("Arraylist insert %d failed.\n", b);
+        return;
     }
     ArrayDemoPrt(arrayList);
     printf("Arraylist remove first num.\n");
@@ -186,9 +194,7 @@ STATIC VOID ListDemo(VOID)
     printf("Sort num :\n");
     ListDemoPrt(appendList, len);
     ret = list_remove_data(&appendList, int_equal, &a[2]);
-    if (ret != LOS_NOK) {
-        printf("List remove data failed.\n");
-    }
+    JUDGERET(ret, "List remove data failed.");
     listLen = list_length(appendList);
     printf("After remove array a third num:\n");
     ListDemoPrt(appendList, listLen);
@@ -199,9 +205,7 @@ STATIC VOID ListDemo(VOID)
     ListDemoPrt(prependList, len);
     entry = list_nth_entry(prependList, 2);
     ret = list_remove_entry(&prependList, entry);
-    if (ret != LOS_NOK) {
-        printf("List remove entry failed.\n");
-    }
+    JUDGERET(ret, "List remove entry failed.");
     listLen = list_length(prependList);
     printf("PrependList len is [%d].\n", len);
     printf("After remove third num from prependList:\n");
