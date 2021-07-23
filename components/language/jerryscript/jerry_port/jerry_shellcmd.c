@@ -66,7 +66,6 @@ static int JerryShellCmd(int argc, char **argv)
     int i;
     char *tmpArgv[argc + 1];
 
-    argc = argc + 1;
     tmpArgv[0] = "jerry";
     for (i = 0; i < argc; i++) {
         tmpArgv[i + 1] = argv[i];
