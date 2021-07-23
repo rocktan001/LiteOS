@@ -68,8 +68,8 @@ typedef struct _httpc_state
   UINT32 hdr_content_len;
   httpc_parse_state_t parse_state;
 #if HTTPC_DEBUG_REQUEST
-  CHAR* server_name;
-  CHAR* uri;
+  CHAR *server_name;
+  CHAR *uri;
 #endif
 } httpc_state_t;
 
