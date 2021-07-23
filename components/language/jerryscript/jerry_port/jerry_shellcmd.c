@@ -54,7 +54,6 @@ static int HelloWorld(void)
     fd = open(fileName, O_CREAT | O_RDWR);
     if (fd < 0) {
         printf("Open file %s failed.\n", fileName);
-        close(fd);
         return -1;
     }
     write(fd, data, strlen(data));
