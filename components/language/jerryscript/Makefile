@@ -29,6 +29,8 @@ JERRYSCRIPT_CMD_SRCS := \
     $(wildcard jerry_port/jerry_main.c) \
     $(wildcard jerry_port/jerry_shellcmd.c)
 
+JERRYSCRIPT_SRCS += $(JERRYSCRIPT_CMD_SRCS)
+
 JERRYSCRIPT_DIR := $(LITEOSTOPDIR)/components/language/jerryscript/$(JERRYSCRIPT_VERSION)
 JERRYSCRIPT_INCLUDE := \
     -I $(JERRYSCRIPT_DIR)/jerry-core \
@@ -54,7 +56,8 @@ JERRYSCRIPT_INCLUDE := \
     -I $(JERRYSCRIPT_DIR)/jerry-ext/include \
     -I $(JERRYSCRIPT_DIR)/jerry-ext/module \
     -I $(JERRYSCRIPT_DIR)/jerry-ext/common \
-    -I $(JERRYSCRIPT_DIR)/jerry-port/default/include
+    -I $(JERRYSCRIPT_DIR)/jerry-port/default/include \
+    -I $(LITEOSTOPDIR)/components/language/jerryscript/jerry-port
 
 LOCAL_DEFS :=\
     -D JERRY_COMMIT_HASH=\"\" \
