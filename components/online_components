@@ -23,7 +23,7 @@ jerryscript-2.4.0  &#& components/language/jerryscript    &#& LOSCFG_COMPONENTS_
 json-c-0.13.1  &#& components/utility/json-c              &#& LOSCFG_COMPONENTS_JSON_C=y        &#& https://github.com/json-c/json-c/archive/refs/tags/json-c-0.13.1-20180305.zip
 jsoncpp-1.9.4  &#& components/utility/jsoncpp             &#& LOSCFG_COMPONENTS_JSONCPP=y       &#& https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.4.zip
 harfbuzz-2.8.0 &#& components/utility/harfbuzz            &#& LOSCFG_COMPONENTS_HARFBUZZ=y      &#& https://github.com/harfbuzz/harfbuzz/archive/refs/tags/2.8.0.zip
-http-parser-2.9.4 &#& components/net/http_parser          &#& LOSCFG_COMPONENTS_HTTP_PARSER     &#& https://github.com/nodejs/http-parser/archive/refs/tags/v2.9.4.zip
+http-parser-2.9.4 &#& components/net/http_parser          &#& LOSCFG_COMPONENTS_HTTP_PARSER=y   &#& https://github.com/nodejs/http-parser/archive/refs/tags/v2.9.4.zip
 libiconv-1.14  &#& components/utility/iconv               &#& LOSCFG_COMPONENTS_ICONV=y         &#& https://github.com/winlibs/libiconv/archive/refs/tags/libiconv-1.14.zip
 libpcap-1.7.3  &#& components/net/pcap                    &#& LOSCFG_COMPONENTS_PCAP=y          &#& https://github.com/the-tcpdump-group/libpcap/archive/refs/tags/libpcap-1.7.3.zip
 libpng-1.6.29  &#& components/media/libpng                &#& LOSCFG_COMPONENTS_LIBPNG=y        &#& https://github.com/glennrp/libpng/archive/refs/tags/v1.6.29.zip
