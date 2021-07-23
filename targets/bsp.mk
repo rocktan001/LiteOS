@@ -295,6 +295,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_SFUD), y)
         LITEOS_BASELIB += -lsfud
     endif
+    ifeq ($(LOSCFG_COMPONENTS_C_ALGORITHMS), y)
+        LITEOS_BASELIB += -lc-algorithms
+    endif
     ifeq ($(LOSCFG_COMPONENTS_HTTP_PARSER), y)
         LITEOS_BASELIB += -lhttp_parser
     endif
@@ -399,6 +402,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_SFUD), y)
         LITEOS_BASELIB += -lsfud_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_C_ALGORITHMS), y)
+        LITEOS_BASELIB += -lc-algorithms_demo
     endif
 endif
 

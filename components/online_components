@@ -13,6 +13,7 @@ gcc            &#& lib                                    &#& LOSCFG_LIB_CPP_EXT
 origin.patch   &#& components/net/lwip                    &#& LOSCFG_COMPONENTS_NET_LWIP=y      &#&
 
 BidireferenceC-8.0.0 &#& components/utility/bidireference &#& LOSCFG_COMPONENTS_BIDIREFERENCE=y &#& sh download_bidi.sh BidireferenceC-8.0.0
+c-algorithms-1.2.0   &#& components/utility/c-algorithms  &#& LOSCFG_COMPONENTS_C_ALGORITHMS=y  &#& https://github.com/fragglet/c-algorithms/archive/refs/tags/c-algorithms-1.2.0.zip
 curl-7.54.1    &#& components/utility/curl                &#& LOSCFG_COMPONENTS_CURL=y          &#& https://github.com/curl/curl/archive/refs/tags/curl-7_54_1.zip
 fastlz-0.5.0   &#& components/utility/fastlz              &#& LOSCFG_COMPONENTS_FASTLZ=y        &#& https://github.com/ariya/FastLZ/archive/refs/tags/0.5.0.zip
 freetype-2.4.0 &#& components/utility/freetype            &#& LOSCFG_COMPONENTS_FREETYPE=y      &#& https://github.com/freetype/freetype/archive/refs/tags/VER-2-4-0.zip

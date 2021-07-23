@@ -214,6 +214,10 @@
 #include "sfud_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_C_ALGORITHMS
+#include "c-algorithms_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_JERRYSCRIPT
 #include "jerryscript_demo.h"
 #endif
@@ -456,6 +460,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_SFUD
     SfudDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_C_ALGORITHMS
+    AlgorithmsDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_JERRYSCRIPT

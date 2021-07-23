@@ -79,3 +79,8 @@ ifeq ($(LOSCFG_COMPONENTS_SFUD), y)
 include $(LITEOSTOPDIR)/components/utility/sfud/sfud.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_SFUD_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_C_ALGORITHMS), y)
+include $(LITEOSTOPDIR)/components/utility/c-algorithms/c-algorithms.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_C_ALGORITHMS_INCLUDE)
+endif
