@@ -120,7 +120,7 @@ static int JerryEntry(int argc, char *argv[])
 
     retValue = jerry_create_undefined();
     sourceSize = ReadJsFile((const char *)filePath, &script);
-    if (script == NULL || sourceSize < 0) {
+    if ((script == NULL) || (sourceSize < 0)) {
         printf("Source file load error.\n");
         jerry_cleanup();
         return -1;
