@@ -117,7 +117,7 @@ STATIC VOID ArrayDemoPrt(ArrayList *a)
 STATIC VOID ArrayDemo(VOID)
 {
     INT32 ret;
-    /* Number 5,2,7 for testing */
+    /* Num 5,2,7 for testing */
     INT32 a = 5;
     INT32 b = 2;
     INT32 c = 7;
@@ -163,7 +163,7 @@ STATIC VOID HashDemo(VOID)
     if (hash == NULL) {
         return;
     }
-    ret hash_table_insert(hash, "1", "one");
+    ret = hash_table_insert(hash, "1", "one");
     if (ret != LOS_NOK) {
         printf("Hash table insert failed.\n");
         hash_table_free(hash);
@@ -175,7 +175,7 @@ STATIC VOID HashDemo(VOID)
         hash_table_free(hash);
         return;
     }
-    ret = hash_table_insert(hash, "3", "nine");
+    ret =hash_table_insert(hash, "3", "nine");
     if (ret != LOS_NOK) {
         printf("Hash table insert failed.\n");
         hash_table_free(hash);
@@ -201,20 +201,15 @@ STATIC VOID ListDemoPrt(ListEntry *list, INT32 len)
     printf("\n");
 }
 
-STATIC VOID ListDemo(VOID)
+STATIC VOID ListAppendDemo(INT32 a[], INT32 len)
 {
     ListEntry *appendList = NULL;
-    ListEntry *prependList = NULL;
-    ListEntry *entry = NULL;
     ListEntry *findRet = NULL;
     INT32 *findData = NULL;
-    INT32 a[] = {1, 3, 5, 2, 4, 6};
-    INT32 ret;
     INT32 listLen;
-    INT32 len;
+    INT32 ret;
     INT32 i;
 
-    len = sizeof(a) / sizeof(INT32);
     for (i = 0; i < len; i++) {
         list_append(&appendList, &a[i]);
     }
@@ -232,29 +227,51 @@ STATIC VOID ListDemo(VOID)
     listLen = list_length(appendList);
     printf("After remove array a third num:\n");
     ListDemoPrt(appendList, listLen);
+    findRet = list_find_data(appendList, int_equal, &a[1]);
+    findData = (INT32 *)list_data(findRet);
+    printf("Find array a second data is [%d].\n", *findData);
+
+    list_free(appendList);
+}
+
+STATIC VOID ListPrependDemo(INT32 a[], INT32 len)
+{
+    ListEntry *prependList = NULL;
+    ListEntry *entry = NULL;
+    INT32 listLen;
+    INT32 ret;
+    INT32 i;
+
     for (i = 0; i < len; i++) {
         list_prepend(&prependList, &a[i]);
     }
     printf("Array a prepend to list:\n");
     ListDemoPrt(prependList, len);
     entry = list_nth_entry(prependList, 2);
+    if (entry == NULL) {
+        list_free(prependList);
+        return;
+    }
     ret = list_remove_entry(&prependList, entry);
     if (ret != LOS_NOK) {
         printf("List remove entry failed.\n");
         list_free(prependList);
-        list_free(appendList);
         return;
     }
     listLen = list_length(prependList);
-    printf("PrependList len is [%d].\n", len);
-    printf("After remove third num from prependList:\n");
+    printf("After remove, len is [%d], list is:\n", listLen);
     ListDemoPrt(prependList, listLen);
-    findRet = list_find_data(appendList, int_equal, &a[1]);
-    findData = (INT32 *)list_data(findRet);
-    printf("Find array a second data is [%d].\n", *findData);
 
     list_free(prependList);
-    list_free(appendList);
+}
+
+STATIC VOID ListDemo(VOID)
+{
+    INT32 a[] = {1, 3, 5, 2, 4, 6};
+    INT32 len;
+    len = sizeof(a) / sizeof(INT32);
+    ListAppendDemo(a, len);
+    ListPrependDemo(a, len);
 }
 
 STATIC VOID DemoTaskEntry(VOID)

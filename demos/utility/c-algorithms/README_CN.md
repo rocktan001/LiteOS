@@ -178,12 +178,11 @@ Sort num :
 1 2 3 4 5 6 
 After remove array a third num:
 1 2 3 4 6 
+Find array a second data is [3].
 Array a prepend to list:
 6 4 2 5 3 1 
-PrependList len is [6].
-After remove third num from prependList:
+After remove, len is [5], list is: 
 6 4 5 3 1 
-Find array a second data is [3].
 C algorithms demo task to finished.
 
 Huawei LiteOS # 
