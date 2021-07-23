@@ -63,13 +63,13 @@ static int HelloWorld(void)
 
 static int JerryShellCmd(int argc, char **argv)
 {
-    int i = 0;
-    char *tmpArgv[argc];
+    int i;
+    char *tmpArgv[argc + 1];
 
     argc = argc + 1;
     tmpArgv[0] = "jerry";
-    for (i = 1; i < argc; i++) {
-        tmpArgv[i] = argv[i - 1];
+    for (i = 0; i < argc; i++) {
+        tmpArgv[i + 1] = argv[i];
     }
 
 #ifdef LOSCFG_COMPONENTS_FS_RAMFS
