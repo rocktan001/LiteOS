@@ -26,7 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "http_client.h"
+#include "lwip/apps/http_client.h"
+#include "http_parser.h"
 #include "los_task.h"
 
 #ifdef __cplusplus
@@ -37,19 +38,114 @@ extern "C" {
 
 #define TASK_PRIORITY           7
 #define TASK_STACK_SIZE         0x2000
-#define DEFAULT_HOST            "192.168.10.182"
+#define DEFAULT_HOST            "your.ip.address"
 #define DEFAULT_PORT            80
 #define DEFAULT_URL             "/index.html"
 #define HTTP_CLIENT_WAIT_TIME   20000
 
 STATIC UINT32 g_demoTaskId;
 
+typedef enum ehttpc_parse_state {
+  HTTPC_PARSE_WAIT_FIRST_LINE = 0,
+  HTTPC_PARSE_WAIT_HEADERS,
+  HTTPC_PARSE_RX_DATA
+} httpc_parse_state_t;
+
+typedef struct _httpc_state
+{
+  struct altcp_pcb *pcb;
+  ip_addr_t remote_addr;
+  UINT16 remote_port;
+  INT32 timeout_ticks;
+  struct pbuf *request;
+  struct pbuf *rx_hdrs;
+  UINT16 rx_http_version;
+  UINT16 rx_status;
+  altcp_recv_fn recv_fn;
+  const httpc_connection_t *conn_settings;
+  VOID *callback_arg;
+  UINT32 rx_content_len;
+  UINT32 hdr_content_len;
+  httpc_parse_state_t parse_state;
+#if HTTPC_DEBUG_REQUEST
+  CHAR *server_name;
+  CHAR *uri;
+#endif
+} httpc_state_t;
+
+STATIC INT32 OnmessageBegin(http_parser *parser)
+{
+    printf("\n***MESSAGE BEGIN***\n\n");
+    return LOS_OK;
+}
+
+STATIC INT32 OnHeadersComplete(http_parser *parser)
+{
+    printf("\n***HEADERS COMPLETE***\n\n");
+    return LOS_OK;
+}
+
+STATIC INT32 OnmessageComplete(http_parser *parser)
+{
+    printf("\n***MESSAGE COMPLETE***\n\n");
+    return LOS_OK;
+}
+
+STATIC INT32 OnUrl(http_parser *parser, const CHAR *at, UINT32 length)
+{
+    printf("Url: %.*s\n", (INT32)length, at);
+    return LOS_OK;
+}
+
+STATIC INT32 onHeaderField(http_parser *parser, const CHAR *at, UINT32 length)
+{
+    printf("Header field: %.*s\n", (INT32)length, at);
+    return LOS_OK;
+}
+
+STATIC INT32 OnHeaderValue(http_parser *parser, const CHAR *at, UINT32 length)
+{
+    printf("Header value: %.*s\n", (INT32)length, at);
+    return LOS_OK;
+}
+
+STATIC INT32 OnBody(http_parser *parser, const CHAR *at, UINT32 length)
+{
+    printf("Body: %.*s\n", (INT32)length, at);
+    return LOS_OK;
+}
+
+STATIC VOID HttpParse(const CHAR *data, UINT32 dataLen)
+{
+    INT32 ret;
+    http_parser parser;
+    http_parser_settings settings;
+
+    ret = memset_s(&settings, sizeof(http_parser_settings), 0, sizeof(http_parser_settings));
+    if (ret != EOK) {
+        printf("Http parser init failed.");
+        return;
+    }
+    settings.on_message_begin = OnmessageBegin;
+    settings.on_url = OnUrl;
+    settings.on_header_field = onHeaderField;
+    settings.on_header_value = OnHeaderValue;
+    settings.on_headers_complete = OnHeadersComplete;
+    settings.on_body = OnBody;
+    settings.on_message_complete = OnmessageComplete;
+
+    http_parser_init(&parser, HTTP_BOTH);
+    ret = http_parser_execute(&parser, &settings, data, dataLen);
+    if (ret != dataLen) {
+        printf("%s (%s)\n", http_errno_description(HTTP_PARSER_ERRNO(&parser)),
+               http_errno_name(HTTP_PARSER_ERRNO(&parser)));
+    }
+}
+
 STATIC err_t HttpcRecv(VOID *arg, struct altcp_pcb *pcb, struct pbuf *p, err_t err)
 {
     struct pbuf *q;
-
     LWIP_ASSERT("p != NULL", p != NULL);
-
     printf("Http receive:\n");
     for (q = p; q != NULL; q = q->next) {
         printf("%s", (CHAR *)q->payload);
@@ -62,6 +158,11 @@ STATIC err_t HttpcRecv(VOID *arg, struct altcp_pcb *pcb, struct pbuf *p, err_t e
 
 STATIC err_t HttpcHeaderDone(httpc_state_t *connection, VOID *arg, struct pbuf *hdr, UINT16 hdr_len, UINT32 content_len)
 {
+    struct pbuf *q;
+    LWIP_ASSERT("p != NULL", hdr != NULL);
+    for (q = hdr; q != NULL; q = q->next) {
+        HttpParse((CHAR *)q->payload, q->len);
+    }
     return ERR_OK;
 }
 
@@ -70,6 +171,7 @@ STATIC VOID HttpcResult(VOID *arg, httpc_result_t httpc_result, UINT32 rx_conten
     if (httpc_result != HTTPC_RESULT_OK) {
         printf("Http close failed result :%d.\n", httpc_result);
     }
+    printf("Http client demo finished.\n");
 }
 
 STATIC httpc_connection_t g_setting = {
@@ -80,13 +182,19 @@ STATIC httpc_connection_t g_setting = {
 
 err_t HttpcGet(const CHAR *server, UINT16 port, const CHAR *url, altcp_recv_fn recv_fn)
 {
-    return httpc_get_file_dns(server, port, url, &g_setting, recv_fn, NULL, NULL);
+    struct pbuf *q;
+    httpc_state_t *states;
+    httpc_get_file_dns(server, port, url, &g_setting, recv_fn, NULL, &states);
+    for(q = states->request; q != NULL; q = q->next) {
+        HttpParse((CHAR *)q->payload, q->len);
+    }
+    return ERR_OK;
 }
 
 STATIC VOID DemoTaskEntry(VOID)
 {
     printf("Http client demo start to run.\n");
-    LOS_TaskDelay(HTTP_CLIENT_WAIT_TIME);   // wait lwip dhcp get ip.
+    LOS_TaskDelay(HTTP_CLIENT_WAIT_TIME); // wait lwip dhcp get ip.
     (VOID)HttpcGet(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_URL, (altcp_recv_fn)HttpcRecv);
 }
 
@@ -94,7 +202,6 @@ VOID HttpClientDemoTask(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
-
     ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
