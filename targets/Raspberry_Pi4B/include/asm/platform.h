@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: uart config HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Platform Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-27
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,8 +26,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#ifndef _ASM_PLATFORM_H
+#define _ASM_PLATFORM_H
+
+#include "los_typedef.h"
+#include "interrupt_config.h"
+#include "memmap_config.h"
+#include "uart.h"
+#include "regs.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,28 +41,32 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
+STATIC INLINE UINT64 GetTimerFreq(VOID)
+{
+    UINT64 cntFrq;
+    cntFrq = AARCH64_SYSREG_READ(cntfrq_el0);
+    return cntFrq;
+}
 
-typedef struct {
-    VOID (*uartInit)(VOID);
-    VOID (*uartWriteChar)(const CHAR c);
-    UINT8 (*uartReadChar)(VOID);
-    INT32 (*uartHwiCreate)(VOID);
-} UartControllerOps;
+typedef enum {
+    INPUT_ALT = 0b0,
+    OUTPUT_ALT = 0b1,
+    FUNC0_ALT = 0b100,
+    FUNC1_ALT = 0b101,
+    FUNC2_ALT = 0b110,
+    FUNC3_ALT = 0b111,
+    FUNC4_ALT = 0b011,
+    FUNC5_ALT = 0b010,
+} GPIO_ALT;
 
-extern INT32 uart_hwiCreate(VOID);
+#define GPIO_TX0           14
+#define GPIO_RX0           15
 
-VOID   uart_early_init(VOID);
-VOID   uart_init(VOID);
-UINT8  uart_getc(VOID);
-UINT32 uart_wait_adapt(VOID);
-INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-UINT8  uart_read(VOID);
-VOID   UartPuts(const CHAR *s, UINT32 len, BOOL isLock);
-INT32  ShellQueueCreat(VOID);
+#define NO_SC_CTRL         1
+
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern VOID app_init(VOID);
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -64,4 +74,4 @@ INT32  ShellQueueCreat(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _UART_H */
+#endif /* _ASM_PLATFORM_H */

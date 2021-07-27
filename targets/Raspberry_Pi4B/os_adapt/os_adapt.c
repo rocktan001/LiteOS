@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: uart config HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Os Adapt Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-27
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,42 +26,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _UART_H
-#define _UART_H
+#include <stdio.h>
+#include "los_typedef.h"
+#include "demo_entry.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#define UART_WITH_LOCK     1
-#define UART_WITHOUT_LOCK  0
-#define DEFAULT_TIMEOUT    0xFFFF
-#define DEFAULT_UART_IRQN  USART1_IRQn
-
-typedef struct {
-    VOID (*uartInit)(VOID);
-    VOID (*uartWriteChar)(const CHAR c);
-    UINT8 (*uartReadChar)(VOID);
-    INT32 (*uartHwiCreate)(VOID);
-} UartControllerOps;
-
-extern INT32 uart_hwiCreate(VOID);
-
-VOID   uart_early_init(VOID);
-VOID   uart_init(VOID);
-UINT8  uart_getc(VOID);
-UINT32 uart_wait_adapt(VOID);
-INT32  uart_write(const CHAR *buf, INT32 len, INT32 timeout);
-UINT8  uart_read(VOID);
-VOID   UartPuts(const CHAR *s, UINT32 len, BOOL isLock);
-INT32  ShellQueueCreat(VOID);
-
-#ifdef __cplusplus
-#if __cplusplus
+__attribute__((weak)) VOID app_init(VOID)
+{
+    printf("app init!\n");
+    DemoEntry();
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif /* _UART_H */

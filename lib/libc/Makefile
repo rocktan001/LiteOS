@@ -58,10 +58,12 @@ FILTER_FILES += $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memset.c) \
                 $(wildcard $(LIBC_RELATIVE_PATH)/src/string/strcmp.c) \
                 $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memcpy.c)
 else ifneq ($(findstring $(LOSCFG_ARCH_ARM_V8A)$(LOSCFG_ARCH_ARM_V8R), y y),)
+ifneq ($(LOSCFG_ARCH_ARM_AARCH64), y)
 FILTER_FILES += $(wildcard $(LIBC_RELATIVE_PATH)/src/string/strcmp.c) \
                 $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memcmp.c) \
                 $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memset.c) \
                 $(wildcard $(LIBC_RELATIVE_PATH)/src/string/memcpy.c)
+endif
 endif
 LOCAL_SRCS := $(filter-out $(FILTER_FILES), $(LOCAL_SRCS))
 

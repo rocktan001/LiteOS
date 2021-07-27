@@ -2,6 +2,7 @@ config LOSCFG_PLATFORM
     string
     default "Raspberry_Pi2B"      if LOSCFG_PLATFORM_RASPBERRY_PI2B
     default "Raspberry32_Pi3B"    if LOSCFG_PLATFORM_RASPBERRY32_PI3B
+    default "Raspberry_Pi4B"      if LOSCFG_PLATFORM_RASPBERRY_PI4B
 
 choice
     prompt "Board"
@@ -10,6 +11,7 @@ choice
     help
       Raspberry Pi2B
       Raspberry32 Pi3B
+      Raspberry_Pi4B
 
 config LOSCFG_PLATFORM_RASPBERRY_PI2B
     bool "Raspberry_Pi2B"
@@ -24,6 +26,14 @@ config LOSCFG_PLATFORM_RASPBERRY32_PI3B
     select LOSCFG_USING_BOARD_LD
     select LOSCFG_PLATFORM_ARM_CONTROL
     select LOSCFG_RASPBERRY_PI_SYSTICK
+
+config LOSCFG_PLATFORM_RASPBERRY_PI4B
+    bool "Raspberry_Pi4B"
+    select LOSCFG_ARCH_CORTEX_A72
+    select LOSCFG_USING_BOARD_LD
+    select LOSCFG_ARM_GIC_V2
+    select LOSCFG_ARM_GENERIC_TIMER
+    select LOSCFG_ARCH_ARM_AARCH64
 
 endchoice
 

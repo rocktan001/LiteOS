@@ -44,7 +44,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define HEAP_CAST(t, exp)   ((t)(exp))
-#define HEAP_ALIGN          4
+#define HEAP_ALIGN          sizeof(UINTPTR)
 #define MALLOC_MAXSIZE      (0xFFFFFFFF - HEAP_ALIGN + 1)
 
 /*

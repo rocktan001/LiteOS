@@ -44,6 +44,11 @@ config LOSCFG_COMPILER_HCC_64
     depends on LOSCFG_ARCH_ARM_AARCH64
     select LOSCFG_COMPILER_GCC
 
+config LOSCFG_COMPILER_GCC_64
+    bool "aarch64-none-elf"
+    depends on LOSCFG_ARCH_ARM_AARCH64
+    select LOSCFG_COMPILER_GCC
+
 config LOSCFG_COMPILER_RISCV_NULEI
     bool "riscv-nuclei-elf"
     depends on LOSCFG_ARCH_RISCV_RV32IMC

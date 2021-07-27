@@ -78,9 +78,7 @@ UINT8 uart_getc(VOID)
 #elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
 	(VOID)HAL_UART_Receive(UART5, &ch, sizeof(UINT8), 0);
 #elif defined (LOSCFG_FAMILY_RASPBERRY)
-    if (miniUart->LSR & UART_RXREADY_FLAG) {
-        ch = (UINT8)(miniUart->IO & 0xff);
-    }
+    ch = g_armGenericUart.uartReadChar();
 #elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
     (VOID)HAL_UART_Receive(&huart3, &ch, sizeof(UINT8), 0);
 #else
@@ -90,9 +88,9 @@ UINT8 uart_getc(VOID)
     return ch;
 }
 
-STATIC VOID UartHandler(VOID)
+VOID uart_early_init(VOID)
 {
-    (VOID)uart_getc();
+    g_armGenericUart.uartInit();
 }
 
 INT32 ShellQueueCreat(VOID)
@@ -143,12 +141,7 @@ INT32 uart_hwiCreate(VOID)
     LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 1, 0, UartHandler, NULL);
     LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
 #elif defined (LOSCFG_FAMILY_RASPBERRY)
-    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    miniUart->IIR = 0x1;
-    if (miniUart->LSR & UART_RXREADY_FLAG) {
-        (VOID)(miniUart->IO & 0xff); /* Clear Uart Rx Irq */
-    }
-    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+    g_armGenericUart.uartHwiCreate();
 #elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
     if (huart3.Instance == NULL) {
         return LOS_NOK;
@@ -218,8 +211,7 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 #elif defined (LOSCFG_FAMILY_RASPBERRY)
     UINT32 i;
     for (i = 0; i < len; i++) {
-        while(!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};
-        miniUart->IO = buf[i];
+        g_armGenericUart.uartWriteChar(buf[i]);
     }
 #elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
     (VOID)HAL_UART_Transmit(&huart3, (UINT8 *)buf, (UINT16)len, DEFAULT_TIMEOUT);
