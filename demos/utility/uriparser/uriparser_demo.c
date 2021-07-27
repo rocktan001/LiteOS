@@ -93,10 +93,10 @@ INT32 UriParse(const CHAR *uriStr)
     if (uri.fragment.first) {
         printf("fragment:     %.*s\n", RANGE(uri.fragment));
     }
-    const CHAR *const absolutePathLabel = "absolutePath: ";
+    const CHAR *absolutePathLabel = "absolutePath: ";
     printf("%s%s\n", absolutePathLabel,
            (uri.absolutePath == URI_TRUE) ? "true" : "false");
-    if (uri.hostText.first != NULL) {
+    if (uri.hostText.first) {
         printf("%*s%s\n", (INT32)strlen(absolutePathLabel), "",
                "(always false for URIs with host)");
     }
