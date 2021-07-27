@@ -213,7 +213,7 @@ VOID HttpClientDemoTask(VOID)
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
     if (ret != LOS_OK) {
-        printf("Create lua demo task failed.\n");
+        printf("Create http client demo task failed.\n");
     }
 }
 
