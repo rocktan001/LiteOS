@@ -95,10 +95,10 @@ INT32 UriParse(const CHAR *uriStr)
     }
     const CHAR *const absolutePathLabel = "absolutePath: ";
     printf("%s%s\n", absolutePathLabel,
-            (uri.absolutePath == URI_TRUE) ? "true" : "false");
+           (uri.absolutePath == URI_TRUE) ? "true" : "false");
     if (uri.hostText.first != NULL) {
         printf("%*s%s\n", (INT32)strlen(absolutePathLabel), "",
-                "(always false for URIs with host)");
+               "(always false for URIs with host)");
     }
     printf("\n");
 
@@ -132,8 +132,7 @@ VOID UriparserDemoTask(VOID)
     taskInitParam.usTaskPrio = TASK_PRIORITY;
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
-    if (ret != LOS_OK)
-    {
+    if (ret != LOS_OK) {
         printf("Create uriparser demo task failed.\n");
     }
 }
