@@ -79,3 +79,8 @@ ifeq ($(LOSCFG_COMPONENTS_SFUD), y)
 include $(LITEOSTOPDIR)/components/utility/sfud/sfud.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_SFUD_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_URIPARSER), y)
+include $(LITEOSTOPDIR)/components/utility/uriparser/uriparser.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_URIPARSER_INCLUDE)
+endif
