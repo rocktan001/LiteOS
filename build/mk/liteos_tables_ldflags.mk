@@ -72,7 +72,8 @@ LITEOS_TABLES_TOOLS_LDFLAGS := \
     -uiperf_shellcmd \
     -ulwip_dump_shellcmd \
     -uthttpd_shellcmd \
-    -ufastlz_shellcmd
+    -ufastlz_shellcmd \
+    -ujerry_shellcmd
 
 ####Extend command####
 #reset_shell.c -ureset_shellcmd

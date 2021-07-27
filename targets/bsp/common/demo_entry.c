@@ -218,6 +218,14 @@
 #include "uriparser_demo.h" 
 #endif
 
+#ifdef LOSCFG_DEMOS_C_ALGORITHMS
+#include "c-algorithms_demo.h"
+#endif
+
+#ifdef LOSCFG_DEMOS_JERRYSCRIPT
+#include "jerryscript_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -460,6 +468,14 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_URIPARSER
     UriparserDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_C_ALGORITHMS
+    AlgorithmsDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_JERRYSCRIPT
+    JerryscriptDemoTask();
 #endif
 
 #ifdef LOSCFG_SHELL
