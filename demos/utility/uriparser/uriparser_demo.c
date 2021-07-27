@@ -71,11 +71,11 @@ INT32 UriParse(const CHAR *uriStr)
         printf("hostText:     %.*s\n", RANGE(uri.hostText));
     }
     if (uri.hostData.ip4) {
-        inet_ntop(AF_INET, uri.hostData.ip4->data, ipstr, sizeof ipstr);
+        inet_ntop(AF_INET, uri.hostData.ip4->data, ipstr, sizeof(ipstr));
         printf("hostData.ip4: %s\n", ipstr);
     }
     if (uri.hostData.ip6) {
-        inet_ntop(AF_INET6, uri.hostData.ip6->data, ipstr, sizeof ipstr);
+        inet_ntop(AF_INET6, uri.hostData.ip6->data, ipstr, sizeof(ipstr));
         printf("hostData.ip6: %s\n", ipstr);
     }
     if (uri.portText.first) {
