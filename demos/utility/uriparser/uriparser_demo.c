@@ -30,8 +30,8 @@
 #include <arpa/inet.h>
 #include "los_task.h"
 
-#define TASK_STACK_SIZE 	0x800
-#define TASK_PRIORITY 		5
+#define TASK_STACK_SIZE       0x800
+#define TASK_PRIORITY         5
 
 STATIC UINT32 g_demoTaskId;
 
@@ -39,101 +39,101 @@ STATIC UINT32 g_demoTaskId;
 
 INT32 UriParse(const CHAR *uriStr)
 {
-	INT32 ret = EXIT_SUCCESS;
+    INT32 ret = EXIT_SUCCESS;
 
-	UriParserStateA state = {0};
-	UriUriA uri;
-	CHAR ipstr[INET6_ADDRSTRLEN];
+    UriParserStateA state = {0};
+    UriUriA uri;
+    CHAR ipstr[INET6_ADDRSTRLEN];
 
-	state.uri = &uri;
-	printf("uri:          %s\n", uriStr);
-	if (uriParseUriA(&state, uriStr) != URI_SUCCESS) {
-		/* Failure */
-		printf("Failure:      %s @ '%.18s' (#%lu)\n",
-			   (state.errorCode == URI_ERROR_SYNTAX)
-			   ? "syntax"
-			   : (state.errorCode == URI_ERROR_MALLOC)
-			   ? "not enough memory"
-			   : "liburiparser bug (please report)",
-			   state.errorPos,
-			   (UINT32)(state.errorPos - uriStr));
-		ret = EXIT_FAILURE;
-		uriFreeUriMembersA(&uri);
-		return ret;
-	}
-	if (uri.scheme.first) {
-		printf("scheme:       %.*s\n", RANGE(uri.scheme));
-	}
-	if (uri.userInfo.first) {
-		printf("userInfo:     %.*s\n", RANGE(uri.userInfo));
-	}
-	if (uri.hostText.first) {
-		printf("hostText:     %.*s\n", RANGE(uri.hostText));
-	}
-	if (uri.hostData.ip4) {
-		inet_ntop(AF_INET, uri.hostData.ip4->data, ipstr, sizeof ipstr);
-		printf("hostData.ip4: %s\n", ipstr);
-	}
-	if (uri.hostData.ip6) {
-		inet_ntop(AF_INET6, uri.hostData.ip6->data, ipstr, sizeof ipstr);
-		printf("hostData.ip6: %s\n", ipstr);
-	}
-	if (uri.portText.first) {
-		printf("portText:     %.*s\n", RANGE(uri.portText));
-	}
-	if (uri.pathHead) {
-		const UriPathSegmentA *p = uri.pathHead;
-		for (; p; p = p->next) {
-			printf(" .. pathSeg:  %.*s\n", RANGE(p->text));
-		}
-	}
-	if (uri.query.first) {
-		printf("query:        %.*s\n", RANGE(uri.query));
-	}
-	if (uri.fragment.first) {
-		printf("fragment:     %.*s\n", RANGE(uri.fragment));
-	}
-	const CHAR *const absolutePathLabel = "absolutePath: ";
-	printf("%s%s\n", absolutePathLabel,
-			(uri.absolutePath == URI_TRUE) ? "true" : "false");
-	if (uri.hostText.first != NULL) {
-		printf("%*s%s\n", (INT32)strlen(absolutePathLabel), "",
-				"(always false for URIs with host)");
-	}
-	printf("\n");
+    state.uri = &uri;
+    printf("uri:          %s\n", uriStr);
+    if (uriParseUriA(&state, uriStr) != URI_SUCCESS) {
+        /* Failure */
+        printf("Failure:      %s @ '%.18s' (#%lu)\n",
+               (state.errorCode == URI_ERROR_SYNTAX)
+               ? "syntax"
+               : (state.errorCode == URI_ERROR_MALLOC)
+               ? "not enough memory"
+               : "liburiparser bug (please report)",
+               state.errorPos,
+               (UINT32)(state.errorPos - uriStr));
+        ret = EXIT_FAILURE;
+        uriFreeUriMembersA(&uri);
+        return ret;
+    }
+    if (uri.scheme.first) {
+        printf("scheme:       %.*s\n", RANGE(uri.scheme));
+    }
+    if (uri.userInfo.first) {
+        printf("userInfo:     %.*s\n", RANGE(uri.userInfo));
+    }
+    if (uri.hostText.first) {
+        printf("hostText:     %.*s\n", RANGE(uri.hostText));
+    }
+    if (uri.hostData.ip4) {
+        inet_ntop(AF_INET, uri.hostData.ip4->data, ipstr, sizeof ipstr);
+        printf("hostData.ip4: %s\n", ipstr);
+    }
+    if (uri.hostData.ip6) {
+        inet_ntop(AF_INET6, uri.hostData.ip6->data, ipstr, sizeof ipstr);
+        printf("hostData.ip6: %s\n", ipstr);
+    }
+    if (uri.portText.first) {
+        printf("portText:     %.*s\n", RANGE(uri.portText));
+    }
+    if (uri.pathHead) {
+        const UriPathSegmentA *p = uri.pathHead;
+        for (; p; p = p->next) {
+            printf(" .. pathSeg:  %.*s\n", RANGE(p->text));
+        }
+    }
+    if (uri.query.first) {
+        printf("query:        %.*s\n", RANGE(uri.query));
+    }
+    if (uri.fragment.first) {
+        printf("fragment:     %.*s\n", RANGE(uri.fragment));
+    }
+    const CHAR *const absolutePathLabel = "absolutePath: ";
+    printf("%s%s\n", absolutePathLabel,
+            (uri.absolutePath == URI_TRUE) ? "true" : "false");
+    if (uri.hostText.first != NULL) {
+        printf("%*s%s\n", (INT32)strlen(absolutePathLabel), "",
+                "(always false for URIs with host)");
+    }
+    printf("\n");
 
-	uriFreeUriMembersA(&uri);
-	return ret;
+    uriFreeUriMembersA(&uri);
+    return ret;
 }
 
 STATIC VOID DemoTaskEntry(VOID)
 {
-	INT32 ret;
-	printf("Uriparser demo start to run.\n");
-	const CHAR *demoUri = "https://www.huawei.com/minisite/liteos/cn/index.html";
-	ret = UriParse(demoUri);
-	if (ret != EXIT_SUCCESS) {
-		printf("Uriparser failed :%d.\n", ret);
-	}
-	printf("Uriparser demo finished.\n");
+    INT32 ret;
+    printf("Uriparser demo start to run.\n");
+    const CHAR *demoUri = "https://www.huawei.com/minisite/liteos/cn/index.html";
+    ret = UriParse(demoUri);
+    if (ret != EXIT_SUCCESS) {
+        printf("Uriparser failed :%d.\n", ret);
+    }
+    printf("Uriparser demo finished.\n");
 }
 
 VOID UriparserDemoTask(VOID)
 {
-	UINT32 ret;
-	TSK_INIT_PARAM_S taskInitParam;
-	ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
-	if (ret != EOK) {
-		return;
-	}
-	taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
-	taskInitParam.uwStackSize = TASK_STACK_SIZE;
-	taskInitParam.pcName = "UriparserDemoTask";
-	taskInitParam.usTaskPrio = TASK_PRIORITY;
-	taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
-	ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
-	if (ret != LOS_OK)
-	{
-		printf("Create uriparser demo task failed.\n");
-	}
+    UINT32 ret;
+    TSK_INIT_PARAM_S taskInitParam;
+    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return;
+    }
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
+    taskInitParam.uwStackSize = TASK_STACK_SIZE;
+    taskInitParam.pcName = "UriparserDemoTask";
+    taskInitParam.usTaskPrio = TASK_PRIORITY;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
+    if (ret != LOS_OK)
+    {
+        printf("Create uriparser demo task failed.\n");
+    }
 }
