@@ -9,7 +9,6 @@ Uriparser是用C语言编写的uri解析器。详情参考<a href="https://githu
 
 1. 在LiteOS源码根目录下根据实际使用的开发板，拷贝tools/build/config/目录下的默认配置文件${platform}.config到根目录，并重命名为.config。
 
-
 2. 继续在LiteOS源码根目录下执行`make menuconfig`命令，按如下菜单路径使能Uriparser Demo。
 
     ```
