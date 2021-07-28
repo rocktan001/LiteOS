@@ -44,7 +44,7 @@ extern "C" {
 #elif defined  LOSCFG_ARCH_RISCV_RV32IMC
 #define SOFT_IRQ_NUM    3
 #elif defined (LOSCFG_FAMILY_RASPBERRY)
-#define SOFT_IRQ_NUM    MAILBOX2_IRQ
+#define SOFT_IRQ_NUM    MAILBOX3_IRQ
 #else
 #define SOFT_IRQ_NUM    39
 #endif

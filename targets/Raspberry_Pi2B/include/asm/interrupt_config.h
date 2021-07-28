@@ -36,22 +36,26 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define ARM_TIMER_INI               0
-#define MAILBOX0_IRQ                4
-#define MAILBOX1_IRQ                5
-#define MAILBOX2_IRQ                6
-#define MAILBOX3_IRQ                7
 #define AUX_INT                     29
 #define I2C_SPI_SLV_INT             43
 #define PWA0_INT                    45
 #define PWA1_INT                    46
+#define CNTPS_IRQ                   65
+#define CNTPNS_IRQ                  66
+#define CNTHP_IRQ                   67
+#define CNTV_IRQ                    68
+#define MAILBOX0_IRQ                69
+#define MAILBOX1_IRQ                70
+#define MAILBOX2_IRQ                71
+#define MAILBOX3_IRQ                72
 
-#define OS_TICK_INT_NUM             (LOSCFG_PLATFORM_HWI_LIMIT + 1)
+#define OS_TICK_INT_NUM             ARM_TIMER_INI
 #define NUM_HAL_INTERRUPT_UART      AUX_INT
 
 #define IRQ_REG_BASE                ((INTERRUPTS_INFO *)(0x3F000000 + 0xB200))
 #define SYSTEMTIMER_REG_BASE        ((SYSTEMTIMER_INFO *)(0x3F000000 + 0x3000))
 #define ARMTIMER_REG_BASE           ((ARMTIMER_INFO *)(0x3F000000 + 0xB000 + 0x400))
-#define CORE_MAILBOX_REG_BASE       ((MAILBOXES_INFO *)(0x40000000 + 0x50))
+#define CORE_MAILBOX_REG_BASE       ((MAILBOXES_INFO *)(0x40000000 + 0x40))
 
 typedef struct tagInterruptsInfo {
     volatile UINT32 basicPending;       /* IRQ basic pending */
@@ -61,7 +65,7 @@ typedef struct tagInterruptsInfo {
     volatile UINT32 enableBasicIRQs;    /* Enable Basic IRQs */
     volatile UINT32 disableIRQs[2];     /* Disable IRQs x */
     volatile UINT32 disableBasicIRQs;   /* Disable Basic IRQs */
-}INTERRUPTS_INFO;
+} INTERRUPTS_INFO;
 
 typedef struct tagArmTimerInfo {
     volatile UINT32 load;
@@ -73,22 +77,23 @@ typedef struct tagArmTimerInfo {
     volatile UINT32 reload;
     volatile UINT32 preDivider;
     volatile UINT32 freeRunningCounter;
-}ARMTIMER_INFO;
+} ARMTIMER_INFO;
 
 typedef struct tagSystemTimerInfo {
     volatile UINT32 CS;         /* System Timer Control/Status  */
     volatile UINT32 CLO;        /* System Timer Counter Lower 32 bits */
     volatile UINT32 CHI;        /* System Timer Counter Higher 32 bits */
     volatile UINT32 C[4];       /* System Timer Compare x */
-}SYSTEMTIMER_INFO;
+} SYSTEMTIMER_INFO;
 
 typedef struct tagMailboxesInfo {
+    volatile UINT32 CoreTimeIRQ[4]; /* Core timers interrupts */
     volatile UINT32 IRQControl[4];  /* Core x timers Interrupt control */
     volatile UINT32 IRQSource[4];   /* Core x IRQ Source*/
     volatile UINT32 FIQSource[4];   /* Core x FIQ Source*/
     volatile UINT32 writeSet[16];   /* Core x Mailbox x write-set */
     volatile UINT32 readClear[16];  /* Core x Mailbox x read & write-high-to-clear */
-}MAILBOXES_INFO;
+} MAILBOXES_INFO;
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -97,3 +102,4 @@ typedef struct tagMailboxesInfo {
 #endif /* __cplusplus */
 
 #endif /* _ASM_INTERRUPT_CONFIG_H */
+

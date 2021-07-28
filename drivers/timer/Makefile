@@ -9,7 +9,11 @@ LOCAL_SRCS_$(LOSCFG_ARM_SP804_TIMER) += arm_sp804_timer.c
 LOCAL_SRCS_$(LOSCFG_RISCV32_M_TIMER) += riscv32_mtimer.c
 LOCAL_SRCS_$(LOSCFG_ARM_SP804_HRTIMER) += arm_sp804_hrtimer.c
 LOCAL_SRCS_$(LOSCFG_CSKY_SYSTICK) += csky_systick.c
+ifeq ($(LOSCFG_KERNEL_SMP), y)
+LOCAL_SRCS_$(LOSCFG_RASPBERRY_PI_SYSTICK) += arm_generic_timer.c
+else
 LOCAL_SRCS_$(LOSCFG_RASPBERRY_PI_SYSTICK) += rasp_systick.c
+endif
 
 LOCAL_SRCS = $(LOCAL_SRCS_y)
 
