@@ -18,7 +18,7 @@ Http Client Demo中使用http-parser组件来解析http response header。
 
     ```
     Demos  --->
-        Http Client Demo Demo  --->
+        Http Client Demo  --->
                 [*] Enable Http Client Demo
     ```
 使能Http Client Demo后会自动使能http-parser组件和LWIP。
