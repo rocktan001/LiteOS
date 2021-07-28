@@ -19,6 +19,8 @@ ifeq ($(CROSS_COMPILE),)
         COMPILE_ALIAS := aarch64-linux-musl
     else ifeq ($(LOSCFG_COMPILER_HCC_64), y)
         CROSS_COMPILE := aarch64-linux-gnu-
+    else ifeq ($(LOSCFG_COMPILER_GCC_64), y)
+        CROSS_COMPILE := aarch64-none-elf-
     else ifeq ($(LOSCFG_COMPILER_ARM_NONE_EABI), y)
         CROSS_COMPILE := arm-none-eabi-
     else ifeq ($(LOSCFG_COMPILER_RISCV), y)
