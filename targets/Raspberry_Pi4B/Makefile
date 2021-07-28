@@ -2,7 +2,8 @@ include $(LITEOSTOPDIR)/config.mk
 
 MODULE_NAME := $(LITEOS_PLATFORM)
 
-LOCAL_SRCS := $(wildcard *.c)
+LOCAL_SRCS := $(wildcard *.c) \
+              $(wildcard Src/*.c) \
 
 ifeq ($(LOSCFG_PLATFORM_ADAPT), y)
 LOCAL_SRCS += $(wildcard os_adapt/*.c)
