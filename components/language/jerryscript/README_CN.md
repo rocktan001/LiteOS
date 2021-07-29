@@ -23,7 +23,7 @@
       Language  --->
             [*] Enable Jerryscript
   ```
-  **注：** RAMFS为可选组件，如选择该组件，可生成一个`ramfs/hello.js`示例文件，在LiteOS的shell中执行`jerry ramfs/hello.js`命令可查看其运行结果，
+  **注：** RAMFS为可选组件，如选择该组件，可生成一个`/ramfs/hello.js`示例文件，在LiteOS的shell中执行`jerry /ramfs/hello.js`命令可查看其运行结果，
   `jerryscript`组件依赖vfs，开启`jerryscript`组件后，vfs即自动开启。
 
   保存退出，此时LiteOS会从github自动下载`jerryscript`源代码，关于在线组件的自动下载，请查阅过<a href="https://gitee.com/LiteOS/LiteOS_Components#在线组件下载流程" target="_blank">在线组件下载流程</a>。待下载完成后，执行如下命令编译LiteOS工程。
@@ -60,7 +60,7 @@
 
   运行hello.js文件
   ```
-   Huawei LiteOS # jerry ramfs/hello.js
+   Huawei LiteOS # jerry /ramfs/hello.js
    Hello, wlorld! I'm JerryScript.
 
    Huawei LiteOS #
