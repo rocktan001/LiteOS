@@ -1,8 +1,8 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS timer driver
+/*----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Description: User Task Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2020-07-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,56 +26,52 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "timer.h"
+#include "stdio.h"
+#include "sys_init.h"
+#include "demo_entry.h"
+#include "los_task_pri.h"
+#include "gpio.h"
 
-UINT64 GetTimerCpupCycles(VOID)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#define TASK_DELAY 1000
+
+STATIC UINT32 LedTask(VOID)
 {
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(CPUP_TIMER);
-#else
-    return StmGetTimerCycles(CPUP_TIMER);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles(CPUP_TIMER);
-#endif
+    while (1) {
+        APM_MINI_LED2Toggle();
+        LOS_TaskDelay(TASK_DELAY);
+    }
+    return 0;
 }
 
-UINT64 GetTimerCycles(Timer_t num)
+STATIC UINT32 LedTaskCreate(VOID)
 {
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(num);
-#else
-    return StmGetTimerCycles(num);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles((num));
-#endif
+    UINT32 taskId = 0;
+    TSK_INIT_PARAM_S ledTaskParam;
+
+    (VOID)memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask;
+    ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    ledTaskParam.pcName = "ledTask";
+    ledTaskParam.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+    ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    return LOS_TaskCreate(&taskId, &ledTaskParam);
 }
 
-VOID TimerHwiCreate (VOID)
+VOID app_init(VOID)
 {
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerHwiCreate();
-#else
-    StmTimerHwiCreate();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerHwiCreate();
-#endif
+    printf("app init!\n");
+    (VOID)LedTaskCreate();
+    DemoEntry();
 }
 
-VOID TimerInitialize(VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerInit();
-#else
-    StmTimerInit();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerInit();
-#endif
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif /* __cplusplus */
+#endif /* __cplusplus */

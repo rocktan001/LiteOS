@@ -1,8 +1,8 @@
-/* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS timer driver
+/*----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Main HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,56 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "timer.h"
+#ifndef _MAIN_H
+#define _MAIN_H
 
-UINT64 GetTimerCpupCycles(VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(CPUP_TIMER);
-#else
-    return StmGetTimerCycles(CPUP_TIMER);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles(CPUP_TIMER);
-#endif
-}
+#include "sys_init.h"
 
-UINT64 GetTimerCycles(Timer_t num)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(num);
-#else
-    return StmGetTimerCycles(num);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles((num));
-#endif
-}
-
-VOID TimerHwiCreate (VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerHwiCreate();
-#else
-    StmTimerHwiCreate();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerHwiCreate();
-#endif
-}
-
-VOID TimerInitialize(VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerInit();
-#else
-    StmTimerInit();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerInit();
-#endif
-}
+#endif /* _MAIN_H */

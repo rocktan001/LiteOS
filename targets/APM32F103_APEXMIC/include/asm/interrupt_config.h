@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS timer driver
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Interrupt Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,56 +26,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "timer.h"
+#ifndef _ASM_INTERRUPT_CONFIG_H
+#define _ASM_INTERRUPT_CONFIG_H
 
-UINT64 GetTimerCpupCycles(VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(CPUP_TIMER);
-#else
-    return StmGetTimerCycles(CPUP_TIMER);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles(CPUP_TIMER);
-#endif
-}
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-UINT64 GetTimerCycles(Timer_t num)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(num);
-#else
-    return StmGetTimerCycles(num);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles((num));
-#endif
-}
+#define CPUP_TIMER              3
+#define TIM_IRQ                 (TMR3_IRQn + 16)
+#define OS_TICK_INT_NUM         (SysTick_IRQn + 16) // 16: cortex-m irq shift
+#define NUM_HAL_INTERRUPT_UART  (USART1_IRQn + 16)  // 16: cortex-m irq shift
 
-VOID TimerHwiCreate (VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerHwiCreate();
-#else
-    StmTimerHwiCreate();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerHwiCreate();
-#endif
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
-VOID TimerInitialize(VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerInit();
-#else
-    StmTimerInit();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerInit();
-#endif
-}
+#endif /* _ASM_INTERRUPT_CONFIG_H */

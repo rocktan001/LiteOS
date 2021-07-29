@@ -83,6 +83,10 @@ UINT8 uart_getc(VOID)
     }
 #elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
     (VOID)HAL_UART_Receive(&huart3, &ch, sizeof(UINT8), 0);
+#elif defined(LOSCFG_PLATFORM_APM32F103_APEXMIC)
+    if (USART_ReadStatusFlag(USART1, USART_INT_RXBNE) == SET) {
+        ch = (UINT8)USART_RxData(USART1);
+    }
 #else
     (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
 #endif
@@ -165,6 +169,9 @@ INT32 uart_hwiCreate(VOID)
     __HAL_UART_CLEAR_FLAG(&huart3, UART_FLAG_TC);
     (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
     __HAL_UART_ENABLE_IT(&huart3, UART_IT_RXNE);
+#elif defined(LOSCFG_PLATFORM_APM32F103_APEXMIC)
+    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    USART_EnableInterrupt(USART1,USART_INT_RXBNE);
 #else
     if (huart1.Instance == NULL) {
         return LOS_NOK;
@@ -232,6 +239,12 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
     }
 #elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
     (VOID)HAL_UART_Transmit(&huart3, (UINT8 *)buf, (UINT16)len, DEFAULT_TIMEOUT);
+#elif defined(LOSCFG_PLATFORM_APM32F103_APEXMIC)
+    UINT32 i;
+    for (i = 0; i < len; i++) {
+        while(USART_ReadStatusFlag(USART1, USART_FLAG_TXBE) == RESET) {};
+        USART_TxData(USART1, buf[i]);
+    }
 #else
     (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)buf, (UINT16)len, DEFAULT_TIMEOUT);
 #endif

@@ -1,0 +1,21 @@
+config LOSCFG_PLATFORM
+    string
+    default "APM32F103_APEXMIC"           	if LOSCFG_PLATFORM_APM32F103_APEXMIC
+
+choice
+    prompt "Board"
+    depends on LOSCFG_FAMILY_APM32
+    default LOSCFG_PLATFORM_APM32F103_APEXMIC
+    help
+      support several boards:
+      APM32F103_APEXMIC
+
+config LOSCFG_PLATFORM_APM32F103_APEXMIC
+    bool "APM32F103_APEXMIC"
+    select LOSCFG_USING_BOARD_LD
+    select LOSCFG_ARCH_CORTEX_M3
+    select LOSCFG_CORTEX_M_NVIC
+    select LOSCFG_CORTEX_M_SYSTICK
+    select LOSCFG_DRIVER_APM_LIB
+
+endchoice
