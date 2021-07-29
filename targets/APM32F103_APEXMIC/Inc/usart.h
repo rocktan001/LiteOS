@@ -26,8 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef __USART_H
-#define __USART_H
+#ifndef _USART_H
+#define _USART_H
 
 #include "los_typedef.h"
 
@@ -40,7 +40,7 @@ extern "C" {
 #include "apm32f10x.h"
 #include "apm32f10x_usart.h"
 
-VOID APM_MINI_COM1Init(VOID);
+VOID ApmMiniCom1Init(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -26,8 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef __GPIO_H
-#define __GPIO_H
+#ifndef _GPIO_H
+#define _GPIO_H
 
 #include "los_typedef.h"
 
@@ -37,10 +37,10 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID APM_MINI_LED2Init(VOID);
-VOID APM_MINI_LED2On(VOID);
-VOID APM_MINI_LED2Off(VOID);
-VOID APM_MINI_LED2Toggle(VOID);
+VOID ApmMiniLed2Init(VOID);
+VOID ApmMiniLed2On(VOID);
+VOID ApmMiniLed2Off(VOID);
+VOID ApmMiniLed2Toggle(VOID);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,4 +48,4 @@ VOID APM_MINI_LED2Toggle(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* __GPIO_H */
+#endif /* _GPIO_H */

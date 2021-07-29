@@ -8,14 +8,8 @@ ASSRCS := $(subst board/$(LITEOS_PLATFORM)/board.ld.S,,$(ALL_ASSRCS))
 LOCAL_SRCS += $(ASSRCS)
 
 USER_SRC = \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/os_adapt/os_adapt.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/main.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/system_apm32f10x.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/sys_init.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/usart.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/gpio.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/tim.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/user_task.c
+    os_adapt/os_adapt.c \
+    $(wildcard Src/*.c)
     C_SOURCES += $(USER_SRC)
 
 # C includes
@@ -40,7 +34,7 @@ C_DEFS += \
     -D_ALL_SOURCE
 
 ASM_SOURCES = \
-        ${wildcard $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/los_startup_gcc.S}
+    ${wildcard $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/los_startup_gcc.S}
 
 BOARD_SRCS += $(ASM_SOURCES)
 BOARD_SRCS += $(C_SOURCES)

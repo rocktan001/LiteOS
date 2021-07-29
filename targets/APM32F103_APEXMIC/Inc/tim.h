@@ -26,8 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef __TIM_H__
-#define __TIM_H__
+#ifndef _TIM_H__
+#define _TIM_H__
 
 #ifdef __cplusplus
 #if __cplusplus

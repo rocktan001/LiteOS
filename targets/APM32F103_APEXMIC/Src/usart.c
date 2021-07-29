@@ -38,7 +38,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void APM_MINI_COM1Init(void)
+void ApmMiniCom1Init(void)
 {
     GPIO_Config_T GPIO_ConfigStruct;
     USART_Config_T USART_ConfigStruct;
@@ -66,7 +66,6 @@ void APM_MINI_COM1Init(void)
     USART_Config(USART1, &USART_ConfigStruct);
     
     // /** Enable USART_INT_RXBNE*/
-    // USART_EnableInterrupt(USART1,USART_INT_RXBNE);
     NVIC_EnableIRQRequest(USART1_IRQn, 0, 0); 
 
     /* Enable USART */

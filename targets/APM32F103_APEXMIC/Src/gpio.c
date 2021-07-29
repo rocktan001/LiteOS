@@ -36,7 +36,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID APM_MINI_LED2Init(VOID)
+VOID ApmMiniLed2Init(VOID)
 {
     GPIO_Config_T  configStruct;
 
@@ -52,17 +52,17 @@ VOID APM_MINI_LED2Init(VOID)
     GPIOE->BC = GPIO_PIN_6;
 }
 
-VOID APM_MINI_LED2On(VOID)
+VOID ApmMiniLed2On(VOID)
 {
     GPIOE->BC = GPIO_PIN_6;
 }
 
-VOID APM_MINI_LED2Off(VOID)
+VOID ApmMiniLed2Off(VOID)
 {
     GPIOE->BSC = GPIO_PIN_6;
 }
 
-VOID APM_MINI_LED2Toggle(VOID)
+VOID ApmMiniLed2Toggle(VOID)
 {
     GPIOE->ODATA ^= GPIO_PIN_6;
 }

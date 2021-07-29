@@ -46,8 +46,8 @@ VOID board_config(VOID)
 
 VOID HardwareInit(VOID)
 {
-    APM_MINI_LED2Init();
-    APM_MINI_COM1Init();
+    ApmMiniLed2Init();
+    ApmMiniCom1Init();
     ApmTimerInit();
 }
 
@@ -61,8 +61,6 @@ INT32 main(VOID)
 
     board_config();
     HardwareInit();
-
-    printf("app init!\n");
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
                   "\nLiteOS Kernel Version : %s\n"

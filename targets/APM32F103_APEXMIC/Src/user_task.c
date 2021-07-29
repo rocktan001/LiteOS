@@ -43,7 +43,7 @@ extern "C" {
 STATIC UINT32 LedTask(VOID)
 {
     while (1) {
-        APM_MINI_LED2Toggle();
+        ApmMiniLed2Toggle();
         LOS_TaskDelay(TASK_DELAY);
     }
     return 0;

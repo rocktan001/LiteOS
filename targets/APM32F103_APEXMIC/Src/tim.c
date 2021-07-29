@@ -39,7 +39,7 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 
-VOID APM_MINI_TIM3Init(VOID)
+VOID ApmMiniTim3Init(VOID)
 {
     TMR_BaseConfig_T TMR_BaseConfigStruct;
     
@@ -62,8 +62,7 @@ VOID APM_MINI_TIM3Init(VOID)
 
 VOID Tim3IrqHandler(VOID)
 {
-    if(TMR_ReadIntFlag(TMR3, TMR_INT_UPDATE) == SET)
-    {
+    if(TMR_ReadIntFlag(TMR3, TMR_INT_UPDATE) == SET) {
         TMR_ClearIntFlag(TMR3, TMR_INT_UPDATE);
     }
 }
@@ -84,7 +83,7 @@ UINT64 Timer3Getcycle(VOID)
 
 VOID ApmTimerInit(VOID)
 {
-    APM_MINI_TIM3Init();
+    ApmMiniTim3Init();
 }
 
 VOID ApmTimerHwiCreate(VOID)
