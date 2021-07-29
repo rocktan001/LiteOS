@@ -93,7 +93,7 @@ VOID CpuInit(VOID)
 }
 
 Atomic g_cpuNum = 1;
-extern void _reset(void);
+extern void reset_vector(void);
 extern UINT8 g_firstPageTable[MMU_16K];
 
 #ifdef LOSCFG_APC_ENABLE
@@ -133,7 +133,7 @@ INT32 main(VOID)
     UINT8 coreId;
     for (coreId = 1; coreId < LOSCFG_KERNEL_CORE_NUM; coreId++) {
         /* per cpu 4 mailbox */
-        mailbox->writeSet[coreId * 4 + MAILBOX3_IRQ - MAILBOX0_IRQ] = (UINT32)_reset;
+        mailbox->writeSet[coreId * 4 + MAILBOX3_IRQ - MAILBOX0_IRQ] = (UINT32)reset_vector;
         __asm__ volatile ("sev");
     }
     while (LOS_AtomicRead(&g_cpuNum) < LOSCFG_KERNEL_CORE_NUM) {

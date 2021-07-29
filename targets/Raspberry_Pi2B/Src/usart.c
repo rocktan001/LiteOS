@@ -55,7 +55,7 @@ MINIUART_INFO *miniUart;
 STATIC VOID MiniUartInit(VOID)
 {
     UINT32 value;
-    GPIO_INFO * gpio = GPIO_REG_BASE;
+    GPIO_INFO *gpio = GPIO_REG_BASE;
 
     value = gpio->GPFSEL[1];
     value &= ~(GPIO_FSEL_MASK << ((MINI_UART_TX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM));
@@ -70,18 +70,18 @@ STATIC VOID MiniUartInit(VOID)
 
     miniUart = MINI_UART;
     *((volatile UINT32 *)(AUX_ENABLES)) |= 1;   /* Mini UART enable */
-    miniUart->LCR   = 3;    /* UART works in 8-bit mode */
-    miniUart->IIR   = 0;    /* disable receive interrupt,transmit interrupt */
-    miniUart->CNTL  = 0;    /* disable receive,transmit  */
-    miniUart->MCR   = 0;    /* RTS set 0 */
-    miniUart->IER   = 0xC6; /* Enable FIFO, Clear FIFO */
-    miniUart->BAUD  = 270;  /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
-    miniUart->CNTL  = 3;    /* enable receive,transmit  */
+    miniUart->LCR = 3;     /* UART works in 8-bit mode */
+    miniUart->IIR = 0;     /* disable receive interrupt,transmit interrupt */
+    miniUart->CNTL = 0;    /* disable receive,transmit  */
+    miniUart->MCR = 0;     /* RTS set 0 */
+    miniUart->IER = 0xC6;  /* Enable FIFO, Clear FIFO */
+    miniUart->BAUD = 270;  /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
+    miniUart->CNTL = 3;    /* enable receive,transmit  */
 }
 
 STATIC VOID MiniUartWriteChar(const CHAR c)
 {
-    while(!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};
+    while (!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};
     miniUart->IO = c;
 }
 

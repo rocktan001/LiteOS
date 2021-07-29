@@ -35,7 +35,7 @@
 .globl system_vectors
 system_vectors:
 
-    b   _reset
+    b   reset_vector
     b   _osExceptUndefInstrHdl
     b   _osExceptSwiHdl
     b   _osExceptPrefetchAbortHdl
@@ -46,8 +46,8 @@ system_vectors:
 
 .text
 /* reset entry */
-.globl _reset
-_reset:
+.globl reset_vector
+reset_vector:
     mrs r0, cpsr_all 
     and r0, r0, #0x1F
     mov r8, #0x1A
