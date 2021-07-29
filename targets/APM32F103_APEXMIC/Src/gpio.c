@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS timer driver
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Gpio Init Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,56 +26,49 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "timer.h"
+#include "gpio.h"
+#include "apm32f10x_rcm.h"
+#include "apm32f10x_gpio.h"
 
-UINT64 GetTimerCpupCycles(VOID)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+VOID APM_MINI_LED2Init(VOID)
 {
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(CPUP_TIMER);
-#else
-    return StmGetTimerCycles(CPUP_TIMER);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles(CPUP_TIMER);
-#endif
+    GPIO_Config_T  configStruct;
+
+    /* Enable the GPIO_LED Clock */
+    RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_GPIOE);
+
+    /* Configure the GPIO_LED pin */
+    configStruct.pin = GPIO_PIN_6;
+    configStruct.mode = GPIO_MODE_OUT_PP;
+    configStruct.speed = GPIO_SPEED_50MHz;
+
+    GPIO_Config(GPIOE, &configStruct);
+    GPIOE->BC = GPIO_PIN_6;
 }
 
-UINT64 GetTimerCycles(Timer_t num)
+VOID APM_MINI_LED2On(VOID)
 {
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(num);
-#else
-    return StmGetTimerCycles(num);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles((num));
-#endif
+    GPIOE->BC = GPIO_PIN_6;
 }
 
-VOID TimerHwiCreate (VOID)
+VOID APM_MINI_LED2Off(VOID)
 {
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerHwiCreate();
-#else
-    StmTimerHwiCreate();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerHwiCreate();
-#endif
+    GPIOE->BSC = GPIO_PIN_6;
 }
 
-VOID TimerInitialize(VOID)
+VOID APM_MINI_LED2Toggle(VOID)
 {
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerInit();
-#else
-    StmTimerInit();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerInit();
-#endif
+    GPIOE->ODATA ^= GPIO_PIN_6;
 }
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */

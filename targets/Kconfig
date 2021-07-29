@@ -22,6 +22,9 @@ config LOSCFG_FAMILY_FMSH
 config LOSCFG_FAMILY_RASPBERRY
     bool "raspberry"
 
+config LOSCFG_FAMILY_APM32
+    bool "APM32"
+
 endchoice
 
 
@@ -32,6 +35,7 @@ osource "targets/Kconfig.csky"
 osource "targets/Kconfig.sifive"
 osource "targets/Kconfig.fmsh"
 osource "targets/Kconfig.raspberry"
+osource "targets/Kconfig.apm32"
 
 config LOSCFG_HW_SD_CARD
     bool
@@ -46,6 +50,9 @@ config LOSCFG_DRIVER_CSKY_LIB
     bool
 
 config LOSCFG_DRIVER_SIFIVE_LIB
+    bool
+
+config LOSCFG_DRIVER_APM_LIB
     bool
 
 config LOSCFG_HW_SPI_FLASH

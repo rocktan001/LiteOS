@@ -1,0 +1,121 @@
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Timer Init Implementation
+ * Author: Huawei LiteOS Team
+ * Create: 2021-07-23
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list
+ * of conditions and the following disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used
+ * to endorse or promote products derived from this software without specific prior written
+ * permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * --------------------------------------------------------------------------- */
+
+#include "tim.h"
+#include "los_hwi.h"
+#include "apm32f10x_tmr.h"
+#include "apm32f10x_misc.h"
+#include "apm32f10x_rcm.h"
+#include "los_hwi.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif /* __cplusplus */
+
+VOID APM_MINI_TIM3Init(VOID)
+{
+    TMR_BaseConfig_T TMR_BaseConfigStruct;
+    
+    RCM_EnableAPB1PeriphClock(RCM_APB1_PERIPH_TMR3);
+    
+     /** Set clockDivision = 1 */
+    TMR_BaseConfigStruct.clockDivision = TMR_CLOCK_DIV_1;
+     /** Up-counter */
+    TMR_BaseConfigStruct.countMode = TMR_COUNTER_MODE_UP;
+     /** Set divider = 7199.So TMR3 clock freq ~= 72000/(7199 + 1) = 10kHZ */
+    TMR_BaseConfigStruct.division = 7199;
+     /** Set counter = 49999 + 1 */
+    TMR_BaseConfigStruct.period = 49999;
+     /** Repetition counter = 0x0 */
+    TMR_BaseConfigStruct.repetitionCounter = 0;
+    TMR_ConfigTimeBase(TMR3, &TMR_BaseConfigStruct);
+    
+    TMR_Enable(TMR3);
+}
+
+VOID Tim3IrqHandler(VOID)
+{
+    if(TMR_ReadIntFlag(TMR3, TMR_INT_UPDATE) == SET)
+    {
+        TMR_ClearIntFlag(TMR3, TMR_INT_UPDATE);
+    }
+}
+
+UINT64 Timer3Getcycle(VOID)
+{
+    static UINT64 bacCycle;
+    static UINT64 cycleTimes;
+    UINT64 swCycles = TMR3->CNT;
+
+    if (swCycles < bacCycle) {
+        cycleTimes++;
+    }
+    bacCycle = swCycles;
+    /* cycle = cycleTimes * 50000 */
+    return swCycles + cycleTimes * 50000;
+}
+
+VOID ApmTimerInit(VOID)
+{
+    APM_MINI_TIM3Init();
+}
+
+VOID ApmTimerHwiCreate(VOID)
+{
+    UINT32 ret;
+
+    ret = LOS_HwiCreate(TIM_IRQ, 0, 0, Tim3IrqHandler, 0); // 16: cortex-m irq num shift
+    if (ret != 0) {
+        printf("ret of TIM3 LOS_HwiCreate = %#x\n", ret);
+        return;
+    }
+    TMR_EnableInterrupt(TMR3, TMR_INT_UPDATE);
+    NVIC_EnableIRQRequest(TMR3_IRQn, 0, 0);
+}
+
+UINT64 ApmGetTimerCycles(Timer_t num)
+{
+    UINT64 cycles = 0;
+
+    switch (num) {
+        case TIMER3:
+            cycles = Timer3Getcycle();
+            break;
+        default:
+            printf("Wrong number of TIMER.\n");
+    }
+    return cycles;
+}
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
