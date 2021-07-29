@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Dma HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2021-07-28

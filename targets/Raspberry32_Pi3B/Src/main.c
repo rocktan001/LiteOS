@@ -169,7 +169,7 @@ LITE_OS_SEC_TEXT_INIT INT32 secondary_cpu_start(VOID)
     LOS_HwiEnable(MAILBOX3_IRQ);
 #endif
 #ifdef LOSCFG_BASE_CORE_SWTMR
-     OsSwtmrInit();
+    OsSwtmrInit();
 #endif
     OsIdleTaskCreate();
     OsStart();

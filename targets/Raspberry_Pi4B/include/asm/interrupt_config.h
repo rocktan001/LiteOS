@@ -40,6 +40,7 @@ extern "C" {
 #define NUM_HAL_INTERRUPT_UART              (125)
 
 #define MAILBOX2_IRQ                        (39)
+#define RASPBERRY_IRQ                       MAILBOX2_IRQ
 
 #ifdef __cplusplus
 #if __cplusplus

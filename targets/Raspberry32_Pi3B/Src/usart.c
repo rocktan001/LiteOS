@@ -55,7 +55,7 @@ MINIUART_INFO *miniUart;
 STATIC VOID MiniUartInit(VOID)
 {
     UINT32 value;
-    GPIO_INFO * gpio = GPIO_REG_BASE;
+    GPIO_INFO *gpio = GPIO_REG_BASE;
 
     value = gpio->GPFSEL[1];
     value &= ~(GPIO_FSEL_MASK << ((MINI_UART_TX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM));
@@ -81,7 +81,7 @@ STATIC VOID MiniUartInit(VOID)
 
 STATIC VOID MiniUartWriteChar(const CHAR c)
 {
-    while(!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};
+    while (!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};
     miniUart->IO = c;
 }
 

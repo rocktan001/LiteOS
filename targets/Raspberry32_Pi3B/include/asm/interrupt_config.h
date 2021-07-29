@@ -53,6 +53,8 @@ extern "C" {
 #else
 #define OS_TICK_INT_NUM             ARM_TIMER_INI
 #endif
+
+#define RASPBERRY_IRQ               MAILBOX3_IRQ
 #define NUM_HAL_INTERRUPT_UART      AUX_INT
 
 #define IRQ_REG_BASE                ((INTERRUPTS_INFO *)(0x3F000000 + 0xB200))

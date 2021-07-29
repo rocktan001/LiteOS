@@ -74,7 +74,7 @@ INT32 main(VOID)
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
 
-	board_config();
+    board_config();
     cpuInit();
     uart_early_init();
 

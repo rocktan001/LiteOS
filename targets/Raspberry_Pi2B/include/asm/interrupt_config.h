@@ -49,6 +49,7 @@ extern "C" {
 #define MAILBOX2_IRQ                71
 #define MAILBOX3_IRQ                72
 
+#define RASPBERRY_IRQ               MAILBOX2_IRQ
 #define OS_TICK_INT_NUM             ARM_TIMER_INI
 #define NUM_HAL_INTERRUPT_UART      AUX_INT
 

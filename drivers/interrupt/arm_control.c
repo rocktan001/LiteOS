@@ -197,7 +197,8 @@ HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 }
 
 #ifdef LOSCFG_KERNEL_SMP
-UINT32 HalIrqSendIpi(UINT32 target, UINT32 ipi) {
+UINT32 HalIrqSendIpi(UINT32 target, UINT32 ipi)
+{
     UINT32 i;
     MAILBOXES_INFO *coreIrq = CORE_MAILBOX_REG_BASE;
 
@@ -254,7 +255,8 @@ UINT32 HalSmpIrqInit(VOID)
 }
 #endif
 
-VOID HalIrqInitPercpu(VOID) {
+VOID HalIrqInitPercpu(VOID)
+{
     INTERRUPTS_INFO * irq = IRQ_REG_BASE;
     /* mask all of interrupts */
     irq->disableBasicIRQs = ARM_IRQ_MASK;
@@ -263,9 +265,9 @@ VOID HalIrqInitPercpu(VOID) {
 
     asm ("mrc     p15, #0, r1, c1, c0, #0\n"
          "bic     r1, #(1 << 13)\n"
-          "ldr r0, =system_vectors\n"
-          "mcr p15, #0, r0, c12, c0, #0\n"
-          "dsb\n");
+         "ldr r0, =system_vectors\n"
+         "mcr p15, #0, r0, c12, c0, #0\n"
+         "dsb\n");
 }
 
 VOID HalIrqInit(VOID)
