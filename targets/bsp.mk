@@ -79,6 +79,10 @@ else ifeq ($(LOSCFG_PLATFORM_HIFIVE1_REV1_B01), y)
 else ifeq ($(LOSCFG_PLATFORM_FM33LC0XX_DEMO), y)
     LITEOS_CMACRO_TEST += -DFM33LC0XX
     HAL_DRIVER_TYPE := FM33LC0xx_LL_Driver
+######################### APM32F103_APEXMIC Options ###############################
+else ifeq ($(LOSCFG_PLATFORM_APM32F103_APEXMIC), y)
+    LITEOS_CMACRO_TEST += -DAPM32F10X_HD
+    APM_DRIVER_TYPE := APM32F10x_StdPeriphDriver
 endif
 
 HAL_DRIVER_SRC := drivers/$(HAL_DRIVER_TYPE)
@@ -118,6 +122,10 @@ endif
 
 ifeq ($(LOSCFG_DRIVER_SIFIVE_LIB), y)
     PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/targets/bsp/$(HAL_DRIVER_SRC)
+endif
+
+ifeq ($(LOSCFG_DRIVER_APM_LIB), y)
+    PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/targets/bsp/drivers/$(APM_DRIVER_TYPE)/inc
 endif
 
 LIB_SUBDIRS += targets/bsp

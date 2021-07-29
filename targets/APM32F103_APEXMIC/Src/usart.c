@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS timer driver
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Usart Init Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-23
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,56 +26,54 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "timer.h"
+#include "usart.h"
+#include "apm32f10x_rcm.h"
+#include "apm32f10x_gpio.h"
+#include "apm32f10x_usart.h"
+#include "apm32f10x_misc.h"
 
-UINT64 GetTimerCpupCycles(VOID)
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+void ApmMiniCom1Init(void)
 {
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(CPUP_TIMER);
-#else
-    return StmGetTimerCycles(CPUP_TIMER);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles(CPUP_TIMER);
-#endif
+    GPIO_Config_T GPIO_ConfigStruct;
+    USART_Config_T USART_ConfigStruct;
+
+    /* Enable GPIO clock */
+    RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOA | RCM_APB2_PERIPH_USART1));
+    
+    /* Configure USART Tx as alternate function push-pull */
+    GPIO_ConfigStruct.mode = GPIO_MODE_AF_PP;
+    GPIO_ConfigStruct.pin = GPIO_PIN_9;
+    GPIO_ConfigStruct.speed = GPIO_SPEED_50MHz;
+    GPIO_Config(GPIOA, &GPIO_ConfigStruct);
+    /* Configure USART Rx as input floating */
+    GPIO_ConfigStruct.mode = GPIO_MODE_IN_FLOATING;
+    GPIO_ConfigStruct.pin = GPIO_PIN_10;
+    GPIO_Config(GPIOA, &GPIO_ConfigStruct);
+    
+    /* USART configuration */
+    USART_ConfigStruct.baudRate = 115200;
+    USART_ConfigStruct.hardwareFlow = USART_HARDWARE_FLOW_NONE;
+    USART_ConfigStruct.mode = USART_MODE_TX_RX;
+    USART_ConfigStruct.parity = USART_PARITY_NONE;
+    USART_ConfigStruct.stopBits = USART_STOP_BIT_1;
+    USART_ConfigStruct.wordLength = USART_WORD_LEN_8B;
+    USART_Config(USART1, &USART_ConfigStruct);
+    
+    // /** Enable USART_INT_RXBNE*/
+    NVIC_EnableIRQRequest(USART1_IRQn, 0, 0); 
+
+    /* Enable USART */
+    USART_Enable(USART1);
 }
 
-UINT64 GetTimerCycles(Timer_t num)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    return ApmGetTimerCycles(num);
-#else
-    return StmGetTimerCycles(num);
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    return GdGetTimerCycles((num));
-#endif
+#ifdef __cplusplus
+#if __cplusplus
 }
-
-VOID TimerHwiCreate (VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerHwiCreate();
-#else
-    StmTimerHwiCreate();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerHwiCreate();
-#endif
-}
-
-VOID TimerInitialize(VOID)
-{
-#if defined LOSCFG_ARCH_ARM_CORTEX_M
-#if defined LOSCFG_FAMILY_APM32
-    ApmTimerInit();
-#else
-    StmTimerInit();
-#endif
-#elif defined LOSCFG_ARCH_RISCV_RV32IMC
-    GdTimerInit();
-#endif
-}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
