@@ -26,9 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
  
-#include "usart.h"
 #include "canary.h"
 #include "los_task_pri.h"
+#include "uart.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -74,9 +74,9 @@ INT32 main(VOID)
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
 
-	board_config();
+    board_config();
     cpuInit();
-    UartInit();
+    uart_early_init();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
                   "\nLiteOS Kernel Version : %s\n"

@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Platform HeadFile
+ * Description: Dma HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2021-07-28
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,15 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ASM_PLATFORM_H
-#define _ASM_PLATFORM_H
-
-#include "los_typedef.h"
-#include "uart.h"
-
-#include "interrupt_config.h"
-#include "memmap_config.h"
-#include "register_config.h"
+#ifndef _DMA_H
+#define _DMA_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -42,11 +35,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define SYS_MEM_BASE    ((UINT32)&__bss_end)
-
-#ifdef LOSCFG_PLATFORM_OSAPPINIT
-extern VOID app_init(VOID);
-#endif
+extern void dma_cache_clean(unsigned int start, unsigned int end);
+extern void dma_cache_inv(unsigned int start, unsigned int end);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,5 +44,5 @@ extern VOID app_init(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ASM_PLATFORM_H */
+#endif /* _DMA_H */
 

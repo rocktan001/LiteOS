@@ -26,6 +26,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include <los_hwi.h>
 #include "usart.h"
 #include "register_config.h"
 
@@ -51,10 +52,10 @@ MINIUART_INFO *miniUart;
 #define PER_GPFSEL_GPIONUM  10
 #define GPIO_FSEL_BITNUM    3
 
-VOID MiniUartInit(VOID)
+STATIC VOID MiniUartInit(VOID)
 {
     UINT32 value;
-    GPIO_INFO * gpio = GPIO_REG_BASE;
+    GPIO_INFO *gpio = GPIO_REG_BASE;
 
     value = gpio->GPFSEL[1];
     value &= ~(GPIO_FSEL_MASK << ((MINI_UART_TX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM));
@@ -77,6 +78,49 @@ VOID MiniUartInit(VOID)
     miniUart->BAUD = 270; /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
     miniUart->CNTL = 3;   /* enable receive,transmit */
 }
+
+STATIC VOID MiniUartWriteChar(const CHAR c)
+{
+    while (!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};
+    miniUart->IO = c;
+}
+
+STATIC UINT8 MiniUartReadChar(VOID)
+{
+    UINT8 ch = 0xFF;
+    if (miniUart->LSR & UART_RXREADY_FLAG) {
+        ch = (UINT8)(miniUart->IO & 0xFF);
+    }
+    return ch;
+}
+
+STATIC VOID UartHandler(VOID)
+{
+    (VOID)uart_getc();
+}
+
+STATIC INT32 MiniUartHwi(VOID)
+{
+    UINT32 ret;
+    ret = LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    if (ret != LOS_OK) {
+        PRINT_ERR("%s,%d, uart interrupt created error:%x\n", __FUNCTION__, __LINE__, ret);
+    } else {
+        miniUart->IIR = 0x1;
+        if (miniUart->LSR & UART_RXREADY_FLAG) {
+            (VOID)(miniUart->IO & 0xFF);
+        }
+        LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+    }
+    return ret;
+}
+
+UartControllerOps g_armGenericUart = {
+    .uartInit = MiniUartInit,
+    .uartWriteChar = MiniUartWriteChar,
+    .uartReadChar = MiniUartReadChar,
+    .uartHwiCreate = MiniUartHwi
+};
 
 #ifdef __cplusplus
 #if __cplusplus

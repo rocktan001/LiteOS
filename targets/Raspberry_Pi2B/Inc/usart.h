@@ -30,6 +30,7 @@
 #define _USART_H
 
 #include "los_typedef.h"
+#include "uart.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -86,9 +87,7 @@ typedef struct tagMiniUartInfo {
     volatile UINT32 BAUD;       /* Mini Uart Baudrate */
 } MINIUART_INFO;
 
-extern MINIUART_INFO *miniUart;
-
-VOID UartInit(VOID);
+extern UartControllerOps g_armGenericUart;
 
 #ifdef __cplusplus
 #if __cplusplus

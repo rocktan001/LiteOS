@@ -42,6 +42,7 @@ CpuVendor g_cpuTable[] = {
     { 0xc09, "Cortex-A9" },
     /* armv7-r */
     { 0xc18, "Cortex-R8" },
+    { 0xd03, "Cortex-A53" },
 };
 
 /* logical cpu mapping */

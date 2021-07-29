@@ -26,6 +26,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include "los_mp_pri.h"
 #include "los_hwi_pri.h"
 #include "los_task_pri.h"
 #include "interrupt_config.h"
@@ -70,16 +71,18 @@ UINT32 HalIrqUnmask(UINT32 hwiNum)
     INTERRUPTS_INFO *irq = IRQ_REG_BASE;
     MAILBOXES_INFO *coreirq = CORE_MAILBOX_REG_BASE;
     UINT32 currCpuid = ArchCurrCpuid();
-    if (hwiNum == ARM_TIMER_INI) {
+
+    if (hwiNum < ARM_IRQ_NUM) {
         irq->enableBasicIRQs |= (1 << hwiNum);
-    } else if ((hwiNum >= MAILBOX0_IRQ) && (hwiNum <= MAILBOX3_IRQ)) {
-        irq->enableBasicIRQs |= (1<<1);
-        coreirq->IRQControl[currCpuid] |= (1 << (hwiNum - MAILBOX0_IRQ));
     } else if ((hwiNum < VC_IRQ_NUM) && (hwiNum >= ARM_IRQ_NUM)) {
         irq->enableIRQs[0] |= (1 << hwiNum);
-    } else if (hwiNum >= ARM_IRQ_NUM) {
+    } else if ((hwiNum >= VC_IRQ_NUM) && (hwiNum < CNTPS_IRQ)) {
         hwiNum = hwiNum % GPU_IRQ_NUM;
         irq->enableIRQs[1] |= (1 << hwiNum);
+    } else if ((hwiNum >= CNTPS_IRQ) && (hwiNum <= CNTV_IRQ)) {
+        coreirq->CoreTimeIRQ[currCpuid] |= (1 << (hwiNum - CNTPS_IRQ));
+    } else if ((hwiNum >= MAILBOX0_IRQ) && (hwiNum <= MAILBOX3_IRQ)) {
+        coreirq->IRQControl[currCpuid] |= (1 << (hwiNum - MAILBOX0_IRQ));
     } else {
         return LOS_ERRNO_HWI_NUM_INVALID;
     }
@@ -92,15 +95,17 @@ UINT32 HalIrqMask(HWI_HANDLE_T hwiNum)
     MAILBOXES_INFO *coreirq = CORE_MAILBOX_REG_BASE;
     UINT32 currCpuid = ArchCurrCpuid();
 
-    if (hwiNum == ARM_TIMER_INI) {
+    if (hwiNum < ARM_IRQ_NUM) {
         irq->disableBasicIRQs |= (1 << hwiNum);
-    } else if ((hwiNum >= MAILBOX0_IRQ) && (hwiNum <= MAILBOX3_IRQ)) {
-        coreirq->IRQControl[currCpuid] &= ~(1 << (hwiNum - MAILBOX0_IRQ));
     } else if ((hwiNum < VC_IRQ_NUM) && (hwiNum >= ARM_IRQ_NUM)) {
         irq->disableIRQs[0] |= (1 << hwiNum);
-    } else if (hwiNum >= ARM_IRQ_NUM)  {
+    } else if ((hwiNum >= VC_IRQ_NUM) && (hwiNum < CNTPS_IRQ))  {
         hwiNum = hwiNum % GPU_IRQ_NUM;
         irq->disableIRQs[1] |= (1 << hwiNum);
+    } else if ((hwiNum >= CNTPS_IRQ) && (hwiNum <= CNTV_IRQ)) {
+        coreirq->CoreTimeIRQ[currCpuid] &= ~(1 << (hwiNum - CNTPS_IRQ));
+    } else if ((hwiNum >= MAILBOX0_IRQ) && (hwiNum <= MAILBOX3_IRQ)) {
+        coreirq->IRQControl[currCpuid] &= ~(1 << (hwiNum - MAILBOX0_IRQ));
     } else {
         return LOS_ERRNO_HWI_NUM_INVALID;
     }
@@ -132,6 +137,7 @@ UINT32 HalCurIrqGet(VOID)
         value = coreIrq->IRQSource[currCpuid];
         if (value &= ARM_IRQ_MASK) {
             irqNum = FFS(value) - 1;
+            irqNum += CNTPS_IRQ;
             g_curIrqNum = irqNum;
         }
     }
@@ -190,6 +196,22 @@ HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
     return &g_hwiForm[hwiNum];
 }
 
+#ifdef LOSCFG_KERNEL_SMP
+UINT32 HalIrqSendIpi(UINT32 target, UINT32 ipi)
+{
+    UINT32 i;
+    MAILBOXES_INFO *coreIrq = CORE_MAILBOX_REG_BASE;
+
+    for (i = 0; i < LOSCFG_KERNEL_CORE_NUM; i++) {
+        if (target & (1 << i)) {
+            /* per cpu 4 mailbox */
+            coreIrq->writeSet[i * 4] = (1 << ipi);
+        }
+    }
+    return LOS_OK;
+}
+#endif
+
 STATIC const HwiControllerOps g_armControlOps = {
     .enableIrq      = HalIrqUnmask,
     .disableIrq     = HalIrqMask,
@@ -199,21 +221,66 @@ STATIC const HwiControllerOps g_armControlOps = {
     .handleIrq      = IrqEntryArmControl,
     .clearIrq       = HalIrqClear,
     .triggerIrq     = HalIrqPending,
+#ifdef LOSCFG_KERNEL_SMP
+    .sendIpi            = HalIrqSendIpi,
+    .setIrqCpuAffinity  = NULL,
+#endif
 };
 
-VOID HalIrqInit(VOID)
+#ifdef LOSCFG_KERNEL_SMP
+UINT32 HalSmpIrqInit(VOID)
+{
+    UINT32 ret;
+
+    /* register inter-processor interrupt */
+    ret = LOS_HwiCreate(MAILBOX0_IRQ, OS_HWI_PRIO_LOWEST, 0, OsMpWakeHandler, 0);
+    if (ret != LOS_OK) {
+        return ret;
+    }
+    ret = LOS_HwiCreate(MAILBOX1_IRQ, OS_HWI_PRIO_LOWEST, 0, OsMpScheduleHandler, 0);
+    if (ret != LOS_OK) {
+        return ret;
+    }
+    ret = LOS_HwiCreate(MAILBOX2_IRQ, OS_HWI_PRIO_LOWEST, 0, OsMpScheduleHandler, 0);
+    if (ret != LOS_OK) {
+        return ret;
+    }
+#ifdef LOSCFG_KERNEL_SMP_CALL
+    ret = LOS_HwiCreate(MAILBOX3_IRQ, OS_HWI_PRIO_LOWEST, 0, OsMpFuncCallHandler, 0);
+    if (ret != LOS_OK) {
+        return ret;
+    }
+#endif
+    return LOS_OK;
+}
+#endif
+
+VOID HalIrqInitPercpu(VOID)
 {
     INTERRUPTS_INFO * irq = IRQ_REG_BASE;
     /* mask all of interrupts */
     irq->disableBasicIRQs = ARM_IRQ_MASK;
-    irq->disableIRQs[0]   = VC_IRQ_MASK;
-    irq->disableIRQs[1]   = GPU_IRQ_MASK;
+    irq->disableIRQs[0] = VC_IRQ_MASK;
+    irq->disableIRQs[1] = GPU_IRQ_MASK;
 
+    asm ("mrc p15, #0, r1, c1, c0, #0\n"
+         "bic r1, #(1 << 13)\n"
+         "ldr r0, =system_vectors\n"
+         "mcr p15, #0, r0, c12, c0, #0\n"
+         "dsb\n");
+}
+
+VOID HalIrqInit(VOID)
+{
+    HalIrqInitPercpu();
     /* register interrupt controller's operations */
     OsHwiControllerReg(&g_armControlOps);
-    asm ("ldr r0, =system_vectors\n"
-          "mcr p15, #0, r0, c12, c0, #0\n"
-          "dsb\n");
+#ifdef LOSCFG_KERNEL_SMP
+    UINT32 ret = HalSmpIrqInit();
+    if (ret != LOS_OK) {
+        PRINT_ERR("HalSmpIrqInit failed, ret:0x%x\n", ret);
+    }
+#endif
     return;
 }
 

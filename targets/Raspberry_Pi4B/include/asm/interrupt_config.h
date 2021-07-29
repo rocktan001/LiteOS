@@ -38,8 +38,7 @@ extern "C" {
 /* interrupts */
 #define OS_TICK_INT_NUM                     (30)
 #define NUM_HAL_INTERRUPT_UART              (125)
-
-#define MAILBOX2_IRQ                        (39)
+#define RASPBERRY_IRQ                       (39)
 
 #ifdef __cplusplus
 #if __cplusplus

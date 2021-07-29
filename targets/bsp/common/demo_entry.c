@@ -318,8 +318,9 @@ VOID AgenttinyDemoTask(VOID)
 
 VOID DemoEntry(VOID)
 {
+#ifndef LOSCFG_KERNEL_SMP
     printf("Hello, welcome to liteos demo!\n");
-
+#endif
 #ifdef LOSCFG_COMPONENTS_FS
     FileSystemInit();
 #endif

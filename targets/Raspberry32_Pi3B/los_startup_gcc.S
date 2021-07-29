@@ -1,6 +1,11 @@
 #include "arch/exception.h"
 #include "arch/regs.h"
 
+.equ    DOMAIN0,    0x3
+.equ    DOMAIN1,    0x1
+.equ    ICACHE_BIT, 12
+.equ    DCACHE_BIT, 2
+
 /* stack */
 .global __exc_stack_top
 .global __irq_stack_top
@@ -15,6 +20,8 @@
 .global __abt_stack
 .global __undef_stack
 
+.extern MmuSectionInit
+
 /* param0 is stack top, param1 is stack size, param2 is magic num */
 .macro STACK_MAGIC_SET param0, param1, param2
     ldr     r0, =\param0
@@ -28,7 +35,7 @@
 .globl system_vectors
 system_vectors:
 
-    b   _reset
+    b   reset_vector
     b   _osExceptUndefInstrHdl
     b   _osExceptSwiHdl
     b   _osExceptPrefetchAbortHdl
@@ -39,8 +46,8 @@ system_vectors:
 
 .text
 /* reset entry */
-.globl _reset
-_reset:
+.globl reset_vector
+reset_vector:
     mrs r0, cpsr_all 
     and r0, r0, #0x1F
     mov r8, #0x1A
@@ -67,13 +74,24 @@ common:
     mcr p15, 0, r0, c1, c0, 0
 
     /* disable mmu */
-    mcr     p15, #0, r0, c8, c7, #0    @ invalidate tlb
     mrc     p15, #0, r0, c1, c0, #0
     bic     r0, r0, #1
     mcr     p15, #0, r0, c1, c0, #0    @ clear mmu bit
-    dsb
 
+    /* diable Dcache */
+    dsb
+    mrc     p15, #0, r0, c1, c0, #0
+    bic     r0,  r0, #(1 << DCACHE_BIT)
+    mcr     p15, #0, r0, c1, c0, #0
+    dsb
     
+    /* disable icache */
+    isb
+    mrc     p15, #0, r0, c1, c0, #0
+    bic     r0,  r0, #(1 << ICACHE_BIT)
+    mcr     p15, #0, r0, c1, c0, #0
+    isb
+
     cmp     r11, #0
     bne     excstatck_loop_done
 
@@ -115,12 +133,25 @@ excstatck_loop_done:
     MOV     r3, #0x40000000
     VMSR    FPEXC, r3
 
+    LDR     r0, =system_vectors
+    MCR     p15, 0, r0, c12, c0, 0
+
     cmp     r11, #0
     bne     cpu_start
+#ifdef LOSCFG_APC_ENABLE
+    bl      MmuSectionInit
+    bl      setup_mmu
+#endif
     b main
     b       .
 
 cpu_start:
+#ifdef LOSCFG_APC_ENABLE
+    bl      setup_mmu
+#ifdef LOSCFG_KERNEL_SMP
+    bl      secondary_cpu_start
+#endif
+#endif
     b       .
 
 .text
@@ -137,6 +168,40 @@ excstack_magic_loop:
     cmp     r3, #CORE_NUM
     blt     excstack_magic_loop
     bx      lr
+
+#ifdef LOSCFG_KERNEL_SMP
+/* mmu init */
+setup_mmu:
+
+    /* Invalidate TLB */
+    mcr     p15, #0, r0, c8, c7, #0
+
+    /* set domain */
+    mov r0, #(DOMAIN0 | (DOMAIN1 << 2))
+    mcr p15, 0, r0, c3, c0
+
+    /* set mmu base */
+    ldr r0, =g_firstPageTable
+    mcr     p15, #0, r0, c2, c0, #0
+
+    /* enable mmu */
+    mrc     p15, #0, r0, c1, c0, #0
+    orr     r0, r0, #1
+    mcr     p15, #0, r0, c1, c0, #0 
+
+    /* enable icache */
+    mrc     p15, #0, r0, c1, c0, #0
+    orr     r0,  r0, #(1 << ICACHE_BIT)
+    mcr     p15, #0, r0, c1, c0, #0
+
+    mrc     p15, #0, r0, c1, c0, #0
+    orr     r0,  r0, #(1 << DCACHE_BIT)
+    mcr     p15, #0, r0, c1, c0, #0
+
+    dmb
+    isb
+    bx lr
+#endif
 
 /*
  * init stack to initial value

@@ -30,6 +30,7 @@
 #define _USART_H
 
 #include "los_typedef.h"
+#include "uart.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -40,10 +41,11 @@ extern "C" {
 #define UART_RXREADY_FLAG   0x1
 #define UART_TXEMPTY_FLAG   0x20
 
-#define AUX_REG_BASE    (0x3F000000 + 0x215000)
+#define AUX_BASE        (0x3F000000)
+#define AUX_REG_BASE    (AUX_BASE + 0x215000)
 #define AUX_ENABLES     (AUX_REG_BASE + 0x4)
 #define MINI_UART       ((MINIUART_INFO *)(AUX_REG_BASE + 0x40))
-#define GPIO_REG_BASE   ((GPIO_INFO *)(0x3F000000 + 0x200000))
+#define GPIO_REG_BASE   ((GPIO_INFO *)(AUX_BASE + 0x200000))
 
 typedef struct tagGpioInfo {
     volatile UINT32 GPFSEL[6];      /* GPIO Function Select x */
@@ -86,9 +88,7 @@ typedef struct tagMiniUartInfo {
     volatile UINT32 BAUD;       /* Mini Uart Baudrate */
 } MINIUART_INFO;
 
-extern MINIUART_INFO *miniUart;
-
-VOID MiniUartInit(VOID);
+extern UartControllerOps g_armGenericUart;
 
 #ifdef __cplusplus
 #if __cplusplus

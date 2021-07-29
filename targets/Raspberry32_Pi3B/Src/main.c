@@ -29,6 +29,9 @@
 #include "usart.h"
 #include "canary.h"
 #include "los_task_pri.h"
+#include "los_atomic.h"
+#include "los_swtmr_pri.h"
+#include "mmu.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -36,11 +39,36 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+VOID board_config(VOID)
+{
+    g_sys_mem_addr_end = (UINTPTR)LOS_HEAP_ADDR_END;
+}
+
+VOID OsSystemInfo(VOID)
+{
+    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n\n"
+                  "LiteOS Kernel Version : %s\n"
+                  "Processor   : %s"
+#ifdef LOSCFG_KERNEL_SMP
+                  " * %d\n"
+                  "Run Mode    : SMP\n"
+#else
+                  "\n"
+                  "Run Mode    : UP\n"
+#endif
+                  "build time  : %s %s\n\n"
+                  "**********************************\n",
+                  HW_LITEOS_KERNEL_VERSION_STRING,
+                  LOS_CpuInfo(),
+#ifdef LOSCFG_KERNEL_SMP
+                  LOSCFG_KERNEL_SMP_CORE_NUM,
+#endif
+                  __DATE__, __TIME__);
+}
+
 VOID CpuInit(VOID)
 {
-    UINT32 coreId = 0;
-    asm("mrc p15, 0, %0, c0, c0, 5":"=r"(coreId)::);
-    coreId = coreId & MPIDR_CPUID_MASK;
+    UINT32 coreId = ArchCurrCpuid();
     __asm__ (
     "msr cpsr_c, %1\n\t"
     "mov sp, %0\n\t"
@@ -64,6 +92,26 @@ VOID CpuInit(VOID)
     : "r14");
 }
 
+Atomic g_cpuNum = 1;
+extern void reset_vector(void);
+extern UINT8 g_firstPageTable[MMU_16K];
+
+#ifdef LOSCFG_APC_ENABLE
+VOID MmuSectionInit(VOID)
+{
+    UINT32 ttbBase = (UINTPTR)g_firstPageTable;
+     /* First clear all TT entries - ie Set them to Faulting */
+    (VOID)memset_s((VOID *)(UINTPTR)ttbBase, MMU_16K, 0, MMU_16K);
+
+    /* Set all mem 4G as uncacheable & rw first */
+    X_MMU_SECTION(0, 0, (MMU_4G >> SHIFT_1M),
+                  UNCACHEABLE, UNBUFFERABLE, ACCESS_RW, NON_EXECUTABLE, D_CLIENT);
+
+    X_MMU_SECTION(0, 0, ((AUX_BASE - 1) >> SHIFT_1M),
+                  CACHEABLE, BUFFERABLE, ACCESS_RW, EXECUTABLE, D_CLIENT);
+}
+#endif
+
 INT32 main(VOID)
 {
 #ifdef __GNUC__
@@ -73,23 +121,62 @@ INT32 main(VOID)
     OsCurrTaskSet(OsGetMainTask());
 
     CpuInit();
-    MiniUartInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
+    uart_early_init();
+    board_config();
+    OsSystemInfo();
     UINT32 ret = OsMain();
     if (ret != LOS_OK) {
         return LOS_NOK;
     }
-    
+#ifdef LOSCFG_KERNEL_SMP
+    MAILBOXES_INFO * mailbox = CORE_MAILBOX_REG_BASE;
+    UINT8 coreId;
+    for (coreId = 1; coreId < LOSCFG_KERNEL_CORE_NUM; coreId++) {
+        /* per cpu 4 mailbox */
+        mailbox->writeSet[coreId * 4 + MAILBOX3_IRQ - MAILBOX0_IRQ] = (UINT32)reset_vector;
+        __asm__ volatile ("sev");
+    }
+    while (LOS_AtomicRead(&g_cpuNum) < LOSCFG_KERNEL_CORE_NUM) {
+        asm volatile("wfe");
+    }
+    LOS_HwiEnable(MAILBOX0_IRQ);
+    LOS_HwiEnable(MAILBOX1_IRQ);
+    LOS_HwiEnable(MAILBOX2_IRQ);
+#ifdef LOSCFG_KERNEL_SMP_CALL
+    LOS_HwiEnable(MAILBOX3_IRQ);
+#endif
+#endif
     OsStart();
 
     return LOS_OK;
 }
+
+#ifdef LOSCFG_KERNEL_SMP
+extern VOID HalIrqInitPercpu(VOID);
+LITE_OS_SEC_TEXT_INIT INT32 secondary_cpu_start(VOID)
+{
+    OsCurrTaskSet(OsGetMainTask());
+    CpuInit();
+    
+    /* increase cpu counter */
+    LOS_AtomicInc(&g_cpuNum);
+    HalIrqInitPercpu();
+    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+    LOS_HwiEnable(MAILBOX0_IRQ);
+    LOS_HwiEnable(MAILBOX1_IRQ);
+    LOS_HwiEnable(MAILBOX2_IRQ);
+#ifdef LOSCFG_KERNEL_SMP_CALL
+    LOS_HwiEnable(MAILBOX3_IRQ);
+#endif
+#ifdef LOSCFG_BASE_CORE_SWTMR
+    OsSwtmrInit();
+#endif
+    OsIdleTaskCreate();
+    OsStart();
+
+    return LOS_OK;
+}
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
