@@ -47,23 +47,23 @@ VOID board_config(VOID)
 VOID OsSystemInfo(VOID)
 {
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n\n"
-	        "LiteOS Kernel Version : %s\n"
-            "Processor   : %s"
+                  "LiteOS Kernel Version : %s\n"
+                  "Processor   : %s"
 #ifdef LOSCFG_KERNEL_SMP
-            " * %d\n"
-            "Run Mode    : SMP\n"
+                  " * %d\n"
+                  "Run Mode    : SMP\n"
 #else
-            "\n"
-            "Run Mode    : UP\n"
+                  "\n"
+                  "Run Mode    : UP\n"
 #endif
-            "build time  : %s %s\n\n"
-            "**********************************\n",
-			HW_LITEOS_KERNEL_VERSION_STRING,
-            LOS_CpuInfo(),
+                  "build time  : %s %s\n\n"
+                  "**********************************\n",
+                  HW_LITEOS_KERNEL_VERSION_STRING,
+                  LOS_CpuInfo(),
 #ifdef LOSCFG_KERNEL_SMP
-            LOSCFG_KERNEL_SMP_CORE_NUM,
+                  LOSCFG_KERNEL_SMP_CORE_NUM,
 #endif
-            __DATE__,__TIME__);
+                  __DATE__, __TIME__);
 }
 
 VOID CpuInit(VOID)

@@ -260,8 +260,8 @@ VOID HalIrqInitPercpu(VOID)
     INTERRUPTS_INFO * irq = IRQ_REG_BASE;
     /* mask all of interrupts */
     irq->disableBasicIRQs = ARM_IRQ_MASK;
-    irq->disableIRQs[0]   = VC_IRQ_MASK;
-    irq->disableIRQs[1]   = GPU_IRQ_MASK;
+    irq->disableIRQs[0] = VC_IRQ_MASK;
+    irq->disableIRQs[1] = GPU_IRQ_MASK;
 
     asm ("mrc     p15, #0, r1, c1, c0, #0\n"
          "bic     r1, #(1 << 13)\n"
@@ -272,7 +272,6 @@ VOID HalIrqInitPercpu(VOID)
 
 VOID HalIrqInit(VOID)
 {
-
     HalIrqInitPercpu();
     /* register interrupt controller's operations */
     OsHwiControllerReg(&g_armControlOps);
