@@ -41,3 +41,4 @@ sfud-master    &#& components/utility/sfud                &#& LOSCFG_COMPONENTS_
 sqlite-3.35.3  &#& components/utility/sqlite              &#& LOSCFG_COMPONENTS_SQLITE=y        &#& https://ftp.osuosl.org/pub/blfs/conglomeration/sqlite/sqlite-autoconf-3350300.tar.gz
 thttpd-2.27    &#& components/utility/thttpd              &#& LOSCFG_COMPONENTS_THTTPD=y        &#& https://github.com/nplab/thttpd/archive/refs/heads/origin-2.27.zip
 tinyxml2-8.0.0 &#& components/utility/tinyxml2            &#& LOSCFG_COMPONENTS_TINYXML2=y      &#& https://github.com/leethomason/tinyxml2/archive/refs/tags/8.0.0.zip
+uriparser-0.9.5 &#& components/utility/uriparser          &#& LOSCFG_COMPONENTS_URIPARSER=y     &#& https://github.com/uriparser/uriparser/releases/download/uriparser-0.9.5/uriparser-0.9.5.zip

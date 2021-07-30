@@ -80,6 +80,11 @@ include $(LITEOSTOPDIR)/components/utility/sfud/sfud.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_SFUD_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_URIPARSER), y)
+include $(LITEOSTOPDIR)/components/utility/uriparser/uriparser.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_URIPARSER_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_COMPONENTS_C_ALGORITHMS), y)
 include $(LITEOSTOPDIR)/components/utility/c-algorithms/c-algorithms.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_C_ALGORITHMS_INCLUDE)

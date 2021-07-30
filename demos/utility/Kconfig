@@ -16,5 +16,6 @@ source "demos/utility/pdfgen/Kconfig"
 source "demos/utility/sqlite/Kconfig"
 source "demos/utility/tinyxml2/Kconfig"
 source "demos/utility/sfud/Kconfig"
+source "demos/utility/uriparser/Kconfig"
 
 endmenu

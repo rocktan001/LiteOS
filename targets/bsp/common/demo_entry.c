@@ -214,6 +214,10 @@
 #include "sfud_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_URIPARSER
+#include "uriparser_demo.h" 
+#endif
+
 #ifdef LOSCFG_DEMOS_C_ALGORITHMS
 #include "c-algorithms_demo.h"
 #endif
@@ -461,6 +465,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_SFUD
     SfudDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_URIPARSER
+    UriparserDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_C_ALGORITHMS
