@@ -26,11 +26,12 @@
   **注：** RAMFS为可选组件，如选择该组件，可生成一个`/ramfs/hello.py`示例文件，在LiteOS的shell中执行`micropython /ramfs/hello.py`命令可查看其运行结果，
   `micropython`组件依赖vfs，开启`micropython`组件后，vfs即自动开启。
 
-  保存退出，此时LiteOS会从github自动下载`micropython`源代码，关于在线组件的自动下载，请查阅过<a href="https://gitee.com/LiteOS/LiteOS_Components#在线组件下载流程" target="_blank">在线组件下载流程</a>。待下载完成后，执行如下命令编译LiteOS工程。
+  保存退出，此时LiteOS会从github自动下载`micropython`源代码，关于在线组件的自动下载，请查阅<a href="https://gitee.com/LiteOS/LiteOS_Components#在线组件下载流程" target="_blank">在线组件下载流程</a>。待下载完成后，执行如下命令编译LiteOS工程。
   ```
   ~/Huawei_LiteOS$ make clean;make -j
   ```
-  编译成功后将在`out/STM32F769IDISCOVERY/lib`目录下生成组件静态库文件`libmicropythont.a`，生成的系统镜像文件为`Huawei_LiteOS.bin`。
+  编译成功后将在`out/STM32F769IDISCOVERY/lib`目录下生成组件静态库文件`libmicropython.a`，生成的系统镜像文件为`Huawei_LiteOS.bin`。
+  
   **注意**：下载需要Linux主机可以访问互联网，并安装`git`。
 
 ## micropython命令
