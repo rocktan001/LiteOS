@@ -28,6 +28,7 @@ LITEOS_TABLES_KERNEL_LDFLAGS := \
     -upwd_shellcmd \
     -ucd_shellcmd \
     -umkdir_shellcmd \
+    -uls_shellcmd \
     -udeadlock_shellcmd
 
 

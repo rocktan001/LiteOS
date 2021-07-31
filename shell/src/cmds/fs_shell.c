@@ -109,6 +109,57 @@ UINT32 OsShellCmdMkdir(UINT32 argc, const CHAR **argv)
     return LOS_OK;
 }
 
+UINT32 OsShellCmdList(UINT32 argc, const CHAR **argv)
+{
+    struct dirent *d_item = NULL;
+    struct dir *target = NULL;
+    char tmp_buf[DIR_PATH_LEN] = {0};
+
+    if (argc > 1) {
+        PRINTK("One argument is required!");
+        return LOS_NOK;
+    }
+
+    sprintf_s(tmp_buf, DIR_PATH_LEN, "%s/", g_fsCmd.curFullPath);
+
+    target = opendir(tmp_buf);
+    if (target == NULL) {
+        PRINTK("The command can be executed only in the directory below the fs root directory.");
+        return LOS_NOK;
+    }
+
+    if (argc == 1) {
+        PRINTK("Name        Type      Size\n");
+    }
+    do {
+        d_item = readdir(target);
+        if (d_item != NULL) {
+            if (argc == 1) {
+                if(strcmp(argv[0], "-l")) {
+                    PRINTK("Argument error! Only support \"-l\"");
+                    return LOS_NOK;
+                }
+                if (d_item->type == VFS_TYPE_DIR) {
+                    PRINTK("%-10s  Dir       %-10u", d_item->name,  d_item->size);
+                } else {
+                    PRINTK("%-10s  File      %-10u", d_item->name,  d_item->size);
+                }
+                PRINTK("\n");
+            } else {
+                if (d_item->type == VFS_TYPE_DIR) {
+                    PRINTK("%s/    ", d_item->name);
+                } else {
+                    PRINTK("%s    ", d_item->name);
+                }
+            }
+        }
+    } while(d_item != NULL);
+
+    PRINTK("\n");
+    closedir(target);
+    return LOS_OK;
+}
+
 UINT32 OsShellCmdPwd(UINT32 argc, const CHAR **argv)
 {
     PRINTK("%s\n", g_fsCmd.curFullPath);
@@ -172,8 +223,12 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
     return 0;
 }
 
+#if defined (LOSCFG_COMPONENTS_FS_VFS)
 SHELLCMD_ENTRY(pwd_shellcmd, CMD_TYPE_EX, "pwd", XARGS, (CmdCallBackFunc)OsShellCmdPwd);
 
 SHELLCMD_ENTRY(cd_shellcmd, CMD_TYPE_EX, "cd", XARGS, (CmdCallBackFunc)OsShellCmdCd);
 
 SHELLCMD_ENTRY(mkdir_shellcmd, CMD_TYPE_EX, "mkdir", XARGS, (CmdCallBackFunc)OsShellCmdMkdir);
+
+SHELLCMD_ENTRY(ls_shellcmd, CMD_TYPE_EX, "ls", XARGS, (CmdCallBackFunc)OsShellCmdList);
+#endif
