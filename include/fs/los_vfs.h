@@ -55,6 +55,8 @@ struct mount_point;
 struct dir;
 struct dirent;
 
+extern struct mount_point *g_mountPoints;
+
 typedef long off_t;
 
 #define VFS_ERROR (-1)
@@ -132,6 +134,7 @@ struct dir {
     off_t d_offset;
     void *d_data;
 };
+
 int mkdir(const char *path, mode_t mode);
 struct dir    *opendir(const char *path);
 struct dirent *readdir(struct dir *dir);

@@ -82,23 +82,32 @@ UINT32 OsShellCmdMkdir(UINT32 argc, const CHAR **argv)
 {
     int mode = 0;
     CHAR *bufMode = NULL;
+<<<<<<< HEAD
     char tmp_buf[DIR_PATH_LEN] = {0};
+=======
+>>>>>>> 19ed4d7b14fb5c84fb587822e312dc3c1be30c8d
 
     if (argc < 1) {
         PRINTK("One argument is required at least!");
         return LOS_NOK;
     }
+<<<<<<< HEAD
     sprintf_s(tmp_buf, DIR_PATH_LEN, "%s%s/", g_fsCmd.curFullPath, argv[0]);
     if (argc == 1) {
        if (mkdir(tmp_buf, 0) == -1) {
            printf("mkdir fail.\n");
            return LOS_NOK;
        }
+=======
+    if (argc == 1) {
+        mkdir(argv[0], 0);
+>>>>>>> 19ed4d7b14fb5c84fb587822e312dc3c1be30c8d
     }
     if (argc == 2) {
         mode = strtoul(argv[1], &bufMode, 0);
         if ((bufMode == NULL) || (*bufMode != 0)) {
             PRINTK("\nThe input mode is invalid. Please try again.\n");
+<<<<<<< HEAD
             return LOS_NOK;
         }
        if (mkdir(tmp_buf, mode) == -1) {
@@ -107,25 +116,41 @@ UINT32 OsShellCmdMkdir(UINT32 argc, const CHAR **argv)
        }
     }
     return LOS_OK;
+=======
+            return 0;
+        }
+        mkdir(argv[1], mode);
+    }
+    return 0;
+>>>>>>> 19ed4d7b14fb5c84fb587822e312dc3c1be30c8d
 }
 
 UINT32 OsShellCmdPwd(UINT32 argc, const CHAR **argv)
 {
     PRINTK("%s\n", g_fsCmd.curFullPath);
+<<<<<<< HEAD
     return LOS_OK;
+=======
+    return 0;
+>>>>>>> 19ed4d7b14fb5c84fb587822e312dc3c1be30c8d
 }
 
 UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
 {
+<<<<<<< HEAD
     char tmp_buf[DIR_PATH_LEN] = {0};
     struct dir *target = NULL;
     char *curPath = NULL;
     int pathLen = 0;
 
+=======
+    struct dir *target = NULL;
+>>>>>>> 19ed4d7b14fb5c84fb587822e312dc3c1be30c8d
     if (argc != 1) {
         PRINTK("One argument is required !");
         return LOS_NOK;
     }
+<<<<<<< HEAD
 
     if (argv[0][0] == '/') {
         curPath = strrchr(argv[0], '/');
@@ -169,6 +194,18 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         memcpy_s(g_fsCmd.curPath, sizeof(g_fsCmd.curPath), argv[0], strlen(argv[0]));
     }
     closedir(target);
+=======
+    if (argv[0][0] == '/') {
+        if (strlen(g_fsCmd.curFullPath) != 1 && target != NULL) {
+            closedir(target);
+        }
+        target = opendir(argv[0]);
+    } else {
+        sprintf_s(g_fsCmd.curFullPath, DIR_PATH_LEN, "%s%s/", g_fsCmd.curFullPath, argv[0]);
+        target = opendir(g_fsCmd.curFullPath);
+    }
+    memcpy_s(g_fsCmd.curPath, sizeof(g_fsCmd.curPath), target->d_dent.name, strlen(target->d_dent.name));
+>>>>>>> 19ed4d7b14fb5c84fb587822e312dc3c1be30c8d
     return 0;
 }
 
