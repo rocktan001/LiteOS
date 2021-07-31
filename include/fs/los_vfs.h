@@ -132,7 +132,7 @@ struct dir {
     off_t d_offset;
     void *d_data;
 };
-
+int mkdir(const char *path, mode_t mode);
 struct dir    *opendir(const char *path);
 struct dirent *readdir(struct dir *dir);
 int           closedir(struct dir *dir);

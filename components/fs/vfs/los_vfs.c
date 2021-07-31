@@ -769,6 +769,7 @@ static int LOS_Mkdir(const char *path, int mode)
     if (mp->m_fs->fs_fops->mkdir != NULL) {
         ret = mp->m_fs->fs_fops->mkdir(mp, pathInMp);
     } else {
+        printf("NULL\n");
         VFS_ERRNO_SET(ENOTSUP);
         ret = -1;
     }
