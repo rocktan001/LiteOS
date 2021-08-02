@@ -182,7 +182,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
                 strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, "/");
             }
         }
-PRINTK("%s\n",g_fsCmd.curFullPath);
+
         if (!strcmp(g_fsCmd.curFullPath, "/")) {
             return LOS_NOK;
         }
