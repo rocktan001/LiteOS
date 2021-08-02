@@ -55,7 +55,6 @@ struct mount_point;
 struct dir;
 struct dirent;
 
-
 typedef long off_t;
 
 #define VFS_ERROR (-1)

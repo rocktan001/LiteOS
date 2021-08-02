@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2019. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: LiteOS Shell fs Command Implementation File
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-08-02
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -35,12 +35,18 @@
 #include "shcmd.h"
 #include "shmsg.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
 #define DIR_PATH_LEN        256
 #define DIR_CUR_PATH_LEN    128
 typedef struct {
-    int fd;
-    int flags;
-    uint32_t status;
+    INT32 fd;
+    INT32 flags;
+    UINT32 status;
     struct file *file;
     CHAR curPath[DIR_CUR_PATH_LEN];
     CHAR curFullPath[DIR_PATH_LEN];
@@ -54,7 +60,7 @@ STATIC FsCB g_fsCmd =
 
 UINT32 OsShellCmdMkdir(UINT32 argc, const CHAR **argv)
 {
-    int mode = 0;
+    INT32 mode = 0;
     CHAR *bufMode = NULL;
     char tmp_buf[DIR_PATH_LEN] = {0};
 
@@ -145,7 +151,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
     char tmp_buf[DIR_PATH_LEN] = {0};
     struct dir *target = NULL;
     char *curPath = NULL;
-    int pathLen = 0;
+    INT32 pathLen = 0;
 
     if (argc != 1) {
         PRINTK("One argument is required !");
@@ -206,3 +212,9 @@ SHELLCMD_ENTRY(mkdir_shellcmd, CMD_TYPE_EX, "mkdir", XARGS, (CmdCallBackFunc)OsS
 
 SHELLCMD_ENTRY(ls_shellcmd, CMD_TYPE_EX, "ls", XARGS, (CmdCallBackFunc)OsShellCmdList);
 #endif
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
