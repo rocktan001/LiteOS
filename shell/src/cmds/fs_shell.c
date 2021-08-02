@@ -79,7 +79,7 @@ UINT32 OsShellCmdMkdir(UINT32 argc, const CHAR **argv)
     return LOS_OK;
 }
 
-UINT32 OsShellCmdList(UINT32 argc, const CHAR **argv)
+UINT32 OsShellCmdLs(UINT32 argc, const CHAR **argv)
 {
     struct dirent *d_item = NULL;
     struct dir *target = NULL;
@@ -140,6 +140,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
 {
     CHAR tmp_buf[DIR_PATH_LEN] = {0};
     struct dir *target = NULL;
+    CHAR *argPath = NULL;
     CHAR *curPath = NULL;
     INT32 pathLen = 0;
 
@@ -170,19 +171,18 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         g_fsCmd.curFullPath[strlen(g_fsCmd.curFullPath) - 1] = 0;
         curPath = strrchr(g_fsCmd.curFullPath, '/');
         pathLen = strlen(g_fsCmd.curFullPath) - strlen(curPath);
-
         memset_s(g_fsCmd.curFullPath + pathLen, sizeof(g_fsCmd.curFullPath) - pathLen, 0, strlen(curPath));
 
-        curPath = strchr(argv[0], '/');
-        if (strlen(argv[0]) != RETURN_BUF_LEN) {
-            strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, curPath);
+        if (strlen(argv[0]) == RETURN_BUF_LEN || (strlen(argv[0]) == RETURN_BUF_LEN + 1 && argv[0][2] == '/')) {
             strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, "/");
         } else {
-            if (argv[0][strlen(argv[0])] == '.') {
+            argPath = strchr(argv[0], '/');
+            strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, argPath);
+            if (argPath[strlen(argPath)] != '/') {
                 strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, "/");
             }
         }
-
+PRINTK("%s\n",g_fsCmd.curFullPath);
         if (!strcmp(g_fsCmd.curFullPath, "/")) {
             return LOS_NOK;
         }
@@ -219,7 +219,7 @@ SHELLCMD_ENTRY(cd_shellcmd, CMD_TYPE_EX, "cd", XARGS, (CmdCallBackFunc)OsShellCm
 
 SHELLCMD_ENTRY(mkdir_shellcmd, CMD_TYPE_EX, "mkdir", XARGS, (CmdCallBackFunc)OsShellCmdMkdir);
 
-SHELLCMD_ENTRY(ls_shellcmd, CMD_TYPE_EX, "ls", XARGS, (CmdCallBackFunc)OsShellCmdList);
+SHELLCMD_ENTRY(ls_shellcmd, CMD_TYPE_EX, "ls", XARGS, (CmdCallBackFunc)OsShellCmdLs);
 #endif
 
 #ifdef __cplusplus
