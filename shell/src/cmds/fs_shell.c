@@ -52,32 +52,6 @@ STATIC FsCB g_fsCmd =
     .curFullPath = "/"
 };
 
-// STATIC VOID PrintContent(VOID)
-// {
-
-// }
-
-// STATIC VOID OsShellCmdDoFs(VOID *arg1)
-// {
-
-// }
-
-// STATIC INT32 OsFsOptionParsed(UINT32 argc, UINT32 *argoff, const CHAR **argv, FsCB *fsItem)
-// {
-
-//     return 0;
-// }
-
-// STATIC INT32 OsFsCmdSplice(UINT32 argc, UINT32 argoff, const CHAR **argv, FsCB *fsItem)
-// {
-//     return 0;
-// }
-
-// STATIC UINT32 OsFsTaskCreate(FsCB *fsItem)
-// {
-//     return 0;
-// }
-
 UINT32 OsShellCmdMkdir(UINT32 argc, const CHAR **argv)
 {
     int mode = 0;
@@ -220,7 +194,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         memcpy_s(g_fsCmd.curPath, sizeof(g_fsCmd.curPath), argv[0], strlen(argv[0]));
     }
     closedir(target);
-    return 0;
+    return LOS_OK;
 }
 
 #if defined (LOSCFG_COMPONENTS_FS_VFS)
