@@ -110,11 +110,10 @@ UINT32 OsShellCmdLs(UINT32 argc, const CHAR **argv)
                     return LOS_NOK;
                 }
                 if (d_item->type == VFS_TYPE_DIR) {
-                    PRINTK("%-10s  Dir       %-10u", d_item->name,  d_item->size);
+                    PRINTK("%-10s  Dir       %-10u\n", d_item->name, d_item->size);
                 } else {
-                    PRINTK("%-10s  File      %-10u", d_item->name,  d_item->size);
+                    PRINTK("%-10s  File      %-10u\n", d_item->name, d_item->size);
                 }
-                PRINTK("\n");
             } else {
                 if (d_item->type == VFS_TYPE_DIR) {
                     PRINTK("%s/    ", d_item->name);
