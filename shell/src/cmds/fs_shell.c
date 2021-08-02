@@ -60,32 +60,20 @@ STATIC FsCB g_fsCmd =
 
 UINT32 OsShellCmdMkdir(UINT32 argc, const CHAR **argv)
 {
-    INT32 mode = 0;
-    CHAR *bufMode = NULL;
-    char tmp_buf[DIR_PATH_LEN] = {0};
+    CHAR tmp_buf[DIR_PATH_LEN] = {0};
 
     if (argc < 1) {
         PRINTK("One argument is required at least!");
         return LOS_NOK;
     }
+
     sprintf_s(tmp_buf, DIR_PATH_LEN, "%s%s/", g_fsCmd.curFullPath, argv[0]);
-    if (argc == 1) {
-       if (mkdir(tmp_buf, 0) == -1) {
-           printf("mkdir fail.\n");
-           return LOS_NOK;
-       }
+
+    if (mkdir(tmp_buf, 0) == -1) {
+        printf("Mkdir fail.\n");
+        return LOS_NOK;
     }
-    if (argc == 2) {
-        mode = strtoul(argv[1], &bufMode, 0);
-        if ((bufMode == NULL) || (*bufMode != 0)) {
-            PRINTK("\nThe input mode is invalid. Please try again.\n");
-            return LOS_NOK;
-        }
-       if (mkdir(tmp_buf, mode) == -1) {
-           printf("mkdir fail.\n");
-           return LOS_NOK;
-       }
-    }
+
     return LOS_OK;
 }
 
@@ -93,7 +81,7 @@ UINT32 OsShellCmdList(UINT32 argc, const CHAR **argv)
 {
     struct dirent *d_item = NULL;
     struct dir *target = NULL;
-    char tmp_buf[DIR_PATH_LEN] = {0};
+    CHAR tmp_buf[DIR_PATH_LEN] = {0};
 
     if (argc > 1) {
         PRINTK("One argument is required!");
@@ -148,9 +136,9 @@ UINT32 OsShellCmdPwd(UINT32 argc, const CHAR **argv)
 
 UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
 {
-    char tmp_buf[DIR_PATH_LEN] = {0};
+    CHAR tmp_buf[DIR_PATH_LEN] = {0};
     struct dir *target = NULL;
-    char *curPath = NULL;
+    CHAR *curPath = NULL;
     INT32 pathLen = 0;
 
     if (argc != 1) {
@@ -162,9 +150,13 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         curPath = strrchr(argv[0], '/');
         pathLen = strlen(curPath);
 
+        if (!strcmp(argv[0], "/")) {
+            return LOS_NOK;
+        }
+
         target = opendir(argv[0]);
         if(target == NULL) {
-            PRINTK("open dir failed.");
+            PRINTK("Open dir failed.");
             return LOS_NOK;
         }
 
@@ -177,12 +169,16 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         curPath = strrchr(g_fsCmd.curFullPath, '/');
         pathLen = strlen(g_fsCmd.curFullPath) - strlen(curPath);
 
-        memset_s(g_fsCmd.curFullPath + pathLen + 1, sizeof(g_fsCmd.curFullPath) - strlen(curPath) - 1, 0, pathLen - 1);
+        memset_s(g_fsCmd.curFullPath + pathLen + 1, sizeof(g_fsCmd.curFullPath) - pathLen - 1, 0, strlen(curPath) - 1);
+
+        if (!strcmp(g_fsCmd.curFullPath, "/")) {
+            return LOS_NOK;
+        }
 
         target = opendir(g_fsCmd.curFullPath);
 
         if(target == NULL) {
-            PRINTK("open dir failed.");
+            PRINTK("Open dir failed.");
             return LOS_NOK;
         }
 
@@ -192,9 +188,10 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         sprintf_s(tmp_buf, DIR_PATH_LEN, "%s%s/", g_fsCmd.curFullPath, argv[0]);
         target = opendir(tmp_buf);
         if(target == NULL) {
-            PRINTK("open dir failed.");
+            PRINTK("Open dir failed.");
             return LOS_NOK;
         }
+
         memcpy_s(g_fsCmd.curFullPath, sizeof(g_fsCmd.curFullPath), tmp_buf, strlen(tmp_buf));
         memset_s(g_fsCmd.curPath, sizeof(g_fsCmd.curPath), 0, strlen(g_fsCmd.curPath));
         memcpy_s(g_fsCmd.curPath, sizeof(g_fsCmd.curPath), argv[0], strlen(argv[0]));
