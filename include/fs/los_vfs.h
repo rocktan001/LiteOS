@@ -55,7 +55,6 @@ struct mount_point;
 struct dir;
 struct dirent;
 
-extern struct mount_point *g_mountPoints;
 
 typedef long off_t;
 
