@@ -20,7 +20,6 @@ endif
 ifeq ($(LOSCFG_SHELL), y)
 LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/include \
-    -I $(LITEOSTOPDIR)/include/fs \
     -I $(LITEOSTOPDIR)/shell/full/include \
     -I $(LITEOSTOPDIR)/kernel/base/include \
     -I $(LITEOSTOPDIR)/components/fs/ramfs \
