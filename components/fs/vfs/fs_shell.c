@@ -106,7 +106,7 @@ UINT32 OsShellCmdLs(UINT32 argc, const CHAR **argv)
         if (d_item != NULL) {
             if (argc == 1) {
                 if(strcmp(argv[0], "-l")) {
-                    PRINTK("Argument error! Only support \"-l\"");
+                    PRINTK("Argument error! Only support \"-l\"\n");
                     return LOS_NOK;
                 }
                 if (d_item->type == VFS_TYPE_DIR) {
@@ -144,7 +144,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
     INT32 pathLen = 0;
 
     if (argc != 1) {
-        PRINTK("One argument is required !\n");
+        PRINTK("One argument is required!\n");
         return LOS_NOK;
     }
 
@@ -172,7 +172,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         pathLen = strlen(g_fsCmd.curFullPath) - strlen(curPath);
         memset_s(g_fsCmd.curFullPath + pathLen, sizeof(g_fsCmd.curFullPath) - pathLen, 0, strlen(curPath));
 
-        if (strlen(argv[0]) == RETURN_BUF_LEN || (strlen(argv[0]) == RETURN_BUF_LEN + 1 && argv[0][2] == '/')) {
+        if (strlen(argv[0]) == RETURN_BUF_LEN || (strlen(argv[0]) == (RETURN_BUF_LEN + 1) && argv[0][2] == '/')) {
             strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, "/");
         } else {
             argPath = strchr(argv[0], '/');
