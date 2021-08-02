@@ -43,6 +43,8 @@ extern "C" {
 
 #define DIR_PATH_LEN        256
 #define DIR_CUR_PATH_LEN    128
+#define RETURN_BUF_LEN      2
+
 typedef struct {
     INT32 fd;
     INT32 flags;
@@ -63,14 +65,14 @@ UINT32 OsShellCmdMkdir(UINT32 argc, const CHAR **argv)
     CHAR tmp_buf[DIR_PATH_LEN] = {0};
 
     if (argc < 1) {
-        PRINTK("One argument is required at least!");
+        PRINTK("One argument is required at least!\n");
         return LOS_NOK;
     }
 
     sprintf_s(tmp_buf, DIR_PATH_LEN, "%s%s/", g_fsCmd.curFullPath, argv[0]);
 
     if (mkdir(tmp_buf, 0) == -1) {
-        printf("Mkdir fail.\n");
+        PRINTK("Mkdir fail.\n");
         return LOS_NOK;
     }
 
@@ -84,7 +86,7 @@ UINT32 OsShellCmdList(UINT32 argc, const CHAR **argv)
     CHAR tmp_buf[DIR_PATH_LEN] = {0};
 
     if (argc > 1) {
-        PRINTK("One argument is required!");
+        PRINTK("One argument is required!\n");
         return LOS_NOK;
     }
 
@@ -92,7 +94,7 @@ UINT32 OsShellCmdList(UINT32 argc, const CHAR **argv)
 
     target = opendir(tmp_buf);
     if (target == NULL) {
-        PRINTK("The command can be executed only in the directory below the fs root directory.");
+        PRINTK("The command can be executed only in the directory below the fs root directory.\n");
         return LOS_NOK;
     }
 
@@ -142,34 +144,44 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
     INT32 pathLen = 0;
 
     if (argc != 1) {
-        PRINTK("One argument is required !");
+        PRINTK("One argument is required !\n");
         return LOS_NOK;
     }
 
     if (argv[0][0] == '/') {
-        curPath = strrchr(argv[0], '/');
-        pathLen = strlen(curPath);
-
         if (!strcmp(argv[0], "/")) {
             return LOS_NOK;
         }
 
         target = opendir(argv[0]);
         if(target == NULL) {
-            PRINTK("Open dir failed.");
+            PRINTK("No such folder.\n");
             return LOS_NOK;
         }
+
+        curPath = strrchr(argv[0], '/');
+        pathLen = strlen(curPath);
 
         memset_s(g_fsCmd.curFullPath, sizeof(g_fsCmd.curFullPath), 0, strlen(g_fsCmd.curFullPath));
         memcpy_s(g_fsCmd.curFullPath, sizeof(g_fsCmd.curFullPath), argv[0], strlen(argv[0]));
         memset_s(g_fsCmd.curPath, sizeof(g_fsCmd.curPath), 0, strlen(g_fsCmd.curPath));
         memcpy_s(g_fsCmd.curPath, sizeof(g_fsCmd.curPath), curPath, pathLen);
-    } else if (!strcmp(argv[0], "..")) {
+    } else if (!strncmp(argv[0], "..", RETURN_BUF_LEN)) {
         g_fsCmd.curFullPath[strlen(g_fsCmd.curFullPath) - 1] = 0;
         curPath = strrchr(g_fsCmd.curFullPath, '/');
         pathLen = strlen(g_fsCmd.curFullPath) - strlen(curPath);
 
-        memset_s(g_fsCmd.curFullPath + pathLen + 1, sizeof(g_fsCmd.curFullPath) - pathLen - 1, 0, strlen(curPath) - 1);
+        memset_s(g_fsCmd.curFullPath + pathLen, sizeof(g_fsCmd.curFullPath) - pathLen, 0, strlen(curPath));
+
+        curPath = strchr(argv[0], '/');
+        if (strlen(argv[0]) != RETURN_BUF_LEN) {
+            strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, curPath);
+            strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, "/");
+        } else {
+            if (argv[0][strlen(argv[0])] == '.') {
+                strcat_s(g_fsCmd.curFullPath, DIR_PATH_LEN, "/");
+            }
+        }
 
         if (!strcmp(g_fsCmd.curFullPath, "/")) {
             return LOS_NOK;
@@ -178,7 +190,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         target = opendir(g_fsCmd.curFullPath);
 
         if(target == NULL) {
-            PRINTK("Open dir failed.");
+            PRINTK("No such folder.\n");
             return LOS_NOK;
         }
 
@@ -188,7 +200,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
         sprintf_s(tmp_buf, DIR_PATH_LEN, "%s%s/", g_fsCmd.curFullPath, argv[0]);
         target = opendir(tmp_buf);
         if(target == NULL) {
-            PRINTK("Open dir failed.");
+            PRINTK("No such folder.\n");
             return LOS_NOK;
         }
 
