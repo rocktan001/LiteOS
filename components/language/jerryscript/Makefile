@@ -57,9 +57,10 @@ JERRYSCRIPT_INCLUDE := \
     -I $(JERRYSCRIPT_DIR)/jerry-ext/module \
     -I $(JERRYSCRIPT_DIR)/jerry-ext/common \
     -I $(JERRYSCRIPT_DIR)/jerry-port/default/include \
-    -I $(LITEOSTOPDIR)/components/language/jerryscript/jerry-port
+    -I $(LITEOSTOPDIR)/components/language/jerryscript/jerry-port \
+    -I $(LITEOSTOPDIR)/include
 
-LOCAL_DEFS :=\
+LOCAL_DEFS := \
     -D JERRY_COMMIT_HASH=\"\" \
     -D JERRY_NDEBUG
 

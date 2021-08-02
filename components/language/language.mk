@@ -9,3 +9,9 @@ ifeq ($(LOSCFG_COMPONENTS_LUA), y)
 include $(LITEOSTOPDIR)/components/language/lua/lua.mk
 COMPONENTS_LANGUAGE_INCLUDE += $(COMPONENTS_LUA_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_MICROPYTHON), y)
+include $(LITEOSTOPDIR)/components/language/micropython/micropython.mk
+COMPONENTS_LANGUAGE_INCLUDE += $(COMPONENTS_MICROPYTHON_INCLUDE)
+endif
+

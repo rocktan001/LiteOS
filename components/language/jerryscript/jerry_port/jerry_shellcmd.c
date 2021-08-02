@@ -40,13 +40,14 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#ifdef LOSCFG_COMPONENTS_FS_RAMFS
 static int HelloWorld(void)
 {
     int fd;
     char data[] = "print(\"Hello, wlorld! I'm JerryScript.\");";
     char fileName[] = "/ramfs/hello.js";
 
-    fd = open(fileName, O_RDWR);
+    fd = open(fileName, O_RDONLY);
     if (fd > 0) {
         close(fd);
         return 0;
@@ -60,6 +61,7 @@ static int HelloWorld(void)
     close(fd);
     return 0;
 }
+#endif
 
 static int JerryShellCmd(int argc, char **argv)
 {
@@ -75,7 +77,7 @@ static int JerryShellCmd(int argc, char **argv)
     HelloWorld();
 #endif
 
-    JerryMain(argc, tmpArgv);
+    JerryMain(argc + 1, tmpArgv);
     return 0;
 }
 
@@ -88,3 +90,4 @@ SHELLCMD_ENTRY(jerry_shellcmd, CMD_TYPE_EX, "jerry", XARGS, (CMD_CBK_FUNC)JerryS
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
