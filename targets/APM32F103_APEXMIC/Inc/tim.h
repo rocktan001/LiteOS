@@ -36,20 +36,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "los_typedef.h"
+#include "platform.h"
 
-typedef enum {
-    TIMER1 = 1,
-    TIMER2,
-    TIMER3,
-    TIMER4,
-    TIMER5,
-    TIMER6,
-    TIMER7,
-    TIMER8
-} Timer_t;
-
-UINT64 ApmGetTimerCycles(Timer_t num);
-VOID ApmTimerHwiCreate(VOID);
-VOID ApmTimerInit(VOID);
+VOID ApmMiniTim3Init(VOID);
+extern TimControllerOps g_cpupTimerOps;
 
 #endif /* __TIM_H__ */

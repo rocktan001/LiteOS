@@ -9,7 +9,6 @@ MODULE_NAME := $(LITEOS_PLATFORM)
 USER_SRC = \
     os_adapt/os_adapt.c \
     Src/main.c \
-    Src/stm32f0xx_it.c \
     Src/system_stm32f0xx.c \
     Src/usart.c \
     Src/sys_init.c \

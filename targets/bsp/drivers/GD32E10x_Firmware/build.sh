@@ -35,8 +35,8 @@ CopySourceFile()
     fi
 
     if [ -z "$toolName" ]; then
-        echo -e "\033[31m[Info]: Program '${toolName}' has not been installed. You can use the following" \
-        "command to install:\nsudo apt-get install ${$toolName}\033[0m"
+        echo -e "\033[31m[Info]: Program unrar has not been installed. You can use the following" \
+        "command to install:\nsudo apt-get install unrar\033[0m"
         return 1
     fi
     

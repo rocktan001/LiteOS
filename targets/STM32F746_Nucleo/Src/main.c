@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Main
  * Author: Huawei LiteOS Team
@@ -26,15 +26,26 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_base.h"
+#include "main.h"
 #include "los_task_pri.h"
 #include "arch/canary.h"
-#include "los_typedef.h"
-#include "los_sys.h"
+#include "gpio.h"
+#include "usart.h"
+#include "tim.h"
 
 VOID board_config(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+}
+
+INT32 HardwareInit(VOID)
+{
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    MX_USART3_UART_Init();
+    MX_TIM3_Init();
+    return 0;
 }
 
 INT32 main (VOID)

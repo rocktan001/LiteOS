@@ -7,8 +7,7 @@ MODULE_NAME := $(LITEOS_PLATFORM)
 USER_SRC = \
     os_adapt/os_adapt.c \
     $(wildcard Src/*.c)
-
-C_SOURCES += $(USER_SRC)
+    C_SOURCES += $(USER_SRC)
 
 # C includes
 HAL_DRIVER_INC = \

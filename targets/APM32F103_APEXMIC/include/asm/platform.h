@@ -31,8 +31,8 @@
 
 #include "los_typedef.h"
 #include "apm32f10x.h"
+#include "hal_timer.h"
 #include "uart.h"
-#include "tim.h"
 
 #include "interrupt_config.h"
 #include "memmap_config.h"

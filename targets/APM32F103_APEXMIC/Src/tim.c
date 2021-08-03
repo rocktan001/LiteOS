@@ -27,10 +27,10 @@
  * --------------------------------------------------------------------------- */
 
 #include "tim.h"
-#include "los_hwi.h"
 #include "apm32f10x_tmr.h"
 #include "apm32f10x_misc.h"
 #include "apm32f10x_rcm.h"
+#include "sys_init.h"
 #include "los_hwi.h"
 
 #ifdef __cplusplus
@@ -38,6 +38,8 @@
 extern "C" {
 #endif
 #endif /* __cplusplus */
+
+#define TIMER3_RELOAD 50000
 
 VOID ApmMiniTim3Init(VOID)
 {
@@ -62,31 +64,17 @@ VOID ApmMiniTim3Init(VOID)
 
 VOID Tim3IrqHandler(VOID)
 {
-    if(TMR_ReadIntFlag(TMR3, TMR_INT_UPDATE) == SET) {
+    if (TMR_ReadIntFlag(TMR3, TMR_INT_UPDATE) == SET) {
         TMR_ClearIntFlag(TMR3, TMR_INT_UPDATE);
     }
 }
 
-UINT64 Timer3Getcycle(VOID)
-{
-    static UINT64 bacCycle;
-    static UINT64 cycleTimes;
-    UINT64 swCycles = TMR3->CNT;
-
-    if (swCycles < bacCycle) {
-        cycleTimes++;
-    }
-    bacCycle = swCycles;
-    /* cycle = cycleTimes * 50000 */
-    return swCycles + cycleTimes * 50000;
-}
-
-VOID ApmTimerInit(VOID)
+VOID TimerInit(VOID)
 {
     ApmMiniTim3Init();
 }
 
-VOID ApmTimerHwiCreate(VOID)
+VOID TimerHwiCreate(VOID)
 {
     UINT32 ret;
 
@@ -99,19 +87,27 @@ VOID ApmTimerHwiCreate(VOID)
     NVIC_EnableIRQRequest(TMR3_IRQn, 0, 0);
 }
 
-UINT64 ApmGetTimerCycles(Timer_t num)
+UINT64 GetTimerCycles(VOID)
 {
+    STATIC UINT64 bacCycle;
+    STATIC UINT64 cycleTimes;
     UINT64 cycles = 0;
+    UINT64 swCycles = TMR3->CNT;
 
-    switch (num) {
-        case TIMER3:
-            cycles = Timer3Getcycle();
-            break;
-        default:
-            printf("Wrong number of TIMER.\n");
+    if (swCycles < bacCycle) {
+        cycleTimes++;
     }
+    bacCycle = swCycles;
+    cycles = swCycles + cycleTimes * TIMER3_RELOAD;
+
     return cycles;
 }
+
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 
 #ifdef __cplusplus
 #if __cplusplus

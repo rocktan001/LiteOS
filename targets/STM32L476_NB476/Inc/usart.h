@@ -21,6 +21,8 @@
 #define __USART_H__
 
 #include "stm32l4xx_hal.h"
+#include "los_typedef.h"
+#include "uart.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +43,7 @@ extern UART_HandleTypeDef huart1;
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+extern UartControllerOps g_armGenericUart;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

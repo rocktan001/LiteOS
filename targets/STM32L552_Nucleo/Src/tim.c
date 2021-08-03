@@ -140,7 +140,24 @@ void TIM3_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-UINT64 Timer3GetCycle(VOID)
+VOID TimerInit(VOID)
+{
+    MX_TIM3_Init();
+}
+
+VOID TimerHwiCreate(VOID)
+{
+    UINT32 ret;
+
+    ret = LOS_HwiCreate(TIM_IRQ, 0, 0, TIM3_IRQHandler, 0); // 16: cortex-m irq num shift
+    if (ret != 0) {
+        printf("ret of TIM3 LOS_HwiCreate = %#x\n", ret);
+        return;
+    }
+    HAL_TIM_Base_Start_IT(&htim3);
+}
+
+UINT64 GetTimerCycles(VOID)
 {
     static UINT64 bacCycle;
     static UINT64 cycleTimes;
@@ -154,36 +171,11 @@ UINT64 Timer3GetCycle(VOID)
     return swCycles + cycleTimes * TIMER3_RELOAD;
 }
 
-VOID StmTimerInit(VOID)
-{
-    MX_TIM3_Init();
-}
-
-VOID StmTimerHwiCreate(VOID)
-{
-    UINT32 ret;
-
-    ret = LOS_HwiCreate(TIM_IRQ, 0, 0, TIM3_IRQHandler, 0); // 16: cortex-m irq num shift
-    if (ret != 0) {
-        printf("ret of TIM3 LOS_HwiCreate = %#x\n", ret);
-        return;
-    }
-    HAL_TIM_Base_Start_IT(&htim3);
-}
-
-UINT64 StmGetTimerCycles(Timer_t num)
-{
-    UINT64 cycles = 0;
-
-    switch (num) {
-        case TIMER3:
-            cycles = Timer3GetCycle();
-            break;
-        default:
-            printf("Wrong number of TIMER.\n");
-    }
-    return cycles;
-}
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

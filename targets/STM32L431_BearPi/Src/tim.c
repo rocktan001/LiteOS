@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------ */
 #include "tim.h"
+#include "sys_init.h"
 
 /* USER CODE BEGIN 0 */
 #include "los_hwi.h"
@@ -98,25 +99,12 @@ void TIM7_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-UINT64 Timer7Getcycle(VOID)
-{
-    static UINT64 bacCycle;
-    static UINT64 cycleTimes;
-    UINT64 swCycles = htim7.Instance->CNT;
-
-    if (swCycles <= bacCycle) {
-        cycleTimes++;
-    }
-    bacCycle = swCycles;
-    return swCycles + cycleTimes * TIMER7_RELOAD;
-}
-
-VOID StmTimerInit(VOID)
+VOID TimerInit(VOID)
 {
     MX_TIM7_Init();
 }
 
-VOID StmTimerHwiCreate(VOID)
+VOID TimerHwiCreate(VOID)
 {
     UINT32 ret;
 
@@ -128,19 +116,28 @@ VOID StmTimerHwiCreate(VOID)
     HAL_TIM_Base_Start_IT(&htim7);
 }
 
-UINT64 StmGetTimerCycles(Timer_t num)
+UINT64 GetTimerCycles(VOID)
 {
+    static UINT64 bacCycle;
+    static UINT64 cycleTimes;
     UINT64 cycles = 0;
+    UINT64 swCycles = htim7.Instance->CNT;
 
-    switch (num) {
-        case 7:
-            cycles = Timer7Getcycle();
-            break;
-        default:
-            printf("Wrong number of TIMER.\n");
+    if (swCycles < bacCycle) {
+        cycleTimes++;
     }
+
+    bacCycle = swCycles;
+    cycles = swCycles + cycleTimes * TIMER7_RELOAD;
+
     return cycles;
 }
+
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 /* USER CODE END 1 */
 
 /* *********************** (C) COPYRIGHT STMicroelectronics *****END OF FILE*** */

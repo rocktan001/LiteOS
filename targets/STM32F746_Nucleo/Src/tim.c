@@ -17,7 +17,7 @@
  * *****************************************************************************
  */
 
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Tim
  * Author: Huawei LiteOS Team
@@ -47,7 +47,8 @@
 
 /* Includes ------------------------------------------------------------------ */
 #include "tim.h"
-
+#include "sys_init.h"
+#include "platform.h"
 /* USER CODE BEGIN 0 */
 #include "los_hwi.h"
 
@@ -125,25 +126,12 @@ void TIM3_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-UINT64 Timer3Getcycle(VOID)
-{
-    static UINT64 bacCycle;
-    static UINT64 cycleTimes;
-    UINT64 swCycles = htim3.Instance->CNT;
-
-    if (swCycles <= bacCycle) {
-        cycleTimes++;
-    }
-    bacCycle = swCycles;
-    return swCycles + cycleTimes * TIMER3_RELOAD;
-}
-
-VOID StmTimerInit(VOID)
+VOID TimerInit(VOID)
 {
     MX_TIM3_Init();
 }
 
-VOID StmTimerHwiCreate(VOID)
+VOID TimerHwiCreate(VOID)
 {
     UINT32 ret;
 
@@ -155,19 +143,25 @@ VOID StmTimerHwiCreate(VOID)
     HAL_TIM_Base_Start_IT(&htim3);
 }
 
-UINT64 StmGetTimerCycles(Timer_t num)
+UINT64 GetTimerCycles(VOID)
 {
-    UINT64 cycles = 0;
+    static UINT64 bacCycle;
+    static UINT64 cycleTimes;
+    UINT64 swCycles = htim3.Instance->CNT;
 
-    switch (num) {
-        case 3:
-            cycles = Timer3Getcycle();
-            break;
-        default:
-            printf("Wrong number of TIMER.\n");
+    if (swCycles < bacCycle) {
+        cycleTimes++;
     }
-    return cycles;
+    bacCycle = swCycles;
+
+    return swCycles + cycleTimes * TIMER3_RELOAD;
 }
+
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 /* USER CODE END 1 */
 
 /* *********************** (C) COPYRIGHT STMicroelectronics *****END OF FILE*** */

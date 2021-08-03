@@ -39,7 +39,8 @@ USER_SRC = \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/stm32f7xx_it.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/system_stm32f7xx.c \
     $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/flash_adaptor.c \
-    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/hal_rng.c
+    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/hal_rng.c \
+    $(LITEOSTOPDIR)/targets/STM32F769IDISCOVERY/Src/usart.c
     C_SOURCES += $(USER_SRC)
 
 # C includes

@@ -28,13 +28,14 @@ extern "C" {
 #include "stm32l0xx_hal.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "los_typedef.h"
+#include "uart.h"
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
-
+extern UartControllerOps g_armGenericUart;
 /* USER CODE END Private defines */
 
 void MX_USART2_UART_Init(void);

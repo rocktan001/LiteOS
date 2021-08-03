@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
- * Description: LiteOS timer driver
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Sys Init HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-29
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _TIMER_H
-#define _TIMER_H
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef _SYS_H
+#define _SYS_H
 
-#include "platform.h"
+/* Includes ------------------------------------------------------------------*/
+
+/* Includes LiteOS------------------------------------------------------------------*/
+#include "los_typedef.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,10 +41,14 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID TimerInitialize(VOID);
-VOID TimerHwiCreate (VOID);
-UINT64 GetTimerCpupCycles(VOID);
-UINT64 GetTimerCycles(Timer_t num);
+uint32_t HAL_GetTick(void);
+void SystemClock_Config(void);
+void _Error_Handler(char *, int);
+
+STATIC INLINE VOID Error_Handler(VOID)
+{
+    _Error_Handler(__FILE__, __LINE__);
+}
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,4 +56,4 @@ UINT64 GetTimerCycles(Timer_t num);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _TIMER_H */
+#endif /* _SYS_H */

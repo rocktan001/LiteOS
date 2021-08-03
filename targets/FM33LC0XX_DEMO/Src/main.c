@@ -37,8 +37,6 @@
 #include "user_init.h"
 #include "usart.h"
 
-
-
 VOID board_config(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
@@ -57,7 +55,7 @@ VOID HardwareInit(VOID)
     /* Initialize all configured peripherals */
     /* SHOULD BE KEPT!!! */
     MF_Config_Init();
-    
+
     UserInit();
 }
 

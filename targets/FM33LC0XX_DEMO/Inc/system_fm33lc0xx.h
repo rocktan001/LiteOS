@@ -46,7 +46,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 #include "fm33lc0xx.h"
-    
+
 //#define   USE_LSCLK_CLOCK_SRC_XTLF
 
 //#define   SYSCLK_SRC_RC4M
@@ -54,7 +54,7 @@ extern "C" {
 #define   SYSCLK_SRC_RCHF
 //#define   SYSCLK_SRC_PLL
 
-    
+
 //#define   USE_PLL_CLOCK_SRC_RCHF
 //#define   USE_PLL_CLOCK_SRC_XTHF
 
@@ -85,7 +85,7 @@ extern "C" {
 #endif /* XTLF_VALUE */         
 
 
-         
+
 
 #define __SYSTEM_CLOCK          (8000000)
 #define DELAY_US                (__SYSTEM_CLOCK/1000000)

@@ -31,7 +31,7 @@
 #include "arch/canary.h"
 #include "gpio.h"
 #include "usart.h"
-#include "apm32f10x_usart.h"
+#include "tim.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,7 +48,7 @@ VOID HardwareInit(VOID)
 {
     ApmMiniLed2Init();
     ApmMiniCom1Init();
-    ApmTimerInit();
+    ApmMiniTim3Init();
 }
 
 INT32 main(VOID)

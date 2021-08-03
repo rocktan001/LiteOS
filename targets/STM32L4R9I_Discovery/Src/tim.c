@@ -65,9 +65,9 @@ void MX_TIM3_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 12000;
+  htim3.Init.Prescaler = 12000 - 1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 50000;
+  htim3.Init.Period = 50000 - 1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -149,12 +149,12 @@ UINT64 Timer3GetCycle(VOID)
     return swCycles + cycleTimes * TIMER3_RELOAD;
 }
 
-VOID StmTimerInit(VOID)
+VOID TimerInit(VOID)
 {
     MX_TIM3_Init();
 }
 
-VOID StmTimerHwiCreate(VOID)
+VOID TimerHwiCreate(VOID)
 {
     UINT32 ret;
 
@@ -166,19 +166,27 @@ VOID StmTimerHwiCreate(VOID)
     HAL_TIM_Base_Start_IT(&htim3);
 }
 
-UINT64 StmGetTimerCycles(Timer_t num)
+UINT64 GetTimerCycles(VOID)
 {
+    static UINT64 bacCycle;
+    static UINT64 cycleTimes;
+    UINT64 swCycles = htim3.Instance->CNT;
     UINT64 cycles = 0;
 
-    switch (num) {
-        case TIMER3:
-            cycles = Timer3GetCycle();
-            break;
-        default:
-            printf("Wrong number of TIMER.\n");
+    if (swCycles < bacCycle) {
+        cycleTimes++;
     }
+    bacCycle = swCycles;
+    cycles = swCycles + cycleTimes * TIMER3_RELOAD;
+
     return cycles;
 }
+
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

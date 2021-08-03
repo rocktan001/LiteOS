@@ -34,6 +34,7 @@
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "hal_rng.h"
+#include "tim.h"
 #ifdef LOSCFG_DEMO_CAN
 #include "can.h"
 #endif
@@ -47,7 +48,7 @@ VOID HardwareInit(VOID)
 {
     SystemClock_Config();
     MX_USART1_UART_Init();
-    StmTimerInit();
+    MX_TIM3_Init();
 #ifdef LOSCFG_DEMO_CAN
     MX_CAN1_Init();
 #endif

@@ -31,6 +31,9 @@
 #include "apm32f10x_gpio.h"
 #include "apm32f10x_usart.h"
 #include "apm32f10x_misc.h"
+#include "sys_init.h"
+#include "platform.h"
+#include "los_hwi.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -71,6 +74,45 @@ void ApmMiniCom1Init(void)
     /* Enable USART */
     USART_Enable(USART1);
 }
+
+VOID UsartInit(VOID)
+{
+    ApmMiniCom1Init();
+}
+
+VOID UsartWrite(const CHAR c)
+{
+    while (USART_ReadStatusFlag(USART1, USART_FLAG_TXBE) == RESET) {};
+    USART_TxData(USART1, c);
+}
+
+UINT8 UsartRead(VOID)
+{
+    UINT8 ch = 0;
+    if (USART_ReadStatusFlag(USART1, USART_INT_RXBNE) == SET) {
+        ch = (UINT8)USART_RxData(USART1);
+    }
+    return ch;
+}
+
+STATIC VOID UartHandler(VOID)
+{
+    (VOID)uart_getc();
+}
+
+INT32 UsartHwi(VOID)
+{
+    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    USART_EnableInterrupt(USART1, USART_INT_RXBNE);
+    return LOS_OK;
+}
+
+UartControllerOps g_armGenericUart = {
+    .uartInit = UsartInit,
+    .uartWriteChar = UsartWrite,
+    .uartReadChar = UsartRead,
+    .uartHwiCreate = UsartHwi
+};
 
 #ifdef __cplusplus
 #if __cplusplus

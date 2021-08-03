@@ -63,6 +63,12 @@ extern VOID HrtimerClockStop(VOID);
 extern UINT32 HrtimerClockValueGet(VOID);
 extern VOID HrtimerClockInit(VOID);
 
+typedef struct {
+    VOID (*timInit)(VOID);
+    VOID (*timHwiCreate)(VOID);
+    UINT64 (*timGetTimerCycles)(VOID);
+} TimControllerOps;
+
 #ifdef __cplusplus
 #if __cplusplus
 }

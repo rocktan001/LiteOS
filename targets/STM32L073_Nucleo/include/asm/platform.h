@@ -32,8 +32,9 @@
 #include "los_typedef.h"
 #include "stm32l073xx.h"
 #include "stm32l0xx.h"
+#include "hal_timer.h"
 #include "uart.h"
-#include "tim.h"
+
 
 #include "interrupt_config.h"
 #include "memmap_config.h"

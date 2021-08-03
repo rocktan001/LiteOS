@@ -26,36 +26,4 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-void OsBackTrace(void)
-{
-}
-
-#ifdef LOSCFG_KERNEL_NX
-#include "arch/mpu.h"
-void MPU_Config(void)
-{
-    MPU_REGION_INFO mpuInfo;
-
-    mpuInfo.number = 0; // region 0
-    mpuInfo.baseAddress = 0x08000000; // start addr of flash
-    mpuInfo.accessPermission = MPU_DEFS_RASR_AP_RO;
-    mpuInfo.sharable = MPU_ACCESS_SHAREABLE;
-    mpuInfo.cachable = MPU_ACCESS_CACHEABLE;
-    mpuInfo.buffable = MPU_ACCESS_BUFFERABLE;
-    mpuInfo.regionSize = MPU_REGION_SIZE_2MB;
-    mpuInfo.hfnmiena = MPU_HFNMIENA_ENABLE;
-    mpuInfo.xn = MPU_INSTRUCTION_ACCESS_ENABLE;
-    (void)ArchProtectionRegionSet(&mpuInfo);
-
-    mpuInfo.number = 1; // region 1
-    mpuInfo.baseAddress = 0x20000000; // start addr of ram
-    mpuInfo.accessPermission = MPU_DEFS_RASR_AP_FULL_ACCESS;
-    mpuInfo.sharable = MPU_ACCESS_SHAREABLE;
-    mpuInfo.cachable = MPU_ACCESS_CACHEABLE;
-    mpuInfo.buffable = MPU_ACCESS_BUFFERABLE;
-    mpuInfo.regionSize = MPU_REGION_SIZE_512KB;
-    mpuInfo.hfnmiena = MPU_HFNMIENA_ENABLE;
-    mpuInfo.xn = MPU_INSTRUCTION_ACCESS_DISABLE;
-    (void)ArchProtectionRegionSet(&mpuInfo);
-}
-#endif
+void OsBackTrace(void) {}

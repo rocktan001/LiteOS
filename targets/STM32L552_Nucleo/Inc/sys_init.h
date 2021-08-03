@@ -68,6 +68,7 @@ STATIC INLINE VOID Error_Handler(VOID)
 {
     _Error_Handler(__FILE__, __LINE__);
 }
+
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -27,12 +27,10 @@
  * --------------------------------------------------------------------------- */
 
 #include "main.h"
-#include "sys_init.h"
-#include "los_base.h"
 #include "los_task_pri.h"
 #include "arch/canary.h"
-#include "los_typedef.h"
-#include "los_sys.h"
+#include "usart.h"
+#include "tim.h"
 
 VOID board_config(VOID)
 {
@@ -43,8 +41,7 @@ VOID HardwareInit(VOID)
 {
     SystemClock_Config();
     MX_USART1_UART_Init();
-    StmTimerInit();
-    dwt_delay_init(SystemCoreClock);
+    MX_TIM3_Init();
 }
 
 INT32 main(VOID)

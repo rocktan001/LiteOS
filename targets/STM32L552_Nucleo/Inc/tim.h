@@ -50,6 +50,7 @@
 #define __TIM_H__
 
 #include "los_typedef.h"
+#include "platform.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,24 +63,14 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
-typedef enum {
-    TIMER1 = 1,
-    TIMER2,
-    TIMER3,
-    TIMER4,
-    TIMER5,
-    TIMER6,
-    TIMER7,
-    TIMER8
-} Timer_t;
+
 /* USER CODE END Private defines */
 
 void MX_TIM3_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-UINT64 StmGetTimerCycles(Timer_t num);
-VOID StmTimerHwiCreate(VOID);
-VOID StmTimerInit(VOID);
+VOID TimerInit(VOID);
+extern TimControllerOps g_cpupTimerOps;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

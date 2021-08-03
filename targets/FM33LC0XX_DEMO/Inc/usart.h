@@ -2,6 +2,8 @@
 #define __USER_UART_H__
 
 #include "main.h"
+#include "los_typedef.h"
+#include "uart.h"
 
 typedef struct{
 	uint8_t *TxBuf;	// Tx BUffer
@@ -13,6 +15,7 @@ typedef struct{
 }tUARTx_OPT;
 
 extern UART_Type* gUARTx_Print;
+extern UartControllerOps g_armGenericUart;
 
 extern void Uartx_Init(UART_Type* UARTx, uint32_t rate);
 extern void UartxPrint_Init(UART_Type* UARTx);

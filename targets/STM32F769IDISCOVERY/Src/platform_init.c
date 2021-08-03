@@ -69,9 +69,6 @@
 
 #define LTCD_LINE                   0
 
-
-UART_HandleTypeDef huart1;
-
 #ifdef LOSCFG_GUI_ENABLE
 static osSemaphoreId vSyncEvent;
 static uint32_t cptFlip;
@@ -152,39 +149,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7);
 
-}
-
-/**
- * @brief Debug UART initialization
- * @param[in] baudrate UART baudrate
- **/
-
-static void UART_Config(uint32_t baudrate)
-{
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  /* Enable GPIOA clock */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  /* Enable USART1 clock */
-  __HAL_RCC_USART1_CLK_ENABLE();
-
-  /* Configure USART1_TX (PA9) and USART1_RX (PA10) */
-  GPIO_InitStructure.Pin = GPIO_PIN_9 | GPIO_PIN_10;
-  GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStructure.Pull = GPIO_PULLUP;
-  GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
-  GPIO_InitStructure.Alternate = GPIO_AF7_USART1;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-  /* Configure USART1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = baudrate;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  HAL_UART_Init(&huart1);
 }
 
 /**
@@ -471,45 +435,3 @@ void platform_Init(void)
 #endif
 
 }
-
-void HardwareInit(void)
-{
-    MPU_Config();
-
-    /* HAL library initialization */
-
-    HAL_Init();
-
-    /* Configure the system clock */
-    SystemClock_Config();
-
-    UART_Config(115200);
-    StmTimerInit();
-
-    /* Initialize the SDRAM */
-    BSP_SDRAM_Init();
-    HalRngConfig();
-}
-
-
-
-/**
-  * @brief  Retargets the C library printf function to the USART.
-  * @param  None
-  * @retval None
-  */
-PUTCHAR_PROTOTYPE
-{
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the USART1 and Loop until the end of transmission */
-  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
-
-  return ch;
-}
-
-void Stm32UartPuts(const char* str, uint32_t len)
-{
-    HAL_UART_Transmit(&huart1, (uint8_t *)str, strlen(str), 0xffff);
-    return;
-}
-

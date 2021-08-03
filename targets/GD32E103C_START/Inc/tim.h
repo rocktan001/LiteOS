@@ -30,6 +30,7 @@
 #define _TIM_H
 
 #include "los_typedef.h"
+#include "platform.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,20 +38,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-typedef enum {
-    LOS_TIMER1 = 1,
-    LOS_TIMER2,
-    LOS_TIMER3,
-    LOS_TIMER4,
-    LOS_TIMER5,
-    LOS_TIMER6,
-    LOS_TIMER7,
-    LOS_TIMER8
-} Timer_t;
-
-UINT64 StmGetTimerCycles(Timer_t num);
-VOID StmTimerHwiCreate(VOID);
-VOID StmTimerInit(VOID);
+VOID TimerInit(VOID);
+extern TimControllerOps g_cpupTimerOps;
 
 #ifdef __cplusplus
 #if __cplusplus

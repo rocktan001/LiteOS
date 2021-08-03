@@ -27,6 +27,8 @@
  * --------------------------------------------------------------------------- */
 
 #include "usart.h"
+#include "los_hwi.h"
+#include "platform.h"
 #include "gd32f30x.h"
 
 VOID Usart0Init(UINT32 bound)
@@ -44,3 +46,44 @@ VOID Usart0Init(UINT32 bound)
     usart_transmit_config(USART0, USART_TRANSMIT_ENABLE);
     usart_enable(USART0);
 }
+
+VOID UsartInit(VOID) {
+    Usart0Init(USART_DEFAULT_BOUND);
+}
+
+VOID UsartWrite(const CHAR c)
+{
+    while (usart_flag_get(USART0, USART_FLAG_TBE) == 0) {}
+    usart_data_transmit(USART0, c);
+}
+
+UINT8 UsartRead(VOID)
+{
+    UINT8 ch = 0;
+    if (usart_interrupt_flag_get(USART0, USART_INT_FLAG_RBNE) == RESET) {
+        return ch;
+    }
+    ch = (UINT8)(usart_data_receive(USART0) & 0xFF);
+    return ch;
+}
+
+STATIC VOID UartHandler(VOID)
+{
+    (VOID)uart_getc();
+}
+
+INT32 UsartHwi(VOID)
+{
+    nvic_irq_enable(USART0_IRQn, 0, 0);
+    usart_flag_clear(USART0, USART_INT_RBNE);
+    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    usart_interrupt_enable(USART0, USART_INT_RBNE);
+    return LOS_OK;
+}
+
+UartControllerOps g_armGenericUart = {
+    .uartInit = UsartInit,
+    .uartWriteChar = UsartWrite,
+    .uartReadChar = UsartRead,
+    .uartHwiCreate = UsartHwi
+};

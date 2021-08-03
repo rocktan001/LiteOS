@@ -18,6 +18,8 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include <los_hwi.h>
+#include "platform.h"
 #include "usart.h"
 #include "sys_init.h"
 
@@ -116,7 +118,41 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+VOID UsartWrite(const CHAR c)
+{
+    (VOID)HAL_UART_Transmit(&huart2, (UINT8 *)&c, 1, DEFAULT_TIMEOUT);
+}
 
+UINT8 UsartRead(VOID)
+{
+    UINT8 ch;
+    HAL_UART_Receive(&huart2, &ch, sizeof(UINT8), 0);
+    return ch;
+}
+
+STATIC VOID UartHandler(VOID)
+{
+    (VOID)uart_getc();
+}
+
+INT32 UsartHwi(VOID)
+{
+    if (huart2.Instance == NULL) {
+        return LOS_NOK;
+    }
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
+    __HAL_UART_CLEAR_FLAG(&huart2, UART_FLAG_TC);
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    __HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE);
+    return LOS_OK;
+}
+
+UartControllerOps g_armGenericUart = {
+    .uartInit = MX_USART2_UART_Init,
+    .uartWriteChar = UsartWrite,
+    .uartReadChar = UsartRead,
+    .uartHwiCreate = UsartHwi
+};
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

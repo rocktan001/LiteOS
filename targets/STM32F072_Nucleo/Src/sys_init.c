@@ -27,6 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "sys_init.h"
+#include "los_sys.h"
 
 uint32_t HAL_GetTick(void)
 {
@@ -68,17 +69,4 @@ void SystemClock_Config(void)
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK) {
         Error_Handler();
     }
-}
-
-/*
- * atiny_adapter user interface
- */
-void atiny_usleep(unsigned long usec)
-{
-    delayus((uint32_t)usec);
-}
-
-void atiny_reboot(void)
-{
-    HAL_NVIC_SystemReset();
 }

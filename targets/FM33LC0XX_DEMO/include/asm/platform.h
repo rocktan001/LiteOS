@@ -32,8 +32,8 @@
 #include "los_typedef.h"
 #include "system_fm33lc0xx.h"
 #include "fm33lc0xx.h"
+#include "hal_timer.h"
 #include "uart.h"
-#include "tim.h"
 
 #include "interrupt_config.h"
 #include "memmap_config.h"

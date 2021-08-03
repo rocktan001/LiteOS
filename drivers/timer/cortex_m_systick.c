@@ -32,7 +32,7 @@
 #include "los_hwi_pri.h"
 
 #ifdef LOSCFG_KERNEL_CPUP
-#include "timer.h"
+#include "tim.h"
 #endif
 
 #define CYCLE_REG_MASK    0xFFFFFFFFU
@@ -56,7 +56,9 @@ VOID HalClockInit(VOID)
         PRINTK("ret of LOS_HwiCreate = %#x\n", ret);
     }
 #ifdef LOSCFG_KERNEL_CPUP
-    TimerHwiCreate();
+    if (g_cpupTimerOps.timHwiCreate != NULL) {
+        g_cpupTimerOps.timHwiCreate();
+    }
 #endif
 }
 
@@ -77,13 +79,6 @@ VOID HalClockStart(VOID)
         PRINTK("LOS_HwiEnable failed. ret = %#x\n", ret);
     }
 }
-
-#ifdef LOSCFG_KERNEL_CPUP
-UINT64 HalClockGetCpupCycles(VOID)
-{
-    return GetTimerCpupCycles();
-}
-#endif
 
 UINT64 HalClockGetCycles(VOID)
 {
@@ -107,7 +102,9 @@ UINT64 HalClockGetCycles(VOID)
     LOS_IntRestore(intSave);
 
 #ifdef LOSCFG_KERNEL_CPUP
-    cycle = HalClockGetCpupCycles() * TIMER_CYCLE_SWITCH;
+    if (g_cpupTimerOps.timGetTimerCycles != NULL) {
+        cycle = g_cpupTimerOps.timGetTimerCycles() * TIMER_CYCLE_SWITCH;
+    }
 #endif
 
     return cycle;

@@ -61,6 +61,8 @@ void    LCD_Vsync_Init(void);
 #endif
 
 void    HardwareInit(void);
+void    MPU_Config(void);
+void    SystemClock_Config(void);
 extern  LTDC_HandleTypeDef hltdc_discovery;
 extern  DSI_HandleTypeDef  hdsi_discovery;
 #endif

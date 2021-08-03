@@ -28,6 +28,7 @@
 
 #include "sys_init.h"
 #include "demo_entry.h"
+#include "los_task_pri.h"
 
 VOID app_init(VOID)
 {

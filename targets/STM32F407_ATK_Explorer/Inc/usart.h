@@ -19,13 +19,16 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __usart_H
 #define __usart_H
+
+#include "stm32f4xx_hal.h"
+#include "los_typedef.h"
+#include "uart.h"
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-#include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -40,7 +43,7 @@ extern UART_HandleTypeDef huart1;
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+extern UartControllerOps g_armGenericUart;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

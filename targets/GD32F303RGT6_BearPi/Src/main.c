@@ -30,6 +30,7 @@
 #include "arch/canary.h"
 #include "gpio.h"
 #include "usart.h"
+#include "tim.h"
 
 VOID board_config(VOID)
 {
@@ -40,7 +41,7 @@ VOID HardwareInit(VOID)
 {
     SystemInit();
     Usart0Init(USART_DEFAULT_BOUND);
-    StmTimerInit();
+    TimerInit();
     GpioInit();
 }
 

@@ -33,7 +33,7 @@
 #include "stm32f103xe.h"
 #include "stm32f1xx.h"
 #include "uart.h"
-#include "tim.h"
+#include "hal_timer.h"
 
 #include "interrupt_config.h"
 #include "memmap_config.h"

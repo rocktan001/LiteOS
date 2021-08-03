@@ -45,7 +45,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
-
+#include "los_typedef.h"
+#include "uart.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -65,7 +66,7 @@ void MX_USART1_UART_Init(void);
 void MX_USART2_UART_Init(void);
 void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN Prototypes */
-
+extern UartControllerOps g_armGenericUart;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -35,7 +35,6 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define CPUP_TIMER              3
 #define TIM_IRQ                 (GPTIM0_IRQn + 16)
 #define OS_TICK_INT_NUM         (SysTick_IRQn + 16) // 16: cortex-m irq shift
 #define NUM_HAL_INTERRUPT_UART  (UART5_IRQn + 16)  // 16: cortex-m irq shift

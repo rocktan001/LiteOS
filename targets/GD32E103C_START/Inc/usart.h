@@ -30,6 +30,7 @@
 #define _USART_H
 
 #include "los_typedef.h"
+#include "uart.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -40,6 +41,8 @@ extern "C" {
 #define USART_DEFAULT_BOUND 115200U
 
 VOID Usart1Init(UINT32 bound);
+
+extern UartControllerOps g_armGenericUart;
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -52,21 +52,7 @@ INT32 uart_putc(CHAR c)
 UINT8 uart_getc(VOID)
 {
     UINT8 ch = 0;
-#if defined(LOSCFG_PLATFORM_STM32L4R9I_DISCOVERY) || defined(LOSCFG_PLATFORM_STM32L073_NUCLEO)
-    HAL_UART_Receive(&huart2, &ch, sizeof(UINT8), 0);
-#elif defined(LOSCFG_PLATFORM_STM32L496_NUCLEO) || defined(LOSCFG_PLATFORM_STM32L552_NUCLEO)
-    HAL_UART_Receive(&hlpuart1, &ch, sizeof(UINT8), 0);
-#elif defined(LOSCFG_PLATFORM_GD32F303RGT6_BEARPI)
-    if (usart_interrupt_flag_get(USART0, USART_INT_FLAG_RBNE) == RESET) {
-        return ch;
-    }
-    ch = (UINT8)(usart_data_receive(USART0) & 0xFF);
-#elif defined(LOSCFG_PLATFORM_GD32E103C_START)
-    if (usart_interrupt_flag_get(USART1, USART_INT_FLAG_RBNE) == RESET) {
-        return ch;
-    }
-    ch = (UINT8)(usart_data_receive(USART1) & 0xFF);
-#elif defined(LOSCFG_PLATFORM_GD32VF103V_EVAL)
+#if defined(LOSCFG_PLATFORM_GD32VF103V_EVAL)
     if (usart_interrupt_flag_get(USART0, USART_INT_FLAG_RBNE) == RESET) {
         return ch;
     }
@@ -75,20 +61,10 @@ UINT8 uart_getc(VOID)
         INT32 tmp;
         metal_tty_getc(&tmp);
         ch =  (UINT8)tmp;
-#elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
-	(VOID)HAL_UART_Receive(UART5, &ch, sizeof(UINT8), 0);
-#elif defined (LOSCFG_FAMILY_RASPBERRY)
+#else
     if (g_armGenericUart.uartReadChar != NULL) {
         ch = g_armGenericUart.uartReadChar();
     }
-#elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
-    (VOID)HAL_UART_Receive(&huart3, &ch, sizeof(UINT8), 0);
-#elif defined(LOSCFG_PLATFORM_APM32F103_APEXMIC)
-    if (USART_ReadStatusFlag(USART1, USART_INT_RXBNE) == SET) {
-        ch = (UINT8)USART_RxData(USART1);
-    }
-#else
-    (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
 #endif
     (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
     return ch;
@@ -96,14 +72,12 @@ UINT8 uart_getc(VOID)
 
 VOID uart_early_init(VOID)
 {
-#if defined(LOSCFG_FAMILY_RASPBERRY)
     if (g_armGenericUart.uartInit != NULL) {
         g_armGenericUart.uartInit();
     }
-#endif
 }
 
-#ifndef LOSCFG_FAMILY_RASPBERRY
+#if defined (LOSCFG_PLATFORM_GD32VF103V_EVAL) || defined (LOSCFG_PLATFORM_HIFIVE1_REV1_B01)
 STATIC VOID UartHandler(VOID)
 {
     (VOID)uart_getc();
@@ -117,33 +91,7 @@ INT32 ShellQueueCreat(VOID)
 
 INT32 uart_hwiCreate(VOID)
 {
-#if defined(LOSCFG_PLATFORM_STM32L4R9I_DISCOVERY) || defined(LOSCFG_PLATFORM_STM32L073_NUCLEO)
-    if (huart2.Instance == NULL) {
-        return LOS_NOK;
-    }
-    HAL_NVIC_EnableIRQ(USART2_IRQn);
-    __HAL_UART_CLEAR_FLAG(&huart2, UART_FLAG_TC);
-    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    __HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE);
-#elif defined(LOSCFG_PLATFORM_STM32L496_NUCLEO) || defined(LOSCFG_PLATFORM_STM32L552_NUCLEO)
-    if (hlpuart1.Instance == NULL) {
-        return LOS_NOK;
-    }
-    HAL_NVIC_EnableIRQ(LPUART1_IRQn);
-    __HAL_UART_CLEAR_FLAG(&hlpuart1, UART_FLAG_TC);
-    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    __HAL_UART_ENABLE_IT(&hlpuart1, UART_IT_RXNE);
-#elif defined(LOSCFG_PLATFORM_GD32F303RGT6_BEARPI)
-    nvic_irq_enable(USART0_IRQn, 0, 0);
-    usart_flag_clear(USART0, USART_INT_RBNE);
-    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    usart_interrupt_enable(USART0, USART_INT_RBNE);
-#elif defined(LOSCFG_PLATFORM_GD32E103C_START)
-    nvic_irq_enable(USART1_IRQn, 0, 0);
-    usart_flag_clear(USART1, USART_INT_RBNE);
-    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    usart_interrupt_enable(USART1, USART_INT_RBNE);
-#elif defined(LOSCFG_PLATFORM_GD32VF103V_EVAL)
+#if defined(LOSCFG_PLATFORM_GD32VF103V_EVAL)
     eclic_enable_interrupt(USART0_IRQn);
     LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
     usart_interrupt_enable(USART0, USART_INT_RBNE);
@@ -151,35 +99,10 @@ INT32 uart_hwiCreate(VOID)
     LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 1, 0, UartHandler, NULL);
     LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
     *(UINT32 volatile *)(METAL_SIFIVE_UART0_10013000_BASE_ADDRESS + METAL_SIFIVE_UART0_IE) |= (1 << 1);
-#elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
-    NVIC_DisableIRQ(UART5_IRQn);
-    NVIC_SetPriority(UART5_IRQn, 1);
-    NVIC_EnableIRQ(UART5_IRQn);
-    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 1, 0, UartHandler, NULL);
-    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
-#elif defined (LOSCFG_FAMILY_RASPBERRY)
+#else
     if (g_armGenericUart.uartHwiCreate != NULL) {
         g_armGenericUart.uartHwiCreate();
     }
-#elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
-    if (huart3.Instance == NULL) {
-        return LOS_NOK;
-    }
-    HAL_NVIC_EnableIRQ(USART3_IRQn);
-    __HAL_UART_CLEAR_FLAG(&huart3, UART_FLAG_TC);
-    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    __HAL_UART_ENABLE_IT(&huart3, UART_IT_RXNE);
-#elif defined(LOSCFG_PLATFORM_APM32F103_APEXMIC)
-    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    USART_EnableInterrupt(USART1, USART_INT_RXBNE);
-#else
-    if (huart1.Instance == NULL) {
-        return LOS_NOK;
-    }
-    HAL_NVIC_EnableIRQ(USART1_IRQn);
-    __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_TC);
-    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
 #endif
     return LOS_OK;
 }
@@ -201,22 +124,7 @@ UINT8 uart_read(VOID)
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 {
     (VOID)timeout;
-#if defined(LOSCFG_PLATFORM_STM32F072_Nucleo) || defined(LOSCFG_PLATFORM_STM32L4R9I_DISCOVERY) || \
-    defined(LOSCFG_PLATFORM_STM32L073_NUCLEO)
-    (VOID)HAL_UART_Transmit(&huart2, (UINT8 *)buf, len, DEFAULT_TIMEOUT);
-#elif defined(LOSCFG_PLATFORM_STM32L496_NUCLEO) || defined(LOSCFG_PLATFORM_STM32L552_NUCLEO)
-    (VOID)HAL_UART_Transmit(&hlpuart1, (UINT8 *)buf, len, DEFAULT_TIMEOUT);
-#elif defined(LOSCFG_PLATFORM_GD32F303RGT6_BEARPI)
-    if (len == 1) {
-        while (usart_flag_get(USART0, USART_FLAG_TBE) == 0) {}
-        usart_data_transmit(USART0, *buf);
-    }
-#elif defined (LOSCFG_PLATFORM_GD32E103C_START)
-    if (len == 1) {
-        while (usart_flag_get(USART1, USART_FLAG_TBE) == 0) {}
-        usart_data_transmit(USART1, *buf);
-    }
-#elif defined (LOSCFG_PLATFORM_GD32VF103V_EVAL)
+#if defined (LOSCFG_PLATFORM_GD32VF103V_EVAL)
     INT32 i;
     for (i = 0; i < len; i++) {
         usart_data_transmit(USART0, *buf);
@@ -228,25 +136,13 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
     for (i = 0; i < len; i++) {
         metal_tty_putc(buf[i]);
     }
-#elif defined(LOSCFG_PLATFORM_FM33LC0XX_DEMO)
-    HAL_UART_Transmit(UART5, (VOID *)buf, len, DEFAULT_TIMEOUT);
-#elif defined (LOSCFG_FAMILY_RASPBERRY)
+#else
     UINT32 i;
     for (i = 0; i < len; i++) {  
         if (g_armGenericUart.uartHwiCreate != NULL) {
             g_armGenericUart.uartWriteChar(buf[i]);
         }
     }
-#elif defined(LOSCFG_PLATFORM_STM32F746_NUCLEO)
-    (VOID)HAL_UART_Transmit(&huart3, (UINT8 *)buf, (UINT16)len, DEFAULT_TIMEOUT);
-#elif defined(LOSCFG_PLATFORM_APM32F103_APEXMIC)
-    UINT32 i;
-    for (i = 0; i < len; i++) {
-        while(USART_ReadStatusFlag(USART1, USART_FLAG_TXBE) == RESET) {};
-        USART_TxData(USART1, buf[i]);
-    }
-#else
-    (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)buf, (UINT16)len, DEFAULT_TIMEOUT);
 #endif
     return len;
 }

@@ -32,10 +32,33 @@
 #include "los_typedef.h"
 #include "los_sys.h"
 #include "platform_init.h"
+#include "tim.h"
+#include "hal_rng.h"
 
 VOID board_config(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+}
+
+void HardwareInit(void)
+{
+    MPU_Config();
+
+    /* HAL library initialization */
+
+    HAL_Init();
+
+    /* Configure the system clock */
+    SystemClock_Config();
+
+    uart_early_init();
+    MX_TIM3_Init();
+
+    /* Initialize the SDRAM */
+    BSP_SDRAM_Init();
+#ifdef HAL_RNG_MODULE_ENABLED
+    HalRngConfig();
+#endif
 }
 
 INT32 main(VOID)

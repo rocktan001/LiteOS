@@ -33,19 +33,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 /* Includes LiteOS------------------------------------------------------------------*/
-
-#include "los_base.h"
-#include "los_config.h"
-#include "los_sys.h"
 #include "los_typedef.h"
-#include "los_task_pri.h"
-
-#include "stdlib.h"
-#include "string.h"
-#include "stdio.h"
-#include "stm32f0xx_hal.h"
-#include "usart.h"
-#include "dwt.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -57,7 +45,10 @@ uint32_t HAL_GetTick(void);
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
 
-#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
+STATIC INLINE VOID Error_Handler(VOID)
+{
+    _Error_Handler(__FILE__, __LINE__);
+}
 
 #ifdef __cplusplus
 #if __cplusplus

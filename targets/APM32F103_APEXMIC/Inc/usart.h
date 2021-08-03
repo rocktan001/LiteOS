@@ -29,7 +29,10 @@
 #ifndef _USART_H
 #define _USART_H
 
+#include "apm32f10x.h"
+#include "apm32f10x_usart.h"
 #include "los_typedef.h"
+#include "uart.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,10 +40,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#include "apm32f10x.h"
-#include "apm32f10x_usart.h"
-
 VOID ApmMiniCom1Init(VOID);
+extern UartControllerOps g_armGenericUart;
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,4 +49,4 @@ VOID ApmMiniCom1Init(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* __USART_H */
+#endif /* _USART_H */

@@ -1,17 +1,18 @@
 #include "user_init.h"
 #include "usart.h"
+#include "tim.h"
 
 #define NVR_CHECK(_N_VALUE_, _T_VALUE_)                         \
                             ((((_N_VALUE_ >> 16) & 0xffff) ==   \
                             ((~_N_VALUE_) & 0xffff)) ? _N_VALUE_ : _T_VALUE_)
 
-#define RCHF8M_DEF_TRIM     (0x30)      // RC8M ����У׼ֵ
-#define RCHF16M_DEF_TRIM    (0x2A)      // RC16M ����У׼ֵ
-#define RCHF24M_DEF_TRIM    (0x27)      // RC24M ����У׼ֵ
+#define RCHF8M_DEF_TRIM     (0x30)      // RC8M
+#define RCHF16M_DEF_TRIM    (0x2A)      // RC16M
+#define RCHF24M_DEF_TRIM    (0x27)      // RC24M
 
-#define RCHF8M_NVR_TRIM     (*(uint32_t *)0x1FFFFB40)	// RC8M ����У׼ֵ
-#define RCHF16M_NVR_TRIM 	(*(uint32_t *)0x1FFFFB3C)	// RC16M ����У׼ֵ
-#define RCHF24M_NVR_TRIM 	(*(uint32_t *)0x1FFFFB38)	// RC24M ����У׼ֵ
+#define RCHF8M_NVR_TRIM     (*(uint32_t *)0x1FFFFB40)    // RC8M
+#define RCHF16M_NVR_TRIM    (*(uint32_t *)0x1FFFFB3C)    // RC16M
+#define RCHF24M_NVR_TRIM    (*(uint32_t *)0x1FFFFB38)    // RC24M
 
 uint32_t systemClock;
 
@@ -74,26 +75,26 @@ static void LedInit(void)
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
     GPIO_InitStruct.Pull = DISABLE;
     LL_GPIO_Init(LED0_GPIO, &GPIO_InitStruct);
-    
+
     while (count--)
     {
         LED0_ON();
         DelayMs(100);
-		LED0_OFF();
-		DelayMs(100);
+        LED0_OFF();
+        DelayMs(100);
     }
 }
 
 static void FoutInit(void)
 {
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-    
+
     GPIO_InitStruct.Pin = LL_GPIO_PIN_11;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_DIGITAL;
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
     GPIO_InitStruct.Pull = DISABLE;
     LL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-    
+
     LL_GPIO_SetFout0(GPIO_COMMON, LL_GPIO_FOUT0_SELECT_AHBCLK_DIV64);
 }
 
@@ -102,6 +103,7 @@ void UserInit(void)
     ClockInit();
     SystickInit();
     UartxPrint_Init(UART5);
+    TimerInit();
     LedInit();
     FoutInit();
 }

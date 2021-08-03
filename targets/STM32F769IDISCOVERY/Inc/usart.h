@@ -25,9 +25,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f7xx_hal.h"
+#include "los_typedef.h"
+#include "uart.h"
 
 /* USER CODE BEGIN Includes */
+void MX_USART3_UART_Init(void);
 
+extern UartControllerOps g_armGenericUart;
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;

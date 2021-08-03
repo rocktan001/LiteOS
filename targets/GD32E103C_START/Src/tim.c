@@ -62,25 +62,12 @@ VOID Tim3IrqHandler(VOID)
     }
 }
 
-UINT64 Timer3GetCycle(VOID)
-{
-    static UINT64 bacCycle;
-    static UINT64 cycleTimes;
-    UINT64 swCycles = (UINT64)timer_counter_read(TIMER3);
-    if (swCycles < bacCycle) {
-        cycleTimes++;
-    }
-
-    bacCycle = swCycles;
-    return swCycles + cycleTimes * TIMER3_RELOAD;
-}
-
-VOID StmTimerInit(VOID)
+VOID TimerInit(VOID)
 {
     Timer3Init(TIMER3_PRESCALER - 1, TIMER3_RELOAD - 1);
 }
 
-VOID StmTimerHwiCreate(VOID)
+VOID TimerHwiCreate(VOID)
 {
     UINT32 ret;
 
@@ -93,19 +80,24 @@ VOID StmTimerHwiCreate(VOID)
     timer_enable(TIMER3);
 }
 
-UINT64 StmGetTimerCycles(Timer_t num)
+UINT64 GetTimerCycles(VOID)
 {
-    UINT64 cycles = 0;
-
-    switch (num) {
-        case LOS_TIMER3:
-            cycles = Timer3GetCycle();
-            break;
-        default:
-            printf("Wrong number of timer.\n");
+    static UINT64 bacCycle;
+    static UINT64 cycleTimes;
+    UINT64 swCycles = (UINT64)timer_counter_read(TIMER3);
+    if (swCycles < bacCycle) {
+        cycleTimes++;
     }
-    return cycles;
+
+    bacCycle = swCycles;
+    return swCycles + cycleTimes * TIMER3_RELOAD;
 }
+
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 
 #ifdef __cplusplus
 #if __cplusplus

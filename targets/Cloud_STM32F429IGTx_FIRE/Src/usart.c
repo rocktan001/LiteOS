@@ -19,6 +19,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
+#include "platform.h"
+#include "los_hwi.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -131,7 +133,45 @@ __attribute__((used)) int _write(int fd, char *ptr, int len)
     return len;
 }
 /* USER CODE BEGIN 1 */
+VOID UsartInit(VOID) {
+    MX_USART1_UART_Init();
+}
 
+VOID UsartWrite(const CHAR c)
+{
+    (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)&c, 1, DEFAULT_TIMEOUT);
+}
+
+UINT8 UsartRead(VOID)
+{
+    UINT8 ch;
+    (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
+    return ch;
+}
+
+STATIC VOID UartHandler(VOID)
+{
+    (VOID)uart_getc();
+}
+
+INT32 UsartHwi(VOID)
+{
+    if (huart1.Instance == NULL) {
+        return LOS_NOK;
+    }
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
+    __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_TC);
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+    return LOS_OK;
+}
+
+UartControllerOps g_armGenericUart = {
+    .uartInit = UsartInit,
+    .uartWriteChar = UsartWrite,
+    .uartReadChar = UsartRead,
+    .uartHwiCreate = UsartHwi
+};
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

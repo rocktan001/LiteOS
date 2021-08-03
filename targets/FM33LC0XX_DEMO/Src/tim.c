@@ -30,35 +30,33 @@
 /* TIM3 init function */
 void MX_TIM3_Init(void)
 {
-	LL_GPTIM_InitTypeDef		InitStructer;	 
+    LL_GPTIM_InitTypeDef        InitStructer;
 
-	InitStructer.Prescaler			   = 7200 - 1;										  //·ÖÆµÏµÊı8000
-	InitStructer.CounterMode		   = LL_GPTIM_COUNTER_DIRECT_UP;					 //ÏòÉÏ¼ÆÊı
-	InitStructer.Autoreload 		   = 50000 - 1;										   //×Ô¶¯ÖØ×°ÔØÖµ1000
-	InitStructer.ClockDivision		   = LL_GPTIM_CLOCKDIVISION_DIV1;					//ËÀÇøºÍÂË²¨ÉèÖÃ
-	InitStructer.AutoreloadState	   = DISABLE;									   //×Ô¶¯ÖØ×°ÔØ½ûÖ¹preload
-	LL_GPTIM_Init(GPTIM0, &InitStructer);
+    InitStructer.Prescaler               = 7200 - 1;                        // åˆ†é¢‘ç³»æ•°7200
+    InitStructer.CounterMode           = LL_GPTIM_COUNTER_DIRECT_UP;        // å‘ä¸Šè®¡æ•°
+    InitStructer.Autoreload            = 50000 - 1;                         // è‡ªåŠ¨é‡è£…è½½å€¼50000
+    InitStructer.ClockDivision           = LL_GPTIM_CLOCKDIVISION_DIV1;     // æ­»åŒºå’Œæ»¤æ³¢è®¾ç½®
+    InitStructer.AutoreloadState       = DISABLE;                           // è‡ªåŠ¨é‡è£…è½½ç¦æ­¢preload
+    LL_GPTIM_Init(GPTIM0, &InitStructer);
 
-	NVIC_DisableIRQ(GPTIM0_IRQn);
-	NVIC_SetPriority(GPTIM0_IRQn,0);//ÖĞ¶ÏÓÅÏÈ¼¶ÅäÖÃ
-	NVIC_EnableIRQ(GPTIM0_IRQn);	
+    NVIC_DisableIRQ(GPTIM0_IRQn);
+    NVIC_SetPriority(GPTIM0_IRQn, 0);        // ä¸­æ–­ä¼˜å…ˆçº§é…ç½®
+    NVIC_EnableIRQ(GPTIM0_IRQn);
 
-	LL_GPTIM_ClearFlag_UPDATE(GPTIM0);	//Çå³ı¼ÆÊıÆ÷ÖĞ¶Ï±êÖ¾Î»
+    LL_GPTIM_ClearFlag_UPDATE(GPTIM0);      // æ¸…é™¤è®¡æ•°å™¨ä¸­æ–­æ ‡å¿—ä½
 
-	LL_GPTIM_EnableIT_UPDATE(GPTIM0); //¿ªÆô¼ÆÊıÆ÷ÖĞ¶Ï
+    LL_GPTIM_EnableIT_UPDATE(GPTIM0);       // å¼€å¯è®¡æ•°å™¨ä¸­æ–­
 
-//	LL_GPTIM_EnableCounter(GPTIM0); //Ê¹ÄÜ¶¨Ê±Æ÷
+//    LL_GPTIM_EnableCounter(GPTIM0);       // ä½¿èƒ½å®šæ—¶å™¨
 
 }
 
 void GPTIM0_IRQHandler(void)
 {
-	if (( LL_GPTIM_IsEnabledIT_UPDATE(GPTIM0) == SET ) &&(LL_GPTIM_IsActiveFlag_UPDATE(GPTIM0)==SET))
-	{	 
-		LL_GPTIM_ClearFlag_UPDATE(GPTIM0);
-
-		
-	}			
+    if (( LL_GPTIM_IsEnabledIT_UPDATE(GPTIM0) == SET ) &&(LL_GPTIM_IsActiveFlag_UPDATE(GPTIM0)==SET))
+    {
+        LL_GPTIM_ClearFlag_UPDATE(GPTIM0);
+    }
 }
 
 
@@ -78,25 +76,12 @@ void TIM3_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
-UINT64 Timer3Getcycle(VOID)
-{
-    static UINT64 bacCycle;
-    static UINT64 cycleTimes;
-    UINT64 swCycles = LL_GPTIM_GetCounter(GPTIM0);
-
-    if (swCycles <= bacCycle) {
-        cycleTimes++;
-    }
-    bacCycle = swCycles;
-    return swCycles + cycleTimes * TIMER3_RELOAD;
-}
-
-VOID StmTimerInit(VOID)
+VOID TimerInit(VOID)
 {
     MX_TIM3_Init();
 }
 
-VOID StmTimerHwiCreate(VOID)
+VOID TimerHwiCreate(VOID)
 {
     UINT32 ret;
 
@@ -105,23 +90,27 @@ VOID StmTimerHwiCreate(VOID)
         printf("ret of TIM3 LOS_HwiCreate = %#x\n", ret);
         return;
     }
-    LL_GPTIM_EnableCounter(GPTIM0); //Ê¹ÄÜ¶¨Ê±Æ÷
+    LL_GPTIM_EnableCounter(GPTIM0);
 }
 
-UINT64 StmGetTimerCycles(Timer_t num)
+UINT64 GetTimerCycles(VOID)
 {
-    UINT64 cycles = 0;
+    static UINT64 bacCycle;
+    static UINT64 cycleTimes;
+    UINT64 swCycles = LL_GPTIM_GetCounter(GPTIM0);
 
-    switch (num) {
-        case 3:
-            cycles = Timer3Getcycle();
-            break;
-        default:
-            printf("Wrong number of TIMER.\n");
+    if (swCycles < bacCycle) {
+        cycleTimes++;
     }
-    return cycles;
+    bacCycle = swCycles;
+    return swCycles + cycleTimes * TIMER3_RELOAD;
 }
 
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 /* USER CODE END 1 */
 
 /* *********************** (C) COPYRIGHT STMicroelectronics *****END OF FILE*** */

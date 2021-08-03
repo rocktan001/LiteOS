@@ -222,7 +222,6 @@ LOCAL_INCLUDE += $(PLATFORM_INCLUDE) \
     -I $(LITEOSTOPDIR)/targets/bsp/common \
     -I $(LITEOSTOPDIR)/targets/bsp/include \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
-    -I $(LITEOSTOPDIR)/targets/bsp/drivers/bsp_timer \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Hardware/Inc \
@@ -255,10 +254,6 @@ endif
 
 ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M), y)
 LOCAL_SRCS += common/dwt.c
-endif
-
-ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M), y)
-LOCAL_SRCS += drivers/bsp_timer/timer.c
 endif
 
 LOCAL_SRCS += $(wildcard common/demo_entry.c)

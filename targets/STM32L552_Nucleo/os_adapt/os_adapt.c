@@ -29,4 +29,3 @@
 #include "los_typedef.h"
 
 VOID OsBackTrace(VOID) {}
-

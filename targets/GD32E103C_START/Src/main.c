@@ -30,6 +30,7 @@
 #include "arch/canary.h"
 #include "gpio.h"
 #include "usart.h"
+#include "tim.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -46,7 +47,7 @@ VOID HardwareInit(VOID)
 {
     SystemInit();
     Usart1Init(USART_DEFAULT_BOUND);
-    StmTimerInit();
+    TimerInit();
     GpioInit();
 }
 

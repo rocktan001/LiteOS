@@ -1,12 +1,14 @@
 /**
   ******************************************************************************
-  * @file    stm32f7xx_hal_conf.h
+  * @file    stm32f7xx_hal_conf_template.h
   * @author  MCD Application Team
-  * @brief   HAL configuration file. 
+  * @brief   HAL configuration template file.
+  *          This file should be copied to the application folder and renamed
+  *          to stm32f7xx_hal_conf.h.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -15,7 +17,7 @@
   *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
-  */ 
+  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __STM32F7xx_HAL_CONF_H
@@ -30,12 +32,13 @@
 
 /* ########################## Module Selection ############################## */
 /**
-  * @brief This is the list of modules to be used in the HAL driver 
+  * @brief This is the list of modules to be used in the HAL driver
   */
-#define HAL_MODULE_ENABLED  
-/* #define HAL_ADC_MODULE_ENABLED */
-/* #define HAL_CAN_MODULE_ENABLED */
-/* #define HAL_CAN_LEGACY_MODULE_ENABLED */
+#define HAL_MODULE_ENABLED
+
+  /* #define HAL_ADC_MODULE_ENABLED   */
+/* #define HAL_CRYP_MODULE_ENABLED   */
+/* #define HAL_CAN_MODULE_ENABLED   */
 /* #define HAL_CEC_MODULE_ENABLED   */
 /* #define HAL_CRC_MODULE_ENABLED   */
 /* #define HAL_CRYP_MODULE_ENABLED   */
@@ -62,7 +65,7 @@
 /* #define HAL_SPI_MODULE_ENABLED   */
 #define HAL_TIM_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
-#define HAL_USART_MODULE_ENABLED
+/* #define HAL_USART_MODULE_ENABLED   */
 /* #define HAL_IRDA_MODULE_ENABLED   */
 /* #define HAL_SMARTCARD_MODULE_ENABLED   */
 /* #define HAL_WWDG_MODULE_ENABLED   */
@@ -90,7 +93,7 @@
   *        (when HSE is used as system clock source, directly or through the PLL).
   */
 #if !defined  (HSE_VALUE)
-  #define HSE_VALUE    ((uint32_t)8000000U) /*!< Value of the External oscillator in Hz */
+  #define HSE_VALUE    ((uint32_t)25000000U) /*!< Value of the External oscillator in Hz */
 #endif /* HSE_VALUE */
 
 #if !defined  (HSE_STARTUP_TIMEOUT)
@@ -142,7 +145,7 @@
   * @brief This is the HAL system configuration section
   */
 #define  VDD_VALUE                    ((uint32_t)3300U) /*!< Value of VDD in mv */
-#define  TICK_INT_PRIORITY            ((uint32_t)0U) /*!< tick interrupt priority */
+#define  TICK_INT_PRIORITY            ((uint32_t)15U) /*!< tick interrupt priority */
 #define  USE_RTOS                     0U
 #define  PREFETCH_ENABLE              0U
 #define  ART_ACCLERATOR_ENABLE        0U /* To enable instruction cache and prefetch */
@@ -278,6 +281,7 @@
 #ifdef HAL_DMA_MODULE_ENABLED
   #include "stm32f7xx_hal_dma.h"
 #endif /* HAL_DMA_MODULE_ENABLED */
+
 #ifdef HAL_CORTEX_MODULE_ENABLED
   #include "stm32f7xx_hal_cortex.h"
 #endif /* HAL_CORTEX_MODULE_ENABLED */
@@ -321,6 +325,7 @@
 #ifdef HAL_FLASH_MODULE_ENABLED
   #include "stm32f7xx_hal_flash.h"
 #endif /* HAL_FLASH_MODULE_ENABLED */
+
 #ifdef HAL_SRAM_MODULE_ENABLED
   #include "stm32f7xx_hal_sram.h"
 #endif /* HAL_SRAM_MODULE_ENABLED */

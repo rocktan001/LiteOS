@@ -103,25 +103,25 @@ void TIM3_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-UINT64 Timer3Getcycle(VOID)
+UINT64 Timer3GetCycle(VOID)
 {
     static UINT64 bacCycle;
     static UINT64 cycleTimes;
     UINT64 swCycles = htim3.Instance->CNT;
 
-    if (swCycles <= bacCycle) {
+    if (swCycles < bacCycle) {
         cycleTimes++;
     }
     bacCycle = swCycles;
     return swCycles + cycleTimes * TIMER3_RELOAD;
 }
 
-VOID StmTimerInit(VOID)
+VOID TimerInit(VOID)
 {
     MX_TIM3_Init();
 }
 
-VOID StmTimerHwiCreate(VOID)
+VOID TimerHwiCreate(VOID)
 {
     UINT32 ret;
 
@@ -133,19 +133,27 @@ VOID StmTimerHwiCreate(VOID)
     HAL_TIM_Base_Start_IT(&htim3);
 }
 
-UINT64 StmGetTimerCycles(Timer_t num)
+UINT64 GetTimerCycles(VOID)
 {
+    static UINT64 bacCycle;
+    static UINT64 cycleTimes;
     UINT64 cycles = 0;
+    UINT64 swCycles = htim3.Instance->CNT;
 
-    switch (num) {
-        case 3:
-            cycles = Timer3Getcycle();
-            break;
-        default:
-            printf("Wrong number of TIMER.\n");
+    if (swCycles < bacCycle) {
+        cycleTimes++;
     }
+    bacCycle = swCycles;
+    cycles = swCycles + cycleTimes * TIMER3_RELOAD;
+
     return cycles;
 }
+
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 /* USER CODE END 1 */
 
 /* *********************** (C) COPYRIGHT STMicroelectronics *****END OF FILE*** */

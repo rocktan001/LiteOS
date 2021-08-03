@@ -5,12 +5,8 @@ MODULE_NAME := $(LITEOS_PLATFORM)
 -include $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/config.mk
 
 USER_SRC = \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/os_adapt/os_adapt.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/main.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/user_task.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/tim.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/platform_init.c \
-    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/system_stm32f7xx.c
+    os_adapt/os_adapt.c \
+    $(wildcard Src/*.c)
     C_SOURCES += $(USER_SRC)
 
 # C includes
