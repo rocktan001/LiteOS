@@ -42,6 +42,28 @@ extern "C" {
 
 STATIC UINT32 g_demoTaskId;
 
+
+STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t size, UINT8 *buff)
+{
+    INT32 ret;
+    printf("Sfud start to read.\n");
+    ret = sfud_read(flash, addr, size, buff);
+    if (ret != SFUD_SUCCESS) {
+        printf("Sfud read failed.\n");
+        return LOS_NOK;
+    }
+    printf("Sfud read successfully.\n");
+    for (INT32 i = 0; i < size; ++i) {
+         printf("%02x ", buff[i]);
+         if (((i + 1) % 0x10) == 0) { // Each row displays 16 pieces of data.
+             printf("\n");
+         }
+    }
+    printf("\n");
+    return LOS_OK;
+}
+
+
 INT32 SfudDemoEntry(VOID) 
 {
     INT32 ret = sfud_init();
@@ -65,43 +87,33 @@ INT32 SfudDemoEntry(VOID)
     }
 
     // The following are write and read, erase example operations.
-    printf("Do sfud write.\n");
+    printf("Sfud start to write.\n");
     ret = sfud_write(flash, addr, size, buff);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud write failed.\n");
         free(buff);
         return LOS_NOK;
     }
-    printf("Sfud write success.\n");
+    printf("Sfud write successfully.\n");
 
     ret = memset_s(buff, size, 0, size);
     if (ret != EOK) {
-       return LOS_NOK;
-    }
-    printf("Do sfud read.\n");
-    ret = sfud_read(flash, addr, size, buff);
-    if (ret != SFUD_SUCCESS) {
-        printf("Sfud read failed.\n");
         free(buff);
         return LOS_NOK;
     }
-    printf("Sfud read success.\n");
-    for (INT32 i = 0; i < size; ++i) {
-         printf("%02x ", buff[i]);
-         if (((i + 1) % 0x10) == 0) { // Each row displays 16 pieces of data.
-             printf("\n");
-         }
+    ret = SfudReadData(flash, addr, size, buff);
+    if (ret != LOS_OK) {
+        free(buff);
+        return LOS_NOK;
     }
-    printf("\n");
-
-    printf("Do sfud erase.\n");
+    printf("Sfud start to erase.\n");
     ret = sfud_erase(flash, addr, size);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud erase failed.\n");
         free(buff);
         return LOS_NOK;
     }
-    printf("Sfud erase success.\n");
+    printf("Sfud erase successfully.\n");
     free(buff);
     return LOS_OK;
 }
