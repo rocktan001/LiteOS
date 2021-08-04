@@ -30,13 +30,7 @@
 #include <los_hwi.h>
 #include "los_task.h"
 #include "los_queue.h"
-
-#ifndef LOSCFG_PLATFORM_HIFIVE1_REV1_B01
 #include "usart.h"
-#else
-#include "metal/tty.h"
-#include "metal/machine/platform.h"
-#endif /* LOSCFG_PLATFORM_HIFIVE1_REV1_B01 */
 
 #define UART_QUEUE_SIZE        64
 #define UART_QUEUE_BUF_MAX_LEN 1
@@ -52,20 +46,9 @@ INT32 uart_putc(CHAR c)
 UINT8 uart_getc(VOID)
 {
     UINT8 ch = 0;
-#if defined(LOSCFG_PLATFORM_GD32VF103V_EVAL)
-    if (usart_interrupt_flag_get(USART0, USART_INT_FLAG_RBNE) == RESET) {
-        return ch;
-    }
-    ch = (UINT8)usart_data_receive(USART0);
-#elif defined(LOSCFG_PLATFORM_HIFIVE1_REV1_B01)
-        INT32 tmp;
-        metal_tty_getc(&tmp);
-        ch =  (UINT8)tmp;
-#else
     if (g_armGenericUart.uartReadChar != NULL) {
         ch = g_armGenericUart.uartReadChar();
     }
-#endif
     (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
     return ch;
 }
@@ -77,13 +60,6 @@ VOID uart_early_init(VOID)
     }
 }
 
-#if defined (LOSCFG_PLATFORM_GD32VF103V_EVAL) || defined (LOSCFG_PLATFORM_HIFIVE1_REV1_B01)
-STATIC VOID UartHandler(VOID)
-{
-    (VOID)uart_getc();
-}
-#endif
-
 INT32 ShellQueueCreat(VOID)
 {
     return (INT32)LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
@@ -91,19 +67,9 @@ INT32 ShellQueueCreat(VOID)
 
 INT32 uart_hwiCreate(VOID)
 {
-#if defined(LOSCFG_PLATFORM_GD32VF103V_EVAL)
-    eclic_enable_interrupt(USART0_IRQn);
-    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    usart_interrupt_enable(USART0, USART_INT_RBNE);
-#elif defined(LOSCFG_PLATFORM_HIFIVE1_REV1_B01)
-    LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 1, 0, UartHandler, NULL);
-    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
-    *(UINT32 volatile *)(METAL_SIFIVE_UART0_10013000_BASE_ADDRESS + METAL_SIFIVE_UART0_IE) |= (1 << 1);
-#else
     if (g_armGenericUart.uartHwiCreate != NULL) {
         g_armGenericUart.uartHwiCreate();
     }
-#endif
     return LOS_OK;
 }
 
@@ -124,26 +90,12 @@ UINT8 uart_read(VOID)
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 {
     (VOID)timeout;
-#if defined (LOSCFG_PLATFORM_GD32VF103V_EVAL)
-    INT32 i;
-    for (i = 0; i < len; i++) {
-        usart_data_transmit(USART0, *buf);
-        while (RESET == usart_flag_get(USART0, USART_FLAG_TBE)) { }
-        buf++;
-    }
-#elif defined(LOSCFG_PLATFORM_HIFIVE1_REV1_B01)
-    INT32 i;
-    for (i = 0; i < len; i++) {
-        metal_tty_putc(buf[i]);
-    }
-#else
     UINT32 i;
     for (i = 0; i < len; i++) {  
         if (g_armGenericUart.uartHwiCreate != NULL) {
             g_armGenericUart.uartWriteChar(buf[i]);
         }
     }
-#endif
     return len;
 }
 

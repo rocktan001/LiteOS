@@ -38,17 +38,17 @@ extern "C" {
 #define TIMER3_RELOAD 50000
 #define TIMER3_PRESCALER 10800
 
-VOID Timer3Init(UINT32 prescaler, UINT32 period)
+VOID Timer3Init(VOID)
 {
     timer_parameter_struct timerInitStruct;
 
     rcu_periph_clock_enable(RCU_TIMER3);
     timer_deinit(TIMER3);
 
-    timerInitStruct.prescaler         = prescaler;
+    timerInitStruct.prescaler         = 10800 - 1;
     timerInitStruct.alignedmode       = TIMER_COUNTER_EDGE;
     timerInitStruct.counterdirection  = TIMER_COUNTER_UP;
-    timerInitStruct.period            = period;
+    timerInitStruct.period            = 50000 - 1;
     timerInitStruct.clockdivision     = TIMER_CKDIV_DIV1;
     timerInitStruct.repetitioncounter = 0;
     timer_init(TIMER3, &timerInitStruct);
@@ -75,12 +75,12 @@ UINT64 Timer3GetCycle(VOID)
     return swCycles + cycleTimes * TIMER3_RELOAD;
 }
 
-VOID GdTimerInit(VOID)
+VOID TimerInit(VOID)
 {
-    Timer3Init(TIMER3_PRESCALER - 1, TIMER3_RELOAD - 1);
+    Timer3Init();
 }
 
-VOID GdTimerHwiCreate(VOID)
+VOID TimerHwiCreate(VOID)
 {
     UINT32 ret;
 
@@ -92,19 +92,23 @@ VOID GdTimerHwiCreate(VOID)
     eclic_irq_enable(TIMER3_IRQn, 1, 0);
 }
 
-UINT64 GdGetTimerCycles(Timer_t num)
+UINT64 GetTimerCycles(VOID)
 {
-    UINT64 cycles = 0;
-
-    switch (num) {
-        case LOS_TIMER3:
-            cycles = Timer3GetCycle();
-            break;
-        default:
-            printf("Wrong number of timer.\n");
+    STATIC UINT64 bacCycle;
+    STATIC UINT64 cycleTimes;
+    UINT64 swCycles = (UINT64)timer_counter_read(TIMER3);
+    if (swCycles < bacCycle) {
+        cycleTimes++;
     }
-    return cycles;
+    bacCycle = swCycles;
+    return swCycles + cycleTimes * TIMER3_RELOAD;
 }
+
+TimControllerOps g_cpupTimerOps = {
+    .timInit = TimerInit,
+    .timHwiCreate = TimerHwiCreate,
+    .timGetTimerCycles = GetTimerCycles
+};
 
 #ifdef __cplusplus
 #if __cplusplus

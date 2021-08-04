@@ -28,7 +28,8 @@
 
 #include "usart.h"
 #include "gd32vf103.h"
-#include <stdio.h>
+#include "platform.h"
+#include "los_hwi.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,6 +55,47 @@ VOID GD_Uart0Init(VOID)
     usart_transmit_config(USART0, USART_TRANSMIT_ENABLE);
     usart_enable(USART0);
 }
+
+VOID UsartInit(VOID)
+{
+    GD_Uart0Init();
+}
+
+VOID UsartWrite(const CHAR c)
+{
+    usart_data_transmit(USART0, c);
+    while (RESET == usart_flag_get(USART0, USART_FLAG_TBE)) { }
+}
+
+UINT8 UsartRead(VOID)
+{
+    UINT8 ch = 0;
+    if (usart_interrupt_flag_get(USART0, USART_INT_FLAG_RBNE) == RESET) {
+        return ch;
+    }
+    ch = (UINT8)usart_data_receive(USART0);
+    return ch;
+}
+
+STATIC VOID UartHandler(VOID)
+{
+    (VOID)uart_getc();
+}
+
+INT32 UsartHwi(VOID)
+{
+    eclic_enable_interrupt(USART0_IRQn);
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    usart_interrupt_enable(USART0, USART_INT_RBNE);
+    return LOS_OK;
+}
+
+UartControllerOps g_armGenericUart = {
+    .uartInit = UsartInit,
+    .uartWriteChar = UsartWrite,
+    .uartReadChar = UsartRead,
+    .uartHwiCreate = UsartHwi
+};
 
 #ifdef __cplusplus
 #if __cplusplus
