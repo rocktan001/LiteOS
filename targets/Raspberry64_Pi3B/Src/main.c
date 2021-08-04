@@ -26,22 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
  
-<<<<<<< HEAD
 #include "canary.h"
 #include "los_task_pri.h"
 #include "mmu.h"
 #include "mmu_pri.h"
-=======
-#include "usart.h"
-#include "canary.h"
-#include "los_task_pri.h"
-#include "los_atomic.h"
-#include "los_swtmr_pri.h"
-#include "mmu.h"
-#include "los_memory.h"
-#include "mmu_pri.h"
-#include "platform.h"
->>>>>>> 058b187f91be0c989d429c3b9d4e131a9c39a886
 
 #ifdef __cplusplus
 #if __cplusplus
