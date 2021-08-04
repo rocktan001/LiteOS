@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
- * Description: Arm64 Mmu Inner HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Main Process Implementation
  * Author: Huawei LiteOS Team
- * Create: 2019-01-01
+ * Create: 2021-08-04
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -25,11 +25,11 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-
-#ifndef _ARCH_MMU_PRI_H
-#define _ARCH_MMU_PRI_H
-
-#include "los_typedef.h"
+ 
+#include "canary.h"
+#include "los_task_pri.h"
+#include "mmu.h"
+#include "mmu_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,37 +37,66 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define MMU_1K 0x400
-#define MMU_4K 0x1000
-#define MMU_16K 0x4000
-#define MMU_64K 0x10000
-#define MMU_1M 0x100000
-#define MMU_2M 0x200000
-#define MMU_1G 0x40000000
-#define MMU_4G 0x100000000UL
+VOID board_config(VOID)
+{
+    g_sys_mem_addr_end = (UINTPTR)LOS_HEAP_ADDR_END;
+}
 
-#define SHIFT_1K 10
-#define SHIFT_4K 12
-#define SHIFT_16K 14
-#define SHIFT_64K 16
-#define SHIFT_1M 20
-#define SHIFT_2M 21
-#define SHIFT_1G 30
+VOID MmuSectionMap(VOID)
+{
+    UINT64 flag;
+     /* device */
+    flag = MMU_INITIAL_MAP_DEVICE | MMU_PTE_L012_DESCRIPTOR_BLOCK;
+    OsBlockMapsInit(flag, 0, MMU_4G);
 
-extern VOID OsNoCachedRemap(UINTPTR physAddr, size_t size);
-extern VOID OsCachedRemap(UINTPTR physAddr, size_t size);
+     /* normal cache */
+    flag = MMU_PTE_CACHE_RW_FLAGS | MMU_PTE_L012_DESCRIPTOR_BLOCK;
+    OsBlockMapsSet(flag, 0, g_sys_mem_addr_end - 1);
+}
 
-extern VOID OsBlockMapsSet(UINT64 flags, UINT64 start, UINT64 end);
-extern VOID OsBlockMapsInit(UINT64 flags, UINT64 start, UINT64 end);
+VOID OsSystemInfo(VOID)
+{
+    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n\n"
+                  "LiteOS Kernel Version : %s\n"
+                  "Processor   : %s"
+#ifdef LOSCFG_KERNEL_SMP
+                  " * %d\n"
+                  "Run Mode    : SMP\n"
+#else
+                  "\n"
+                  "Run Mode    : UP\n"
+#endif
+                  "build time  : %s %s\n\n"
+                  "**********************************\n",
+                  HW_LITEOS_KERNEL_VERSION_STRING,
+                  LOS_CpuInfo(),
+#ifdef LOSCFG_KERNEL_SMP
+                  LOSCFG_KERNEL_SMP_CORE_NUM,
+#endif
+                  __DATE__, __TIME__);
+}
 
-extern VOID OsSysSecPteInit(UINTPTR startAddr, UINTPTR len, UINT64 flag);
-extern VOID OsAppSecPteInit(UINTPTR startAddr, UINTPTR len, UINT64 flag);
-extern VOID ArchCodeProtect(VOID);
+INT32 main(VOID)
+{
+
+#ifdef __GNUC__
+    ArchStackGuardInit();
+#endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+    OsSystemInfo();
+    UINT32 ret = OsMain();
+    if (ret != LOS_OK) {
+        return LOS_NOK;
+    }
+
+    OsStart();
+
+    return LOS_OK;
+}
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#endif /* _ARCH_MMU_PRI_H */

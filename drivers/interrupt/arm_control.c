@@ -263,11 +263,13 @@ VOID HalIrqInitPercpu(VOID)
     irq->disableIRQs[0] = VC_IRQ_MASK;
     irq->disableIRQs[1] = GPU_IRQ_MASK;
 
+#ifndef LOSCFG_ARCH_ARM_AARCH64
     asm ("mrc p15, #0, r1, c1, c0, #0\n"
          "bic r1, #(1 << 13)\n"
          "ldr r0, =system_vectors\n"
          "mcr p15, #0, r0, c12, c0, #0\n"
          "dsb\n");
+#endif
 }
 
 VOID HalIrqInit(VOID)
