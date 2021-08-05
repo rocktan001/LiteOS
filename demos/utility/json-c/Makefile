@@ -14,7 +14,7 @@ LOCAL_INCLUDE := $(JSON_DEMO_INCLUDE) $(COMPONENTS_JSON_INCLUDE)
 
 LOCAL_SRCS := $(subst $(CURDIR)/,, $(JSON_DEMO_SRCS))
 
-LOCAL_EXT_FLAG := -Wno-error
+LOCAL_EXT_FLAG := -Wno-error -fstack-protector-strong
 
 LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 

@@ -92,11 +92,12 @@ STATIC INT32 DemoTaskEntry(VOID)
         }
         (VOID)curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
         (VOID)memset_s(buff, BUFF_LEN, 0, BUFF_LEN);
+        buff[BUFF_LEN - 1] = '\0';
         (VOID)lseek(fd, 0, SEEK_SET);
-        if ((result == CURLE_OK) && (read(fd, buff, BUFF_LEN) <= 0)) {
+        if ((result == CURLE_OK) && (read(fd, buff, BUFF_LEN - 1) <= 0)) {
             printf("Read file %s failed, htttCode: %ld.\n", FILE_PATH, httpCode);
         } else {
-            printf("*** readed %s %ld data ***\r\n%s\n"
+            printf("*** readed %s %u data ***\r\n%s\n"
                    "**************************************\r\n", FILE_PATH, strlen(buff), buff);
         }
     }

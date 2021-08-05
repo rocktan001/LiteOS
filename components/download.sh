@@ -113,7 +113,7 @@ ApplyPatch()
         patch -p1 -N --binary < ${patchFile}
         if [ $? -ne 0 ]; then
             ClearDownload
-            echo "[Error]: Apply patch failed!"
+            echo -e "\033[31m[Error]:\033[0m Apply patch failed!"
         else
             ClearDir
             echo "[Info]: Apply patch success."
@@ -243,10 +243,10 @@ DownloadSourceCode()
         # get source code
         if [ "${packageType1}" = ".zip" ]; then
             curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.zip
-        elif [ "${packageType1}" = ".rar" ]; then
-            curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.rar
         elif [ "${packageType2}" = ".tar.gz" ]; then
             curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.tar.gz
+        elif [ "${packageType1}" = ".rar" ]; then
+            curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.rar
         elif [ "${packageType}" = "git" -o "${packageType1}" = ".git" ]; then
             git config --global core.autocrlf input
             ${g_componentDownloadAddr} ${g_componentName}
@@ -272,7 +272,7 @@ DownloadSourceCode()
     done
 
     if [ $iNum -le 0 ]; then
-        echo "[Error]: Download ${g_componentName} source code failed!"
+        echo -e "\033[31m[Error]:\033[0m Download ${g_componentName} source code failed!"
         ClearDownload
         return 1
     fi

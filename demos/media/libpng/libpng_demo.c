@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Libpng Demo Implementation
  * Author: Huawei LiteOS Team
@@ -24,7 +24,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------- */
 
 #include "libpng_demo.h"
 #include "stdio.h"

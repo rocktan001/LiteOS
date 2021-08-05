@@ -10,6 +10,10 @@ LOCAL_INCLUDE := \
 PNG_SRCS = $(wildcard $(LIBPNG_VERSION)/*.c) $(wildcard $(LIBPNG_VERSION)/arm/*.c)
 LOCAL_SRCS = $(PNG_SRCS)
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+LOCAL_EXT_FLAG := \
+    -Wno-error -Wno-float-equal \
+    -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

@@ -123,7 +123,7 @@ VOID HarfbuzzDemoTask(VOID)
 
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)DemoTaskEntry;
     taskInitParam.uwStackSize = HARFBUZZ_TASK_STACK;
-    taskInitParam.pcName = (char *)"HarfbuzzDemoTask";
+    taskInitParam.pcName = (CHAR *)"HarfbuzzDemoTask";
     taskInitParam.usTaskPrio = HARFBUZZ_TASK_PRIORITY;
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_harfbuzzTaskID, &taskInitParam);

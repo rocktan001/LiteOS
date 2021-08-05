@@ -3,7 +3,7 @@ include $(LITEOSTOPDIR)/components/utility/iniparser/iniparser.mk
 
 MODULE_NAME := iniparser_demo
 
-LOCAL_SRCS_y := $(wildcard *.c)
+LOCAL_SRCS := $(wildcard *.c)
 
 LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/include \
@@ -12,7 +12,9 @@ LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/demos/iniparser
 
 LOCAL_INCLUDE += $(COMPONENTS_INIPARSER_INCLUDE)
-LOCAL_SRCS := $(LOCAL_SRCS_y)
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+
+LOCAL_EXT_FLAG := -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

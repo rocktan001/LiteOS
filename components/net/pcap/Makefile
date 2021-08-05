@@ -20,11 +20,13 @@ LOCAL_SRCS = $(foreach file, $(LIBPCAP_SRC), $(LIBPCAP_VERSION)/$(file))
 LOCAL_SRCS += $(wildcard $(LIBPCAP_VERSION)/bpf/net/bpf_filter.c)
 LOCAL_SRCS += $(wildcard pcap_dump.c)
 
+LOCAL_CDEFS = -DHAVE_CONFIG_H -D_U_=
+
 LOCAL_EXT_FLAG := -Wno-error -Wno-unused-const-variable \
     -Wno-unused-variable -Wno-incompatible-pointer-types \
     -Wno-unused-function -Wno-pointer-sign -Wno-format-nonliteral \
-    -Wno-discarded-qualifiers
+    -Wno-discarded-qualifiers -fstack-protector-strong
 
-LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE) -DHAVE_CONFIG_H -D_U_=
+LOCAL_FLAGS := $(LOCAL_CDEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

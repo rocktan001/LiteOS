@@ -9,6 +9,8 @@ LOCAL_INCLUDE += $(LWIP_INCLUDE) $(COMPONENTS_FS_INCLUDE)
 
 LOCAL_SRCS := $(wildcard *.c)
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+LOCAL_EXT_FLAG := -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

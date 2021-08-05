@@ -10,8 +10,10 @@ LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/demos/utility/bidireference \
     -I $(LITEOSTOPDIR)/include/fs
 
-LOCAL_EXT_FLAG := -Wno-error
 LOCAL_SRCS := $(BIDIREFERENCE_SRC)
+
+LOCAL_EXT_FLAG := -Wno-error -fstack-protector-strong
+
 LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

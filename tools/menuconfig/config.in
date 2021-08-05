@@ -65,7 +65,7 @@ config LOSCFG_COMPILER_RISCV64_UNKNOWN
     select LOSCFG_COMPILER_GCC
 
 config LOSCFG_COMPILER_XTENSA_32
-    bool "xtensa-RH-2018.7-linux"
+    bool "xtensa-(RF~RI)-201x.x-linux"
     depends on LOSCFG_ARCH_XTENSA
     select LOSCFG_COMPILER_CLANG
 
@@ -418,41 +418,9 @@ config LOSCFG_PLATFORM_OSAPPINIT
 config LOSCFG_TEST
     bool "Enable Auto TestSuit"
 
-config LOSCFG_TESTSUIT_SHELL
-   bool "Enable Shell TestSuit"
-
-config LOSCFG_TEST_MANUAL_TEST
-   bool "Enable Manual Testsuit"
-
-config LOSCFG_FUZZ_DT
-   bool "Enable Fuzz Testsuit"
-
 endchoice
 osource "test/Kconfig"
-osource "test/Kconfig_case"
 endmenu
-
-config LOSCFG_LLTREPORT
-    bool "Enable LLT Report"
-    default n
-    depends on LOSCFG_FS_VFS
-
-choice
-    prompt "Code LLT Report"
-    depends on LOSCFG_LLTREPORT
-    default  LOSCFG_LLTFS
-
-    help
-        LOSCFG_LLTFS
-        LOSCFG_LLTSER
-
-config LOSCFG_LLTSER
-    bool "Enable Serial Transfer"
-
-config LOSCFG_LLTFS
-    bool "Enable FS Transfer"
-
-endchoice
 
 osource "kernel/extended/lms/Kconfig"
 
