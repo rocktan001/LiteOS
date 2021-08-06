@@ -9,6 +9,10 @@ LOCAL_SRCS := $(wildcard *.c)
 
 LOCAL_INCLUDE := $(PNG_DEMO_INCLUDE)
 
-LOCAL_FLAGS :=  $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS) -Wno-implicit-function-declaration
+LOCAL_EXT_FLAG := \
+    -Wno-implicit-function-declaration \
+    -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 
 include $(MODULE)

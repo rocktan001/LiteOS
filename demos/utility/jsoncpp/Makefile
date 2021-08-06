@@ -7,6 +7,10 @@ LOCAL_SRCS := $(wildcard *.cpp)
 
 LOCAL_INCLUDE := $(COMPONENTS_JSONCPP_INCLUDE)
 
-LOCAL_CPPFLAGS :=  $(LOCAL_INCLUDE) -w -std=c++11
+LOCAL_CPPDEFS := -std=c++11
+
+LOCAL_EXT_FLAG := -w -fstack-protector-strong
+
+LOCAL_CPPFLAGS := $(LOCAL_CPPDEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

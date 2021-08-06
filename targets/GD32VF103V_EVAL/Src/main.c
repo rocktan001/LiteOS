@@ -42,7 +42,7 @@ VOID HardwareInit(VOID)
     SystemInit();
     GpioInit();
     GD_Uart0Init();
-    GdTimerInit();
+    Timer3Init();
 }
 
 INT32 main(VOID)

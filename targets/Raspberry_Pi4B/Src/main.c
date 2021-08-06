@@ -39,22 +39,12 @@
 #include "los_memory.h"
 
 extern VOID psci_call(uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3);
-extern VOID OsSecPageInit(VOID);
 
 Atomic ncpu = 1;
 
 VOID board_config(VOID)
 {
-    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
-}
-
-/* 3 : 2^3 = 8, 8 Bytes per item; 12 : 2^12 = 4K, second page granule size, address length of each item mapping */
-VOID OsSecPageInit(VOID)
-{
-    OsSysSecPteInit(SYS_MEM_BASE + TEXT_OFFSET,
-        ALIGN((UINTPTR)&__ram_data_start - SYS_MEM_BASE - TEXT_OFFSET, MMU_2M), MMU_PTE_CACHE_RW_FLAGS);
-
-    OsAppSecPteInit(MMZ_MEM_BASE, MMZ_MEM_LEN, MMU_PTE_NONCACHE_RW_XN_FLAGS);
+    g_sys_mem_addr_end = (UINTPTR)&__LOS_HEAP_ADDR_END__;
 }
 
  /*
@@ -74,20 +64,10 @@ VOID MmuSectionMap(VOID)
     UINT64 flag;
      /* device */
     flag = MMU_INITIAL_MAP_DEVICE | MMU_PTE_L012_DESCRIPTOR_BLOCK;
-    OsBlockMapsInit(flag, 0, DDR_MEM_ADDR + DDR_MEM_SIZE);
-     /* normal cache */
+    OsBlockMapsInit(flag, 0, DDR_MEM_SIZE);
+    /* normal cache */
     flag = MMU_PTE_CACHE_RW_FLAGS | MMU_PTE_L012_DESCRIPTOR_BLOCK;
-    OsBlockMapsSet(flag, SYS_MEM_BASE, g_sys_mem_addr_end - 1);
-     /* normal non-cache */
-    flag = MMU_PTE_NONCACHE_RW_FLAGS | MMU_PTE_L012_DESCRIPTOR_BLOCK;
-    OsBlockMapsSet(flag, DDR_MEM_ADDR, SYS_MEM_BASE);
-    OsBlockMapsSet(flag, g_sys_mem_addr_end, (DDR_MEM_ADDR + DDR_MEM_SIZE) - 1);
-     /*
-     * set mmu descriptor of (0~2M) invalid, check the illegal access to NULL pointer in code.
-     * Access to NULL pointer and mem (0 ~ 2M) will trigger excption immediately
-     */
-    flag = MMU_PTE_CACHE_RW_FLAGS | MMU_PTE_DESCRIPTOR_INVALID;
-    OsBlockMapsSet(flag, 0, (MMU_2M - 1));
+    OsBlockMapsSet(flag, 0, g_sys_mem_addr_end - 1);
 }
 
 LITE_OS_SEC_TEXT_INIT void osSystemInfo(void)

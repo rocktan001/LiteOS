@@ -44,12 +44,13 @@ OUT_SRCS := \
 OPENSSL_SRCS := $(SSL_SRCS) $(CRYPTO_SRCS)
 LOCAL_SRCS := $(filter-out $(OUT_SRCS), $(OPENSSL_SRCS))
 
-DEFS := -DOPENSSLDIR="\"$(OPENSSLDIR)\"" -DENGINESDIR="\"$(ENGINESDIR)\""
+LOCAL_CDEFS := -DOPENSSLDIR="\"$(OPENSSLDIR)\"" -DENGINESDIR="\"$(ENGINESDIR)\""
 
 LOCAL_EXT_FLAG := \
     -Wno-error -Wno-implicit-int -Wno-strict-prototypes -Wno-format-nonliteral \
-    -Wno-unused-but-set-variable -Wno-unused-variable -Wno-float-equal
+    -Wno-unused-but-set-variable -Wno-unused-variable -Wno-float-equal \
+    -fstack-protector-strong
 
-LOCAL_FLAGS := $(DEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
+LOCAL_FLAGS := $(LOCAL_CDEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

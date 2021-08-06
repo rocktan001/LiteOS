@@ -10,40 +10,14 @@ LOCAL_SRCS_$(LOSCFG_DEMOS_FS_SPIF) += spiffs_demo.c
 LOCAL_SRCS_$(LOSCFG_DEMOS_FS_RAM) += ramfs_demo.c
 LOCAL_SRCS_$(LOSCFG_DEMOS_FS_LITTLEFS) += littlefs_demo.c
 
-ifeq ($(LOSCFG_DEMOS_FS), y)
-LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/include
-endif
-
-ifeq ($(LOSCFG_DEMOS_FS_FAT), y)
-LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/demos/fs
-endif
-
-ifeq ($(LOSCFG_DEMOS_FS_SPIF), y)
-LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/demos/fs
-endif
-
-ifeq ($(LOSCFG_DEMOS_FS_RAM), y)
-LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/demos/fs
-endif
-
-ifeq ($(LOSCFG_DEMOS_FS_LITTLEFS), y)
-LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/demos/fs
-LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/targets/bsp/common/fs
-endif
-
-ifeq ($(LOSCFG_PLATFORM_STM32F429IGTX), y)
 LOCAL_INCLUDE += \
-    -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Inc \
-    -I $(LITEOSTOPDIR)/targets/Cloud_STM32F429IGTx_FIRE/Hardware/Inc
-endif
-
-ifeq ($(LOSCFG_PLATFORM_STM32L431_BearPi), y)
-LOCAL_INCLUDE += \
-    -I $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Inc \
-    -I $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Hardware/Inc
-endif
+    -I $(LITEOSTOPDIR)/demos/fs \
+    -I $(LITEOSTOPDIR)/include
 
 LOCAL_SRCS = $(LOCAL_SRCS_y)
-LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_CFLAGS_INTERWORK)
+
+LOCAL_EXT_FLAG := -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE) $(LITEOS_CFLAGS_INTERWORK)
 
 include $(MODULE)

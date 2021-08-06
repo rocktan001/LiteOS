@@ -26,10 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef __USART_H
-#define __USART_H
+#ifndef _USART_H
+#define _USART_H
 
 #include "los_typedef.h"
+#include "uart.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -38,6 +39,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 VOID GD_Uart0Init(VOID);
+extern UartControllerOps g_armGenericUart;
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -45,4 +47,4 @@ VOID GD_Uart0Init(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* __USART_H */
+#endif /* _USART_H */

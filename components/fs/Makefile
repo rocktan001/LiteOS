@@ -73,8 +73,10 @@ LOCAL_INCLUDE += \
 endif
 
 LOCAL_SRCS_y += $(foreach dir, $(LOCAL_DIRS_y), $(wildcard $(dir)/*.c))
-LOCAL_SRCS   = $(LOCAL_SRCS_y)
+LOCAL_SRCS = $(LOCAL_SRCS_y)
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+LOCAL_EXT_FLAG := -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

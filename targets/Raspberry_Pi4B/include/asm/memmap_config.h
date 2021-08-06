@@ -66,8 +66,8 @@ extern "C" {
 #define PULL_DOWN               0b10
 
 /* vs_server.bin should be loaded at SYS_MEM_BASE */
-#define DDR_MEM_ADDR            (0x40000000)
-#define DDR_MEM_SIZE            (0x100000000ull)
+#define DDR_MEM_ADDR            (0x0)
+#define DDR_MEM_SIZE            (0x100000000UL)
 #define SYS_MEM_BASE            (0x80000)
 #define TEXT_OFFSET             (0x80000)
 #define MMZ_MEM_BASE            (0x60000000)

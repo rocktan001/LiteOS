@@ -9,7 +9,12 @@ LOCAL_INCLUDE := $(HARFBUZZ_INC)
 
 LOCAL_SRCS := $(wildcard *.cpp)
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE) -DHB_NO_MT -std=c++11 -D_GLIBCXX_HAS_GTHREADS \
-    -Wno-error -Wno-deprecated-declarations
+LOCAL_CPPDEFS := -DHB_NO_MT -std=c++11 -D_GLIBCXX_HAS_GTHREADS
+
+LOCAL_EXT_FLAG := \
+    -Wno-error -Wno-deprecated-declarations \
+    -Wno-write-strings -fstack-protector-strong
+
+LOCAL_CPPFLAGS := $(LOCAL_CPPDEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

@@ -12,7 +12,8 @@ LOCAL_INCLUDE += $(COMPONENTS_FREETYPE_INCLUDE) $(COMPONENTS_FS_INCLUDE)
 LOCAL_SRCS := $(wildcard *.c)
 
 LOCAL_EXT_FLAG := \
-    -Wno-error -Wno-strict-prototypes -Wno-unused-function
+    -Wno-error -Wno-strict-prototypes \
+    -Wno-unused-function -fstack-protector-strong
 
 LOCAL_CFLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE) 
 
