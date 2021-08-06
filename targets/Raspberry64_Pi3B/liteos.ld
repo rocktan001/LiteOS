@@ -11,24 +11,24 @@ SECTIONS
     }
     __ram_vectors_lma = LOADADDR(.ram_vectors);
 
-    .got ALIGN(0x4) : { *(.got.plt) *(.got) }
+    .got ALIGN(0x8) : { *(.got.plt) *(.got) }
 
     .gcc_except_table ALIGN (0x8) : { . = .; }
     .gcc_except_table : { KEEP(*(.gcc_except_table*)) }
     .exception_ranges ALIGN (0x8) : ONLY_IF_RW { *(.exception_ranges .exception_ranges*) }
 
-    .ARM.extab ALIGN(0x4) : { *(.ARM.extab* .gnu.linkonce.armextab.*) }
+    .ARM.extab ALIGN(0x8) : { *(.ARM.extab* .gnu.linkonce.armextab.*) }
 
     /* Exception handling  */
     PROVIDE (__EH_FRAME_BEGIN__ = LOADADDR(.eh_frame));
     .eh_frame ALIGN (0x8) : { KEEP (*(.eh_frame)) *(.eh_frame.*);  }
 
-    .fast_text ALIGN(0x4) : { __fast_text_start = ABSOLUTE(.); . = .;
+    .fast_text ALIGN(0x8) : { __fast_text_start = ABSOLUTE(.); . = .;
     }
 
     __fast_text_end = ABSOLUTE(.);
 
-    .fast_data ALIGN(0x4) : { __fast_data_start = ABSOLUTE(.); . = .;
+    .fast_data ALIGN(0x8) : { __fast_data_start = ABSOLUTE(.); . = .;
     }
 
     __fast_data_end = ABSOLUTE(.);
@@ -52,16 +52,16 @@ SECTIONS
         /* writable data  */
         __ram_data_start = .;
         *(.data .data.* .gnu.linkonce.d.*)
-        . = ALIGN(0x4);
+        . = ALIGN(0x8);
         KEEP(*( SORT (.liteos.table.*)));
     }
 
-    .ctors : ALIGN(0x4) {
+    .ctors : ALIGN(0x8) {
         __ctor_list__ = .;
         KEEP (*(.ctors .init_array))
         __ctor_end__ = .;
     }
-    .dtors : ALIGN(0x4) {
+    .dtors : ALIGN(0x8) {
         __dtor_list__ = .;
         KEEP (*(.dtors .fini_array))
         __dtor_end__ = .;
@@ -72,7 +72,7 @@ SECTIONS
     .bss ALIGN(0x800) : {
         __int_stack_start = .;
         *(.int_stack);
-        . = ALIGN(0x4);
+        . = ALIGN(0x8);
         KEEP(*(.bss.prebss.*))
         . = ALIGN(0x8);
         __bss_start = .;

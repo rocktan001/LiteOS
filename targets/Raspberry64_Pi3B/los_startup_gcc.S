@@ -18,9 +18,8 @@
 .type   arm64_elX_2_el1,function
 .global arm64_el3_to_el1
 .type   arm64_el3_to_el1,function
-.global reset_vector
-.type   reset_vector,function
 .extern arm64_exception_handlers
+.extern secondary_cpu_start
 
 /* param0 is stack top, param1 is stack size, param2 is magic num */
 .macro STACK_MAGIC_SET param0, param1, param2
@@ -71,7 +70,7 @@ excstatck_loop_done:
     msr     sctlr_el1, x9
 
     /* enable el1 fp/neon */
-    mov     x9, #(0x3 << 20)
+    mov     x9, #(0xf << 20)
     msr     cpacr_el1, x9
     isb
 
@@ -79,7 +78,7 @@ excstatck_loop_done:
     ldr     x9, =arm64_exception_handlers
     msr     vbar_el1, x9
 
-   cbnz    x25, setup_mmu
+    cbnz    x25, setup_mmu
 
     /* set core0's stack, phy addr */
     ldr     x9, =__startup_stack_top
@@ -134,9 +133,9 @@ setup_mmu:
     orr x9, x9, #(0x3 << 12)  /* [13:12]ttbr0:inner shareable */
     orr x9, x9, #(0x1 << 10)  /* [11:10]ttbr0:outer cacheability: write-back write-allocate */
     orr x9, x9, #(0x1 << 8)   /* [9:8]ttbr0:inner cacheability: write-back write-allocate */
-    mov x10, #(0x19)             /* [5:0] 64 - 0x19 = 39-bits, stage1 tranlation input address*/
-    orr x9, x9, x10              /* [5:0]T0SZ the size offset of memory region set to 2^(64-0x19)=512G */
-    msr     tcr_el1, x9
+    mov x10, #(0x19)          /* [5:0] 64 - 0x19 = 39-bits, stage1 tranlation input address*/
+    orr x9, x9, x10           /* [5:0]T0SZ the size offset of memory region set to 2^(64-0x19)=512G */
+    msr tcr_el1, x9
 
     isb
 
@@ -152,7 +151,7 @@ setup_mmu:
 .Lmmu_on_pc:
     isb
 
-    /* Jump to virtual code address */
+/* Jump to virtual code address */
 .Lmmu_on_vaddr:
     /* Invalidate TLB */
     tlbi    vmalle1
@@ -160,7 +159,7 @@ setup_mmu:
 
     cbnz    x25, cpu_start
 
-    /* clear bss */
+/* clear bss */
 .L__do_bss:
     /* clear out the bss excluding the stack and kernel translation table  */
     /* NOTE: relies on __post_prebss_bss_start and __bss_end being 8 byte aligned */
@@ -178,6 +177,7 @@ setup_mmu:
     b       .
 
 cpu_start:
+    bl      secondary_cpu_start
     b       .
 
 arm64_el3_to_el1:
