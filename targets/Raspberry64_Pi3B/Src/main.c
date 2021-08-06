@@ -47,7 +47,7 @@ VOID board_config(VOID)
     g_sys_mem_addr_end = (UINTPTR)LOS_HEAP_ADDR_END;
 }
 
-extern void reset_vector(void);
+extern VOID reset_vector(VOID);
 
 VOID MmuSectionMap(VOID)
 {
