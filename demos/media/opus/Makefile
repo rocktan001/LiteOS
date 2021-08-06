@@ -9,6 +9,8 @@ LOCAL_INCLUDE := $(OPUS_INC)
 
 LOCAL_SRCS := $(wildcard *.c)
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE) -Wno-error
+LOCAL_EXT_FLAG := -Wno-error -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

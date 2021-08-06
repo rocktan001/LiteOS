@@ -19,7 +19,10 @@ LOCAL_SRCS = \
     $(wildcard $(UPNP_VERSION)/upnp/src/genlib/miniserver/*.c)       \
     $(wildcard $(UPNP_VERSION)/upnp/src/genlib/util/*.c)
 
-LOCAL_EXT_FLAG := -Wno-error -DSQLITE_DEBUG=1
-LOCAL_FLAGS := $(COMPONENTS_UPNP_INCLUDE) $(LOCAL_EXT_FLAG)
+LOCAL_CDEFS = -DSQLITE_DEBUG=1
+
+LOCAL_EXT_FLAG := -Wno-error -Wno-float-equal
+
+LOCAL_FLAGS := $(LOCAL_CDEFS) $(LOCAL_EXT_FLAG) $(COMPONENTS_UPNP_INCLUDE)
 
 include $(MODULE)

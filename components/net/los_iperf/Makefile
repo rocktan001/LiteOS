@@ -11,7 +11,8 @@ LOCAL_INCLUDE := \
 LOCAL_INCLUDE += $(LWIP_INCLUDE)
 
 LOCAL_EXT_FLAG := \
-    -Wno-implicit-function-declaration
+    -Wno-implicit-function-declaration \
+    -fstack-protector-strong
 
 LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 

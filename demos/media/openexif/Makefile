@@ -9,6 +9,8 @@ LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/include \
     $(COMPONENTS_INCLUDE)
 
-LOCAL_CPPFLAGS := $(LOCAL_INCLUDE) -Wno-error -w
+LOCAL_EXT_FLAG := -w -Wno-error -fstack-protector-strong
+
+LOCAL_CPPFLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

@@ -23,13 +23,10 @@ LWIP_SRCS = \
     $(wildcard $(LWIP_VERION)/src/netif/ppp/polarssl/*.c) \
     $(wildcard lwip_port/OS/*.c)
 
-LWIP_INC := \
+LOCAL_SRCS := $(LWIP_SRCS)
 
-LOCAL_CFLAGS += -Wno-maybe-uninitialized
+LOCAL_EXT_FLAG += -Wno-maybe-uninitialized -fstack-protector-strong
 
-LOCAL_SRCS :=  $(LWIP_SRCS)
-
-LOCAL_INCLUDE := $(LWIP_INC)
-LOCAL_FLAGS :=  $(LITEOS_CFLAGS_INTERWORK) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LITEOS_CFLAGS_INTERWORK) $(LITEOS_GCOV_OPTS)
 
 include $(MODULE)
