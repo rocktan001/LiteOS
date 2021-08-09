@@ -40,7 +40,7 @@ extern "C" {
 #define FIRST_SECTION_TABLE_LEN   (0x1000 * 9)
 #define SECOND_PAGE_TABLE_OS_LEN  (0)
 #define SECOND_PAGE_TABLE_APP_LEN (0)
-#define OS_SYS_MEM_SIZE           (UINT32)(((UINTPTR)LOS_HEAP_ADDR_END - (UINTPTR)OS_SYS_MEM_ADDR + (64 - 1)) & ~(64 - 1))
+#define OS_SYS_MEM_SIZE           (UINT32)(((UINTPTR)LOS_HEAP_ADDR_END - (UINTPTR)OS_SYS_MEM_ADDR) & ~(64 - 1))
 
 #ifdef __cplusplus
 #if __cplusplus

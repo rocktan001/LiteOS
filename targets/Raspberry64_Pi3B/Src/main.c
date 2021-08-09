@@ -30,6 +30,9 @@
 #include "los_task_pri.h"
 #include "mmu.h"
 #include "mmu_pri.h"
+#include "los_atomic.h"
+#include "los_swtmr_pri.h"
+#include "arch/cache.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,10 +40,14 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#define SPIN_TABLE_BASE 0xD8
+
 VOID board_config(VOID)
 {
     g_sys_mem_addr_end = (UINTPTR)LOS_HEAP_ADDR_END;
 }
+
+extern VOID reset_vector(VOID);
 
 VOID MmuSectionMap(VOID)
 {
@@ -78,7 +85,6 @@ VOID OsSystemInfo(VOID)
 
 INT32 main(VOID)
 {
-
 #ifdef __GNUC__
     ArchStackGuardInit();
 #endif
@@ -90,10 +96,49 @@ INT32 main(VOID)
         return LOS_NOK;
     }
 
+#ifdef LOSCFG_KERNEL_SMP
+    UINT8 coreId;
+    for (coreId = 1; coreId < LOSCFG_KERNEL_CORE_NUM; coreId++) {
+        /* per cpu 4 mailbox */
+        *(((UINTPTR *)SPIN_TABLE_BASE) + coreId) = (UINTPTR)reset_vector;
+        ArchDCacheCleanByAddr((UINTPTR)SPIN_TABLE_BASE, (UINTPTR)(SPIN_TABLE_BASE+LOSCFG_KERNEL_CORE_NUM * sizeof(UINTPTR)));
+        asm("SEV");
+    }
+
+    LOS_HwiEnable(MAILBOX0_IRQ);
+    LOS_HwiEnable(MAILBOX1_IRQ);
+    LOS_HwiEnable(MAILBOX2_IRQ);
+#ifdef LOSCFG_KERNEL_SMP_CALL
+    LOS_HwiEnable(MAILBOX3_IRQ);
+#endif
+#endif
+
     OsStart();
 
     return LOS_OK;
 }
+
+#ifdef LOSCFG_KERNEL_SMP
+LITE_OS_SEC_TEXT_INIT INT32 secondary_cpu_start(VOID)
+{
+    OsCurrTaskSet(OsGetMainTask());
+    HalIrqInitPercpu();
+    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+    LOS_HwiEnable(MAILBOX0_IRQ);
+    LOS_HwiEnable(MAILBOX1_IRQ);
+    LOS_HwiEnable(MAILBOX2_IRQ);
+#ifdef LOSCFG_KERNEL_SMP_CALL
+    LOS_HwiEnable(MAILBOX3_IRQ);
+#endif
+#ifdef LOSCFG_BASE_CORE_SWTMR
+    OsSwtmrInit();
+#endif
+    OsIdleTaskCreate();
+    OsStart();
+
+    return LOS_OK;
+}
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
