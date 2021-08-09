@@ -2,6 +2,7 @@
 
 osource "arch/arm/Kconfig"
 osource "arch/arm64/Kconfig"
+osource "arch/xtensa/Kconfig"
 osource "arch/riscv/Kconfig"
 osource "arch/csky/Kconfig"
 

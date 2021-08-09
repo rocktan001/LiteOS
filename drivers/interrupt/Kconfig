@@ -20,6 +20,11 @@ config LOSCFG_PLATFORM_BSP_XTENSA_XEA3
     help
       General Interrupt Controller xtensa xea3.
 
+config LOSCFG_XEA2_INT_CONTROLLER
+    bool
+    help
+      General Interrupt Controller xtensa xea2.
+
 config LOSCFG_PLATFORM_BSP_RISCV_PLIC
     bool
     depends on LOSCFG_ARCH_RISCV
