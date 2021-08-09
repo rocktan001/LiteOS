@@ -218,9 +218,12 @@ ifeq ($(LOSCFG_LIB_CPP_EXTEND), y)
 LITEOS_CXXMACRO   += -D_GLIBCXX_HAS_GTHREADS
 endif
 
-ifeq ($(LOSCFG_ARCH_XTENSA), y)
+ifeq ($(LOSCFG_ARCH_XTENSA_XEA3), y)
+# xea2 don't support shadow due to libc in compiler
 LITEOS_COMMON_OPTS += -Wshadow
-else
+endif
+
+ifeq ($(LOSCFG_ARCH_XTENSA),)
 ## xtensa do not have -freg-struct-return.
 LITEOS_COMMON_OPTS += -freg-struct-return
 endif
@@ -255,7 +258,7 @@ endif
 
 # clang support -fno-omit-frame-pointer
 ifeq ($(LOSCFG_BACKTRACE), y)
-ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M),)
+ifeq ($(LOSCFG_ARCH_ARM_CORTEX_M)$(LOSCFG_ARCH_XTENSA),)
 LITEOS_COPTS_BASE += -fno-omit-frame-pointer
 LITEOS_CXXOPTS_BASE += -fno-omit-frame-pointer
 endif
