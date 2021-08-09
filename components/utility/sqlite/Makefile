@@ -17,7 +17,7 @@ SQLITE_DEFS = \
     -D _REENTRANT=1 \
     -D SQLITE_THREADSAFE=0
 
-LOCAL_DEFS = \
+LOCAL_CDEFS = \
     -D HAVE_GMTIME_R=1 \
     -D HAVE_INTTYPES_H=1 \
     -D HAVE_LOCALTIME_R=1 \
@@ -44,8 +44,9 @@ LOCAL_EXT_FLAG := \
     -Wno-error \
     -Wno-unused-value \
     -Wno-unused-function \
-    -Wno-float-equal
+    -Wno-float-equal \
+    -fstack-protector-strong
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE) $(SQLITE_DEFS) $(LOCAL_DEFS) $(LOCAL_EXT_FLAG)
+LOCAL_FLAGS := $(LOCAL_CDEFS) $(SQLITE_DEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

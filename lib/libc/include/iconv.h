@@ -10,6 +10,7 @@ extern "C" {
 #define __NEED_size_t
 
 #include <bits/alltypes.h>
+#include <errno.h>
 
 typedef void *iconv_t;
 

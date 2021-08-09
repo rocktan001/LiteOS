@@ -70,12 +70,15 @@ LOCAL_CFLAGS := \
     -include $(FREETYPE_VERSION)/include/freetype/config/ftstdlib.h \
     -include $(FREETYPE_VERSION)/include/freetype/internal/internal.h
 
+LOCAL_CDEFS = -DFT_OPTION_AUTOFIT2 -DFT2_BUILD_LIBRARY -DHAVE_MEMCPY
+
 LOCAL_EXT_FLAG := \
     -Wno-error -Wno-unused-but-set-variable -Wno-implicit-function-declaration \
     -Wno-unused-const-variable -Wno-implicit-function-declaration \
     -Wno-unused-label -Wno-unused-function -Wno-misleading-indentation \
-    -Wno-return-type -Wno-unused-variable -Wno-unused-function
+    -Wno-return-type -Wno-unused-variable -Wno-unused-function \
+    -fstack-protector-strong
 
-LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE) -DFT_OPTION_AUTOFIT2 -DFT2_BUILD_LIBRARY -DHAVE_MEMCPY
+LOCAL_FLAGS := $(LOCAL_CDEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

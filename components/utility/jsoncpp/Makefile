@@ -8,6 +8,8 @@ LOCAL_SRCS := $(wildcard $(JSONCPP_VERSION)/src/lib_json/*.cpp)
 LOCAL_INCLUDE := $(COMPONENTS_JSONCPP_INCLUDE) \
     -I $(LITEOSTOPDIR)/components/utility/jsoncpp/$(JSONCPP_VERSION)/src/lib_json
 
-LOCAL_CPPFLAGS := $(LOCAL_INCLUDE) -w
+LOCAL_EXT_FLAG := -w -fstack-protector-strong
+
+LOCAL_CPPFLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

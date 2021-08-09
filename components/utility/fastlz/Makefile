@@ -8,6 +8,8 @@ LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/components/utility/fastlz/$(FASTLZ_VERSION) \
     -I $(LITEOSTOPDIR)/include
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE)
+LOCAL_EXT_FLAG := -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)
