@@ -10,6 +10,7 @@ void *__dso_handle = &__dso_handle;
 void *_impure_ptr;
 void *_ctype_;
 
+
 /* Ensure that at least 32 atexit handlers can be registered without malloc */
 #define COUNT 32
 
@@ -88,14 +89,15 @@ int atexit(void (*func)(void))
 
 int __cxa_atexit(void (*func)(void *), void *arg, void *dso)
 {
-	errno = ENOSYS;
-	return -1;
+    errno = ENOSYS;
+    return -1;
 }
 
 int __locale_mb_cur_max(void)
 {
-	return COUNT;
+    return COUNT;
 }
 
 void __sync_synchronize(void)
-{}
+{ }
+

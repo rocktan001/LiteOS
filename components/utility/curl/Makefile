@@ -21,9 +21,11 @@ LOCAL_INCLUDE += \
 LOCAL_SRCS_y += $(foreach dir, $(LOCAL_DIRS_y), $(wildcard $(dir)/*.c))
 LOCAL_SRCS   = $(LOCAL_SRCS_y)
 
-LOCAL_EXT_FLAG := -Wno-error -Wno-implicit-function-declaration -Wno-unused-variable
+LOCAL_EXT_FLAG := \
+    -Wno-error -Wno-implicit-function-declaration \
+    -Wno-unused-variable -fstack-protector-strong
 
-CURL_DEFS := \
+LOCAL_CDEFS := \
     -D HAVE_CONFIG_H \
     -D BUILDING_LIBCURL
 
@@ -32,6 +34,6 @@ CURL_DEFS += -DUSE_OPENSSL
 LOCAL_INCLUDE += $(COMPONENTS_OPENSSL_INCLUDE)
 endif
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE) $(CURL_DEFS) $(LOCAL_EXT_FLAG)
+LOCAL_FLAGS := $(LOCAL_CDEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

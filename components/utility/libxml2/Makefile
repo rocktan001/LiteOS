@@ -25,7 +25,8 @@ LOCAL_EXT_FLAG := \
     -Wno-implicit-function-declaration -Wno-unused-function \
     -Wno-enum-compare -Wno-array-bounds -Wno-unused-const-variable \
     -Wno-strict-prototypes -Wno-unused-but-set-variable \
-    -Wno-tautological-compare -Wno-switch -Wno-stringop-overflow
+    -Wno-tautological-compare -Wno-switch -Wno-stringop-overflow \
+    -Wno-float-equal -fstack-protector-strong
 
 LOCAL_INCLUDE := $(XML2_INC)
 

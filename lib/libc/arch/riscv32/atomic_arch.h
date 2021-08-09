@@ -7,20 +7,20 @@ static inline void a_barrier(void)
 #define a_ll a_ll
 static inline int a_ll(volatile int *p)
 {
-	int v;
+	int v = 0;
 	return v;
 }
 
 #define a_sc a_sc
 static inline int a_sc(volatile int *p, int v)
 {
-	int r;
+	int r = 0;
 	return !r;
 }
 
 #define a_cas a_cas
 static inline int a_cas(volatile int *p, int t, int s)
 {
-	int old;
+	int old = 0;
 	return old;
 }

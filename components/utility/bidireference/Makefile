@@ -10,7 +10,9 @@ LOCAL_SRCS = $(wildcard $(BIDIREFERENCE_VERSION)/source/*.c)
 
 LOCAL_EXT_FLAG := -Wno-error -Wno-restrict -Wno-unused-variable \
     -Wno-switch -Wno-unused-but-set-variable -Wno-parentheses \
-    -Wno-unused-function -Wno-maybe-uninitialized
-LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LOCAL_EXT_FLAG)
+    -Wno-unused-function -Wno-maybe-uninitialized -Wno-float-equal \
+    -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)

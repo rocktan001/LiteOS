@@ -13,9 +13,13 @@ LOCAL_INCLUDE := \
 
 LOCAL_SRCS = $(wildcard $(JSON_VERSION)/*.c)
 
-LOCAL_EXT_FLAG := -Wno-error -DSQLITE_DEBUG=1 \
-    -Wno-strict-prototypes -Wno-unused-variable
+LOCAL_CDEFS := -DSQLITE_DEBUG=1
 
-LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
+LOCAL_EXT_FLAG := \
+    -Wno-error -Wno-strict-prototypes \
+    -Wno-unused-variable -Wno-float-equal \
+    -fstack-protector-strong
+
+LOCAL_FLAGS := $(LOCAL_CDEFS) $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE)
 
 include $(MODULE)
