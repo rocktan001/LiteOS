@@ -153,6 +153,8 @@ extern "C" {
 #define CPSR_SVC_MODE           0x00000013u
 #define CPSR_ABT_MODE           0x00000017u
 #define CPSR_UNDEF_MODE         0x0000001Bu
+#define CPSR_HYP_MODE           0x0000001Au
+#define CPSR_MODE_MASK          0x1F
 
 #define CPSR_IRQ_DISABLE        PSR_I_BIT   /* IRQ disabled when =1 */
 #define CPSR_FIQ_DISABLE        PSR_F_BIT   /* FIQ disabled when =1 */
