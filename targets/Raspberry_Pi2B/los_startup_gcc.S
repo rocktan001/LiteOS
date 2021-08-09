@@ -41,28 +41,19 @@ system_vectors:
 /* reset entry */
 .globl _reset
 _reset:
-    /* Disable IRQ & FIQ */
-    cpsid if
-
-    /* Check for HYP mode */
-    mrs r0, cpsr_all 
-    and r0, r0, #0x1F
-    mov r8, #0x1A
-    cmp r0, r8
-    beq overHyped
-    b continue
-
-overHyped: /* Get out of HYP mode */
-    ldr r1, =continue
+    mrs r0, cpsr_all
+    eor r0, r0, #CPSR_HYP_MODE
+    tst r0, #CPSR_MODE_MASK
+    bic r0, r0, #CPSR_MODE_MASK
+    orr r0, r0, #CPSR_SVC_MODE | CPSR_INT_DISABLE
+    bne 1f
+    ldr r1, =common
     msr ELR_hyp, r1
-    mrs r1, cpsr_all
-    and r1, r1, #0x1f   ;@ CPSR_MODE_MASK
-    orr r1, r1, #0x13   ;@ CPSR_MODE_SUPERVISOR
-    msr SPSR_hyp, r1
+    msr SPSR_hyp, r0
     eret
+1:  msr cpsr_c, r0
 
-continue:
-
+common:
     mrc p15, 0, r0, c1, c0, 1 
     bic r0, r0, #0x40
     mcr p15, 0, r0, c1, c0, 1
