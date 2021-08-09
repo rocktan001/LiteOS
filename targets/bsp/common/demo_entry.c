@@ -174,6 +174,10 @@
 #include "openssl_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_QRENCODE
+#include "qrencode_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_SQLITE
 #include "sqlite_demo.h"
 #endif
@@ -325,6 +329,7 @@ VOID DemoEntry(VOID)
 #ifndef LOSCFG_KERNEL_SMP
     printf("Hello, welcome to liteos demo!\n");
 #endif
+
 #ifdef LOSCFG_COMPONENTS_FS
     FileSystemInit();
 #endif
@@ -437,6 +442,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_OPENSSL
     OpensslDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_QRENCODE
+    QrencodeDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_SQLITE

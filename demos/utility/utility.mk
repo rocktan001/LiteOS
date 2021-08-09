@@ -60,6 +60,11 @@ include $(LITEOSTOPDIR)/demos/utility/fastlz/fastlz.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_FASTLZ_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_QRENCODE), y)
+include $(LITEOSTOPDIR)/demos/utility/qrencode/qrencode.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_QRENCODE_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_DEMOS_PDFGEN), y)
 include $(LITEOSTOPDIR)/demos/utility/pdfgen/pdfgen.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_PDFGEN_INCLUDE)

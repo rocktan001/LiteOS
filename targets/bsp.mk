@@ -290,6 +290,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_UPNP), y)
         LITEOS_BASELIB += -lupnp
     endif
+    ifeq ($(LOSCFG_COMPONENTS_QRENCODE), y)
+        LITEOS_BASELIB += -lqrencode
+    endif
     ifeq ($(LOSCFG_COMPONENTS_FASTLZ), y)
         LITEOS_BASELIB += -lfastlz
     endif
@@ -397,6 +400,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_UPNP), y)
         LITEOS_BASELIB += -lupnp_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_QRENCODE), y)
+        LITEOS_BASELIB += -lqrencode_demo
     endif
     ifeq ($(LOSCFG_DEMOS_FASTLZ), y)
         LITEOS_BASELIB += -lfastlz_demo
