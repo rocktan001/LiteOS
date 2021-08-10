@@ -118,6 +118,14 @@ UINT32 MsgQueueDemo(VOID)
 
     printf("Kernel message queue demo start to run.\n");
 
+    /* create queue */
+    ret = LOS_QueueCreate("queue", QUEUE_SIZE, &g_demoQueue, 0, QUEUE_MSGLEN);
+    if (ret != LOS_OK) {
+        printf("Create the queue failed.\n");
+        return ret;
+    }
+    printf("Create the queue successfully.\n");
+
     LOS_TaskLock();
     /* create task */
     ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
@@ -129,6 +137,9 @@ UINT32 MsgQueueDemo(VOID)
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     taskInitParam.pcName = "MsgQueueDemoSendTask";
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+#ifdef LOSCFG_KERNEL_SMP
+    taskInitParam.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
+#endif
     ret = LOS_TaskCreate(&g_demoTask1Id, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create queue sending Task failed.\n");
@@ -144,13 +155,6 @@ UINT32 MsgQueueDemo(VOID)
         }
         return ret;
     }
-
-    /* create queue */
-    ret = LOS_QueueCreate("queue", QUEUE_SIZE, &g_demoQueue, 0, QUEUE_MSGLEN);
-    if (ret != LOS_OK) {
-        printf("Create the queue failed.\n");
-    }
-    printf("Create the queue successfully.\n");
 
     LOS_TaskUnlock();
     LOS_TaskDelay(DELAY_INTERVAL2);

@@ -109,6 +109,13 @@ UINT32 MutexLockDemo(VOID)
 
     printf("Kernel mutex demo start to run.\n");
 
+    /* create mux */
+    ret = LOS_MuxCreate(&g_demoMux01);
+    if (ret != LOS_OK) {
+        printf("Creat the mutex failed.\n");
+        return LOS_NOK;
+    }
+    
     LOS_TaskLock();
     /* create task */
     ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
@@ -120,6 +127,9 @@ UINT32 MutexLockDemo(VOID)
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     taskInitParam.usTaskPrio = LO_TASK_PRIOR;
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+#ifdef LOSCFG_KERNEL_SMP
+    taskInitParam.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
+#endif
     ret = LOS_TaskCreate(&g_demoTask1Id, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create mutex task1 failed.\n");
@@ -138,13 +148,6 @@ UINT32 MutexLockDemo(VOID)
             printf("Delete mutex task1 failed.\n");
         }
         LOS_TaskUnlock();
-        return LOS_NOK;
-    }
-
-    /* create mux */
-    ret = LOS_MuxCreate(&g_demoMux01);
-    if (ret != LOS_OK) {
-        printf("Creat the mutex failed.\n");
         return LOS_NOK;
     }
     LOS_TaskUnlock();

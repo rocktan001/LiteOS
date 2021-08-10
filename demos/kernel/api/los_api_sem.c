@@ -105,6 +105,13 @@ UINT32 SemphoreDemo(VOID)
 
     printf("Kernel semaphore demo start to run.\n");
 
+    /* create semaphore */
+    ret = LOS_SemCreate(0, &g_demoSemId);
+    if (ret != LOS_OK) {
+        printf("Creat the semaphore failed.\n");
+        return LOS_NOK;
+    }
+
     LOS_TaskLock();
     /* create task */
     ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
@@ -116,6 +123,9 @@ UINT32 SemphoreDemo(VOID)
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     taskInitParam.usTaskPrio = TASK_PRIOR;
     taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
+#ifdef LOSCFG_KERNEL_SMP
+    taskInitParam.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
+#endif
     ret = LOS_TaskCreate(&g_demoTask1Id, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create semaphore task1 failed.\n");
@@ -135,13 +145,6 @@ UINT32 SemphoreDemo(VOID)
             printf("Delete semaphore task1 failed.\n");
         }
         LOS_TaskUnlock();
-        return LOS_NOK;
-    }
-
-    /* create semaphore */
-    ret = LOS_SemCreate(0, &g_demoSemId);
-    if (ret != LOS_OK) {
-        printf("Creat the semaphore failed.\n");
         return LOS_NOK;
     }
 

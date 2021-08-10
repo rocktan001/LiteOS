@@ -141,6 +141,9 @@ UINT32 TaskDemo(VOID)
     taskInitParam.usTaskPrio = HI_TASK_PRIOR;
     taskInitParam.pcName = "TaskDemoHiTask";
     taskInitParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+#ifdef LOSCFG_KERNEL_SMP
+    taskInitParam.usCpuAffiMask = CPUID_TO_AFFI_MASK(ArchCurrCpuid());
+#endif
     ret = LOS_TaskCreate(&g_demoTaskHiId, &taskInitParam);
     if (ret != LOS_OK) {
         LOS_TaskUnlock();
