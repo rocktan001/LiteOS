@@ -51,14 +51,14 @@ STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t rdSize)
         return LOS_NOK;
     }
     printf("Sfud start to read.\n");
-    ret = sfud_read(flash, addr, rSize, buff);
+    ret = sfud_read(flash, addr, rdSize, buff);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud read failed.\n");
 	free(buff);
         return LOS_NOK;
     }
     printf("Sfud read successfully.\n");
-    for (INT32 i = 0; i < rSize; ++i) {
+    for (INT32 i = 0; i < rdSize; ++i) {
          printf("%02x ", buff[i]);
          if (((i + 1) % 0x10) == 0) { // Each row displays 16 pieces of data.
              printf("\n");
