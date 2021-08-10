@@ -41,7 +41,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-void ApmMiniCom1Init(void)
+VOID ApmMiniCom1Init(VOID)
 {
     GPIO_Config_T GPIO_ConfigStruct;
     USART_Config_T USART_ConfigStruct;
