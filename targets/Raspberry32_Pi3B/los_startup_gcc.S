@@ -48,20 +48,17 @@ system_vectors:
 /* reset entry */
 .globl reset_vector
 reset_vector:
-    mrs r0, cpsr_all 
-    and r0, r0, #0x1F
-    mov r8, #0x1A
-    cmp r0, r8
-    beq hypHandle
-    b common
-hypHandle:
+    mrs r0, cpsr_all
+    eor r0, r0, #CPSR_HYP_MODE
+    tst r0, #CPSR_MODE_MASK
+    bic r0, r0, #CPSR_MODE_MASK
+    orr r0, r0, #CPSR_SVC_MODE | CPSR_INT_DISABLE
+    bne 1f
     ldr r1, =common
     msr ELR_hyp, r1
-    mrs r1, cpsr_all
-    and r1, r1, #0x1f
-    orr r1, r1, #0x13
-    msr SPSR_hyp, r1	/* return SVC */
+    msr SPSR_hyp, r0
     eret
+1:  msr cpsr_c, r0
 
 common:
     /* get cpuid and keep it in r11 */
