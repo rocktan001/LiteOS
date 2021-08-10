@@ -122,7 +122,7 @@ UINT32 MsgQueueDemo(VOID)
     ret = LOS_QueueCreate("queue", QUEUE_SIZE, &g_demoQueue, 0, QUEUE_MSGLEN);
     if (ret != LOS_OK) {
         printf("Create the queue failed.\n");
-        return ret;
+        return LOS_NOK;
     }
     printf("Create the queue successfully.\n");
 
@@ -130,7 +130,7 @@ UINT32 MsgQueueDemo(VOID)
     /* create task */
     ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
-        return ret;
+        return LOS_NOK;
     }
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)SendTaskEntry;
     taskInitParam.usTaskPrio = TASK_PRIOR;
@@ -143,7 +143,7 @@ UINT32 MsgQueueDemo(VOID)
     ret = LOS_TaskCreate(&g_demoTask1Id, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create queue sending Task failed.\n");
-        return ret;
+        return LOS_NOK;
     }
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)ReceiveTaskEntry;
     taskInitParam.pcName = "MsgQueueDemoReceiveTask";
@@ -153,7 +153,7 @@ UINT32 MsgQueueDemo(VOID)
         if (LOS_OK != LOS_TaskDelete(g_demoTask1Id)) {
             printf("Delete queue sending Task failed.\n");
         }
-        return ret;
+        return LOS_NOK;
     }
 
     LOS_TaskUnlock();
