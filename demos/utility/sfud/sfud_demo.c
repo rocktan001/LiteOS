@@ -43,13 +43,18 @@ extern "C" {
 STATIC UINT32 g_demoTaskId;
 
 
-STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t size, UINT8 *buff)
+STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t rdSize)
 {
     INT32 ret;
+    UINT8 *buff = (UINT8 *)malloc(rdSize);
+    if (buff == NULL) {
+        return LOS_NOK;
+    }
     printf("Sfud start to read.\n");
     ret = sfud_read(flash, addr, size, buff);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud read failed.\n");
+	free(buff);
         return LOS_NOK;
     }
     printf("Sfud read successfully.\n");
@@ -60,6 +65,7 @@ STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t size, UIN
          }
     }
     printf("\n");
+    free(buff);
     return LOS_OK;
 }
 
@@ -81,7 +87,7 @@ INT32 SfudDemoEntry(VOID)
     }
     for (INT32 i = 0, j = 0; i < size; i++, j++) {
          buff[i] = j;
-         if (buff[i] == 0xFF) { // The maximum value of a byte is 0xFF;
+         if (buff[i] == 0xFF) { // The maximum value of a byte is 0xFF.
              j = 0;
          }
     }
@@ -94,27 +100,20 @@ INT32 SfudDemoEntry(VOID)
         free(buff);
         return LOS_NOK;
     }
+    free(buff); // Free memory of buff.
     printf("Sfud write successfully.\n");
 
-    ret = memset_s(buff, size, 0, size);
-    if (ret != EOK) {
-        free(buff);
-        return LOS_NOK;
-    }
-    ret = SfudReadData(flash, addr, size, buff);
+    ret = SfudReadData(flash, addr, size);
     if (ret != LOS_OK) {
-        free(buff);
         return LOS_NOK;
     }
     printf("Sfud start to erase.\n");
     ret = sfud_erase(flash, addr, size);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud erase failed.\n");
-        free(buff);
         return LOS_NOK;
     }
     printf("Sfud erase successfully.\n");
-    free(buff);
     return LOS_OK;
 }
 
