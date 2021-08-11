@@ -99,7 +99,6 @@ INT32 main(VOID)
 #ifdef LOSCFG_KERNEL_SMP
     UINT8 coreId;
     for (coreId = 1; coreId < LOSCFG_KERNEL_CORE_NUM; coreId++) {
-        /* per cpu 4 mailbox */
         *(((UINTPTR *)SPIN_TABLE_BASE) + coreId) = (UINTPTR)reset_vector;
         ArchDCacheCleanByAddr((UINTPTR)SPIN_TABLE_BASE, (UINTPTR)(SPIN_TABLE_BASE+LOSCFG_KERNEL_CORE_NUM * sizeof(UINTPTR)));
         asm("SEV");
