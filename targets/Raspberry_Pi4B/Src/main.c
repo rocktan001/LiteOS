@@ -38,7 +38,7 @@
 #include "mmu.h"
 #include "los_memory.h"
 
-extern VOID psci_call(uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3);
+#define SPIN_TABLE_BASE 0xD8
 
 Atomic ncpu = 1;
 
@@ -70,7 +70,7 @@ VOID MmuSectionMap(VOID)
     OsBlockMapsSet(flag, 0, g_sys_mem_addr_end - 1);
 }
 
-LITE_OS_SEC_TEXT_INIT void osSystemInfo(void)
+LITE_OS_SEC_TEXT_INIT void osSystemInfo(VOID)
 {
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n\n"
             "LiteOS Kernel Version : %s\n"
@@ -93,7 +93,7 @@ LITE_OS_SEC_TEXT_INIT void osSystemInfo(void)
             HalIrqVersion(), __DATE__, __TIME__);
 }
 
-LITE_OS_SEC_TEXT_INIT int secondary_cpu_start(void)
+LITE_OS_SEC_TEXT_INIT int secondary_cpu_start(VOID)
 {
     int cpuId = ArchCurrCpuid();
 
@@ -116,22 +116,16 @@ LITE_OS_SEC_TEXT_INIT int secondary_cpu_start(void)
     }
 }
 
-LITE_OS_SEC_TEXT_INIT VOID release_secondary_cores(void)
+LITE_OS_SEC_TEXT_INIT VOID release_secondary_cores(VOID)
 {
-    /* use psci to wakeup APs */
-    UINT64 psci_call_num = 0xC4000000 + 3; /* SMC64 CPU_ON */
-
     for (UINT32 i = 1; i < LOSCFG_KERNEL_CORE_NUM; i++) {
-        psci_call(psci_call_num, i, SYS_MEM_BASE, 0);
-    }
-
-    /* wait until all APs are ready */
-    while (LOS_AtomicRead(&ncpu) < LOSCFG_KERNEL_CORE_NUM) {
-        asm volatile("wfe");
+        *(((UINTPTR *)SPIN_TABLE_BASE) + i) = (UINTPTR)SYS_MEM_BASE;
+        flush_dcache((UINTPTR)(SPIN_TABLE_BASE + sizeof(UINTPTR) * i), (UINTPTR)(SPIN_TABLE_BASE + sizeof(UINTPTR) * (i + 1)));
+        __asm volatile("sev");
     }
 }
 
-LITE_OS_SEC_TEXT_INIT int main(void)
+LITE_OS_SEC_TEXT_INIT int main(VOID)
 {
     UINT32 ret = LOS_OK;
 

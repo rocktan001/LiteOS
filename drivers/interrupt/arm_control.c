@@ -205,7 +205,7 @@ UINT32 HalIrqSendIpi(UINT32 target, UINT32 ipi)
     for (i = 0; i < LOSCFG_KERNEL_CORE_NUM; i++) {
         if (target & (1 << i)) {
             /* per cpu 4 mailbox */
-            coreIrq->writeSet[i * 4] = (1 << ipi);
+            coreIrq->writeSet[i * 4 + MAILBOX1_IRQ - MAILBOX0_IRQ] = (1 << ipi);
         }
     }
     return LOS_OK;
