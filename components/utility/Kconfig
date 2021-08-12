@@ -14,11 +14,12 @@ source "components/utility/jsoncpp/Kconfig"
 source "components/utility/libxml2/Kconfig"
 source "components/utility/pdfgen/Kconfig"
 source "components/utility/qrencode/Kconfig"
+source "components/utility/regex/Kconfig"
+source "components/utility/sfud/Kconfig"
 source "components/utility/sqlite/Kconfig"
 source "components/utility/thttpd/Kconfig"
 source "components/utility/tinyframe/Kconfig"
 source "components/utility/tinyxml2/Kconfig"
-source "components/utility/sfud/Kconfig"
 source "components/utility/uriparser/Kconfig"
 
 endmenu
