@@ -95,6 +95,11 @@ include $(LITEOSTOPDIR)/components/utility/c-algorithms/c-algorithms.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_C_ALGORITHMS_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_JSMN), y)
+include $(LITEOSTOPDIR)/components/utility/jsmn/jsmn.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_JSMN_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_COMPONENTS_TINYFRAME), y)
 include $(LITEOSTOPDIR)/components/utility/tinyframe/tinyframe.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_TINYFRAME_INCLUDE)

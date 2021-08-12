@@ -89,3 +89,8 @@ ifeq ($(LOSCFG_DEMOS_C_ALGORITHMS), y)
 include $(LITEOSTOPDIR)/demos/utility/c-algorithms/c-algorithms.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_C_ALGORITHMS_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_JSMN), y)
+include $(LITEOSTOPDIR)/demos/utility/jsmn/jsmn.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_JSMN_INCLUDE)
+endif
