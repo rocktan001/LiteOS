@@ -1,7 +1,7 @@
 include $(LITEOSTOPDIR)/config.mk
 include $(LITEOSTOPDIR)/components/utility/c-algorithms/c-algorithms.mk
 
-MODULE_NAME := c-algorithms_demo
+MODULE_NAME := c_algorithms_demo
 
 LOCAL_SRCS := $(wildcard *.c)
 

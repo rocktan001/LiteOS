@@ -53,7 +53,7 @@ STATIC INT32 JerryTest(VOID)
     jerry_init(JERRY_INIT_EMPTY);   /* Initialize engine */
 
     /* Register the print function in the global object. */
-    jerryx_handler_register_global((const jerry_char_t *)"print", jerryx_handler_print);
+    (VOID)jerryx_handler_register_global((const jerry_char_t *)"print", jerryx_handler_print);
     /* Setup Global scope code */
     retValue = jerry_parse(NULL, 0, script, (sizeof(script) - 1), JERRY_PARSE_NO_OPTS); 
     if (!jerry_value_is_error(retValue)) {
@@ -83,7 +83,7 @@ VOID JerryscriptDemoTask(VOID)
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
     }

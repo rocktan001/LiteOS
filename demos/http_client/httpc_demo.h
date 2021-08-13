@@ -29,13 +29,13 @@
 #ifndef _HTTP_CLIENT_DEMO_H
 #define _HTTP_CLIENT_DEMO_H
 
+#include "los_typedef.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#include "los_typedef.h"
 
 VOID HttpClientDemoTask(VOID);
 

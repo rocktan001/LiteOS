@@ -49,18 +49,16 @@ extern "C" {
 #define SECTION_LEN           50
 #define INIH_TASK_PRIORITY    6
 #define INIH_TASK_STACK_SIZE  0x2000
-#define MATCH(s, n) (strcmp(section, s) == 0 && strcmp(name, n) == 0)
 
 STATIC UINT32 g_demoTaskId;
 CHAR g_prevSection[SECTION_LEN] = { 0 };
 
-typedef struct
-{
+typedef struct {
     UINT32 date;
     const CHAR *components;
     const CHAR *author;
     const CHAR *description;
-} iniFile;
+} IniFile;
 
 STATIC VOID CreateIniFile(VOID)
 {
@@ -105,15 +103,21 @@ STATIC VOID CreateIniFile(VOID)
 INT32 FileHandler(VOID *user, const CHAR *section, const CHAR *name,
                   const CHAR *value)
 {
-    iniFile *pConfig = (iniFile *)user;
+    if (user == NULL) {
+        return LOS_OK;
+    }
+    IniFile *pConfig = (IniFile *)user;
 
-    if (MATCH("INIH", "components")) {
+    if ((value == NULL) || (section == NULL) || (name == NULL)) {
+        return LOS_OK;
+    }
+    if (!strcmp(section, "INIH") && !strcmp(name, "components")) {
         pConfig->components = strdup(value);
-    } else if (MATCH("INIH", "author")) {
+    } else if (!strcmp(section, "INIH") && !strcmp(name, "author")) {
         pConfig->author = strdup(value);
-    } else if (MATCH("INIH", "date")) {
+    } else if (!strcmp(section, "INIH") && !strcmp(name, "date")) {
         pConfig->date = atoi(value);
-    } else if (MATCH("INIH", "description")) {
+    } else if (!strcmp(section, "INIH") && !strcmp(name, "description")) {
         pConfig->description = strdup(value);
     } else {
         /* unknown section/name, error */
@@ -125,13 +129,17 @@ INT32 FileHandler(VOID *user, const CHAR *section, const CHAR *name,
 INT32 StringHandler(VOID *user, const CHAR *section, const CHAR *name,
                     const CHAR *value)
 {
-    UINT32 ret;
+    (VOID)user;
+    INT32 ret;
+    if (section == NULL) {
+        return LOS_OK;
+    }
     if (strcmp(section, g_prevSection)) {
         printf("[%s]\n", section);
         ret = memcpy_s(g_prevSection,sizeof(g_prevSection)/sizeof(CHAR), section, SECTION_LEN);
-	if (ret != EOK) {
+	    if (ret != EOK) {
             return ret;
-	}
+	    }
         g_prevSection[sizeof(g_prevSection) - 1] = '\0';
     }
     printf("%s = %s;\n", name, value);
@@ -141,7 +149,7 @@ INT32 StringHandler(VOID *user, const CHAR *section, const CHAR *name,
 VOID StringParseDemo(const CHAR *string)
 {
     STATIC UINT32 num;
-    UINT32 ret;
+    INT32 ret;
 
     g_prevSection[0] = '\0';
     ret = ini_parse_string(string, StringHandler, &num);
@@ -154,7 +162,7 @@ VOID StringParseDemo(const CHAR *string)
 STATIC VOID DemoTaskEntry(VOID)
 {
     printf("Inih demo task start to run.\n");
-    iniFile config = { 0 };
+    IniFile config = { 0 };
     CreateIniFile();
 
     if (ini_parse(INI_FILE, FileHandler, &config) < 0) {
@@ -184,7 +192,7 @@ VOID InihDemoTask(VOID)
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
     }

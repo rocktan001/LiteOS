@@ -26,7 +26,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "c-algorithms_demo.h"
+#include "c_algorithms_demo.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "los_task.h"
@@ -46,11 +46,9 @@ extern "C" {
 
 #define ALGORITHMS_TASK_PRIORITY    6
 #define ALGORITHMS_TASK_STACK_SIZE  0x2000
-#define JUDGERET(ret, msg, q) \
-    if (ret != LOS_NOK) {  \
-        printf("%s\n", msg); \
-        queue_free(q); \
-        return; \
+#define JUDGERET(ret, msg) \
+    if ((ret) != LOS_NOK) {  \
+        (VOID)printf("%s\n", msg); \
     }
 
 STATIC UINT32 g_demoTaskId;
@@ -65,43 +63,43 @@ STATIC VOID QueueDemo(VOID)
         return;
     }
     ret = queue_push_tail(q, "xiaohong");
-    JUDGERET(ret, "Push to queue tail failed.", q);
+    JUDGERET(ret, "Push to queue tail failed.");
     ret = queue_push_tail(q, "xiaoming");
-    JUDGERET(ret, "Push to queue tail failed.", q);
+    JUDGERET(ret, "Push to queue tail failed.");
     ret = queue_push_tail(q, "xiaoqiang");
-    JUDGERET(ret, "Push to queue tail failed.", q);
+    JUDGERET(ret, "Push to queue tail failed.");
     qValue = queue_peek_head(q);
     if (qValue == NULL) {
         queue_free(q);
         return;
     }
-    printf("First in line is %s.\n", qValue);
+    printf("First in line is %s.\n", (CHAR *)qValue);
     qValue = queue_peek_tail(q);
     if (qValue == NULL) {
         queue_free(q);
         return;
     }
-    printf("Last in line is %s.\n", qValue);
+    printf("Last in line is %s.\n", (CHAR *)qValue);
     qValue = queue_pop_head(q);
     if (qValue == NULL) {
         queue_free(q);
         return;
     }
-    printf("%s bought a sandwich.\n", qValue);
+    printf("%s bought a sandwich.\n", (CHAR *)qValue);
     qValue = queue_peek_head(q);
     if (qValue == NULL) {
         queue_free(q);
         return;
     }
-    printf("Now %s turn is it to buy rice.\n", qValue);
+    printf("Now %s turn is it to buy rice.\n", (CHAR *)qValue);
     ret = queue_push_head(q, "xiaobing");
-    JUDGERET(ret, "Cutting to the front of the line failed.", q);
+    JUDGERET(ret, "Cutting to the front of the line failed.");
     qValue = queue_peek_head(q);
     if (qValue == NULL) {
         queue_free(q);
         return;
     }
-    printf("%s cutting to the front change first in line.\n", qValue);
+    printf("%s cutting to the front change first in line.\n", (CHAR *)qValue);
     queue_free(q);
 }
 
@@ -175,7 +173,7 @@ STATIC VOID HashDemo(VOID)
         hash_table_free(hash);
         return;
     }
-    ret =hash_table_insert(hash, "3", "nine");
+    ret = hash_table_insert(hash, "3", "nine");
     if (ret != LOS_NOK) {
         printf("Hash table insert failed.\n");
         hash_table_free(hash);
@@ -196,12 +194,14 @@ STATIC VOID ListDemoPrt(ListEntry *list, INT32 len)
     INT32 *listValue = NULL;
     for (i = 0; i < len; i++) {
         listValue = (INT32 *)list_nth_data(list, i);
-        printf("%d ", *listValue);
+        if (listValue != NULL) {
+            printf("%d ", *listValue);
+        }
     }
     printf("\n");
 }
 
-STATIC VOID ListAppendDemo(INT32 a[], INT32 len)
+STATIC VOID ListAppendDemo(INT32 *a, INT32 len)
 {
     ListEntry *appendList = NULL;
     ListEntry *findRet = NULL;
@@ -211,14 +211,14 @@ STATIC VOID ListAppendDemo(INT32 a[], INT32 len)
     INT32 i;
 
     for (i = 0; i < len; i++) {
-        list_append(&appendList, &a[i]);
+        (VOID)list_append(&appendList, &a[i]);
     }
     printf("Array a append to list:\n");
     ListDemoPrt(appendList, len);
     list_sort(&appendList, int_compare);
     printf("Sort num :\n");
     ListDemoPrt(appendList, len);
-    ret = list_remove_data(&appendList, int_equal, &a[2]);
+    ret = list_remove_data(&appendList, int_equal, &a[2]); // 2:the index of array
     if (ret != LOS_NOK) {
         printf("List remove data failed.\n");
         list_free(appendList);
@@ -234,7 +234,7 @@ STATIC VOID ListAppendDemo(INT32 a[], INT32 len)
     list_free(appendList);
 }
 
-STATIC VOID ListPrependDemo(INT32 a[], INT32 len)
+STATIC VOID ListPrependDemo(INT32 *a, INT32 len)
 {
     ListEntry *prependList = NULL;
     ListEntry *entry = NULL;
@@ -243,11 +243,11 @@ STATIC VOID ListPrependDemo(INT32 a[], INT32 len)
     INT32 i;
 
     for (i = 0; i < len; i++) {
-        list_prepend(&prependList, &a[i]);
+        (VOID)list_prepend(&prependList, &a[i]);
     }
     printf("Array a prepend to list:\n");
     ListDemoPrt(prependList, len);
-    entry = list_nth_entry(prependList, 2);
+    entry = list_nth_entry(prependList, 2); // 2:list position
     if (entry == NULL) {
         list_free(prependList);
         return;
@@ -269,7 +269,7 @@ STATIC VOID ListDemo(VOID)
 {
     INT32 a[] = {1, 3, 5, 2, 4, 6};
     INT32 len;
-    len = sizeof(a) / sizeof(INT32);
+    len = (INT32)(sizeof(a) / sizeof(INT32));
     ListAppendDemo(a, len);
     ListPrependDemo(a, len);
 }
@@ -293,7 +293,7 @@ VOID AlgorithmsDemoTask(VOID)
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
     }
