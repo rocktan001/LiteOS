@@ -294,6 +294,60 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+/**
+  * @brief  I2Cx error treatment function
+  */
+static void I2Cx_Error(void)
+{
+  /* De-initialize the SPI communication BUS */
+  HAL_I2C_DeInit(&hi2c1);
+
+  /* Re-Initialize the SPI communication BUS */
+  MX_I2C1_Init();
+}
+
+/**
+  * @brief  Writes a value in a register of the device through BUS.
+  * @param  Addr: Device address on BUS Bus.  
+  * @param  Reg: The target register address to write
+  * @param  pBuffer: The target register value to be written 
+  * @param  Length: buffer size to be written
+  */
+uint8_t I2C1_WriteBuffer(uint8_t Addr, uint8_t Reg,  uint8_t *pBuffer, uint16_t Length)
+{
+    HAL_StatusTypeDef status = HAL_OK;
+    status = HAL_I2C_Master_Transmit(&hi2c1, Addr, pBuffer, Length, 0xff); 
+    /* Check the communication status */
+    if (status != HAL_OK) {
+      /* Re-Initialize the BUS */
+      I2Cx_Error();
+      return 1;
+    }
+    return 0;
+}
+
+/**
+  * @brief  Reads multiple data on the BUS.
+  * @param  Addr: I2C Address
+  * @param  Reg: Reg Address 
+  * @param  pBuffer: pointer to read data buffer
+  * @param  Length: length of the data
+  * @retval 0 if no problems to read multiple data
+  */
+uint8_t I2C1_ReadBuffer(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length)
+{
+    HAL_StatusTypeDef status = HAL_OK;
+    status = HAL_I2C_Master_Receive(&hi2c1, Addr, pBuffer, Length, 0xff);
+    //  HAL_I2C_Mem_Read(&hi2c1, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, pBuffer, Length, 0x1000);
+    /* Check the communication status */
+    if (status == HAL_OK) {
+        return 0;
+    } else {
+        /* Re-Initialize the BUS */
+        I2Cx_Error();
+        return 1;
+    }
+}
 
 /* USER CODE END 1 */
 

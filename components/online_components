@@ -39,6 +39,7 @@ openexif-2.1.4 &#& components/media/openexif              &#& LOSCFG_COMPONENTS_
 OpenSSL_1_1_0e &#& components/security/openssl            &#& LOSCFG_COMPONENTS_OPENSSL=y       &#& https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_1_1_0e.zip
 opus-1.3.1     &#& components/media/opus                  &#& LOSCFG_COMPONENTS_OPUS=y          &#& https://github.com/xiph/opus/archive/refs/tags/v1.3.1.zip
 PDFGen-0.1.0   &#& components/utility/pdfgen              &#& LOSCFG_COMPONENTS_PDFGEN=y        &#& https://github.com/AndreRenaud/PDFGen/archive/refs/tags/0.1.0.zip
+RHash-1.4.2    &#& components/security/rhash              &#& LOSCFG_COMPONENTS_RHASH=y         &#& https://github.com/rhash/RHash/archive/refs/tags/v1.4.2.zip
 qrencode-0.1.1 &#& components/utility/qrencode            &#& LOSCFG_COMPONENTS_QRENCODE=y      &#& https://github.com/AlexCharlton/qrencode/archive/refs/tags/0.1.1.zip
 regex-master   &#& components/utility/regex               &#& LOSCFG_COMPONENTS_REGEX=y         &#& https://github.com/kokke/tiny-regex-c/archive/refs/heads/master.zip
 sfud-master    &#& components/utility/sfud                &#& LOSCFG_COMPONENTS_SFUD=y          &#& https://github.com/armink/SFUD/archive/refs/heads/master.zip

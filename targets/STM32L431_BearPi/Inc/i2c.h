@@ -66,7 +66,8 @@ void MX_I2C2_Init(void);
 void MX_I2C3_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+uint8_t I2C1_WriteBuffer(uint8_t Addr, uint8_t Reg,  uint8_t *pBuffer, uint16_t Length);
+uint8_t I2C1_ReadBuffer(uint8_t Addr, uint8_t Reg,  uint8_t *pBuffer, uint16_t Length);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

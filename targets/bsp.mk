@@ -314,6 +314,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_URIPARSER), y)
         LITEOS_BASELIB += -luriparser
     endif
+    ifeq ($(LOSCFG_COMPONENTS_RHASH), y)
+        LITEOS_BASELIB += -lrhash
+    endif
     ifeq ($(LOSCFG_COMPONENTS_JSMN), y)
         LITEOS_BASELIB += -ljsmn
     endif
@@ -427,6 +430,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_C_ALGORITHMS), y)
         LITEOS_BASELIB += -lc-algorithms_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_RHASH), y)
+        LITEOS_BASELIB += -lrhash_demo
     endif
     ifeq ($(LOSCFG_DEMOS_JSMN), y)
         LITEOS_BASELIB += -ljsmn_demo

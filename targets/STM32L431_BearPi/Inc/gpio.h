@@ -47,13 +47,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
 
-#define KEY1_Pin GPIO_PIN_2
-#define KEY1_GPIO_Port GPIOB
-#define KEY2_Pin GPIO_PIN_3
-#define KEY2_GPIO_Port GPIOB
+#define KEY1_PIN GPIO_PIN_2
+#define KEY1_GPIO_PORT GPIOB
+#define KEY2_PIN GPIO_PIN_3
+#define KEY2_GPIO_PORT GPIOB
 
-#define LED_Pin GPIO_PIN_13
-#define LED_GPIO_Port GPIOC
+#define LED_PIN GPIO_PIN_13
+#define LED_GPIO_PORT GPIOC
 //#define Light_Pin GPIO_PIN_9
 //#define Light_GPIO_Port GPIOB
 /* USER CODE BEGIN Includes */
