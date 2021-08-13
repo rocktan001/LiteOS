@@ -3,7 +3,7 @@ config LOSCFG_PLATFORM
     default "FM33LC0XX_DEMO"           	if LOSCFG_PLATFORM_FM33LC0XX_DEMO
 
 choice
-    prompt "Board"
+    prompt "Target"
     depends on LOSCFG_FAMILY_FMSH
     default LOSCFG_PLATFORM_FM33LC0XX_DEMO
     help

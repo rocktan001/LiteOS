@@ -3,7 +3,7 @@ config LOSCFG_PLATFORM
     default "HiFive1_Rev1_B01"          if LOSCFG_PLATFORM_HIFIVE1_REV1_B01
 
 choice
-    prompt "Board"
+    prompt "Target"
     depends on LOSCFG_FAMILY_SIFIVE
     default LOSCFG_PLATFORM_HIFIVE1_REV1_B01
     help

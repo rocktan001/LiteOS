@@ -5,7 +5,7 @@ config LOSCFG_PLATFORM
     default "GD32VF103V_EVAL"       if LOSCFG_PLATFORM_GD32VF103V_EVAL
 
 choice
-    prompt "Board"
+    prompt "Target"
     depends on LOSCFG_FAMILY_GD
     default LOSCFG_PLATFORM_GD32E103C_START
     help

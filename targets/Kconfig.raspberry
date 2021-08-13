@@ -6,7 +6,7 @@ config LOSCFG_PLATFORM
     default "Raspberry_Pi4B"      if LOSCFG_PLATFORM_RASPBERRY_PI4B
 
 choice
-    prompt "Board"
+    prompt "Target"
     depends on LOSCFG_FAMILY_RASPBERRY
     default LOSCFG_PLATFORM_RASPBERRY_PI2B
     help

@@ -3,7 +3,7 @@ config LOSCFG_PLATFORM
     default "CB2201"      if LOSCFG_PLATFORM_CB2201
 
 choice
-    prompt "Board"
+    prompt "Target"
     depends on LOSCFG_FAMILY_CSKY
     default LOSCFG_PLATFORM_CB2201
     help

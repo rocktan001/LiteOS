@@ -14,7 +14,7 @@ config LOSCFG_PLATFORM
     default "STM32L552_Nucleo"          if LOSCFG_PLATFORM_STM32L552_NUCLEO
 
 choice
-    prompt "Board"
+    prompt "Target"
     depends on LOSCFG_FAMILY_STM32
     default LOSCFG_PLATFORM_STM32F429IGTX
     help

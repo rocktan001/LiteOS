@@ -4,7 +4,7 @@ config LOSCFG_PLATFORM
     default "qemu-virt-a53"   if LOSCFG_PLATFORM_QEMU_VIRT_A53
 
 choice
-    prompt "Board"
+    prompt "Target"
     depends on LOSCFG_FAMILY_QEMU
     default LOSCFG_PLATFORM_PBX_A9
     help

@@ -3,7 +3,7 @@ config LOSCFG_PLATFORM
     default "APM32F103_Geehy"           	if LOSCFG_PLATFORM_APM32F103_GEEHY
 
 choice
-    prompt "Board"
+    prompt "Target"
     depends on LOSCFG_FAMILY_APM32
     default LOSCFG_PLATFORM_APM32F103_GEEHY
     help
