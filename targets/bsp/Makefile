@@ -210,7 +210,7 @@ else ifeq ($(LOSCFG_PLATFORM_FM33LC0XX_DEMO), y)
 FM33LC0XX_HAL_SRC = \
     $(wildcard  $(HAL_DRIVER_SRC)/Src/*.c)
     LOCAL_SRCS = $(FM33LC0XX_HAL_SRC)
-else ifeq ($(LOSCFG_PLATFORM_APM32F103_APEXMIC), y)
+else ifeq ($(LOSCFG_PLATFORM_APM32F103_GEEHY), y)
     APM32F103ZET6_DRIVER_SRC = $(wildcard drivers/APM32F10x_StdPeriphDriver/src/*.c)
     LOCAL_SRCS = $(APM32F103ZET6_DRIVER_SRC)
 endif
