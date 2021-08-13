@@ -31,6 +31,7 @@
 #include "arch/canary.h"
 #include "usart.h"
 #include "tim.h"
+#include "gpio.h"
 
 VOID board_config(VOID)
 {
@@ -40,6 +41,7 @@ VOID board_config(VOID)
 VOID HardwareInit(VOID)
 {
     SystemClock_Config();
+    MX_GPIO_Init();
     MX_USART1_UART_Init();
     MX_TIM3_Init();
 }

@@ -86,8 +86,8 @@
 target目录下保存了当前已经支持的开发板工程源码。当移植新开发板时，应该在target目录下增加该开发板的目录，目录结构和代码可以参考当前已支持的开发板的目录。例如：
 
 -   STM32F4系列的移植可以参考Cloud\_STM32F429IGTx\_FIRE工程。
--   STM32F7系列的移植可以参考STM32F769IDISCOVERY工程。
--   STM32L4系列的移植可以参考STM32L431\_BearPi工程。
+-   STM32F7系列的移植可以参考STM32F746\_Nucleo工程。
+-   STM32L4系列的移植可以参考STM32L496\_Nucleo工程。
 
 <h2 id="环境准备">环境准备</h2>
 
@@ -466,7 +466,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 1.  将芯片外设驱动文件替换为对应芯片的文件。
     -   修改芯片外设驱动源文件system\_xxx.c。
 
-        LiteOS对STM32F407\_OpenEdv\\Src\\system\_stm32f4xx.c做了修改，所以该文件无法使用在新开发板上，移植时可以直接替换为裸机工程中对应的文件。对于正点原子STM32F407开发板，在裸机工程中的对应文件为：Core\\Src\\system\_stm32f4xx.c。
+        不同开发板的system\_stm32f4xx.c文件中内容不一样，所以该文件无法使用在新开发板上，移植时可以直接替换为裸机工程中对应的文件。对于正点原子STM32F407开发板，在裸机工程中的对应文件为：Core\\Src\\system\_stm32f4xx.c。
 
     -   修改芯片外设驱动头文件。
 
@@ -532,50 +532,22 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
 <h3 id="适配定时器初始化文件">适配定时器初始化文件</h3>
 
-1.  使用裸机工程的串口初始文件**Core\\Src\\tim.c**和**Core\\Inc\\tim.h**替换LiteOS源码中的**targets\\STM32F407\_OpenEdv\\Src\\tim.c**和**targets\\STM32F407\_OpenEdv\\Inc\\tim.h**。
-2.  裸机工程相对于LiteOS系统缺少相关函数（StmGetTimerCycles，StmTimerHwiCreate，StmTimerInit）声明和枚举类型Timer_t定义，在**targets\\STM32F407\_OpenEdv\\Inc\\tim.h**文件中增加如下代码：
+1.  使用裸机工程的定时器初始文件**Core\\Src\\tim.c**和**Core\\Inc\\tim.h**替换LiteOS源码中的**targets\\STM32F407\_OpenEdv\\Src\\tim.c**和**targets\\STM32F407\_OpenEdv\\Inc\\tim.h**。
+2.  裸机工程相对于LiteOS系统缺少关于g_cpupTimerOps结构体的实现，在**targets\\STM32F407\_OpenEdv\\Inc\\tim.h**文件中增加如下代码：
     ```c
     #include "los_typedef.h"
-    typedef enum {
-        TIMER1 = 1,
-        TIMER2,
-        TIMER3,
-        TIMER4,
-        TIMER5,
-        TIMER6,
-        TIMER7,
-        TIMER8
-    } Timer_t;
-
-    UINT64 StmGetTimerCycles(Timer_t num);
-    VOID StmTimerHwiCreate(VOID);
-    VOID StmTimerInit(VOID);
+    #include "platform.h"
+    extern TimControllerOps g_cpupTimerOps;
     ```
-3.  增加2中对应函数的实现，对targets\\STM32F407\_OpenEdv\\Src\\tim.c文件中增加如下代码：
+3.  增加2中对应结构体的实现，对targets\\STM32F407\_OpenEdv\\Src\\tim.c文件中增加如下代码：
     ```c
+    #include "sys_init.h"
     #include "los_hwi.h"
-
-    #define TIMER3_RELOAD 50000
-
-    UINT64 Timer3Getcycle(VOID)
-    {
-        static UINT64 bacCycle;
-        static UINT64 cycleTimes;
-        UINT64 swCycles = htim3.Instance->CNT;
-
-        if (swCycles <= bacCycle) {
-            cycleTimes++;
-        }
-        bacCycle = swCycles;
-        return swCycles + cycleTimes * TIMER3_RELOAD;
-    }
-
-    VOID StmTimerInit(VOID)
+    VOID TimerInit(VOID)
     {
         MX_TIM3_Init();
     }
-
-    VOID StmTimerHwiCreate(VOID)
+    VOID TimerHwiCreate(VOID)
     {
         UINT32 ret;
 
@@ -586,20 +558,27 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
         }
         HAL_TIM_Base_Start_IT(&htim3);
     }
-
-    UINT64 StmGetTimerCycles(Timer_t num)
+    UINT64 GetTimerCycles(VOID)
     {
+        static UINT64 bacCycle;
+        static UINT64 cycleTimes;
         UINT64 cycles = 0;
+        UINT64 swCycles = htim3.Instance->CNT;
 
-        switch (num) {
-            case 3:
-                cycles = Timer3Getcycle();
-                break;
-            default:
-                printf("Wrong number of TIMER.\n");
+        if (swCycles < bacCycle) {
+            cycleTimes++;
         }
+
+        bacCycle = swCycles;
+        cycles = swCycles + cycleTimes * TIMER3_RELOAD;
+
         return cycles;
     }
+    TimControllerOps g_cpupTimerOps = {
+        .timInit = TimerInit,
+        .timHwiCreate = TimerHwiCreate,
+        .timGetTimerCycles = GetTimerCycles
+    };
     ```
 
 <h3 id="添加GPIO初始化文件">添加GPIO初始化文件</h3>
@@ -620,7 +599,6 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 3.  在targets\\STM32F407\_OpenEdv\\Inc\\gpio.h文件中新增如下代码以避免相关宏定义缺少报错。
     ```c
     #include "stm32f4xx_hal.h"
-
     ```
 
 <h3 id="适配串口初始化文件">适配串口初始化文件</h3>
@@ -630,16 +608,49 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 
     ```c
     #include "stm32f4xx_hal.h"
+    #include "los_typedef.h"
+    #include "uart.h"
+    extern UartControllerOps g_armGenericUart;
     ```
 
 3.  在**targets\\STM32F407\_OpenEdv\\Src\\usart.c**文件尾部添加如下函数定义：
 
     ```c
-    __attribute__((used)) int _write(int fd, char *ptr, int len)
+    VOID UsartInit(VOID)
     {
-        (void)HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, 0xFFFF);
-        return len;
+        MX_USART1_UART_Init();
     }
+    VOID UsartWrite(const CHAR c)
+    {
+        (VOID)HAL_UART_Transmit(&huart1, (UINT8 *)&c, 1, DEFAULT_TIMEOUT);
+    }
+    UINT8 UsartRead(VOID)
+    {
+        UINT8 ch;
+        (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
+        return ch;
+    }
+    STATIC VOID UartHandler(VOID)
+    {
+        (VOID)uart_getc();
+    }
+    INT32 UsartHwi(VOID)
+    {
+        if (huart1.Instance == NULL) {
+            return LOS_NOK;
+        }
+        HAL_NVIC_EnableIRQ(USART1_IRQn);
+        __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_TC);
+        (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+        __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+        return LOS_OK;
+    }
+    UartControllerOps g_armGenericUart = {
+        .uartInit = UsartInit,
+        .uartWriteChar = UsartWrite,
+        .uartReadChar = UsartRead,
+        .uartHwiCreate = UsartHwi
+    };
     ```
 
 
@@ -776,14 +787,13 @@ STM32F407ZGTX_HAL_SRC = \
 
 <h4 id="添加新开发板到系统配置中">添加新开发板到系统配置中</h4>
 
-1.  修改targets\\targets.mk。
+1.  修改targets\\bsp.mk。
 
     可以参考其他开发板的编译配置，新增正点原子开发板的配置，如下所示：
 
     ```makefile
     ######################### STM32F407ZGTX Options###############################
     else ifeq ($(LOSCFG_PLATFORM_STM32F407ZGTX), y)
-        TIMER_TYPE := arm/timer/arm_cortex_m
         LITEOS_CMACRO_TEST += -DSTM32F407xx
         HAL_DRIVER_TYPE := STM32F4xx_HAL_Driver
     ```
@@ -799,6 +809,9 @@ STM32F407ZGTX_HAL_SRC = \
     bool "STM32F407_OpenEdv"
     select LOSCFG_USING_BOARD_LD
     select LOSCFG_ARCH_CORTEX_M4
+    select LOSCFG_CORTEX_M_NVIC
+    select LOSCFG_CORTEX_M_SYSTICK
+    select LOSCFG_DRIVER_HAL_LIB
     ```
     b. choice条目下面的help追加STM32F407_OpenEdv。
 
@@ -847,59 +860,43 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
 
 下面以一个循环亮灯任务为例，介绍LiteOS任务创建流程。
 
-在移植好的开发板工程“targets\\开发板名称\\Src\\main.c”文件中按照如下流程创建任务：
+在移植好的开发板工程“targets\\开发板名称\\Src\\user\_task.c”文件中按照如下流程创建任务：
 
-1.  编写任务函数，创建两个不同闪烁频率的LED指示灯任务：
+1.  编写任务函数，创建一个闪着不同闪烁频率的LED指示灯的任务：
 
     ```c
-    UINT32 LED1_init(VOID)
+    STATIC UINT32 LedTask(VOID)
     {
-        while(1) {
-            HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9); // 需要和“创建裸机工程”中配置的LED灯引脚对应
-            LOS_TaskDelay(500000);
-        }
-        return 0;
-    }
-    
-    UINT32 LED2_init(VOID)
-    {
-        while(1) {
-            HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_10); // 需要和“创建裸机工程”中配置的LED灯引脚对应
-            LOS_TaskDelay(1000000);
+        while (1) {
+            HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9);
+            HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_10);
+            LOS_TaskDelay(TASK_DELAY);
+            HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9);
+            LOS_TaskDelay(TASK_DELAY);
         }
         return 0;
     }
     ```
 
-2.  配置两个任务的参数并创建任务：
+2.  配置LED指示灯任务的参数并创建任务：
 
     ```c
-    STATIC UINT32 LED1TaskCreate(VOID)
+    STATIC UINT32 LedTaskCreate(VOID)
     {
-        UINT32 taskId;
-        TSK_INIT_PARAM_S LEDTask;
-    
-        (VOID)memset_s(&LEDTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
-        LEDTask.pfnTaskEntry = (TSK_ENTRY_FUNC)LED1_init;
-        LEDTask.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-        LEDTask.pcName = "LED1_Task";
-        LEDTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
-        LEDTask.uwResved = LOS_TASK_STATUS_DETACHED;
-        return LOS_TaskCreate(&taskId, &LEDTask);
-    }
-    
-    STATIC UINT32 LED2TaskCreate(VOID)
-    {
-        UINT32 taskId;
-        TSK_INIT_PARAM_S LEDTask;
-    
-        (VOID)memset_s(&LEDTask, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
-        LEDTask.pfnTaskEntry = (TSK_ENTRY_FUNC)LED2_init;
-        LEDTask.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-        LEDTask.pcName = "LED2_Task";
-        LEDTask.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
-        LEDTask.uwResved = LOS_TASK_STATUS_DETACHED;
-        return LOS_TaskCreate(&taskId, &LEDTask);
+        INT32 ret;
+        UINT32 taskId = 0;
+        TSK_INIT_PARAM_S ledTaskParam;
+
+        ret = memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+        if (ret != EOK) {
+            return ret;
+        }
+        ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask;
+        ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+        ledTaskParam.pcName = "ledTask";
+        ledTaskParam.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+        ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
+        return LOS_TaskCreate(&taskId, &ledTaskParam);
     }
     ```
 
@@ -910,23 +907,21 @@ LiteOS支持多任务。在LiteOS 中，一个任务表示一个线程。任务�
     MX_GPIO_Init();
     ```
 
-4.  对于移植好的STM32F407\_OpenEdv工程，任务处理函数app\_init定义在targets\\STM32F407\_OpenEdv\\Src\\user\_task.c文件中，其中包含了网络、文件系统等相关的任务，目前并不需要执行这些任务，可在targets\\STM32F407\_OpenEdv\\Makefile的“**USER\_SRC**”变量中删除这个文件，后续有相关任务需求时，可以参考这个文件的实现。
-5.  在main.c文件的main\(\)函数前实现任务处理函数app\_init\(\)，添加对LED任务创建函数的调用：
+4.  在user\_task.c文件中的app\_init\(\)，添加对LED任务创建函数的调用：
 
     ```c
-    UINT32 app_init(VOID)
+    VOID app_init(VOID)
     {
-        LED1TaskCreate();
-        LED2TaskCreate();
-    
-        return 0;
+        printf("app init!\n");
+        (VOID)LedTaskCreate();
+        DemoEntry();
     }
     ```
 
 
 #### 完整代码示例<a name="section1095419341137"></a>
 
-[main.c](resource/main.c)
+[user\_task.c](resource/user\_task.c)
 
 >![](public_sys-resources/icon-note.gif) **说明：**
 >此代码示例只完成了基本任务的创建，开发者可以根据实际需求创建自己的任务。

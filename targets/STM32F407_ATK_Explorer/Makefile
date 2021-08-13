@@ -15,6 +15,7 @@ USER_SRC = \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/system_stm32f4xx.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/usart.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/tim.c \
+    $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/gpio.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/sys_init.c \
     $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Src/user_task.c
     C_SOURCES += $(USER_SRC)
