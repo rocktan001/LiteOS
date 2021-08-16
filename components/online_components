@@ -17,6 +17,7 @@ c-algorithms-1.2.0   &#& components/utility/c-algorithms  &#& LOSCFG_COMPONENTS_
 curl-7.54.1    &#& components/utility/curl                &#& LOSCFG_COMPONENTS_CURL=y          &#& https://github.com/curl/curl/archive/refs/tags/curl-7_54_1.zip
 fastlz-0.5.0   &#& components/utility/fastlz              &#& LOSCFG_COMPONENTS_FASTLZ=y        &#& https://github.com/ariya/FastLZ/archive/refs/tags/0.5.0.zip
 freetype-2.4.0 &#& components/utility/freetype            &#& LOSCFG_COMPONENTS_FREETYPE=y      &#& https://github.com/freetype/freetype/archive/refs/tags/VER-2-4-0.zip
+genann-1.0.0   &#& components/utility/genann              &#& LOSCFG_COMPONENTS_GENANN=y        &#& https://github.com/codeplea/genann/archive/refs/tags/v1.0.0.zip
 inih-r53       &#& components/utility/inih                &#& LOSCFG_COMPONENTS_INIH=y          &#& https://github.com/benhoyt/inih/archive/refs/tags/r53.zip
 iniparser-4.1  &#& components/utility/iniparser           &#& LOSCFG_COMPONENTS_INIPARSER=y     &#& https://github.com/ndevilla/iniparser/archive/refs/tags/v4.1.zip
 jerryscript-2.4.0  &#& components/language/jerryscript    &#& LOSCFG_COMPONENTS_JERRYSCRIPT=y   &#& https://github.com/jerryscript-project/jerryscript/archive/refs/tags/v2.4.0.zip

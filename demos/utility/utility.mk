@@ -94,3 +94,8 @@ ifeq ($(LOSCFG_DEMOS_JSMN), y)
 include $(LITEOSTOPDIR)/demos/utility/jsmn/jsmn.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_JSMN_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_GENANN), y)
+include $(LITEOSTOPDIR)/demos/utility/genann/genann.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_GENANN_INCLUDE)
+endif

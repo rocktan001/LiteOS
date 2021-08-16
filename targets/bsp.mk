@@ -320,6 +320,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_JSMN), y)
         LITEOS_BASELIB += -ljsmn
     endif
+    ifeq ($(LOSCFG_COMPONENTS_GENANN), y)
+        LITEOS_BASELIB += -lgenann
+    endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
     endif
@@ -434,8 +437,14 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_RHASH), y)
         LITEOS_BASELIB += -lrhash_demo
     endif
+    ifeq ($(LOSCFG_DEMOS_RHASH), y)
+        LITEOS_BASELIB += -lrhash_demo
+    endif
     ifeq ($(LOSCFG_DEMOS_JSMN), y)
         LITEOS_BASELIB += -ljsmn_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_GENANN), y)
+        LITEOS_BASELIB += -lgenann_demo
     endif
 endif
 

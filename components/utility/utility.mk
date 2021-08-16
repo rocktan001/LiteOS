@@ -109,3 +109,9 @@ ifeq ($(LOSCFG_COMPONENTS_REGEX), y)
 include $(LITEOSTOPDIR)/components/utility/regex/regex.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_REGEX_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_GENANN), y)
+include $(LITEOSTOPDIR)/components/utility/genann/genann.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_GENANN_INCLUDE)
+endif
+
