@@ -46,20 +46,24 @@ STATIC UINT32 g_demoTaskId;
 STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t rdSize)
 {
     INT32 ret;
+    if (rdSize <= 0) {
+        return LOS_NOK;
+    }
     UINT8 *buff = (UINT8 *)malloc(rdSize);
     if (buff == NULL) {
         return LOS_NOK;
     }
+    (VOID)memset_s(buff, rdSize, 0, rdSize);
     printf("Sfud start to read.\n");
-    ret = sfud_read(flash, addr, rdSize, buff);
+    ret = (VOID)sfud_read(flash, addr, rdSize, buff);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud read failed.\n");
-	free(buff);
+	    free(buff);
         return LOS_NOK;
     }
     printf("Sfud read successfully.\n");
     for (INT32 i = 0; i < rdSize; ++i) {
-         printf("%02x ", buff[i]);
+         printf("%02x ", (UINT32)buff[i]);
          if (((i + 1) % 0x10) == 0) { // Each row displays 16 pieces of data.
              printf("\n");
          }
@@ -72,21 +76,22 @@ STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t rdSize)
 
 INT32 SfudDemoEntry(VOID) 
 {
-    INT32 ret = sfud_init();
+    INT32 ret = (INT32)sfud_init();
     if (ret != SFUD_SUCCESS) {
         printf("Sfud init failed\n");
         return LOS_NOK;
     }
     // In sfdu device table, pointer is offset to SFUD_W25Q256JV_DEVICE_INDEX.
     const sfud_flash *flash = sfud_get_device_table() + SFUD_W25Q256JV_DEVICE_INDEX;
-    INT32 addr = 0; // Operate on spi falsh address 0.
-    INT32 size = 0x200; // Set the size of 512 data to operate.
-    UINT8 *buff = (UINT8 *)malloc(size);
+    const INT32 addr = 0; // Operate on spi falsh address 0.
+    const INT32 size = 0x200; // Set the size of 512 data to operate.
+    UINT8 *buff = (UINT8 *)malloc((UINT32)size);
     if (buff == NULL) {
         return LOS_NOK;
     }
+    (VOID)memset_s(buff, size, 0, size);
     for (INT32 i = 0, j = 0; i < size; i++, j++) {
-         buff[i] = j;
+         buff[i] = (UINT8)j;
          if (buff[i] == 0xFF) { // The maximum value of a byte is 0xFF.
              j = 0;
          }
@@ -94,7 +99,7 @@ INT32 SfudDemoEntry(VOID)
 
     // The following are write and read, erase example operations.
     printf("Sfud start to write.\n");
-    ret = sfud_write(flash, addr, size, buff);
+    ret = (INT32)sfud_write(flash, addr, size, buff);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud write failed.\n");
         free(buff);
@@ -123,7 +128,7 @@ VOID SfudDemoTask(VOID)
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
     }

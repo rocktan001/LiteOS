@@ -31,8 +31,6 @@
 #include <librws.h>
 #include "los_task.h"
 
-#define TEXT_BUFF_LEN                   1024
-#define BIN_BUFF_LEN                    1024
 #define WEBSOCKET_DEMO_SERVER           "192.168.10.182"
 #define WEBSOCKET_DEMO_PORT             8000
 #define LIBRWS_TASK_PRIORITY            6
@@ -44,7 +42,9 @@ STATIC rws_socket g_socket = NULL;
 
 STATIC VOID OnSocketReceivedText(rws_socket socket, const CHAR *text, const UINT32 length)
 {
+    (VOID)socket;
     INT32 ret;
+    CHAR *buff = NULL;
     if ((text == NULL) || (length == 0)) {
         printf("Websocket text receive failed.\n");
         return;
@@ -56,6 +56,7 @@ STATIC VOID OnSocketReceivedText(rws_socket socket, const CHAR *text, const UINT
     }
     ret = memcpy_s(buff, length, text, length);
     if (ret != EOK) {
+        free(buff);
         printf("Websocket text receive failed.\n");
         return;
     }
@@ -67,7 +68,9 @@ STATIC VOID OnSocketReceivedText(rws_socket socket, const CHAR *text, const UINT
 
 STATIC VOID OnSocketReceivedBin(rws_socket socket, const VOID *data, const UINT32 length)
 {
+    (VOID)socket;
     INT32 ret;
+    CHAR *buff = NULL;
     if ((data == NULL) || (length == 0)) {
         printf("Websocket bin receive failed.\n");
         return;
@@ -80,6 +83,7 @@ STATIC VOID OnSocketReceivedBin(rws_socket socket, const VOID *data, const UINT3
     ret = memcpy_s(buff, length, data, length);
     if (ret != EOK) {
         printf("Websocket bin receive failed.\n");
+        free(buff);
         return;
     }
 
@@ -91,7 +95,7 @@ STATIC VOID OnSocketReceivedBin(rws_socket socket, const VOID *data, const UINT3
 STATIC VOID OnSocketConnected(rws_socket socket)
 {
     const CHAR *demoText = "LiteOS Websocket demo data";
-    rws_socket_send_text(socket, demoText);
+    (VOID)rws_socket_send_text(socket, demoText);
     printf("\nWebsocket connected\n");
 }
 
@@ -113,18 +117,18 @@ STATIC VOID WebsocketConnect(VOID)
     rws_socket_set_path(g_socket, "/");
     rws_socket_set_port(g_socket, WEBSOCKET_DEMO_PORT);
 
-    rws_socket_set_on_disconnected(g_socket, &OnSocketDisconnected);
-    rws_socket_set_on_connected(g_socket, &OnSocketConnected);
-    rws_socket_set_on_received_text(g_socket, &OnSocketReceivedText);
-    rws_socket_set_on_received_bin(g_socket, &OnSocketReceivedBin);
+    rws_socket_set_on_disconnected(g_socket, OnSocketDisconnected);
+    rws_socket_set_on_connected(g_socket, OnSocketConnected);
+    rws_socket_set_on_received_text(g_socket, OnSocketReceivedText);
+    rws_socket_set_on_received_bin(g_socket, OnSocketReceivedBin);
 
-    rws_socket_connect(g_socket);
+    (VOID)rws_socket_connect(g_socket);
 }
 
 STATIC VOID DemoTaskEntry(VOID)
 {
     printf("Librws demo start to run.\n");
-    LOS_TaskDelay(LIBRWS_DEMO_WAIT_TIME);    // wait lwip dhcp get ip.
+    (VOID)LOS_TaskDelay(LIBRWS_DEMO_WAIT_TIME);    // wait lwip dhcp get ip.
     WebsocketConnect();
 }
 
@@ -133,7 +137,7 @@ VOID LibrwsDemo(VOID)
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
     }

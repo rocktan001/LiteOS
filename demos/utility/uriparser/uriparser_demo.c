@@ -122,7 +122,7 @@ VOID UriparserDemoTask(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
     }

@@ -223,7 +223,7 @@
 #endif
 
 #ifdef LOSCFG_DEMOS_C_ALGORITHMS
-#include "c-algorithms_demo.h"
+#include "c_algorithms_demo.h"
 #endif
 
 #ifdef LOSCFG_DEMOS_JERRYSCRIPT

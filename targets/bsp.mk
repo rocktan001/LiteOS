@@ -429,7 +429,7 @@ ifneq ($(OS), Linux)
         LITEOS_BASELIB += -luriparser_demo
     endif
     ifeq ($(LOSCFG_DEMOS_C_ALGORITHMS), y)
-        LITEOS_BASELIB += -lc-algorithms_demo
+        LITEOS_BASELIB += -lc_algorithms_demo
     endif
     ifeq ($(LOSCFG_DEMOS_RHASH), y)
         LITEOS_BASELIB += -lrhash_demo

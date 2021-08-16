@@ -296,7 +296,7 @@ GetSourceCode()
         if [ -f "${g_componentName}.${packageType[i]}" ]; then
             Sha256sumCheck ${g_srcSha256File} ${g_componentName}
             ret=$?
-            if [ ret? -ne 0 ]; then
+            if [ $ret -ne 0 ]; then
                 rm -rf ${g_componentName}.${packageType[i]}
                 DownloadSourceCode
                 ret=$?
