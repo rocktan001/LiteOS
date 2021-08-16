@@ -415,8 +415,10 @@ choice
 config LOSCFG_PLATFORM_OSAPPINIT
     bool "Enable Appinit"
 
+if LOSCFG_PLATFORM_STM32F429IGTX || LOSCFG_PLATFORM_STM32F769IDISCOVERY
 config LOSCFG_TEST
     bool "Enable Auto TestSuit"
+endif
 
 endchoice
 osource "test/Kconfig"
