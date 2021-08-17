@@ -302,6 +302,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_INIH), y)
         LITEOS_BASELIB += -linih
     endif
+    ifeq ($(LOSCFG_COMPONENTS_PIXMAN), y)
+        LITEOS_BASELIB += -lpixman
+    endif
     ifeq ($(LOSCFG_COMPONENTS_SFUD), y)
         LITEOS_BASELIB += -lsfud
     endif
@@ -412,6 +415,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_QRENCODE), y)
         LITEOS_BASELIB += -lqrencode_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_PIXMAN), y)
+        LITEOS_BASELIB += -lpixman_demo
     endif
     ifeq ($(LOSCFG_DEMOS_FASTLZ), y)
         LITEOS_BASELIB += -lfastlz_demo

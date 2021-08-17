@@ -15,6 +15,11 @@ include $(LITEOSTOPDIR)/components/media/openexif/openexif.mk
 COMPONENTS_MEDIA_INCLUDE += $(COMPONENTS_OPENEXIF_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_PIXMAN), y)
+include $(LITEOSTOPDIR)/components/media/pixman/pixman.mk
+COMPONENTS_MEDIA_INCLUDE += $(COMPONENTS_PIXMAN_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_COMPONENTS_UPNP), y)
 include $(LITEOSTOPDIR)/components/media/upnp/upnp.mk
 COMPONENTS_INCLUDE += $(COMPONENTS_UPNP_INCLUDE)

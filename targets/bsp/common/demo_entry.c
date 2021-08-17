@@ -178,6 +178,10 @@
 #include "qrencode_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_PIXMAN
+#include "pixman_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_SQLITE
 #include "sqlite_demo.h"
 #endif
@@ -462,6 +466,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_QRENCODE
     QrencodeDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_PIXMAN
+    PixmanDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_SQLITE
