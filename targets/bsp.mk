@@ -443,6 +443,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DEMOS_JSMN), y)
         LITEOS_BASELIB += -ljsmn_demo
     endif
+    ifeq ($(LOSCFG_DEMOS_AGRICULTURE), y)
+        LITEOS_BASELIB += -lagriculture
+    endif
     ifeq ($(LOSCFG_DEMOS_GENANN), y)
         LITEOS_BASELIB += -lgenann_demo
     endif

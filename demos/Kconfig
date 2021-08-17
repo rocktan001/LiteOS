@@ -2,6 +2,7 @@ menu "Demos"
 
 source "demos/agenttiny_lwm2m/Kconfig"
 source "demos/agenttiny_mqtt/Kconfig"
+source "demos/agriculture/Kconfig"
 source "demos/ai/Kconfig"
 source "demos/drivers/Kconfig"
 source "demos/dtls_server/Kconfig"

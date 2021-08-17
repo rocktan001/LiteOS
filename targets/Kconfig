@@ -63,3 +63,6 @@ config LOSCFG_USING_BOARD_LD
 
 config LOSCFG_HW_QSPI
     bool "Qspi peripherals"
+
+config LOSCFG_DRIVER_E53
+    bool

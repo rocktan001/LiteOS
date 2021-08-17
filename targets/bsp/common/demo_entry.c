@@ -230,6 +230,10 @@
 #include "jerryscript_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_AGRICULTURE
+#include "agriculture.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_RHASH
 #include "rhash_demo.h"
 #endif
@@ -498,6 +502,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_JERRYSCRIPT
     JerryscriptDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_AGRICULTURE
+    AgricultureDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_RHASH

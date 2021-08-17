@@ -70,6 +70,11 @@ include $(LITEOSTOPDIR)/demos/http_client/http_client.mk
 DEMOS_INCLUDE += $(DEMOS_HTTP_CLIENT_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_AGRICULTURE), y)
+include $(LITEOSTOPDIR)/demos/agriculture/agriculture.mk
+DEMOS_INCLUDE += $(DEMOS_AGRICULTURE_INCLUDE)
+endif
+
 include $(LITEOSTOPDIR)/demos/utility/utility.mk
 DEMOS_INCLUDE += $(DEMOS_UTILITY_INCLUDE)
 
