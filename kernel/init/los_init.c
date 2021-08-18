@@ -181,6 +181,8 @@ LITE_OS_SEC_TEXT_INIT VOID OsStart(VOID)
 
     PRINTK("cpu %u entering scheduler\n", cpuid);
 
+    taskCB->taskStatus = OS_TASK_STATUS_RUNNING;
+
     OsStartToRun(taskCB);
 }
 
