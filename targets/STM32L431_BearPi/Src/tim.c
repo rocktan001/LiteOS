@@ -99,7 +99,7 @@ void TIM7_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-VOID TimerInit(VOID)
+VOID TimInitVOID)
 {
     MX_TIM7_Init();
 }
@@ -134,7 +134,7 @@ UINT64 GetTimerCycles(VOID)
 }
 
 TimControllerOps g_cpupTimerOps = {
-    .timInit = TimerInit,
+    .timInit = TimInit,
     .timHwiCreate = TimerHwiCreate,
     .timGetTimerCycles = GetTimerCycles
 };

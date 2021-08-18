@@ -39,7 +39,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID TimerInit(VOID);
+VOID TimInitVOID);
 extern TimControllerOps g_cpupTimerOps;
 
 #ifdef __cplusplus

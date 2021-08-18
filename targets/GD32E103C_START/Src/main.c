@@ -47,7 +47,7 @@ VOID HardwareInit(VOID)
 {
     SystemInit();
     Usart1Init(USART_DEFAULT_BOUND);
-    TimerInit();
+    TimInit);
     GpioInit();
 }
 

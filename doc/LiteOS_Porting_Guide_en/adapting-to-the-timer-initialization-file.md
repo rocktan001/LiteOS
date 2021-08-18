@@ -1,7 +1,7 @@
 # Adapting to the Timer Initialization File<a name="EN-US_TOPIC_0319337940"></a>
 
 1.  Replace  **targets\\STM32F407\_OpenEdv\\Src\\tim.c**  and  **targets\\STM32F407\_OpenEdv\\Inc\\tim.h**  in the LiteOS source code with the timer initialization files  **Core\\Src\\tim.c**  and  **Core\\Inc\\tim.h**  of the bare metal project.
-2.  <a name="li7771155672316"></a>Compared with LiteOS, the bare metal project does not have the declaration of the related function \(StmGetTimerCycles, StmTimerHwiCreate, and StmTimerInit\) and the definition of the enumeration type Timer\_t. Therefore, the following code is added to the  **targets\\STM32F407\_OpenEdv\\Inc\\tim.h**  file:
+2.  <a name="li7771155672316"></a>Compared with LiteOS, the bare metal project does not have the declaration of the related function \(GetTimerCycles, TimerHwiCreate, and TimInit\) and the definition of the enumeration type Timer\_t. Therefore, the following code is added to the  **targets\\STM32F407\_OpenEdv\\Inc\\tim.h**  file:
 
     ```
         #include "los_typedef.h"
@@ -16,9 +16,9 @@
             TIMER8
         } Timer_t;
     
-        UINT64 StmGetTimerCycles(Timer_t num);
-        VOID StmTimerHwiCreate(VOID);
-        VOID StmTimerInit(VOID);
+        UINT64 GetTimerCycles(Timer_t num);
+        VOID TimerHwiCreate(VOID);
+        VOID TimInit(VOID);
     ```
 
 3.  Add the implementation of the corresponding function in  [2](#li7771155672316)  and add the following code to the  **targets\\STM32F407\_OpenEdv\\Src\\tim.c**  file:
@@ -40,12 +40,12 @@
             return swCycles + cycleTimes * TIMER3_RELOAD;
         }
     
-        VOID StmTimerInit(VOID)
+        VOID TimInit(VOID)
         {
             MX_TIM3_Init();
         }
     
-        VOID StmTimerHwiCreate(VOID)
+        VOID TimerHwiCreate(VOID)
         {
             UINT32 ret;
     
@@ -57,7 +57,7 @@
             HAL_TIM_Base_Start_IT(&htim3);
         }
     
-        UINT64 StmGetTimerCycles(Timer_t num)
+        UINT64 GetTimerCycles(Timer_t num)
         {
             UINT64 cycles = 0;
     

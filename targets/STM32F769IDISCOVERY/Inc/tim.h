@@ -37,7 +37,7 @@ void MX_TIM3_Init(void);
 /* USER CODE END Private defines */
 
 /* USER CODE BEGIN Prototypes */
-VOID TimerInit(VOID);
+VOID TimInitVOID);
 extern TimControllerOps g_cpupTimerOps;
 /* USER CODE END Prototypes */
 

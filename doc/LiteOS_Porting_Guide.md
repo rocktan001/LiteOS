@@ -543,7 +543,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
     ```c
     #include "sys_init.h"
     #include "los_hwi.h"
-    VOID TimerInit(VOID)
+    VOID TimInit(VOID)
     {
         MX_TIM3_Init();
     }
@@ -575,7 +575,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
         return cycles;
     }
     TimControllerOps g_cpupTimerOps = {
-        .timInit = TimerInit,
+        .timInit = TimInit,
         .timHwiCreate = TimerHwiCreate,
         .timGetTimerCycles = GetTimerCycles
     };

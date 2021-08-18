@@ -149,7 +149,7 @@ UINT64 Timer3GetCycle(VOID)
     return swCycles + cycleTimes * TIMER3_RELOAD;
 }
 
-VOID TimerInit(VOID)
+VOID TimInitVOID)
 {
     MX_TIM3_Init();
 }
@@ -183,7 +183,7 @@ UINT64 GetTimerCycles(VOID)
 }
 
 TimControllerOps g_cpupTimerOps = {
-    .timInit = TimerInit,
+    .timInit = TimInit,
     .timHwiCreate = TimerHwiCreate,
     .timGetTimerCycles = GetTimerCycles
 };

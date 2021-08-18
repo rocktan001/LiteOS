@@ -69,7 +69,7 @@ VOID Tim3IrqHandler(VOID)
     }
 }
 
-VOID TimerInit(VOID)
+VOID TimInitVOID)
 {
     ApmMiniTim3Init();
 }
@@ -104,7 +104,7 @@ UINT64 GetTimerCycles(VOID)
 }
 
 TimControllerOps g_cpupTimerOps = {
-    .timInit = TimerInit,
+    .timInit = TimInit,
     .timHwiCreate = TimerHwiCreate,
     .timGetTimerCycles = GetTimerCycles
 };

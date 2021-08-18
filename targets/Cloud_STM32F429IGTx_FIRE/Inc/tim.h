@@ -38,7 +38,7 @@ extern "C" {
 
 /* USER CODE BEGIN Prototypes */
 void MX_TIM3_Init(void);
-VOID TimerInit(VOID);
+VOID TimInitVOID);
 extern TimControllerOps g_cpupTimerOps;
 /* USER CODE END Prototypes */
 
