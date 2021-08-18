@@ -214,6 +214,10 @@
 #include "inih_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_MINMEA
+#include "minmea_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_HTTP_CLIENT
 #include "httpc_demo.h"
 #endif
@@ -494,6 +498,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_INIH
     InihDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_MINMEA
+    MinmeaDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_SFUD

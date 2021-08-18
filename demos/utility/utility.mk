@@ -80,6 +80,11 @@ include $(LITEOSTOPDIR)/demos/utility/sfud/sfud.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_SFUD_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_MINMEA), y)
+include $(LITEOSTOPDIR)/demos/utility/minmea/minmea.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_MINMEA_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_DEMOS_URIPARSER), y)
 include $(LITEOSTOPDIR)/demos/utility/uriparser/uriparser.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_URIPARSER_INCLUDE)

@@ -36,6 +36,7 @@ littlefs-2.3.0 &#& components/fs/littlefs                 &#& LOSCFG_COMPONENTS_
 lua-5.4.2      &#& components/language/lua                &#& LOSCFG_COMPONENTS_LUA=y           &#& https://github.com/lua/lua/archive/refs/tags/v5.4.2.zip
 lvgl-7.0.0     &#& components/gui                         &#& LOSCFG_COMPONENTS_GUI=y           &#& https://github.com/lvgl/lvgl/archive/refs/tags/v7.0.0.zip
 micropython-1.16 &#& components/language/micropython      &#& LOSCFG_COMPONENTS_MICROPYTHON=y   &#& https://github.com/micropython/micropython/archive/refs/tags/v1.16.zip
+minmea-0.3.0   &#& components/utility/minmea              &#& LOSCFG_COMPONENTS_MINMEA=y        &#& https://github.com/kosma/minmea/archive/refs/tags/v0.3.0.zip
 openexif-2.1.4 &#& components/media/openexif              &#& LOSCFG_COMPONENTS_OPENEXIF=y      &#& https://sourceforge.net/code-snapshots/git/o/op/openexif/git.git/openexif-git-ab46678d8b185dafd731f8b16a98d1f72c187fdc.zip
 OpenSSL_1_1_0e &#& components/security/openssl            &#& LOSCFG_COMPONENTS_OPENSSL=y       &#& https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_1_1_0e.zip
 opus-1.3.1     &#& components/media/opus                  &#& LOSCFG_COMPONENTS_OPUS=y          &#& https://github.com/xiph/opus/archive/refs/tags/v1.3.1.zip

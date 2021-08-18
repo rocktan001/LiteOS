@@ -105,6 +105,11 @@ include $(LITEOSTOPDIR)/components/utility/tinyframe/tinyframe.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_TINYFRAME_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_MINMEA), y)
+include $(LITEOSTOPDIR)/components/utility/minmea/minmea.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_MINMEA_INCLUDE)
+endif
+
 ifeq ($(LOSCFG_COMPONENTS_REGEX), y)
 include $(LITEOSTOPDIR)/components/utility/regex/regex.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_REGEX_INCLUDE)

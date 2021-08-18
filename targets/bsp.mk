@@ -323,6 +323,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_JSMN), y)
         LITEOS_BASELIB += -ljsmn
     endif
+    ifeq ($(LOSCFG_COMPONENTS_MINMEA), y)
+        LITEOS_BASELIB += -lminmea
+    endif
     ifeq ($(LOSCFG_COMPONENTS_GENANN), y)
         LITEOS_BASELIB += -lgenann
     endif
@@ -448,6 +451,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_JSMN), y)
         LITEOS_BASELIB += -ljsmn_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_MINMEA), y)
+        LITEOS_BASELIB += -lminmea_demo
     endif
     ifeq ($(LOSCFG_DEMOS_AGRICULTURE), y)
         LITEOS_BASELIB += -lagriculture
