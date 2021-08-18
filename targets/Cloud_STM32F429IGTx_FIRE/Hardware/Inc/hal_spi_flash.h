@@ -180,9 +180,9 @@ void hal_spi_flash_power_down(void);
  */
 void hal_spi_flash_wake_up(void);
 
-void prv_spi_flash_transmit(uint8_t *buf, uint32_t size);
+int prv_spi_flash_transmit(uint8_t *buf, uint32_t size);
 
-void prv_spi_flash_transmit_and_receive(uint8_t *t_buf,  uint32_t t_size, uint8_t *r_buf,uint32_t r_size);
+int prv_spi_flash_transmit_and_receive(uint8_t *t_buf, uint32_t t_size, uint8_t *r_buf, uint32_t r_size);
 
 #ifdef __cplusplus
 #if __cplusplus

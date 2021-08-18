@@ -104,3 +104,9 @@ ifeq ($(LOSCFG_DEMOS_GENANN), y)
 include $(LITEOSTOPDIR)/demos/utility/genann/genann.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_GENANN_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_EASYFLASH), y)
+include $(LITEOSTOPDIR)/demos/utility/easyflash/easyflash.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_EASYFLASH_INCLUDE)
+endif
+

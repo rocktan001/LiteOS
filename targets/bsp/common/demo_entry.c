@@ -254,6 +254,10 @@
 #include "genann_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_EASYFLASH
+#include "ef_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define USER_TASK_PRIORITY          2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -534,6 +538,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_GENANN
     GenannDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_EASYFLASH
+    EasyFlashDemoTask();
 #endif
 
 #ifdef LOSCFG_SHELL

@@ -3,6 +3,7 @@ menu "Utility Demo"
 source "demos/utility/bidireference/Kconfig"
 source "demos/utility/c-algorithms/Kconfig"
 source "demos/utility/curl/Kconfig"
+source "demos/utility/easyflash/Kconfig"
 source "demos/utility/fastlz/Kconfig"
 source "demos/utility/freetype/Kconfig"
 source "demos/utility/genann/Kconfig"
@@ -23,3 +24,4 @@ source "demos/utility/sfud/Kconfig"
 source "demos/utility/uriparser/Kconfig"
 
 endmenu
+

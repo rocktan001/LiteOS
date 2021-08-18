@@ -17,7 +17,7 @@
 ```
 
 3. 勾选`Sfud Demo`后，自动使能其依赖的`sfud`组件。保存并退出`menuconfig`后，自动执行`components/download.sh`脚本。  
-* 从`github`上下载`sfud-master`源代码。  
+* 从互联网下载`sfud-master`源代码。  
 * 从`gitee`的`LiteOS_Components`组件仓库下载对应的patch包，并把该patch打入源码中。  
 
 关于组件自动下载的详细流程，请查阅`components/download.sh`脚本。  

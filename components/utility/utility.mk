@@ -120,3 +120,8 @@ include $(LITEOSTOPDIR)/components/utility/genann/genann.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_GENANN_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_EASYFLASH), y)
+include $(LITEOSTOPDIR)/components/utility/easyflash/easyflash.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_EASYFLASH_INCLUDE)
+endif
+

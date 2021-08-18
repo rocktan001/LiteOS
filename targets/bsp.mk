@@ -329,6 +329,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_GENANN), y)
         LITEOS_BASELIB += -lgenann
     endif
+    ifeq ($(LOSCFG_COMPONENTS_EASYFLASH), y)
+        LITEOS_BASELIB += -leasyflash
+    endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
     endif
@@ -460,6 +463,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_GENANN), y)
         LITEOS_BASELIB += -lgenann_demo
+    ifeq ($(LOSCFG_DEMOS_EASYFLASH), y)
+        LITEOS_BASELIB += -lef_demo
+    endif
     endif
 endif
 

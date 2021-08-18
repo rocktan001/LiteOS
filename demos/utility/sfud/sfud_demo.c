@@ -58,7 +58,7 @@ STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t rdSize)
     ret = (VOID)sfud_read(flash, addr, rdSize, buff);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud read failed.\n");
-	    free(buff);
+	free(buff);
         return LOS_NOK;
     }
     printf("Sfud read successfully.\n");
@@ -81,7 +81,7 @@ INT32 SfudDemoEntry(VOID)
         printf("Sfud init failed\n");
         return LOS_NOK;
     }
-    // In sfdu device table, pointer is offset to SFUD_W25Q256JV_DEVICE_INDEX.
+    // In sfud device table, pointer is offset to SFUD_W25Q256JV_DEVICE_INDEX.
     const sfud_flash *flash = sfud_get_device_table() + SFUD_W25Q256JV_DEVICE_INDEX;
     const INT32 addr = 0; // Operate on spi falsh address 0.
     const INT32 size = 0x200; // Set the size of 512 data to operate.
@@ -133,10 +133,10 @@ VOID SfudDemoTask(VOID)
         return;
     }
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)SfudDemoEntry;
-    taskInitParam.pcName       = "SfudDemoTask";
-    taskInitParam.uwStackSize  = DEFAULT_TASK_STACK_SIZE;
-    taskInitParam.usTaskPrio   = DEFAULT_TASK_PRIORITY;
-    taskInitParam.uwResved     = LOS_TASK_STATUS_DETACHED;
+    taskInitParam.pcName = "SfudDemoTask";
+    taskInitParam.uwStackSize = DEFAULT_TASK_STACK_SIZE;
+    taskInitParam.usTaskPrio = DEFAULT_TASK_PRIORITY;
+    taskInitParam.uwResved = LOS_TASK_STATUS_DETACHED;
     ret = LOS_TaskCreate(&g_demoTaskId, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create easyflash demo task failed.\n");
