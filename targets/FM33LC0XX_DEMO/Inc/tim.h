@@ -37,7 +37,7 @@ extern "C" {
 /* USER CODE END Private defines */
 
 /* USER CODE BEGIN Prototypes */
-VOID TimInitVOID);
+VOID TimInit(VOID);
 extern TimControllerOps g_cpupTimerOps;
 /* USER CODE END Prototypes */
 

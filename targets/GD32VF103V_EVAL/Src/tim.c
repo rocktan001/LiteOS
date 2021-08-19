@@ -75,7 +75,7 @@ UINT64 Timer3GetCycle(VOID)
     return swCycles + cycleTimes * TIMER3_RELOAD;
 }
 
-VOID TimInitVOID)
+VOID TimInit(VOID)
 {
     Timer3Init();
 }

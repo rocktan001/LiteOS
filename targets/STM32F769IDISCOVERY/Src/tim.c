@@ -97,7 +97,7 @@ void TIM3_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-VOID TimInitVOID)
+VOID TimInit(VOID)
 {
     MX_TIM3_Init();
 }

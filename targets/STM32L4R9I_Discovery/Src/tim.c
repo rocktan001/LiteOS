@@ -149,7 +149,7 @@ UINT64 Timer3GetCycle(VOID)
     return swCycles + cycleTimes * TIMER3_RELOAD;
 }
 
-VOID TimInitVOID)
+VOID TimInit(VOID)
 {
     MX_TIM3_Init();
 }

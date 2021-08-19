@@ -56,7 +56,7 @@ VOID Tim3IrqHandler(VOID)
     }
 }
 
-VOID TimInitVOID)
+VOID TimInit(VOID)
 {
     Timer3Init(TIMER3_PRESCALER - 1, TIMER3_RELOAD - 1);
 }

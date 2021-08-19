@@ -69,7 +69,7 @@ VOID Tim3IrqHandler(VOID)
     }
 }
 
-VOID TimInitVOID)
+VOID TimInit(VOID)
 {
     ApmMiniTim3Init();
 }
