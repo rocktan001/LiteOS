@@ -103,7 +103,7 @@ void UserInit(void)
     ClockInit();
     SystickInit();
     UartxPrint_Init(UART5);
-    TimInit);
+    TimInit();
     LedInit();
     FoutInit();
 }
