@@ -17,3 +17,9 @@ ifeq ($(LOSCFG_COMPONENTS_RHASH), y)
 include $(LITEOSTOPDIR)/components/security/rhash/rhash.mk
 COMPONENTS_SECURITY_INCLUDE += $(COMPONENTS_RHASH_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_TINYCRYPT), y)
+include $(LITEOSTOPDIR)/components/security/tinycrypt/tinycrypt.mk
+COMPONENTS_SECURITY_INCLUDE += $(COMPONENTS_TINYCRYPT_INCLUDE)
+endif
+

@@ -2,5 +2,6 @@ menu "Security Demo"
 
 source "demos/security/openssl/Kconfig"
 source "demos/security/rhash/Kconfig"
+source "demos/security/tinycrypt/Kconfig"
 
 endmenu

@@ -326,6 +326,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_MINMEA), y)
         LITEOS_BASELIB += -lminmea
     endif
+    ifeq ($(LOSCFG_COMPONENTS_TINYCRYPT), y)
+        LITEOS_BASELIB += -ltinycrypt
+    endif
     ifeq ($(LOSCFG_COMPONENTS_GENANN), y)
         LITEOS_BASELIB += -lgenann
     endif
@@ -463,6 +466,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_AGRICULTURE), y)
         LITEOS_BASELIB += -lagriculture
+    endif
+    ifeq ($(LOSCFG_DEMOS_TINYCRYPT), y)
+        LITEOS_BASELIB += -ltinycrypt_demo
     endif
     ifeq ($(LOSCFG_DEMOS_GENANN), y)
         LITEOS_BASELIB += -lgenann_demo

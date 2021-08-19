@@ -15,5 +15,6 @@ config LOSCFG_COMPONENTS_SECURITY_MBEDTLS
 
 source "components/security/openssl/Kconfig"
 source "components/security/rhash/Kconfig"
+source "components/security/tinycrypt/Kconfig"
 
 endmenu

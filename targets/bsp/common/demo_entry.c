@@ -254,6 +254,10 @@
 #include "genann_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_TINYCRYPT
+#include "tinycrypt_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_TINYFRAME
 #include "tinyframe_demo.h"
 #endif
@@ -542,6 +546,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_GENANN
     GenannDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_TINYCRYPT
+    TinycryptDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_TINYFRAME

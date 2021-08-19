@@ -48,6 +48,7 @@ regex-master   &#& components/utility/regex               &#& LOSCFG_COMPONENTS_
 sfud-master    &#& components/utility/sfud                &#& LOSCFG_COMPONENTS_SFUD=y          &#& https://github.com/armink/SFUD/archive/refs/heads/master.zip
 sqlite-3.35.3  &#& components/utility/sqlite              &#& LOSCFG_COMPONENTS_SQLITE=y        &#& https://ftp.osuosl.org/pub/blfs/conglomeration/sqlite/sqlite-autoconf-3350300.tar.gz
 thttpd-2.27    &#& components/utility/thttpd              &#& LOSCFG_COMPONENTS_THTTPD=y        &#& https://github.com/nplab/thttpd/archive/refs/heads/origin-2.27.zip
+tinycrypt-0.2.8 &#& components/security/tinycrypt          &#& LOSCFG_COMPONENTS_TINYCRYPT=y     &#& https://github.com/intel/tinycrypt/archive/refs/tags/v0.2.8.zip
 tinyxml2-8.0.0 &#& components/utility/tinyxml2            &#& LOSCFG_COMPONENTS_TINYXML2=y      &#& https://github.com/leethomason/tinyxml2/archive/refs/tags/8.0.0.zip
 TinyFrame-2.3.0 &#& components/utility/tinyframe          &#& LOSCFG_COMPONENTS_TINYFRAME=y     &#& https://github.com/MightyPork/TinyFrame/archive/refs/tags/2.3.0.zip
 uriparser-0.9.5 &#& components/utility/uriparser          &#& LOSCFG_COMPONENTS_URIPARSER=y     &#& https://github.com/uriparser/uriparser/releases/download/uriparser-0.9.5/uriparser-0.9.5.zip
