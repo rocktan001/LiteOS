@@ -254,6 +254,10 @@
 #include "genann_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_TINYFRAME
+#include "tinyframe_demo.h"
+#endif
+
 #ifdef LOSCFG_DEMOS_EASYFLASH
 #include "ef_demo.h"
 #endif
@@ -538,6 +542,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_GENANN
     GenannDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_TINYFRAME
+    TinyframeDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_EASYFLASH
