@@ -89,3 +89,8 @@ DEMOS_INCLUDE += $(DEMOS_DRIVERS_INCLUDE)
 
 include $(LITEOSTOPDIR)/demos/security/security.mk
 DEMOS_INCLUDE += $(DEMOS_SECURITY_INCLUDE)
+
+ifeq ($(LOSCFG_DEMOS_PERF), y)
+include $(LITEOSTOPDIR)/demos/perf/perf.mk
+DEMOS_INCLUDE += $(DEMOS_PERF_INCLUDE)
+endif

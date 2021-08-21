@@ -19,6 +19,12 @@ ifneq ($(LOSCFG_APC_ENABLE), y)
 LOCAL_SRCS_y := $(filter-out src/mmu.c, $(LOCAL_SRCS_y))
 endif
 
+ifeq ($(LOSCFG_KERNEL_PERF), y)
+LOCAL_SRCS_y += $(wildcard src/pmu/armv7_pmu.c)
+LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/kernel/extended/src/pmu \
+                 -I $(LITEOSTOPDIR)/kernel/extended/perf
+endif
+
 LOCAL_SRCS = $(LOCAL_SRCS_y)
 LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 

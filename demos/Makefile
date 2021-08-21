@@ -22,5 +22,6 @@ MODULE_y += media
 MODULE_y += language
 MODULE_y += drivers
 MODULE_y += security
+MODULE_$(LOSCFG_DEMOS_PERF) += perf
 
 include $(MODULE)

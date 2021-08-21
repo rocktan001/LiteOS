@@ -447,6 +447,46 @@ config LOSCFG_KERNEL_SCATTER
     help
       If you wish to build LiteOS with support for scatter.
 
+config LOSCFG_KERNEL_PERF
+   bool "Enable Perf Feature"
+   default n
+   depends on LOSCFG_KERNEL_EXTKERNEL
+   select LOSCFG_KERNEL_RINGBUF
+   select LOSCFG_KERNEL_SMP_CALL if LOSCFG_KERNEL_SMP
+   help
+     If you wish to build LiteOS with support for perf.
+
+choice
+   prompt "Time-consuming Calc Methods"
+   depends on LOSCFG_KERNEL_PERF
+
+config LOSCFG_PERF_CALC_TIME_BY_TICK
+   bool "By Tick"
+
+config LOSCFG_PERF_CALC_TIME_BY_CYCLE
+   bool "By Cpu Cycle"
+
+endchoice
+
+config LOSCFG_PERF_HW_PMU
+   bool "Enable Hardware Pmu Events for Sampling"
+   default n
+   depends on LOSCFG_KERNEL_PERF
+
+config LOSCFG_PERF_TIMED_PMU
+   bool "Enable Hrtimer Period Events for Sampling"
+   default n
+   depends on LOSCFG_KERNEL_PERF && LOSCFG_COMPAT_LINUX
+
+config LOSCFG_PERF_SW_PMU
+   bool "Enable Software Events for Sampling"
+   default y
+   depends on LOSCFG_KERNEL_PERF
+
+config LOSCFG_BASE_CORE_SYS_RES_CHECK
+   bool "Enable System Resource Check"
+   default y
+
 config LOSCFG_KERNEL_TRACE
     bool "Enable Trace Feature"
     default n
