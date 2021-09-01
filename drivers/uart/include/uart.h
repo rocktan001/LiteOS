@@ -29,6 +29,8 @@
 #ifndef _UART_H
 #define _UART_H
 
+#include "los_typedef.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

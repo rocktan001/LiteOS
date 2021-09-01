@@ -384,7 +384,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_HwiCreate(HWI_HANDLE_T hwiNum,
     LOS_TRACE(HWI_CREATE, hwiNum, hwiPrio, hwiMode, (UINTPTR)hwiHandler);
 
     ret = OsHwiCreate(hwiForm, hwiMode, hwiHandler, irqParam);
-    LOS_TRACE(HWI_CREATE, hwiNum, (UINTPTR)(irqParam != NULL ? irqParam->pDevId : NULL), ret);
+    LOS_TRACE(HWI_CREATE_SHARE, hwiNum, (UINTPTR)(irqParam != NULL ? irqParam->pDevId : NULL), ret);
 
     /* priority will be changed if setIrqPriority implemented,
      * but interrupt preemption only allowed when LOSCFG_ARCH_INTERRUPT_PREEMPTION enable */
@@ -413,7 +413,7 @@ LITE_OS_SEC_TEXT UINT32 LOS_HwiDelete(HWI_HANDLE_T hwiNum, HWI_IRQ_PARAM_S *irqP
     LOS_TRACE(HWI_DELETE, hwiNum);
 
     ret = OsHwiDel(hwiForm, irqParam, hwiNum);
-    LOS_TRACE(HWI_DELETE, hwiNum, (UINTPTR)(irqParam != NULL ? irqParam->pDevId : NULL), ret);
+    LOS_TRACE(HWI_DELETE_SHARE, hwiNum, (UINTPTR)(irqParam != NULL ? irqParam->pDevId : NULL), ret);
 
     return ret;
 }
