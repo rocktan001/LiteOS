@@ -39,18 +39,18 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define MEM_USE_BUFF    828
+#define BLOCKSIZE       3
+#define POOLSIZE        144
 
-STATIC UINT32 g_demoBoxMem[144];
+STATIC UINT32 g_demoBoxMem[POOLSIZE];
 
 UINT32 StaticMemDemo(VOID)
 {
     UINT32 *mem = NULL;
-    const UINT32 blksize = 3;
-    const UINT32 boxsize = 48;
     UINT32 ret;
 
     printf("Kernel static memory demo start to run.\n");
-    ret = LOS_MemboxInit(&g_demoBoxMem[0], boxsize, blksize);
+    ret = LOS_MemboxInit(&g_demoBoxMem[0], POOLSIZE, BLOCKSIZE);
     if (ret != LOS_OK) {
         printf("Mem box init failed.\n");
         return LOS_NOK;

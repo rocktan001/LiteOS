@@ -92,7 +92,7 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
     (VOID)timeout;
     UINT32 i;
     for (i = 0; i < len; i++) {  
-        if (g_armGenericUart.uartHwiCreate != NULL) {
+        if (g_armGenericUart.uartWriteChar != NULL) {
             g_armGenericUart.uartWriteChar(buf[i]);
         }
     }
