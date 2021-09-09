@@ -51,4 +51,5 @@ thttpd-2.27    &#& components/utility/thttpd              &#& LOSCFG_COMPONENTS_
 tinycrypt-0.2.8 &#& components/security/tinycrypt          &#& LOSCFG_COMPONENTS_TINYCRYPT=y     &#& https://github.com/intel/tinycrypt/archive/refs/tags/v0.2.8.zip
 tinyxml2-8.0.0 &#& components/utility/tinyxml2            &#& LOSCFG_COMPONENTS_TINYXML2=y      &#& https://github.com/leethomason/tinyxml2/archive/refs/tags/8.0.0.zip
 TinyFrame-2.3.0 &#& components/utility/tinyframe          &#& LOSCFG_COMPONENTS_TINYFRAME=y     &#& https://github.com/MightyPork/TinyFrame/archive/refs/tags/2.3.0.zip
+tjpgd3          &#& components/media/tjpgdec              &#& LOSCFG_COMPONENTS_TJPGDEC=y       &#& http://elm-chan.org/fsw/tjpgd/arc/tjpgd3.zip
 uriparser-0.9.5 &#& components/utility/uriparser          &#& LOSCFG_COMPONENTS_URIPARSER=y     &#& https://github.com/uriparser/uriparser/releases/download/uriparser-0.9.5/uriparser-0.9.5.zip

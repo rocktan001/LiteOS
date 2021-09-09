@@ -24,3 +24,8 @@ ifeq ($(LOSCFG_DEMOS_UPNP), y)
 include $(LITEOSTOPDIR)/demos/media/upnp/upnp.mk
 DEMOS_INCLUDE += $(DEMOS_UPNP_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_DEMOS_TJPGDEC), y)
+include $(LITEOSTOPDIR)/demos/media/tjpgdec/tjpgdec.mk
+DEMOS_INCLUDE += $(DEMOS_TJPGDEC_INCLUDE)
+endif

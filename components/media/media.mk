@@ -24,3 +24,8 @@ ifeq ($(LOSCFG_COMPONENTS_UPNP), y)
 include $(LITEOSTOPDIR)/components/media/upnp/upnp.mk
 COMPONENTS_INCLUDE += $(COMPONENTS_UPNP_INCLUDE)
 endif
+
+ifeq ($(LOSCFG_COMPONENTS_TJPGDEC), y)
+include $(LITEOSTOPDIR)/components/media/tjpgdec/tjpgdec.mk
+COMPONENTS_INCLUDE += $(COMPONENTS_TJPGDEC_INCLUDE)
+endif

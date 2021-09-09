@@ -5,5 +5,6 @@ source "components/media/openexif/Kconfig"
 source "components/media/opus/Kconfig"
 source "components/media/pixman/Kconfig"
 source "components/media/upnp/Kconfig"
+source "components/media/tjpgdec/Kconfig"
 
 endmenu
