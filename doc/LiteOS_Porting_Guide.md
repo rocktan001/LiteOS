@@ -438,11 +438,6 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
 <td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p147771452155511"><a name="p147771452155511"></a><a name="p147771452155511"></a>芯片外设配置的源文件，只需保留main.c、system_stm32f4xx.c、usart.c、sys_init.c、user_task.c、tim.c</p>
 </td>
 </tr>
-<tr id="row516754815410"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p1738383615558"><a name="p1738383615558"></a><a name="p1738383615558"></a>config.mk</p>
-</td>
-<td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p577745211554"><a name="p577745211554"></a><a name="p577745211554"></a>当前开发板工程的编译配置文件</p>
-</td>
-</tr>
 <tr id="row141671148115413"><td class="cellrowborder" valign="top" width="20.369999999999997%" headers="mcps1.2.3.1.1 "><p id="p03834365559"><a name="p03834365559"></a><a name="p03834365559"></a>liteos.ld</p>
 </td>
 <td class="cellrowborder" valign="top" width="79.63%" headers="mcps1.2.3.1.2 "><p id="p477765245517"><a name="p477765245517"></a><a name="p477765245517"></a>当前开发板工程的链接文件</p>
