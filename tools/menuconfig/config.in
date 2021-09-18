@@ -74,6 +74,11 @@ config LOSCFG_COMPILER_ARM_NONE_EABI
     depends on LOSCFG_ARCH_ARM_AARCH32
     select LOSCFG_COMPILER_GCC
 
+config LOSCFG_COMPILER_XTENSA_LX6
+    bool "xtensa-esp32-elf-"
+    depends on LOSCFG_ARCH_XTENSA_ARCH32
+    select LOSCFG_COMPILER_GCC
+
 endchoice
 
 menu "Compiler Options"

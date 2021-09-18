@@ -33,6 +33,8 @@ ifeq ($(CROSS_COMPILE),)
         CROSS_COMPILE := riscv-nuclei-elf-
     else ifeq ($(LOSCFG_COMPILER_RISCV64_UNKNOWN), y)
         CROSS_COMPILE := riscv64-unknown-elf-
+    else ifeq ($(LOSCFG_COMPILER_XTENSA_LX6), y)
+        CROSS_COMPILE := xtensa-esp32-elf-
     endif
 endif
 
@@ -104,6 +106,9 @@ else
 endif
 
 ifeq ($(wildcard $(GCC_GCCLIB_PATH)/$(LITEOS_GCCLIB)),)
+    GCC_USE_CPU_OPT := n
+endif
+ifeq ($(LOSCFG_ARCH_XTENSA_LX6), y)
     GCC_USE_CPU_OPT := n
 endif
 

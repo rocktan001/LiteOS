@@ -14,6 +14,11 @@ config LOSCFG_ARCH_XTENSA_ARCH32
     help
       32-bit XTENSA architecture implementations
 
+config LOSCFG_ARCH_XTENSA_LX6
+    bool
+    select LOSCFG_LIB_LIBC
+    select LOSCFG_ARCH_XTENSA_ARCH32
+
 config LOSCFG_ARCH_XTENSA_XEA2
     bool
     select LOSCFG_ARCH_XTENSA
@@ -25,6 +30,7 @@ config LOSCFG_ARCH_XTENSA_XEA3
 
 config LOSCFG_ARCH_CPU
     string
+    default "xtensa-x6"   if LOSCFG_ARCH_XTENSA_LX6
     default "xtensa-xea2" if LOSCFG_ARCH_XTENSA_XEA2
     default "xtensa-xea3" if LOSCFG_ARCH_XTENSA_XEA3
 

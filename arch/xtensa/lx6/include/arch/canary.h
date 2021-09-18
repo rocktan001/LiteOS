@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Arch32 C-Sky Hw Task Implementation
+ * Description: Canary Defines HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-04-28
+ * Create: 2021-09-07
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,8 +26,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_task_pri.h"
-#include "arch/task.h"
+/**
+ * @defgroup cannary
+ * @ingroup kernel
+ */
+
+#ifndef _ARCH_CANARY_H
+#define _ARCH_CANARY_H
+
+#include "los_typedef.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,61 +42,33 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#ifdef __GNUC__
+extern UINTPTR __stack_chk_guard;
 
-VOID *g_runTask = NULL;
-VOID *g_oldTask = NULL;
-
-#ifdef LOSCFG_GDB
-STATIC VOID OsTaskEntrySetupLoopFrame(UINT32) __attribute__((noinline, naked));
-VOID OsTaskEntrySetupLoopFrame(UINT32 arg0)
-{
-    asm volatile("\tsub fp, sp, #0x4\n"
-                 "\tpush {fp, lr}\n"
-                 "\tadd fp, sp, #0x4\n"
-                 "\tpush {fp, lr}\n"
-
-                 "\tadd fp, sp, #0x4\n"
-                 "\tbl OsTaskEntry\n"
-
-                 "\tpop {fp, lr}\n"
-                 "\tpop {fp, pc}\n");
-}
+/**
+ * @ingroup  canary
+ * @brief Stack protector canaries value init.
+ *
+ * @par Description:
+ * This API is used to init canaries value __stack_chk_guard if the SP compiling options:
+ * -fstack-protector-strong or -fstack-protector-all is enabled.
+ *
+ * @attention
+ * <ul>
+ * <li>This API is a weak function, We recommend to implement true random number generator
+ * function for __stack_chk_guard value to replace it.</li>
+ * </ul>
+ *
+ * @param  None.
+ *
+ * @retval None.
+ * @par Dependency:
+ * <ul><li>arch/sp.h: the header file that contains the API declaration.</li></ul>
+ * @see none
+ * @since Huawei LiteOS V200R005C00
+ */
+extern VOID ArchStackGuardInit(VOID);
 #endif
-
-LITE_OS_SEC_TEXT_MINOR VOID OsTaskExit(VOID)
-{
-    LOS_IntLock();
-    while (1) {
-    }
-}
-
-LITE_OS_SEC_TEXT_INIT VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOID *topStack)
-{
-    TaskContext *taskContext = NULL;
-
-    OsStackInit(topStack, stackSize);
-    taskContext = (TaskContext *)(((UINTPTR)topStack + stackSize) - sizeof(TaskContext));
-
-    taskContext->R0  = taskId;
-    taskContext->R1  = 0x01010101L;
-    taskContext->R2  = 0x02020202L;
-    taskContext->R3  = 0x03030303L;
-    taskContext->R4  = 0x04040404L;
-    taskContext->R5  = 0x05050505L;
-    taskContext->R6  = 0x06060606L;
-    taskContext->R7  = 0x07070707L;
-    taskContext->R8  = 0x08080808L;
-    taskContext->R9  = 0x09090909L;
-    taskContext->R10 = 0x10101010L;
-    taskContext->R11 = 0x11111111L;
-    taskContext->R12 = 0x12121212L;
-    taskContext->R13 = 0x13131313L;
-    taskContext->R15 = (UINT32)OsTaskExit;
-    taskContext->EPSR = 0xe0000144L;
-    taskContext->EPC = (UINT32)OsTaskEntry;
-
-    return (VOID *)taskContext;
-}
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -97,3 +76,4 @@ LITE_OS_SEC_TEXT_INIT VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOI
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#endif /* _ARCH_CANARY_H */

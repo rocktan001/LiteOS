@@ -1,5 +1,5 @@
 menu "Lib"
-    depends on !LOSCFG_ARCH_XTENSA
+    depends on !LOSCFG_ARCH_XTENSA || LOSCFG_ARCH_XTENSA_LX6
 
 config LOSCFG_LIB_LIBC
     bool "Enable Libc"
