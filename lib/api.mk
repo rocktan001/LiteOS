@@ -16,6 +16,8 @@ ifeq ($(LOSCFG_LIB_LIBC), y)
         ARCH_LOCAL := riscv32
     else ifeq ($(LOSCFG_ARCH_CSKY), y)
         ARCH_LOCAL := csky
+    else ifeq ($(LOSCFG_ARCH_XTENSA), y)
+        ARCH_LOCAL := xtensa
     endif
 
     LITEOS_LIBC_INCLUDE += \
