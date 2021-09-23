@@ -36,7 +36,7 @@ Kernel  --->
     [*]     C++ Support
 Demos  --->
     Utility Demo  --->
-            [*] Enable Iconv Demo
+            [*] Enable Tinyxml2 Demo
 ```
 
 **注意**

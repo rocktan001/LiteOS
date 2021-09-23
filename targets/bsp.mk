@@ -472,9 +472,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_GENANN), y)
         LITEOS_BASELIB += -lgenann_demo
+    endif
     ifeq ($(LOSCFG_DEMOS_EASYFLASH), y)
         LITEOS_BASELIB += -lef_demo
-    endif
     endif
     ifeq ($(LOSCFG_DEMOS_TINYFRAME), y)
         LITEOS_BASELIB += -ltinyframe_demo
