@@ -23,6 +23,11 @@ config LOSCFG_ARM_SP804_HRTIMER
     help
       ARM sp804 dual timer as hrtimer.
 
+config LOSCFG_XTENSA_LX6_TIMER
+    bool
+    help
+      Xtensa lx6 systick.
+
 config LOSCFG_XTENSA_XEA2_TIMER
     bool
     help

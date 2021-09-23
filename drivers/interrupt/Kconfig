@@ -47,3 +47,7 @@ config LOSCFG_PLATFORM_ARM_CONTROL
     help
       Raspberry Pi 2B/3B Arm Interrupt control
 
+config LOSCFG_LX6_INT_CONTROLLER
+    bool
+    help
+      xtensa lx6 interrupt

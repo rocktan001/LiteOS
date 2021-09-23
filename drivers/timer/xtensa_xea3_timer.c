@@ -100,7 +100,7 @@ VOID HalClockInit(VOID)
     SET_SYS_CLOCK(OS_SYS_CLOCK);
     g_ticksPerSec = LOSCFG_BASE_CORE_TICK_PER_SECOND;
     g_cyclePerSec = GET_SYS_CLOCK();
-    g_cyclesPerTick =  (GET_SYS_CLOCK() / LOSCFG_BASE_CORE_TICK_PER_SECOND);
+    g_cyclesPerTick = (GET_SYS_CLOCK() / LOSCFG_BASE_CORE_TICK_PER_SECOND);
 
     return;
 }

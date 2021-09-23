@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: LiteOS hwi Module Implementation
+ * Description: LiteOS Hwi Module Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-01-01
+ * Create: 2021-09-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,15 +26,20 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include "xtensa_lx6.h"
 #include "los_hwi_pri.h"
+#include "los_task_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif /* __cpluscplus */
-#endif /* __cpluscplus */
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#define HWI_NUM_SIX   6
 
 LITE_OS_SEC_BSS HwiHandleInfo g_hwiForm[LOSCFG_PLATFORM_HWI_LIMIT];
+extern VOID HalUpdateTimerCmpVal(VOID);
 
 UINT32 HalIrqPending(HWI_HANDLE_T hwiNum)
 {
@@ -42,7 +47,7 @@ UINT32 HalIrqPending(HWI_HANDLE_T hwiNum)
         return LOS_ERRNO_HWI_NUM_INVALID;
     }
 
-    __asm__ __volatile__("wsr   %0, intset; rsync" : : "a"(0x1U << hwiNum));
+    __asm__ __volatile__("wsr %0, intset; rsync" : : "a"(0x1U << hwiNum));
 
     return LOS_OK;
 }
@@ -52,11 +57,11 @@ UINT32 HalIrqUnmask(HWI_HANDLE_T hwiNum)
     UINT32 ier;
 
     if (!HWI_NUM_VALID(hwiNum)) {
-        return LOS_ERRNO_HWI_NUM_INVALID;
+        return OS_ERRNO_HWI_NUM_INVALID;
     }
 
-    __asm__ __volatile__("rsr %0, intenable" : "=a"(ier) :);
-    __asm__ __volatile__("wsr %0, intenable; rsync" : : "a"(ier | ((UINT32)1 << hwiNum)));
+    __asm__ __volatile__("rsr %0, intenable" : "=a"(ier) : : "memory");
+    __asm__ __volatile__("wsr %0, intenable; rsync" : : "a"(ier | ((UINT32)0x1U << hwiNum)));
 
     return LOS_OK;
 }
@@ -66,22 +71,28 @@ UINT32 HalIrqMask(HWI_HANDLE_T hwiNum)
     UINT32 ier;
 
     if (!HWI_NUM_VALID(hwiNum)) {
-        return LOS_ERRNO_HWI_NUM_INVALID;
+        return OS_ERRNO_HWI_NUM_INVALID;
     }
 
-    __asm__ __volatile__("rsr %0, intenable" : "=a"(ier) :);
-    __asm__ __volatile__("wsr %0, intenable; rsync" : : "a"(ier & ~((UINT32)1 << hwiNum)));
+    __asm__ __volatile__("rsr %0, intenable" : "=a"(ier) : : "memory");
+    __asm__ __volatile__("wsr %0, intenable; rsync" : : "a"(ier & ~((UINT32)0x1U << hwiNum)));
 
     return LOS_OK;
 }
 
-WEAK VOID IrqEntryXea2(UINT32 intrNo)
+VOID HalInterrupt(VOID)
 {
-    if (intrNo >= LOSCFG_PLATFORM_HWI_LIMIT) {
-        PRINT_ERR("intNo:%u\n", intrNo);
-        return;
+    UINT32 hwiIndex;
+
+    hwiIndex = HalIntNumGet();
+    HalIrqClear(hwiIndex);
+    OsIntHandle(hwiIndex, &g_hwiForm[hwiIndex]);
+    if (hwiIndex == HWI_NUM_SIX) {
+        HalUpdateTimerCmpVal();
     }
-    OsIntHandle(intrNo, &g_hwiForm[intrNo]);
+    if (OsTaskProcSignal() != 0) {
+        OsSchedPreempt();
+    }
 }
 
 UINT32 HalIrqClear(HWI_HANDLE_T vector)
@@ -89,10 +100,23 @@ UINT32 HalIrqClear(HWI_HANDLE_T vector)
     if (!HWI_NUM_VALID(vector)) {
         return LOS_ERRNO_HWI_NUM_INVALID;
     }
-
     __asm__ __volatile__("wsr %0, intclear; rsync" : : "a"(0x1U << vector));
 
     return LOS_OK;
+}
+
+UINT32 HalIntNumGet(VOID)
+{
+    UINT32 ier;
+    UINT32 intenable;
+    UINT32 intSave;
+
+    __asm__ __volatile__("rsr %0, interrupt" : "=a"(ier) : : "memory");
+    __asm__ __volatile__("rsr %0, intenable" : "=a"(intenable) : : "memory");
+
+    intSave = ier & intenable;
+
+    return  __builtin_ffs(intSave) - 1;
 }
 
 STATIC HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
@@ -104,7 +128,7 @@ STATIC HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
     return &g_hwiForm[hwiNum];
 }
 
-STATIC const HwiControllerOps g_xea2Ops = {
+STATIC const HwiControllerOps g_lx6Ops = {
     .triggerIrq     = HalIrqPending,
     .clearIrq       = HalIrqClear,
     .enableIrq      = HalIrqUnmask,
@@ -112,14 +136,18 @@ STATIC const HwiControllerOps g_xea2Ops = {
     .getHandleForm  = HalIrqGetHandleForm,
 };
 
-LITE_OS_SEC_TEXT_INIT VOID HalIrqInit(VOID)
+VOID HalIrqInit(VOID)
 {
-    /* register interrupt controller's operations */
-    OsHwiControllerReg(&g_xea2Ops);
+    for (UINT32 i = 0; i < OS_HWI_MAX_NUM; i++) {
+        HalIrqMask(i);
+    }
+    asm volatile ("wsr %0, vecbase" : : "r"(INIT_VECTOR_START));
+    OsHwiControllerReg(&g_lx6Ops);
+    return;
 }
 
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif /* __cpluscplus */
-#endif /* __cpluscplus */
+#endif /* __cplusplus */
+#endif /* __cplusplus */
