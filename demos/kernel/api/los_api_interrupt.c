@@ -45,6 +45,8 @@ extern "C" {
 #define SOFT_IRQ_NUM    3
 #elif defined (LOSCFG_FAMILY_RASPBERRY)
 #define SOFT_IRQ_NUM    RASPBERRY_IRQ
+#elif defined (LOSCFG_PLATFORM_ESP32)
+#define SOFT_IRQ_NUM    7
 #else
 #define SOFT_IRQ_NUM    39
 #endif

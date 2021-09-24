@@ -30,7 +30,7 @@ config LOSCFG_ARCH_XTENSA_XEA3
 
 config LOSCFG_ARCH_CPU
     string
-    default "xtensa-x6"   if LOSCFG_ARCH_XTENSA_LX6
+    default "xtensa-lx6"  if LOSCFG_ARCH_XTENSA_LX6
     default "xtensa-xea2" if LOSCFG_ARCH_XTENSA_XEA2
     default "xtensa-xea3" if LOSCFG_ARCH_XTENSA_XEA3
 
