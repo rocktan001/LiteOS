@@ -287,7 +287,12 @@ LITEOS_GCOV_OPTS := -fprofile-arcs -ftest-coverage -Wno-maybe-uninitialized
 LITEOS_BASELIB += -lgcov
 endif
 
-LITEOS_LD_OPTS += -nostartfiles -static --gc-sections
+LITEOS_LD_OPTS += -static --gc-sections
+ifeq ($(LOSCFG_COMPILER_ARM_NONE_EABI)_$(shell if [ $(shell echo $(VERSION_NUM) | tr -d ".") -gt 1021 ]; then echo y; fi), y_y)
+    LITEOS_LD_OPTS +=
+else
+    LITEOS_LD_OPTS += -nostartfiles
+endif
 
 ifeq ($(findstring y, $(LOSCFG_ARCH_CORTEX_M0)$(LOSCFG_ARCH_CORTEX_M0_PLUS)), y)
 LITEOS_COPTS_BASE += -fshort-enums
