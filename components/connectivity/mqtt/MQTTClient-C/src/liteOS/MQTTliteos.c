@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Mqtt Client For LiteOS
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -28,12 +28,14 @@
 
 #include "MQTTliteos.h"
 
+#if defined(LOSCFG_COMPONENTS_SECURITY_MBEDTLS)
 #include "mbedtls/net_sockets.h"
 #include "mbedtls/ssl.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/platform.h"
 #include "dtls_interface.h"
+#endif /* LOSCFG_COMPONENTS_SECURITY_MBEDTLS */
 
 #if defined(WITH_LINUX)
 #include <sys/types.h>
@@ -52,6 +54,9 @@
 #endif
 #include "osdepends/atiny_osdep.h"
 
+#if defined(LOSCFG_COMPONENTS_ATINY_LOG)
+#include "atiny_log.h"
+#endif /* LOSCFG_COMPONENTS_ATINY_LOG */
 
 #ifdef __cplusplus
 #if __cplusplus

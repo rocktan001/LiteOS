@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "flash_manager.h"
-#include "log/atiny_log.h"
+#include "atiny_log.h"
 
 #ifdef __cplusplus
 #if __cplusplus

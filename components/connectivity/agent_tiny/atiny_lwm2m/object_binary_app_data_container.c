@@ -42,7 +42,7 @@
 
 #include "object_comm.h"
 #include "atiny_rpt.h"
-#include "log/atiny_log.h"
+#include "atiny_log.h"
 
 #ifdef __cplusplus
 #if __cplusplus

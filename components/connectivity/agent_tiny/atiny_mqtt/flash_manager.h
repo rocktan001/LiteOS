@@ -29,7 +29,7 @@
 #ifndef _FLASH_MANAGER_H
 #define _FLASH_MANAGER_H
 
-#include "atiny_mqtt/mqtt_client.h"
+#include "mqtt_client.h"
 
 #ifdef __cplusplus
 #if __cplusplus

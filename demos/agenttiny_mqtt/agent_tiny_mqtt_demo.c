@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Agent Tiny Mqtt Demo
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -26,16 +26,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include "agent_tiny_mqtt_demo.h"
 #include "los_base.h"
 #include "los_task_pri.h"
 #include "los_typedef.h"
 #include "los_sys.h"
-#include "atiny_mqtt/mqtt_client.h"
+#include "mqtt_client.h"
 #include "osdepends/atiny_osdep.h"
-#include "log/atiny_log.h"
+#include "atiny_log.h"
 #include "cJSON.h"
-
-#include "agent_tiny_mqtt_demo.h"
 
 #ifdef __cplusplus
 #if __cplusplus

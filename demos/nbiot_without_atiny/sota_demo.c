@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Sota Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -34,7 +34,7 @@
 #include "sota/sota_hal.h"
 #include "ota_port.h"
 #include "hal_spi_flash.h"
-#include "at_frame/at_main.h"
+#include "at_main.h"
 
 #define DEVICE_VER         "V0.0"
 #define SOTA_BUF_LEN       (512+16)

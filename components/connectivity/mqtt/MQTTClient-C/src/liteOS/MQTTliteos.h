@@ -35,9 +35,9 @@
 #include <signal.h>
 #include <los_typedef.h>
 #include <los_sys.h>
-#include "sal/atiny_socket.h"
-#include "log/atiny_log.h"
-#include "atiny_mqtt/mqtt_client.h"
+#include "atiny_socket.h"
+#include "mqtt_client.h"
+#include "osdepends/atiny_osdep.h"
 
 #ifdef __cplusplus
 #if __cplusplus

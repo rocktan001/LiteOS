@@ -66,8 +66,8 @@
 /* mbed TLS feature support */
 #define MBEDTLS_KEY_EXCHANGE_PSK_ENABLED
 #define MBEDTLS_SSL_PROTO_TLS1_2
-//#define MBEDTLS_SSL_PROTO_DTLS
-//#define MBEDTLS_SSL_DTLS_HELLO_VERIFY
+#define MBEDTLS_SSL_PROTO_DTLS
+#define MBEDTLS_SSL_DTLS_HELLO_VERIFY
 
 /* mbed TLS modules */
 #define MBEDTLS_AES_C
@@ -84,7 +84,7 @@
 #if !defined ( __GNUC__ )  /* GCC*/
 #define MBEDTLS_DEBUG_C
 #endif
-
+#define MBEDTLS_DEBUG_C
 #define MBEDTLS_PLATFORM_C
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
 #define MBEDTLS_NO_PLATFORM_ENTROPY
@@ -115,7 +115,7 @@
  * both ends of the connection!  (See comments in "mbedtls/ssl.h".)
  * The optimal size here depends on the typical size of records.
  */
-#define MBEDTLS_SSL_MAX_CONTENT_LEN             5000
+#define MBEDTLS_SSL_MAX_CONTENT_LEN             (5 * 1024)
 #define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
 //#define MBEDTLS_SSL_DTLS_ANTI_REPLAY
 #define MBEDTLS_SSL_ALL_ALERT_MESSAGES
@@ -131,7 +131,9 @@
 #else
 #define MBEDTLS_CIPHER_MODE_CBC
 #define MBEDTLS_SSL_CIPHERSUITES                        \
-        MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA256,MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA256, MBEDTLS_TLS_RSA_WITH_AES_128_GCM_SHA256
+        MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA256, \
+		MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA256, \
+		MBEDTLS_TLS_RSA_WITH_AES_128_GCM_SHA256
 #endif
 
 #define MBEDTLS_TLS_DEFAULT_ALLOW_SHA1_IN_CERTIFICATES

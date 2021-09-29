@@ -1,16 +1,14 @@
 include $(LITEOSTOPDIR)/config.mk
+include $(LITEOSTOPDIR)/components/components.mk
 
 MODULE_NAME := $(notdir $(CURDIR))
 
-NB_IOT_SRCS := $(wildcard *.c)
+LOCAL_SRCS := $(wildcard *.c)
 
-NB_IOT_INC := \
-    -I $(LITEOSTOPDIR)/components/net/at_device/nb_bc95 \
-    -I $(LITEOSTOPDIR)/include
+LOCAL_INCLUDE := \
+    -I $(LITEOSTOPDIR)/components/net/at_device/nb_bc95
 
-LOCAL_SRCS := $(NB_IOT_SRCS)
-
-LOCAL_INCLUDE := $(NB_IOT_INC)
+LOCAL_INCLUDE += $(COMPONENTS_INCLUDE)
 
 LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 

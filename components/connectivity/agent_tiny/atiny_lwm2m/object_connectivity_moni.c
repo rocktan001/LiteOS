@@ -65,7 +65,7 @@
  */
 
 #include "internals.h"
-#include "atiny_lwm2m/agenttiny.h"
+#include "agenttiny.h"
 
 #ifdef __cplusplus
 #if __cplusplus

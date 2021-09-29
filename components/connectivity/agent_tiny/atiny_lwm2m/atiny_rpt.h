@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Agent Rpt HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -28,7 +28,7 @@
 
 #ifndef _ATINY_RPT_H
 #define _ATINY_RPT_H
-#include "atiny_lwm2m/agenttiny.h"
+#include "agenttiny.h"
 #include "agent_list.h"
 
 #ifdef __cplusplus

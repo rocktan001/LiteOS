@@ -183,8 +183,7 @@ ifneq ($(OS), Linux)
         LITEOS_BASELIB += -lgui
     endif
     ifeq ($(LOSCFG_COMPONENTS_NET_AT), y)
-        LITEOS_BASELIB += -lat_device
-        LITEOS_BASELIB += -lat_frame
+        LITEOS_BASELIB += -lnet_at
     endif
     ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT), y)
         LITEOS_BASELIB += -lnb_iot
@@ -210,8 +209,8 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_LIB_CJSON), y)
         LITEOS_BASELIB += -lcjson
     endif
-    ifeq ($(LOSCFG_COMPONENTS_LOG), y)
-        LITEOS_BASELIB += -llog
+    ifeq ($(LOSCFG_COMPONENTS_ATINY_LOG), y)
+        LITEOS_BASELIB += -latiny_log
     endif
     ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT), y)
         LITEOS_BASELIB += -lmqtt
@@ -219,10 +218,10 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_LWM2M), y)
         LITEOS_BASELIB += -llwm2m
     endif
-    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_ATINY_MQTT), y)
+    ifeq ($(LOSCFG_COMPONENTS_ATINY_MQTT), y)
         LITEOS_BASELIB += -latiny_mqtt
     endif
-    ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_ATINY_LWM2M), y)
+    ifeq ($(LOSCFG_COMPONENTS_ATINY_LWM2M), y)
         LITEOS_BASELIB += -latiny_lwm2m
     endif
     ifeq ($(LOSCFG_COMPONENTS_NET_SAL), y)

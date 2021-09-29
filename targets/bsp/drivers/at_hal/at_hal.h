@@ -29,7 +29,7 @@
 #ifndef _AT_HAL_H
 #define _AT_HAL_H
 
-#include "at_frame/at_main.h"
+#include "at_main.h"
 
 int32_t at_usart_init(void);
 void at_usart_deinit(void);

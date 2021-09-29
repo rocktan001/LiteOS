@@ -29,7 +29,7 @@
 #ifndef _ATINY_CONTEXT_H
 #define _ATINY_CONTEXT_H
 #include "liblwm2m.h"
-#include "atiny_lwm2m/agenttiny.h"
+#include "agenttiny.h"
 #include "object_comm.h"
 
 #define SERVER_URI_MAX_LEN      (64)

@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Agent Tiny Mqtt Demo
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -27,9 +27,15 @@
  * --------------------------------------------------------------------------- */
 
 #include "agent_tiny_lwm2m_demo.h"
+#include "agenttiny.h"
+#include "osdepends/atiny_osdep.h"
+#include "los_base.h"
+#include "los_task.h"
+#include "los_typedef.h"
+#include "los_sys.h"
 
 #if defined LOSCFG_COMPONENTS_NET_AT
-#include "at_frame/at_api.h"
+#include "at_api.h"
 #endif
 
 #define DEFAULT_SERVER_IP "192.168.3.98" /* local ipv4 */

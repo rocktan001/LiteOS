@@ -1,6 +1,6 @@
+LOSCFG_MQTT_DIR := $(LITEOSTOPDIR)/components/connectivity/mqtt
 
-COMPONENTS_MQTT_INCLUDE = \
-    -I $(LITEOSTOPDIR)/components/connectivity/mqtt/MQTTClient-C/src \
-    -I $(LITEOSTOPDIR)/components/connectivity/mqtt/MQTTClient-C/src/liteOS \
-    -I $(LITEOSTOPDIR)/components/connectivity/mqtt//MQTTPacket/src
-
+COMPONENTS_MQTT_INCLUDE:= \
+    -I $(LOSCFG_MQTT_DIR)/MQTTClient-C/src \
+    -I $(LOSCFG_MQTT_DIR)/MQTTClient-C/src/liteOS \
+    -I $(LOSCFG_MQTT_DIR)/MQTTPacket/src

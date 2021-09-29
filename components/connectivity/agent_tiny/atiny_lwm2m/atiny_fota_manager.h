@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Agent Fota Manager HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -46,7 +46,7 @@
 #ifndef _ATINY_FOTA_MANAGER_H
 #define _ATINY_FOTA_MANAGER_H
 
-#include "atiny_lwm2m/agenttiny.h"
+#include "agenttiny.h"
 #include "liblwm2m.h"
 #include "ota/package.h"
 

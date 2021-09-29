@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Firmware Update
  * Author: Huawei LiteOS Team
@@ -27,8 +27,8 @@
  * --------------------------------------------------------------------------- */
 
 #include "internals.h"
-#include "atiny_lwm2m/agenttiny.h"
-#include "log/atiny_log.h"
+#include "agenttiny.h"
+#include "atiny_log.h"
 #include "ota/package.h"
 #include "firmware_update.h"
 

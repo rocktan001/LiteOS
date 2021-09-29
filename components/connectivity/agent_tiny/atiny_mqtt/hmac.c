@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Hmac
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -31,10 +31,7 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/platform.h"
-
 #include "mbedtls/md_internal.h"
-#include "osdepends/atiny_osdep.h"
-#include "dtls_interface.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -66,14 +63,14 @@ int mbedtls_hmac_calc(mbedtls_hmac_t *hmac_info)
     ret = mbedtls_md_setup(&mbedtls_md_ctx, md_info, 1);
     if (ret != 0) {
         printf("mbedtls_md_setup() returned -0x%04x\n", -ret);
-        goto exit;
+        mbedtls_md_free(&mbedtls_md_ctx);
+        return ret;
     }
 
     (void)mbedtls_md_hmac_starts(&mbedtls_md_ctx, hmac_info->secret, hmac_info->secret_len);
     (void)mbedtls_md_hmac_update(&mbedtls_md_ctx, hmac_info->input, hmac_info->input_len);
     (void)mbedtls_md_hmac_finish(&mbedtls_md_ctx, hmac_info->digest);
 
-exit:
     mbedtls_md_free(&mbedtls_md_ctx);
     return ret;
 }
