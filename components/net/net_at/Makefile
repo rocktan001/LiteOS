@@ -38,7 +38,6 @@ LOCAL_INCLUDE += \
 LOCAL_INCLUDE += $(COMPONENTS_NET_INCLUDE)
 
 LOCAL_EXT_FLAG := -Wno-unused-function
-# $(info @@@@@@@@@@@@@@ $(LOCAL_INCLUDE))
 LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS) 
 
 include $(MODULE)
