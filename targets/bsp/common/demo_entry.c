@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
  * Description: Demo Entry Implementation
  * Author: Huawei LiteOS Team
  * Create: 2020-12-10
@@ -44,7 +44,7 @@
 
 #ifdef LOSCFG_COMPONENTS_NET_AT
 #include "nb_iot/los_nb_api.h"
-#include "at_frame/at_api.h"
+#include "at_api.h"
 #endif /* LOSCFG_COMPONENTS_NET_AT */
 
 #ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266

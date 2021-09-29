@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Agent Tiny Lwm2m
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -27,10 +27,10 @@
  * --------------------------------------------------------------------------- */
 
 #include "internals.h"
-#include "atiny_lwm2m/agenttiny.h"
+#include "agenttiny.h"
 #include "atiny_context.h"
 #include "connection.h"
-#include "log/atiny_log.h"
+#include "atiny_log.h"
 #include "atiny_rpt.h"
 #include "osdepends/atiny_osdep.h"
 #ifdef CONFIG_FEATURE_FOTA

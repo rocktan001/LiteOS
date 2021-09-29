@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Agent Fota State HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -46,7 +46,7 @@
 #ifndef _ATINY_FOTA_STATE_H
 #define _ATINY_FOTA_STATE_H
 #include "atiny_fota_manager.h"
-#include "log/atiny_log.h"
+#include "atiny_log.h"
 #include "object_comm.h"
 #include "flag_manager.h"
 #include "upgrade_flag.h"

@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Agent Tiny Cmd Ioctl
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "agent_tiny_cmd_ioctl.h"
-#include "atiny_lwm2m/agenttiny.h"
+#include "agenttiny.h"
 #include "osdepends/atiny_osdep.h"
 #ifdef CONFIG_FEATURE_FOTA
 #include "ota/ota_api.h"

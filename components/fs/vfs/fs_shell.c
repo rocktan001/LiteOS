@@ -31,6 +31,7 @@
 #include "securec.h"
 #include "los_event.h"
 #include "los_vfs.h"
+#include "los_printf.h"
 
 #include "shcmd.h"
 #include "shmsg.h"
@@ -211,7 +212,7 @@ UINT32 OsShellCmdCd(UINT32 argc, const CHAR **argv)
     return LOS_OK;
 }
 
-#if defined (LOSCFG_COMPONENTS_FS_VFS)
+#if defined (LOSCFG_COMPONENTS_FS_VFS) && defined (LOSCFG_SHELL)
 SHELLCMD_ENTRY(pwd_shellcmd, CMD_TYPE_EX, "pwd", XARGS, (CmdCallBackFunc)OsShellCmdPwd);
 
 SHELLCMD_ENTRY(cd_shellcmd, CMD_TYPE_EX, "cd", XARGS, (CmdCallBackFunc)OsShellCmdCd);

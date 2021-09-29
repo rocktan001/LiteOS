@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Agent Rpt
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -28,7 +28,7 @@
 
 #include "liblwm2m.h"
 #include "atiny_rpt.h"
-#include "log/atiny_log.h"
+#include "atiny_log.h"
 
 typedef struct _atiny_rpt_list_t {
     atiny_dl_list node;

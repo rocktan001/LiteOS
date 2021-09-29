@@ -5,14 +5,14 @@ include $(LITEOSTOPDIR)/components/net/lwip/lwip.mk
 COMPONENTS_NET_INCLUDE += $(LWIP_INCLUDE)
 endif
 
-ifeq ($(LOSCFG_COMPONENTS_NET_SAL), y)
-COMPONENTS_NET_INCLUDE += \
-    -I $(LITEOSTOPDIR)/include/sal
+ifeq ($(LOSCFG_COMPONENTS_NET_AT), y)
+include $(LITEOSTOPDIR)/components/net/net_at/net_at.mk
+COMPONENTS_NET_INCLUDE += $(COMPONENTS_AT_INCLUDE)
 endif
 
-ifeq ($(LOSCFG_COMPONENTS_NET_AT), y)
-include $(LITEOSTOPDIR)/components/net/at_device/at.mk
-COMPONENTS_NET_INCLUDE += $(COMPONENTS_AT_INCLUDE)
+ifeq ($(LOSCFG_COMPONENTS_NET_SAL), y)
+include $(LITEOSTOPDIR)/components/net/sal/atiny_sal.mk
+COMPONENTS_NET_INCLUDE += $(COMPONENTS_ATINY_SAL_INCLUDE)
 endif
 
 ifeq ($(LOSCFG_COMPONENTS_IPERF), y)

@@ -29,13 +29,6 @@
 #ifndef _AGENT_TINY_LWM2M_DEMO_H
 #define _AGENT_TINY_LWM2M_DEMO_H
 
-#include "los_base.h"
-#include "los_task.h"
-#include "los_typedef.h"
-#include "los_sys.h"
-#include "atiny_lwm2m/agenttiny.h"
-#include "osdepends/atiny_osdep.h"
-
 void AgentTinyLwm2mDemoEntry(void);
 
 #endif /* _AGENT_TINY_LWM2M_DEMO_H */

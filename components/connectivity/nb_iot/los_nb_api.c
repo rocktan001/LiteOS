@@ -26,8 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "nb_iot/los_nb_api.h"
-#include "at_frame/at_api.h"
+#include "los_nb_api.h"
+#include "at_api.h"
 #ifdef LOSCFG_COMPONENTS_NET_AT_BC95
 #include "bc95.h"
 #endif

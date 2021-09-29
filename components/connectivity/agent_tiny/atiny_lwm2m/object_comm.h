@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Object Common
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -56,7 +56,7 @@
 #define OBJECT_COMM_H_
 
 #include "internals.h"
-#include "atiny_lwm2m/agenttiny.h"
+#include "agenttiny.h"
 #include "connection.h"
 #include "agent_list.h"
 

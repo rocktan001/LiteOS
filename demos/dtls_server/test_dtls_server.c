@@ -33,7 +33,7 @@
 #include "test_dtls_server.h"
 #include "dtls_interface.h"
 #include "osdepends/atiny_osdep.h"
-#include "sal/atiny_socket.h"
+#include "atiny_socket.h"
 
 #ifdef __cplusplus
 #if __cplusplus

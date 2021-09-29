@@ -44,7 +44,7 @@
 #include "mbedtls/net_sockets.h"
 
 #include "osdepends/atiny_osdep.h"
-#include "sal/atiny_socket.h"
+#include "atiny_socket.h"
 
 #ifdef __cplusplus
 #if __cplusplus

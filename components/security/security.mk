@@ -1,25 +1,24 @@
 COMPONENTS_SECURITY_INCLUDE :=
 
-MBEDTLS_VERSION = mbedtls-2.16.8
+CLASS_DIR := $(LITEOSTOPDIR)/components/security
 
 ifeq ($(LOSCFG_COMPONENTS_SECURITY_MBEDTLS), y)
-COMPONENTS_SECURITY_INCLUDE += \
-    -I $(LITEOSTOPDIR)/components/security/mbedtls/mbedtls_port \
-    -I $(LITEOSTOPDIR)/components/security/mbedtls/$(MBEDTLS_VERSION)/include
+include $(CLASS_DIR)/mbedtls/mbedtls.mk
+COMPONENTS_SECURITY_INCLUDE += $(COMPONENTS_MBEDTLS_INCLUDE)
 endif
 
 ifeq ($(LOSCFG_COMPONENTS_OPENSSL), y)
-include $(LITEOSTOPDIR)/components/security/openssl/openssl.mk
+include $(CLASS_DIR)/openssl/openssl.mk
 COMPONENTS_SECURITY_INCLUDE += $(COMPONENTS_OPENSSL_INCLUDE)
 endif
 
 ifeq ($(LOSCFG_COMPONENTS_RHASH), y)
-include $(LITEOSTOPDIR)/components/security/rhash/rhash.mk
+include $(CLASS_DIR)/rhash/rhash.mk
 COMPONENTS_SECURITY_INCLUDE += $(COMPONENTS_RHASH_INCLUDE)
 endif
 
 ifeq ($(LOSCFG_COMPONENTS_TINYCRYPT), y)
-include $(LITEOSTOPDIR)/components/security/tinycrypt/tinycrypt.mk
+include $(CLASS_DIR)/tinycrypt/tinycrypt.mk
 COMPONENTS_SECURITY_INCLUDE += $(COMPONENTS_TINYCRYPT_INCLUDE)
 endif
 

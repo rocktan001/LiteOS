@@ -32,7 +32,7 @@
 
 #ifndef _NB_IOT_H
 #define _NB_IOT_H
-#include "at_frame/at_main.h"
+#include "at_main.h"
 
 typedef struct sec_param {
 char *psk;

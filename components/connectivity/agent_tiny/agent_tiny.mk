@@ -1,3 +1,13 @@
-ATINY_TINY_INCLUDE = \
-    -I $(LITEOSTOPDIR)/components/connectivity/agent_tiny/atiny_mqtt \
-    -I $(LITEOSTOPDIR)/components/connectivity/agent_tiny/atiny_lwm2m
+ATINY_TINY_INCLUDE :=
+
+AGENT_TINY_DIR := $(LITEOSTOPDIR)/components/connectivity/agent_tiny
+
+ATINY_TINY_INCLUDE += -I $(AGENT_TINY_DIR)
+
+ifeq ($(LOSCFG_COMPONENTS_ATINY_MQTT), y)
+ATINY_TINY_INCLUDE += -I $(AGENT_TINY_DIR)/atiny_mqtt
+endif
+
+ifeq ($(LOSCFG_COMPONENTS_ATINY_LWM2M), y)
+ATINY_TINY_INCLUDE += -I $(AGENT_TINY_DIR)/atiny_lwm2m
+endif

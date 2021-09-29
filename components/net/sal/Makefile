@@ -1,20 +1,16 @@
 include $(LITEOSTOPDIR)/config.mk
-include $(LITEOSTOPDIR)/components/net/lwip/lwip.mk
+include $(LITEOSTOPDIR)/components/components.mk
 
 MODULE_NAME := $(notdir $(CURDIR))
 
-SAL_SRC = \
-    $(wildcard *.c)
+LOCAL_SRCS := $(wildcard *.c)
 
-SAL_INC := \
+LOCAL_INCLUDE := \
+    -I $(LITEOSTOPDIR)/components/net/sal \
     -I $(LITEOSTOPDIR)/include
-
-LOCAL_SRCS := $(subst $(CURDIR)/,, $(SAL_SRC))
-
-LOCAL_INCLUDE := $(SAL_INC) $(LWIP_INCLUDE)
 
 LOCAL_EXT_FLAG := -fstack-protector-strong
 
-LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_FLAGS := $(LOCAL_EXT_FLAG) $(LOCAL_INCLUDE) $(COMPONENTS_INCLUDE) $(LITEOS_GCOV_OPTS)
 
 include $(MODULE)

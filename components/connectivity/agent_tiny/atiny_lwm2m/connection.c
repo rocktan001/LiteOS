@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Connection
  * Author: Huawei LiteOS Team
@@ -49,8 +49,8 @@
 #if defined (LOSCFG_COMPONENTS_SECURITY_MBEDTLS)
 #include "dtls_interface.h"
 #endif
-#include "sal/atiny_socket.h"
-#include "log/atiny_log.h"
+#include "atiny_socket.h"
+#include "atiny_log.h"
 #include "object_comm.h"
 
 #define COAP_PORT "5683"

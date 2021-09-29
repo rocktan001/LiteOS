@@ -26,12 +26,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "atiny_mqtt/mqtt_client.h"
+#include "mqtt_client.h"
 #include "los_base.h"
 #include "los_task_pri.h"
 #include "los_typedef.h"
 #include "los_sys.h"
-#include "log/atiny_log.h"
+#include "atiny_log.h"
 #include "MQTTClient.h"
 #include "flash_manager.h"
 #include "dtls_interface.h"

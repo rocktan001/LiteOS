@@ -1,18 +1,6 @@
 menu "Security"
 
-config LOSCFG_COMPONENTS_SECURITY
-    bool "Enable Security"
-    default n
-    help
-      Answer y to enable sucurity component.
-
-config LOSCFG_COMPONENTS_SECURITY_MBEDTLS
-    bool "Enable Mbed TLS Component"
-    default n
-    depends on LOSCFG_COMPONENTS_SECURITY
-    help
-      Answer y to enable Mbed TLS.
-
+source "components/security/mbedtls/Kconfig"
 source "components/security/openssl/Kconfig"
 source "components/security/rhash/Kconfig"
 source "components/security/tinycrypt/Kconfig"

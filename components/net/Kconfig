@@ -1,80 +1,14 @@
-menu "Network"
-
-config LOSCFG_COMPONENTS_NET_AT
-    bool "Enable AT"
-    select LOSCFG_COMPONENTS_NETWORK
-    default n
-    help
-        Answer y to enable AT.
-
-choice
-    prompt "Choose AT Device"
-    default LOSCFG_COMPONENTS_NET_AT_BC95
-    depends on LOSCFG_COMPONENTS_NET_AT
-
-    config LOSCFG_COMPONENTS_NET_AT_ESP8266
-    bool "Enable esp8266"
-
-    config LOSCFG_COMPONENTS_NET_AT_BC95
-    bool "Enable bc95"
-    select LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT
-
-    config LOSCFG_COMPONENTS_NET_AT_SIM900A
-    bool "Enable sim900a"
-
-    config LOSCFG_COMPONENTS_NET_AT_BG36
-    bool "Enable bg36"
-
-endchoice
-
-config LOSCFG_COMPONENTS_NET_AT_INFO
-    bool "Enable AT INFO"
-    depends on LOSCFG_COMPONENTS_NET_AT
-    default y
-
-config LOSCFG_COMPONENTS_NET_AT_DEBUG
-    bool "Enable AT DEBUG"
-    depends on LOSCFG_COMPONENTS_NET_AT
-    default y
-
-config LOSCFG_COMPONENTS_NET_LWIP
-    bool "Enable Lwip"
-    select LOSCFG_COMPONENTS_NETWORK
-    select LOSCFG_COMPONENTS_FS_VFS
-    default n
-    help
-      Answer y to enable lwip.
-
-config LOSCFG_COMPONENTS_LWIP_DHCP
-    bool "Enable DHCP"
-    depends on LOSCFG_COMPONENTS_NET_LWIP
-    default y
-    help
-      Answer y to enable lwip dhcp.
-
-choice
-    prompt "Enable Ipv4 Or Ipv6"
-    default LOSCFG_LWIP_IPV4
-    depends on LOSCFG_COMPONENTS_NET_LWIP
-
-config LOSCFG_LWIP_IPV4
-    bool "Enable Ipv4"
-
-config LOSCFG_LWIP_IPV6
-    bool "Enable Ipv6"
-
-endchoice
-
-config LOSCFG_COMPONENTS_NET_SAL
-    bool "Enable Sal"
-    select LOSCFG_COMPONENTS_NETWORK
-    default n
-    help
-      Answer y to enable sal.
-
 config LOSCFG_COMPONENTS_NETWORK
     bool
+    default n
+    help
+      Answer y to enable network.
 
+menu "Network"
+
+osource "components/net/net_at/Kconfig"
+osource "components/net/sal/Kconfig"
+osource "components/net/lwip/Kconfig"
 osource "components/net/ifconfig/Kconfig"
 osource "components/net/los_iperf/Kconfig"
 osource "components/net/pcap/Kconfig"

@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Atiny Socket
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -26,7 +26,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "sal/atiny_socket.h"
+#include "atiny_socket.h"
 #include "osdepends/atiny_osdep.h"
 
 #if defined(WITH_LINUX)
@@ -44,14 +44,11 @@
 #include "lwip/netdb.h"
 #include "lwip/errno.h"
 #elif defined(LOSCFG_COMPONENTS_NET_AT)
-#include "at_frame/at_api.h"
-
+#include "at_api.h"
 #else
 #endif
 
-#define SOCKET_DEBUG
-
-#if defined(SOCKET_DEBUG)
+#if defined(LOSCFG_ATINY_SOCKET_DEBUG)
 #define SOCKET_LOG(fmt, ...) \
     do \
     { \
@@ -496,9 +493,8 @@ int atiny_net_send_timeout(void *ctx, const unsigned char *buf, size_t len, uint
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     return atiny_net_write_sock(ctx, buf, len, timeout);
 #elif defined(LOSCFG_COMPONENTS_NET_AT)
-        int fd;
-        fd = ((atiny_net_context *)ctx)->fd;
+        int fd = ((atiny_net_context *)ctx)->fd;
         return at_api_send(fd, buf, (uint32_t)len);
 #endif
-   return 0;
+   return -1;
 }

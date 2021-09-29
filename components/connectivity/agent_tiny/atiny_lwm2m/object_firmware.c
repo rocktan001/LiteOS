@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Object Firmware
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -63,8 +63,8 @@
  */
 
 #include "internals.h"
-#include "atiny_lwm2m/agenttiny.h"
-#include "log/atiny_log.h"
+#include "agenttiny.h"
+#include "atiny_log.h"
 
 #ifdef __cplusplus
 #if __cplusplus
