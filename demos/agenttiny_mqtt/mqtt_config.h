@@ -36,7 +36,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 uint8_t MQTT_GetConnectType(void);
-uint8_t MQTT_GetSecureType(void);
 void MQTT_GetCurrentRealTime(char **time, uint16_t *timeLen);
 uint8_t MQTT_GetConnectType(void);
 void MQTT_GetServerIp(char **serverIp, uint8_t *serverIpLen);

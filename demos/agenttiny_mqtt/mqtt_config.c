@@ -84,21 +84,16 @@ uint8_t MQTT_GetConnectType(void)
     return MQTT_STATIC_CONNECT;
 }
 
-uint8_t MQTT_GetSecureType(void)
-{
-    return MQTT_STATIC_CONNECT;
-}
-
 void MQTT_GetServerIp(char **serverIp, uint8_t *serverIpLen)
 {
    *serverIp = g_serverIp;
-   *serverIpLen = sizeof(g_serverIp);
+   *serverIpLen = strlen(g_serverIp);
 }
 
 void MQTT_GetServerPort(char **serverPort, uint8_t *serverPortLen)
 {
    *serverPort = g_serverPort;
-   *serverPortLen = sizeof(g_serverPort);
+   *serverPortLen = strlen(g_serverPort);
 }
 
 void MQTT_GetConnectDeviceId(char **deviceId, uint16_t *deviceIdLen)

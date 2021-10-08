@@ -274,10 +274,6 @@ void AgentTinyMqttDemoEntry(void)
     if (MQTT_GetConnectType() == MQTT_STATIC_CONNECT) {
         deviceInfo.connection_type = MQTT_STATIC_CONNECT;
         MQTT_GetConnectDeviceId(&deviceInfo.u.s_info.deviceid, &deviceInfo.u.s_info.deviceid_len);
-    } else {
-        deviceInfo.connection_type = MQTT_DYNAMIC_CONNECT;
-        MQTT_GetConnectProductId(&deviceInfo.u.d_info.productid, &deviceInfo.u.d_info.productid_len);
-        MQTT_GetConnectNodeId(&deviceInfo.u.d_info.nodeid, &deviceInfo.u.d_info.nodeid_len);
     }
     (void)atiny_mqtt_bind(&deviceInfo);
     return;
