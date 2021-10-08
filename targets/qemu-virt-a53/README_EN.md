@@ -21,11 +21,12 @@
 
 ### Deploying a Build Environment
 
-Install a 64-bit compiler to build VIRT A53. The Ubuntu environment is used in this example to describe how to install the 64-bit ARM Linux cross compiler `aarch64-linux-gnu-gcc`.
+Install a 64-bit compiler to build VIRT A53. The Ubuntu environment is used in this example to describe how to install the 64-bit ARM cross compiler `aarch64-none-elf-gcc`.
 
 ```
-apt-get install gcc-5-aarch64-linux-gnu
-apt-get install gcc-aarch64-linux-gnu
+$ wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+$ tar -xf gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+$ export PATH=$PATH:{$USERPATH}/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
 ```
 
 ### Building and Running
