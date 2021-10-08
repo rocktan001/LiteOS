@@ -41,26 +41,6 @@
 #define PAYLOAD_MAX_LEN 2048
 
 #if defined(LOSCFG_AGENTTINY_MQTT_OTA)
-/*
-    {
-    "object_device_id":"60d32ce25f880902bcb28a40_testID1",
-    "services":[
-        {
-            "event_type":"firmware_upgrade",
-            "service_id":"$ota",
-            "event_time":"20210908T104920Z",
-            "paras":{
-                "version":"112233445566",
-                "url":"https://121.36.42.100:8943/iodm/dev/v2.0/upgradefile/applications/9a58dffc24434ce8b3a5dc7a1b89253b/devices/60d32ce25f880902bcb28a40_testID1/packages/e0acf6da191d99bd62cca504",
-                "file_size":421668,
-                "access_token":"655dbf93045bc0a45d80b741cd8392795f75cb350e121fb2ec475d8bce7eea18",
-                "expires":86400,
-                "sign":"a1787a15117f400933f7d470ff970369263c2310a791752d9597e67a3fac2998"
-            }
-        }
-    ]
-}
-*/
 int EventsDownPayloadParse(char *payload, int payloadLen)
 {
     cJSON *obj = cJSON_Parse((const char *)payload);
@@ -198,20 +178,6 @@ int UpoladDeviceVerison(char *deviceId, char *eventTime)
 
 static char *UploadUpgradeStatus(void)
 {
-    /*
-     {     "object_device_id": "{object_device_id}",
-     "services": [{
-         "service_id": "$ota",
-         "event_type": "upgrade_progress_report",
-         "event_time": "20151212T121212Z",
-         "paras": {
-             "result_code": 0,
-             "progress": 50,
-             "version": "V1.0",
-             "description": "upgrade processing"
-         }
-     }] }
-    */
     char *deviceId = "60d32ce25f880902bcb28a40_testID1";
     char *eventTime = "20210908T081630Z";
     char *version = "V1.0";
