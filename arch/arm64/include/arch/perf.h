@@ -37,6 +37,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#ifdef LOSCFG_KERNEL_PERF
 /* Get Caller's pc and fp in non-irq context */
 #define OsPerfArchFetchCallerRegs(regs) \
     do { \
@@ -50,6 +51,7 @@ extern "C" {
         (regs)->pc = (tcb)->pc; \
         (regs)->fp = (tcb)->fp; \
     } while (0)
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

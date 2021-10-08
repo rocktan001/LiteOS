@@ -15,10 +15,11 @@
 ## Linux环境下以多核编译VIRT A53
 
 ### 部署编译环境
-编译VIRT A53需要安装64位编译器，下面以Ubuntu环境为例，按照如下方式安装64位的ARM linux的交叉编译工具`aarch64-linux-gnu-gcc`。
+编译VIRT A53需要安装64位编译器，下面以Ubuntu环境为例，按照如下方式安装64位的ARM的交叉编译工具`aarch64-none-elf-gcc`。
 ```
-$ apt-get install gcc-5-aarch64-linux-gnu
-$ apt-get install gcc-aarch64-linux-gnu
+$ wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+$ tar -xf gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+$ export PATH=$PATH:{$USERPATH}/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
 ```
 
 ### 编译运行
