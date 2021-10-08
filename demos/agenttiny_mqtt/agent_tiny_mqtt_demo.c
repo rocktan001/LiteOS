@@ -46,7 +46,6 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-// static mqtt_client_s *g_mqttClientHandle = NULL;
 static demoFlashHandle g_flashHandle;
 
 static void MqttDemoDataReport(void)
@@ -145,13 +144,6 @@ static int HandleRecvMsg(char *topic, int32_t topicLen, char *payload, int32_t p
         return ATINY_OK;
     }
 
-#if 0
-    cJSON *body = get_resp_body();
-    if (body == NULL) {
-        ATINY_LOG(LOG_ERR, "get_resp_body fail");
-        return ATINY_ERR;
-    }
-#endif
     return 0; //SendResponse(items[MID_IDX]->valueint, (ret == ATINY_OK) ? MQTT_ERR_CODE_OK : MQTT_ERR_CODE_ERR, MQTT_NO_MORE_DATA, body);
 }
 

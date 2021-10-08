@@ -50,8 +50,8 @@
 #include "dtls_interface.h"
 #endif
 #include "atiny_socket.h"
-#include "object_comm.h"
 #include "atiny_log.h"
+#include "object_comm.h"
 
 #define COAP_PORT "5683"
 #define COAPS_PORT "5684"

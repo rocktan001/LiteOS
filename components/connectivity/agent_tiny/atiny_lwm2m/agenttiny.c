@@ -30,12 +30,12 @@
 #include "agenttiny.h"
 #include "atiny_context.h"
 #include "connection.h"
+#include "atiny_log.h"
 #include "atiny_rpt.h"
 #include "osdepends/atiny_osdep.h"
 #ifdef CONFIG_FEATURE_FOTA
 #include "atiny_fota_manager.h"
 #endif
-#include "atiny_log.h"
 
 int g_reboot = 0;
 

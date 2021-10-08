@@ -114,10 +114,11 @@
 #else
 #define LWIP_IPV6 0
 #endif
+
 #if defined(LOSCFG_LWIP_IPV4)
 #define LWIP_IPV4 1
 #else
-#define LWIP_IPV4 1
+#define LWIP_IPV4 0
 #endif
 
 /* *

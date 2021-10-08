@@ -36,11 +36,11 @@
 #include "atiny_error.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include "atiny_log.h"
 #ifdef CONFIG_FEATURE_FOTA
 #include "ota/ota_api.h"
 #endif
 #include "liblwm2m_api.h"
-#include "atiny_log.h"
 
 #ifdef __cplusplus
 extern "C" {

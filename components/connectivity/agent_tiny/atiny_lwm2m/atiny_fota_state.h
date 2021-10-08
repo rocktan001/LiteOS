@@ -46,10 +46,10 @@
 #ifndef _ATINY_FOTA_STATE_H
 #define _ATINY_FOTA_STATE_H
 #include "atiny_fota_manager.h"
+#include "atiny_log.h"
 #include "object_comm.h"
 #include "flag_manager.h"
 #include "upgrade_flag.h"
-#include "atiny_log.h"
 
 #define ASSERT_THIS(do_something) if (thi == NULL) { \
         ATINY_LOG(LOG_ERR, "this null pointer");     \
