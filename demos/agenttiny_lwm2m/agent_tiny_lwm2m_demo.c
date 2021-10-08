@@ -33,11 +33,7 @@
 #include "los_task.h"
 #include "los_typedef.h"
 #include "los_sys.h"
-#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 #include "atiny_log.h"
-#else
-#define ATINY_LOG(level, fmt, ...)
-#endif
 
 #if defined LOSCFG_COMPONENTS_NET_AT
 #include "at_api.h"

@@ -49,11 +49,7 @@
 #include "object_comm.h"
 #include "flag_manager.h"
 #include "upgrade_flag.h"
-#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 #include "atiny_log.h"
-#else
-#define ATINY_LOG(level, fmt, ...)
-#endif
 
 #define ASSERT_THIS(do_something) if (thi == NULL) { \
         ATINY_LOG(LOG_ERR, "this null pointer");     \

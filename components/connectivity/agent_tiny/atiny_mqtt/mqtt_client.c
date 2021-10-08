@@ -36,11 +36,7 @@
 #include "dtls_interface.h"
 #include "cJSON.h"
 #include "hmac.h"
-#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 #include "atiny_log.h"
-#else
-#define ATINY_LOG(level, fmt, ...)
-#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -492,7 +488,7 @@ static mqtt_security_info_s *mqtt_get_security_info(void)
     return &handle->params.info;
 }
 
-int  atiny_mqtt_init(const mqtt_param_s *params)
+int atiny_mqtt_init(const mqtt_param_s *params)
 {
     mqtt_client_s *phandle = &g_mqtt_client;
     if ((params == NULL) || (phandle == NULL)
@@ -628,7 +624,7 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info)
     return ATINY_OK;
 }
 
-int atiny_mqtt_data_send(char *topic, const char *msg,  uint32_t msg_len, mqtt_qos_e qos)
+int atiny_mqtt_data_send(char *topic, const char *msg, uint32_t msg_len, mqtt_qos_e qos)
 {
     MQTTMessage message;
     int rc;

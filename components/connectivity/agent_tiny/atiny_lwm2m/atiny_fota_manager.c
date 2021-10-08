@@ -31,11 +31,7 @@
 #include <string.h>
 #include "firmware_update.h"
 #include "ota/package.h"
-#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 #include "atiny_log.h"
-#else
-#define ATINY_LOG(level, fmt, ...)
-#endif
 
 
 struct atiny_fota_manager_tag_s {

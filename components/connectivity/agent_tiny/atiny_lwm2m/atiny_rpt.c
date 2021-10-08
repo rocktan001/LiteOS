@@ -28,11 +28,7 @@
 
 #include "liblwm2m.h"
 #include "atiny_rpt.h"
-#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 #include "atiny_log.h"
-#else
-#define ATINY_LOG(level, fmt, ...)
-#endif
 
 typedef struct _atiny_rpt_list_t {
     atiny_dl_list node;

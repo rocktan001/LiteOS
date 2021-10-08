@@ -54,11 +54,7 @@
 #endif
 #include "osdepends/atiny_osdep.h"
 
-#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 #include "atiny_log.h"
-#else
-#define ATINY_LOG(level, fmt, ...)
-#endif
 
 #ifdef __cplusplus
 #if __cplusplus

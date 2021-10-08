@@ -33,11 +33,7 @@
 #include "mqtt_client.h"
 #include "osdepends/atiny_osdep.h"
 #include "cJSON.h"
-#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 #include "atiny_log.h"
-#else
-#define ATINY_LOG(level, fmt, ...)
-#endif
 
 #define PROPERTIES_REPORT_TOPIC "$oc/devices/%s/sys/properties/report"
 #define EVENTS_UP_TOPIC "$oc/devices/%s/sys/events/up"

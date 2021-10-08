@@ -40,11 +40,7 @@
 #include "ota/ota_api.h"
 #endif
 #include "liblwm2m_api.h"
-#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 #include "atiny_log.h"
-#else
-#define ATINY_LOG(level, fmt, ...)
-#endif
 
 #ifdef __cplusplus
 extern "C" {
