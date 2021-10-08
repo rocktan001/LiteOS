@@ -117,7 +117,7 @@
 #if defined(LOSCFG_LWIP_IPV4)
 #define LWIP_IPV4 1
 #else
-#define LWIP_IPV4 0
+#define LWIP_IPV4 1
 #endif
 
 /* *

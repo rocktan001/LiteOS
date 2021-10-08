@@ -28,9 +28,13 @@
 
 #include "internals.h"
 #include "agenttiny.h"
-#include "atiny_log.h"
 #include "ota/package.h"
 #include "firmware_update.h"
+#ifdef LOSCFG_COMPONENTS_ATINY_LOG
+#include "atiny_log.h"
+#else
+#define ATINY_LOG(level, fmt, ...)
+#endif
 
 #define FW_BLOCK_SIZE (512)
 

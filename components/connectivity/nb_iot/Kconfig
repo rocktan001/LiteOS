@@ -18,4 +18,3 @@ choice
     select LOSCFG_COMPONENTS_NET_AT_BG36
     bool "Enable bg36"
 endchoice
-

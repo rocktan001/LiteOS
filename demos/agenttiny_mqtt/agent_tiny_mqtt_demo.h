@@ -42,9 +42,8 @@ typedef struct {
     void (*init)(void);
     int (*write_flash_info)(const void *buffer, uint32_t len);
     int (*read_flash_info)(void *buffer, uint32_t len);
-} demo_param_s;
+} demoFlashHandle;
 
-void AgentTinyDemoInit(const demo_param_s *param);
 void AgentTinyMqttDemoEntry(void);
 
 #ifdef __cplusplus

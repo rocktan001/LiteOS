@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Lwip Ethernet Interface HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Mqtt Config Headile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-09-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -25,14 +25,9 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-
-#ifndef _ETHERNETIF_H
-#define _ETHERNETIF_H
-
-#include "lwip/opt.h"
-#include "lwip/err.h"
-#include "lwip/netif.h"
-#include "lwip/pbuf.h"
+#ifndef _MQTT_CONFIG_H
+#define _MQTT_CONFIG_H
+#include "los_typedef.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -40,28 +35,24 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-struct ethernet_api {
-    int8_t          (*init)(struct netif* netif);
-    int8_t          (*output)(struct netif* netif, struct pbuf *p);
-    struct pbuf*    (*input)(struct netif* netif);
-};
+uint8_t MQTT_GetConnectType(void);
+uint8_t MQTT_GetSecureType(void);
+void MQTT_GetCurrentRealTime(char **time, uint16_t *timeLen);
+uint8_t MQTT_GetConnectType(void);
+void MQTT_GetServerIp(char **serverIp, uint8_t *serverIpLen);
+void MQTT_GetServerPort(char **serverPort, uint8_t *serverPortLen);
+void MQTT_GetConnectDeviceId(char **deviceId, uint16_t *deviceIdLen);
+void MQTT_GetConnectProductId(char **productId, uint16_t *productIdLen);
+void MQTT_GetConnectNodeId(char **nodeId, uint16_t *nodeIdLen);
+void MQTT_GetConnectPwd(char **pwd, uint16_t *pwdLen);
 
-int8_t ethernetif_api_register(struct ethernet_api *api);
+#ifdef LOSCFG_DTLS_PSK_ENCRYPT
+void MQTT_GeConnectSecurePsk(uint8_t **pskId, uint32_t *pskIdLen, uint8_t **psk, uint32_t *pskLen);
+#endif /* LOSCFG_DTLS_PSK_ENCRYPT */
 
-err_t ethernetif_init(struct netif *netif);
-void ethernetif_input(void *pvParameters);
-
-#if LWIP_IPV6
-ip6_addr_t *get_lwip_ipv6_default_gw(const struct netif *netif, const ip6_addr_t *ip6addr);
-void set_lwip_ipv6_default_gw(struct netif *netif, const ip6_addr_t *gw);
-
-/*
-   ----------------------------------------
-   ----------- Lwip Ipv6 options ----------
-   ----------------------------------------
-*/
-#define LWIP_HOOK_ND6_GET_GW get_lwip_ipv6_default_gw
-#endif
+#ifdef LOSCFG_DTLS_CERT_ENCRYPT
+void MQTT_GetConnectSecureCaCrt(char **ca, uint32_t *caLen);
+#endif /* LOSCFG_DTLS_CERT_ENCRYPT */
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -69,4 +60,4 @@ void set_lwip_ipv6_default_gw(struct netif *netif, const ip6_addr_t *gw);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ETHERNETIF_H */
+#endif /* _MQTT_CONFIG_H */

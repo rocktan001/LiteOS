@@ -31,12 +31,16 @@
 #include "los_task_pri.h"
 #include "los_typedef.h"
 #include "los_sys.h"
-#include "atiny_log.h"
 #include "MQTTClient.h"
 #include "flash_manager.h"
 #include "dtls_interface.h"
 #include "cJSON.h"
 #include "hmac.h"
+#ifdef LOSCFG_COMPONENTS_ATINY_LOG
+#include "atiny_log.h"
+#else
+#define ATINY_LOG(level, fmt, ...)
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -47,15 +51,10 @@ extern "C" {
 #define MQTT_VERSION_3_1 (3)
 #define MQTT_VERSION_3_1_1 (4)
 
-#define VARIABLE_SIZE (4 + 1)
-#define CMD_TOPIC_FMT "/huawei/v1/devices/%s/command/%s"
-#define DATA_TOPIC_FMT "/huawei/v1/devices/%s/data/%s"
-#define SECRET_NOTIFY_TOPIC_FMT "/huawei/v1/products/%s/sn/%s/secretNotify"
-#define SECRET_ACK_TOPIC_FMT "/huawei/v1/products/%s/sn/%s/secretACK"
+#define VARIABLE_SIZE (2)
+#define TOPIC_ROOT_FMT "$oc/devices/%s/sys/#" // mqtt root topic
 
-#define MQTT_TIME_BUF_LEN 11
-
-#define IS_VALID_NAME_LEN(name) (strnlen((name), STRING_MAX_LEN + 1) <= STRING_MAX_LEN)
+#define IS_VALID_NAME_LEN(name) (strnlen((name), MQTT_STRING_MAX_LEN + 1) <= MQTT_STRING_MAX_LEN)
 
 typedef enum {
     MQTT_CONNECT_WITH_PRODUCT_ID,
@@ -64,7 +63,7 @@ typedef enum {
 
 typedef struct {
     mqtt_static_connection_info_s save_info;
-    char *  got_password;
+    char *get_secret;
     mqtt_dynamic_connect_state_e state;
     uint8_t connection_update_flag;
     uint8_t has_device_id;
@@ -201,7 +200,7 @@ mqtt_param_dup_failed:
 
 static void mqtt_free_device_info(mqtt_device_info_s *info)
 {
-    TRY_FREE_MEM(info->password);
+    TRY_FREE_MEM(info->secret);
     if (MQTT_STATIC_CONNECT == info->connection_type) {
         TRY_FREE_MEM(info->u.s_info.deviceid);
     } else {
@@ -210,23 +209,13 @@ static void mqtt_free_device_info(mqtt_device_info_s *info)
     }
 }
 
-static void mqtt_free_dynamic_info(mqtt_client_s *handle)
-{
-    if (handle->sub_topic) {
-        (void)MQTTSetMessageHandler(&handle->client, handle->sub_topic, NULL);
-        atiny_free(handle->sub_topic);
-        handle->sub_topic = NULL;
-    }
-    TRY_FREE_MEM(handle->dynamic_info.save_info.deviceid);
-    TRY_FREE_MEM(handle->dynamic_info.got_password);
-}
 static int mqtt_check_device_info(const mqtt_device_info_s *info)
 {
     if ((info->connection_type >= MQTT_MAX_CONNECTION_TYPE)
         || (info->codec_mode >= MQTT_MAX_CODEC_MODE)
         || (info->sign_type >= MQTT_MAX_SIGN_TYPE)
-        || (info->password == NULL)
-        || (!IS_VALID_NAME_LEN(info->password))) {
+        || (info->secret == NULL)
+        || (!IS_VALID_NAME_LEN(info->secret))) {
         ATINY_LOG(LOG_FATAL, "invalid device info con_type %d codec_mode %d signe type %d",
             info->connection_type, info->codec_mode, info->sign_type);
         return ATINY_ARG_INVALID;
@@ -258,8 +247,8 @@ static int mqtt_dup_device_info(mqtt_device_info_s *dest, const mqtt_device_info
     dest->connection_type = src->connection_type;
     dest->sign_type = src->sign_type;
     dest->codec_mode = src->codec_mode;
-    dest->password = atiny_strdup(src->password);
-    if (dest->password == NULL) {
+    dest->secret = atiny_strdup(src->secret);
+    if (dest->secret == NULL) {
         ATINY_LOG(LOG_FATAL, "atiny_strdup fail");
         return ATINY_MALLOC_FAILED;
     }
@@ -290,8 +279,7 @@ MALLOC_FAIL:
 
 static bool mqtt_is_connectting_with_deviceid(const mqtt_client_s *handle)
 {
-    return (handle->device_info.connection_type == MQTT_STATIC_CONNECT)
-           || (handle->dynamic_info.state == MQTT_CONNECT_WITH_DEVICE_ID);
+    return (handle->device_info.connection_type == MQTT_STATIC_CONNECT);
 }
 
 static char *mqtt_add_strings(const char *strs[], uint32_t tmp_len[], uint32_t str_num)
@@ -344,7 +332,7 @@ static void mqtt_bin_to_str(const uint8_t *bin_buf, char *str_buf, uint32_t bin_
         (void)snprintf(str_buf + i * 2, 3, "%02x", bin_buf[i]);
     }
 }
-static char *mqtt_get_send_password(char *password, char *time)
+static char *mqtt_get_send_password(char *pwd, char *time)
 {
     uint8_t hmac[32];
     const uint32_t len = sizeof(hmac) * 2 + 1;
@@ -354,8 +342,8 @@ static char *mqtt_get_send_password(char *password, char *time)
 
     hmac_info.secret = (uint8_t *)time;
     hmac_info.secret_len = strnlen(time, MQTT_TIME_BUF_LEN);
-    hmac_info.input = (uint8_t *)password;
-    hmac_info.input_len = strnlen(password, STRING_MAX_LEN);
+    hmac_info.input = (uint8_t *)pwd;
+    hmac_info.input_len = strnlen(pwd, STRING_MAX_LEN);
     hmac_info.digest = hmac;
     hmac_info.digest_len = sizeof(hmac);
     hmac_info.hmac_type = MBEDTLS_MD_SHA256;
@@ -386,15 +374,12 @@ static int mqtt_get_connection_info(mqtt_client_s *handle, MQTTPacket_connectDat
     uint32_t tmp[array_size(strs)];
     uint32_t str_num = 0;
     char time[MQTT_TIME_BUF_LEN];
-    char *password;
+    char *pwd = NULL;
 
     if (mqtt_is_connectting_with_deviceid(handle)) {
         if (handle->device_info.connection_type == MQTT_STATIC_CONNECT) {
             strs[0] = handle->device_info.u.s_info.deviceid;
-            password = handle->device_info.password;
-        } else {
-            strs[0] = handle->dynamic_info.save_info.deviceid;
-            password = handle->dynamic_info.got_password;
+            pwd = handle->device_info.secret;
         }
         str_num = 1;
         ATINY_LOG(LOG_INFO, "try static connect");
@@ -402,7 +387,7 @@ static int mqtt_get_connection_info(mqtt_client_s *handle, MQTTPacket_connectDat
         strs[0] = handle->device_info.u.d_info.productid;
         strs[1] = handle->device_info.u.d_info.nodeid;
         str_num = 2;
-        password = handle->device_info.password;
+        pwd = handle->device_info.secret;
         ATINY_LOG(LOG_INFO, "try dynamic connect");
     }
 
@@ -422,214 +407,72 @@ static int mqtt_get_connection_info(mqtt_client_s *handle, MQTTPacket_connectDat
     }
 
     data->username.cstring = strs[0]; /* deviceid or pruoductid */
-    data->password.cstring = mqtt_get_send_password(password, time);
+    data->password.cstring = mqtt_get_send_password(pwd, time);
     if (data->password.cstring == NULL) {
         return ATINY_ERR;
     }
 
-    ATINY_LOG(LOG_DEBUG, "send user %s client %s", data->username.cstring,
-              data->clientID.cstring);
+    ATINY_LOG(LOG_DEBUG, "send user %s client %s", data->username.cstring, data->clientID.cstring);
     return ATINY_OK;
 }
 
-static char *mqtt_get_topic(const mqtt_client_s *handle, const char *fmt, uint32_t fixed_size,
-                            const char *deviceid_or_productid, const char *sn_or_codec_mode)
+char *mqtt_get_topic(const char *fmt, uint32_t fixed_size)
 {
     uint32_t len;
-    char *topic;
-
-    len = fixed_size + strnlen(deviceid_or_productid, STRING_MAX_LEN) + strnlen(sn_or_codec_mode, STRING_MAX_LEN) + 1;
-    topic = atiny_malloc(len);
-    if (topic == NULL) {
-        ATINY_LOG(LOG_FATAL, "atiny_malloc fail, len %d", len);
-        return NULL;
+    char *deviceId = NULL;
+    mqtt_client_s *handle = &g_mqtt_client;
+    if (handle->device_info.connection_type == MQTT_STATIC_CONNECT) {
+        deviceId = handle->device_info.u.s_info.deviceid;
     }
 
-    (void)snprintf(topic, len, fmt, deviceid_or_productid, sn_or_codec_mode);
+    len = fixed_size + strnlen(deviceId, MQTT_STRING_MAX_LEN);
+    if (len < 0) {
+        return NULL;
+    }
+    char *topic = atiny_malloc(len);
+    if (topic == NULL) {
+        ATINY_LOG(LOG_FATAL, "atiny_malloc failed, len %d", len);
+        return NULL;
+    }
+    (void)snprintf(topic, len, fmt, deviceId);
     return topic;
 }
 
-
-static char *mqtt_get_device_topic(const mqtt_client_s *handle, const char *fmt, uint32_t fixed_size)
+static void mqtt_subscribe_callback(MessageData *md)
 {
-    char *deviceid;
-    const char *codec_mode[MQTT_MAX_CODEC_MODE] = {"binary", "json"};
-
-    deviceid = ((handle->device_info.connection_type == MQTT_STATIC_CONNECT) ?
-                handle->device_info.u.s_info.deviceid : handle->dynamic_info.save_info.deviceid);
-
-    return mqtt_get_topic(handle, fmt, fixed_size, deviceid, codec_mode[handle->device_info.codec_mode]);
-}
-
-static char *mqtt_get_secret_topic(const mqtt_client_s *handle, const char *fmt, uint32_t fixed_size)
-{
-    return mqtt_get_topic(handle, fmt, fixed_size, handle->device_info.u.d_info.productid,
-                          handle->device_info.u.d_info.nodeid);
-}
-
-static int mqtt_parse_secret_topic(mqtt_client_s *handle, const char *payload, uint32_t len)
-{
-    /* should parse json, log ? */
-    cJSON *msg_type;
-    cJSON *deviceid;
-    cJSON *secret;
-    cJSON *root = NULL;
-    int ret = ATINY_ERR;
-
-    root = cJSON_Parse(payload);
-    if (root == NULL) {
-        ATINY_LOG(LOG_ERR, "err secret notify, len %d, msg %s", len, payload);
-        goto EXIT;
-    }
-
-    msg_type = cJSON_GetObjectItem(root, MQTT_MSG_TYPE);
-    if ((msg_type == NULL) || (msg_type->valuestring == NULL)
-        || (strncmp(msg_type->valuestring, "cloudSendSecret", STRING_MAX_LEN + 1) != 0)) {
-        ATINY_LOG(LOG_ERR, "msg_type not right");
-        goto EXIT;
-    }
-
-    deviceid = cJSON_GetObjectItem(root, "deviceid");
-    if ((deviceid == NULL) || (deviceid->valuestring == NULL)
-        || (!IS_VALID_NAME_LEN(deviceid->valuestring))) {
-        ATINY_LOG(LOG_ERR, "deviceid not right");
-        goto EXIT;
-    }
-
-    secret = cJSON_GetObjectItem(root, "secret");
-    if ((secret == NULL) || (secret->valuestring == NULL)
-        || (!IS_VALID_NAME_LEN(secret->valuestring))) {
-        ATINY_LOG(LOG_ERR, "secret not right");
-        goto EXIT;
-    }
-
-    handle->dynamic_info.has_device_id = false;
-    TRY_FREE_MEM(handle->dynamic_info.save_info.deviceid);
-    handle->dynamic_info.save_info.deviceid = atiny_strdup(deviceid->valuestring);
-    if (handle->dynamic_info.save_info.deviceid == NULL) {
-        ATINY_LOG(LOG_INFO, "atiny_strdup null");
-        goto EXIT;
-    }
-    TRY_FREE_MEM(handle->dynamic_info.got_password);
-    handle->dynamic_info.got_password = atiny_strdup(secret->valuestring);
-    if (handle->dynamic_info.got_password == NULL) {
-        ATINY_LOG(LOG_INFO, "atiny_strdup null");
-        goto EXIT;
-    }
-    handle->dynamic_info.has_device_id = true;
-    handle->dynamic_info.connection_update_flag = true;
-    ret = ATINY_OK;
-    ATINY_LOG(LOG_INFO, "get secret info right");
-EXIT:
-    if (root) {
-        cJSON_Delete(root);
-    }
-    return ret;
-}
-
-static void mqtt_send_secret_ack(mqtt_client_s *handle)
-{
-    MQTTMessage message;
-    int rc;
-
-    char *topic = mqtt_get_secret_topic(handle, SECRET_ACK_TOPIC_FMT, sizeof(SECRET_ACK_TOPIC_FMT) - VARIABLE_SIZE);
-    if (topic == NULL) {
+    if (md == NULL) {
         return;
     }
-    memset(&message, 0, sizeof(message));
-    message.qos = QOS1;
-    rc = MQTTPublish(&handle->client, topic, &message);
-    atiny_free(topic);
-    if (rc != MQTT_SUCCESS) {
-        ATINY_LOG(LOG_FATAL, "MQTTPublish fail,rc %d", rc);
-    }
-}
-
-static int mqtt_modify_payload(MessageData *md)
-{
-    char *end = ((char *)md->message->payload) + md->message->payloadlen;
-    static uint32_t callback_err;
-
-    /* add for jason parse,then not need to copy in callback */
-    if ((end >= (char *)g_mqtt_readbuf) && (end < (char *)(g_mqtt_readbuf + sizeof(g_mqtt_readbuf)))) {
-         *end = '\0';
-         return ATINY_OK;
-    }
-
-    /* should not happen */
-    ATINY_LOG(LOG_ERR, "not expect msg callback err, pl %p, len %ld, err num %ld",
-              md->message->payload, md->message->payloadlen, ++callback_err);
-    return ATINY_ERR;
-}
-
-static void mqtt_recv_secret_topic(MessageData *md)
-{
-    mqtt_client_s *handle = &g_mqtt_client;
-
-    if ((md == NULL) || (md->message == NULL)
-        || (md->message->payload == NULL)
-        || (md->message->payloadlen == 0)
-        || (mqtt_modify_payload(md) != ATINY_OK)) {
-        ATINY_LOG(LOG_FATAL, "null point or msg err, len %ld", md->message->payloadlen);
+    if (md->message == NULL || md->topicName == NULL) {
         return;
     }
-
-    if (mqtt_parse_secret_topic(handle, md->message->payload, md->message->payloadlen) == ATINY_OK) {
-        flash_info_s flash_info;
-        flash_info.items[PRODUCT_IDX] = handle->device_info.u.d_info.productid;
-        flash_info.items[NODEID_IDX] = handle->device_info.u.d_info.nodeid;
-        flash_info.items[DEVICEID_IDX] = handle->dynamic_info.save_info.deviceid;
-        flash_info.items[PASSWORD_IDX] = handle->dynamic_info.got_password;
-        if (flash_manager_write(&flash_info) != ATINY_OK) {
-            return;
-        }
-        mqtt_send_secret_ack(handle);
-    }
-}
-
-static void mqtt_recv_cmd_topic(MessageData *md)
-{
-    if ((md == NULL) || (md->message == NULL)
-        || (mqtt_modify_payload(md) != ATINY_OK)) {
-        ATINY_LOG(LOG_FATAL, "null point");
+    /* add for json parse,then not need to copy in callback */
+    if (md->message->payloadlen > sizeof(g_mqtt_readbuf)) {
         return;
     }
-    (void)mqtt_cmd_ioctl(MQTT_RCV_MSG, md->message->payload, md->message->payloadlen);
+    char *topic = md->topicName->lenstring.data;
+    int topicLen = md->topicName->lenstring.len;
+	MQTTLenString *lenstring = (MQTTLenString *)&md->topicName->lenstring;
+    (void)mqtt_cmd_ioctl(MQTT_RCV_MSG, md, sizeof(md));
 }
 
-static int mqtt_subscribe_topic(mqtt_client_s *handle)
+static int mqtt_subscribe_topic(mqtt_client_s *handle, char *topic, messageHandler callback)
 {
-    char *topic;
-    void (*topi_callback)(MessageData *md);
-    int rc;
-
+    int rc = FAILURE;
+    if (handle == NULL || callback == NULL || topic == NULL) {
+        return rc;
+    }
     if (handle->sub_topic != NULL) {
         (void)MQTTSetMessageHandler(&handle->client, handle->sub_topic, NULL);
         atiny_free(handle->sub_topic);
         handle->sub_topic = NULL;
     }
 
-    if (mqtt_is_connectting_with_deviceid(handle)) {
-        topic = mqtt_get_device_topic(handle, CMD_TOPIC_FMT, sizeof(CMD_TOPIC_FMT) - VARIABLE_SIZE);
-        topi_callback = mqtt_recv_cmd_topic;
-        ATINY_LOG(LOG_INFO, "try subcribe static topic");
-    } else {
-        topic = mqtt_get_secret_topic(handle, SECRET_NOTIFY_TOPIC_FMT, sizeof(SECRET_NOTIFY_TOPIC_FMT) - VARIABLE_SIZE);;
-        topi_callback = mqtt_recv_secret_topic;
-        ATINY_LOG(LOG_INFO, "try subcribe dynamic topic");
-    }
-
-    if (topic == NULL) {
-        return ATINY_ERR;
-    }
-
-
-    rc = MQTTSubscribe(&handle->client, topic, QOS1, topi_callback);
-    if (rc != MQTT_SUCCESS) {
-        ATINY_LOG(LOG_FATAL, "MQTTSubscribe fail,rc=%d, topic=%s", rc, topic);
-        atiny_free(topic);
-    } else {
+    rc = MQTTSubscribe(&handle->client, topic, QOS1, callback);
+    if (rc == MQTT_SUCCESS) {
         handle->sub_topic = topic;
+    } else {
+        ATINY_LOG(LOG_FATAL, "MQTTSubscribe failed, rc=%d, topic=%s", rc, topic);
     }
     return rc;
 }
@@ -643,134 +486,85 @@ static void mqtt_disconnect( MQTTClient *client, Network *n)
     ATINY_LOG(LOG_ERR, "mqtt_disconnect");
 }
 
-static inline void mqtt_inc_fail_cnt(int32_t *conn_failed_cnt)
-{
-    if (*conn_failed_cnt < MQTT_CONN_FAILED_MAX_TIMES) {
-        (*conn_failed_cnt)++;
-    }
-}
-
-static void mqtt_proc_connect_err( MQTTClient *client, Network *n, int32_t *conn_failed_cnt)
-{
-    mqtt_inc_fail_cnt(conn_failed_cnt);
-    mqtt_disconnect(client, n);
-}
-
-static void mqtt_proc_connect_nack(mqtt_client_s *handle)
-{
-    if (handle->device_info.connection_type == MQTT_DYNAMIC_CONNECT) {
-        if (handle->dynamic_info.state == MQTT_CONNECT_WITH_DEVICE_ID) {
-            handle->dynamic_info.state = MQTT_CONNECT_WITH_PRODUCT_ID;
-        } else {
-            if (handle->dynamic_info.has_device_id) {
-                handle->dynamic_info.state = MQTT_CONNECT_WITH_DEVICE_ID;
-            }
-        }
-    }
-}
-
 static mqtt_security_info_s *mqtt_get_security_info(void)
 {
     mqtt_client_s *handle = &g_mqtt_client;
     return &handle->params.info;
 }
 
-static void mqtt_read_flash_info(mqtt_client_s *handle)
+int  atiny_mqtt_init(const mqtt_param_s *params)
 {
-    flash_info_s flash_info;
-
-    if (handle->device_info.connection_type == MQTT_STATIC_CONNECT) {
-        return;
-    }
-
-    memset(&handle->dynamic_info, 0, sizeof(handle->dynamic_info));
-    memset(&flash_info, 0, sizeof(flash_info));
-    if (flash_manager_read(&flash_info) != ATINY_OK) {
-        return;
-    }
-
-    if ((strcmp(flash_info.items[PRODUCT_IDX], handle->device_info.u.d_info.productid) != 0)
-        || (strcmp(flash_info.items[NODEID_IDX], handle->device_info.u.d_info.nodeid) != 0)) {
-        ATINY_LOG(LOG_INFO, "flash info for the nodeid and not use");
-        flash_manager_destroy_flash_info(&flash_info);
-        return;
-    }
-
-    ATINY_LOG(LOG_DEBUG, "mqtt read info deviceid %s,procid %s,nodid %s",
-            flash_info.items[DEVICEID_IDX], flash_info.items[PRODUCT_IDX], flash_info.items[NODEID_IDX]);
-
-    handle->dynamic_info.save_info.deviceid = flash_info.items[DEVICEID_IDX];
-    flash_info.items[DEVICEID_IDX] = NULL;
-    handle->dynamic_info.got_password =  flash_info.items[PASSWORD_IDX];
-    flash_info.items[PASSWORD_IDX] = NULL;
-    handle->dynamic_info.has_device_id = true;
-    handle->dynamic_info.state = MQTT_CONNECT_WITH_DEVICE_ID;
-    flash_manager_destroy_flash_info(&flash_info);
-}
-
-int  atiny_mqtt_init(const mqtt_param_s *params, mqtt_client_s **phandle)
-{
-    cJSON_InitHooks(NULL);
+    mqtt_client_s *phandle = &g_mqtt_client;
     if ((params == NULL) || (phandle == NULL)
         || (params->info.security_type > MQTT_SECURITY_TYPE_CA)
         || (mqtt_check_param(params) != ATINY_OK)) {
         ATINY_LOG(LOG_FATAL, "Invalid args");
         return ATINY_ARG_INVALID;
     }
-    if (g_mqtt_client.init_flag) {
+    if (phandle->init_flag) {
         ATINY_LOG(LOG_FATAL, "mqtt reinit");
         return ATINY_ERR;
     }
-    memset(&g_mqtt_client, 0, sizeof(g_mqtt_client));
-    if (ATINY_OK != mqtt_dup_param(&(g_mqtt_client.params), params)) {
+    memset(phandle, 0, sizeof(mqtt_client_s));
+    if (ATINY_OK != mqtt_dup_param(&(phandle->params), params)) {
         return ATINY_MALLOC_FAILED;
     }
     flash_manager_init(mqtt_cmd_ioctl);
-    *phandle = &g_mqtt_client;
-    g_mqtt_client.init_flag = true;
+    phandle->init_flag = true;
     return ATINY_OK;
 }
 
-int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *handle)
+static int atiny_mqtt_bind_quit(mqtt_client_s *handle)
+{
+    int result = ATINY_ERR;
+    mqtt_free_params(&(handle->params));
+    (void)atiny_task_mutex_lock(&(handle->client.mutex));
+    mqtt_free_device_info(&(handle->device_info));
+    (void)atiny_task_mutex_unlock(&(handle->client.mutex));
+    MQTTClientDeInit(&handle->client);
+    handle->init_flag = false;
+    return result;
+}
+
+int atiny_mqtt_bind(const mqtt_device_info_s *device_info)
 {
     Network n;
-    MQTTClient *client = NULL;
-    mqtt_param_s *params;
     int rc;
-    int32_t conn_failed_cnt = 0;
+    MQTTClient *client = NULL;
+    mqtt_param_s *params = NULL;
     MQTTPacket_connectData data = MQTTPacket_connectData_initializer;
     Timer timer;
     int result = ATINY_ERR;
-
-    if (handle == NULL) {
-        ATINY_LOG(LOG_FATAL, "handle null");
-        return ATINY_ARG_INVALID;
-    }
+    bool connectRetry = 0;
+    char *topic = NULL;
 
     if ((device_info == NULL) || (mqtt_check_device_info(device_info) != ATINY_OK)) {
         ATINY_LOG(LOG_FATAL, "parameter invalid");
         result = ATINY_ARG_INVALID;
-        goto atiny_bind_quit;
+        atiny_mqtt_bind_quit(&g_mqtt_client);
+        return result;
     }
 
     dtls_init();
 
-    client = &(handle->client);
-    params = &(handle->params);
+    client = &(g_mqtt_client.client);
+    params = &(g_mqtt_client.params);
 
-    rc = mqtt_dup_device_info(&(handle->device_info), device_info);
+    rc = mqtt_dup_device_info(&(g_mqtt_client.device_info), device_info);
     if (rc != ATINY_OK) {
-        goto atiny_bind_quit;
+        atiny_mqtt_bind_quit(&g_mqtt_client);
+        return result;
     }
 
-    mqtt_read_flash_info(handle);
+    (void)memset_s(&n, sizeof(Network), 0x0, sizeof(Network));
     NetworkInit(&n, mqtt_get_security_info);
 
     memset(client, 0x0, sizeof(MQTTClient));
     rc = MQTTClientInit(client, &n, MQTT_COMMAND_TIMEOUT_MS, g_mqtt_sendbuf, MQTT_SENDBUF_SIZE, g_mqtt_readbuf, MQTT_READBUF_SIZE);
     if (rc != MQTT_SUCCESS) {
         ATINY_LOG(LOG_FATAL, "MQTTClientInit fail,rc %d", rc);
-        goto atiny_bind_quit;
+        atiny_mqtt_bind_quit(&g_mqtt_client);
+        return result;
     }
 
     data.willFlag = 0;
@@ -778,105 +572,84 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *handle
     data.keepAliveInterval = MQTT_KEEPALIVE_INTERVAL_S;
     data.cleansession = true;
 
-    while (true) {
-        if (conn_failed_cnt > 0) {
-            ATINY_LOG(LOG_INFO, "reconnect delay : %d", conn_failed_cnt);
-            (void)LOS_TaskDelay(MQTT_CONN_FAILED_BASE_DELAY << conn_failed_cnt);
+    while (1) {
+        if (connectRetry) {
+            ATINY_LOG(LOG_INFO, "reconnect delay[%d]", MQTT_CONN_RETRY_DELAY);
+            (void)LOS_TaskDelay(MQTT_CONN_RETRY_DELAY);
         }
         rc = NetworkConnect(&n, params->server_ip, atoi(params->server_port));
         if (rc != 0) {
-            ATINY_LOG(LOG_ERR, "NetworkConnect fail: %d", rc);
-            mqtt_inc_fail_cnt(&conn_failed_cnt);
+            ATINY_LOG(LOG_ERR, "NetworkConnect failed: %d", rc);
+            connectRetry = true;
             continue;
         }
 
-        if (mqtt_get_connection_info(handle, &data) != ATINY_OK) {
+        if (mqtt_get_connection_info(&g_mqtt_client, &data) != ATINY_OK) {
             mqtt_destroy_data_connection_info(&data);
-            mqtt_proc_connect_err(client, &n, &conn_failed_cnt);
+            connectRetry = true;
+            mqtt_disconnect(client, &n);
             continue;
         }
 
         rc = MQTTConnect(client, &data);
         mqtt_destroy_data_connection_info(&data);
-        ATINY_LOG(LOG_DEBUG, "CONNACK : %d", rc);
+        ATINY_LOG(LOG_DEBUG, "CONNACK : %d.", rc);
         if (rc != MQTT_SUCCESS) {
-            /* receive connection nack value */
-            if (rc != MQTT_SUCCESS) {
-                mqtt_proc_connect_nack(handle);
+            ATINY_LOG(LOG_ERR, "MQTTConnect failed, rc=%d.", rc);
+            continue;
+        }
+
+        if (mqtt_is_connectting_with_deviceid(&g_mqtt_client)) {
+            topic = mqtt_get_topic(TOPIC_ROOT_FMT, sizeof(TOPIC_ROOT_FMT) - VARIABLE_SIZE);
+            if (topic == NULL) {
+                ATINY_LOG(LOG_ERR, "topic is null. ");
+                connectRetry = true;
+                continue;
             }
-            ATINY_LOG(LOG_ERR, "MQTTConnect failed %d", rc);
-            mqtt_proc_connect_err(client, &n, &conn_failed_cnt);
+            ATINY_LOG(LOG_INFO, "try subcribe static topic=%s", topic);
+        }
+        if (ATINY_OK != mqtt_subscribe_topic(&g_mqtt_client, topic, mqtt_subscribe_callback)) {
+            ATINY_LOG(LOG_ERR, "mqtt_subscribe_topic failed.");
+            connectRetry = true;
             continue;
         }
 
-        if (ATINY_OK != mqtt_subscribe_topic(handle)) {
-            ATINY_LOG(LOG_ERR, "mqtt_subscribe_topic failed");
-            mqtt_proc_connect_err(client, &n, &conn_failed_cnt);
-            continue;
-        }
-
-        conn_failed_cnt = 0;
-        if (!mqtt_is_connectting_with_deviceid(handle)) {
+        connectRetry = false;
+        if (!mqtt_is_connectting_with_deviceid(&g_mqtt_client)) {
             TimerInit(&timer);
             TimerCountdownMS(&timer, MQTT_WRITE_FOR_SECRET_TIMEOUT);
         }
         while (rc >= 0 && MQTTIsConnected(client)) {
             rc = MQTTYield(client, MQTT_EVENTS_HANDLE_PERIOD_MS);
-
-            /* receive secret info */
-            if (handle->dynamic_info.connection_update_flag) {
-                ATINY_LOG(LOG_INFO, "recv secret info");
-                ATINY_LOG(LOG_DEBUG, "secret info deviceid %s", handle->dynamic_info.save_info.deviceid);
-                handle->dynamic_info.connection_update_flag = false;
-                handle->dynamic_info.state = MQTT_CONNECT_WITH_DEVICE_ID;
-                break;
-            }
-
-            /* wait secret info timeout. */
-            if (!mqtt_is_connectting_with_deviceid(handle) && (TimerIsExpired(&timer))) {
-                if (handle->dynamic_info.has_device_id) {
-                    handle->dynamic_info.state = MQTT_CONNECT_WITH_DEVICE_ID;
-                }
-                break;
-            }
         }
         mqtt_disconnect(client, &n);
     }
-    result = ATINY_OK;
-atiny_bind_quit:
-    mqtt_free_dynamic_info(handle);
-    mqtt_free_params(&(handle->params));
-    (void)atiny_task_mutex_lock(&client->mutex);
-    mqtt_free_device_info(&(handle->device_info));
-    (void)atiny_task_mutex_unlock(&client->mutex);
-    MQTTClientDeInit(client);
-    handle->init_flag = false;
-    return result;
+    (void)atiny_mqtt_bind_quit(&g_mqtt_client);
+    return ATINY_OK;
 }
 
-int atiny_mqtt_data_send(mqtt_client_s *phandle, const char *msg,  uint32_t msg_len, mqtt_qos_e qos)
+int atiny_mqtt_data_send(char *topic, const char *msg,  uint32_t msg_len, mqtt_qos_e qos)
 {
     MQTTMessage message;
     int rc;
-    char *topic;
-    size_t payloadlen;
-
+    size_t payloadLen;
+    mqtt_client_s *phandle = &g_mqtt_client;
     if ((phandle == NULL) || (qos >= MQTT_QOS_MAX)) {
-        ATINY_LOG(LOG_FATAL, "Parameter invalid");
+        ATINY_LOG(LOG_FATAL, "parameter invalid");
+        return ATINY_ARG_INVALID;
+    }
+    if (topic == NULL) {
+        ATINY_LOG(LOG_FATAL, "topic invalid");
+        return ATINY_ARG_INVALID;
+    }
+    if (msg == NULL || msg_len <= 0) {
+        ATINY_LOG(LOG_FATAL, "msg invalid");
         return ATINY_ARG_INVALID;
     }
     if (phandle->device_info.codec_mode == MQTT_CODEC_MODE_JSON) {
-        if ((msg == NULL) || (msg_len <= 0)) {
-            ATINY_LOG(LOG_FATAL, "msg invalid");
-            return ATINY_ARG_INVALID;
-        }
-        payloadlen = strnlen(msg, msg_len);
+        payloadLen = strnlen(msg, msg_len);
     } else {
-        if ((msg == NULL) && (msg_len > 0)) {
-            ATINY_LOG(LOG_FATAL, "msg invalid");
-            return ATINY_ARG_INVALID;
-        }
-        payloadlen = msg_len;
+        payloadLen = msg_len;
     }
 
     if (!atiny_mqtt_isconnected(phandle)) {
@@ -884,18 +657,13 @@ int atiny_mqtt_data_send(mqtt_client_s *phandle, const char *msg,  uint32_t msg_
         return ATINY_ERR;
     }
 
-    topic = mqtt_get_device_topic(phandle, DATA_TOPIC_FMT, sizeof(DATA_TOPIC_FMT) - VARIABLE_SIZE);
-    if (topic == NULL) {
-        return ATINY_MALLOC_FAILED;
-    }
     memset(&message, 0, sizeof(message));
     message.qos = (enum QoS)qos;
     message.payload = (void *)msg;
-    message.payloadlen = payloadlen;
+    message.payloadlen = payloadLen;
     rc = MQTTPublish(&phandle->client, topic, &message);
-    atiny_free(topic);
     if (rc != MQTT_SUCCESS) {
-        ATINY_LOG(LOG_FATAL, "MQTTPublish fail,rc %d", rc);
+        ATINY_LOG(LOG_FATAL, "MQTTPublish failed, rc %d", rc);
         return ATINY_ERR;
     }
     return ATINY_OK;
@@ -908,6 +676,15 @@ int atiny_mqtt_isconnected(mqtt_client_s *phandle)
         return false;
     }
     return mqtt_is_connectting_with_deviceid(phandle) && MQTTIsConnected(&(phandle->client));
+}
+
+char *atiny_mqtt_get_deviceId(mqtt_client_s *phandle)
+{
+    if (phandle->device_info.connection_type == MQTT_STATIC_CONNECT) {
+        return phandle->device_info.u.s_info.deviceid;
+    } else {
+        return phandle->device_info.u.d_info.productid;
+    }
 }
 
 #ifdef __cplusplus

@@ -30,11 +30,15 @@
 #include "agenttiny.h"
 #include "atiny_context.h"
 #include "connection.h"
-#include "atiny_log.h"
 #include "atiny_rpt.h"
 #include "osdepends/atiny_osdep.h"
 #ifdef CONFIG_FEATURE_FOTA
 #include "atiny_fota_manager.h"
+#endif
+#ifdef LOSCFG_COMPONENTS_ATINY_LOG
+#include "atiny_log.h"
+#else
+#define ATINY_LOG(level, fmt, ...)
 #endif
 
 int g_reboot = 0;

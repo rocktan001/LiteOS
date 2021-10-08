@@ -308,16 +308,6 @@ STATIC VOID AtinyDemoTaskEntry(VOID)
 #endif
 #endif
 
-#ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
-    FlashAdaptorInit();
-    demo_param_s demoParam = {
-        .init = NULL,
-        .write_flash_info = FlashAdaptorWriteMqttInfo,
-        .read_flash_info = FlashAdaptorReadMqttInfo
-    };
-    AgentTinyDemoInit(&demoParam);
-#endif
-
 #ifndef LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
 #ifdef CONFIG_FEATURE_FOTA
     hal_init_ota();
