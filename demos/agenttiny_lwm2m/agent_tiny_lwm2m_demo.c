@@ -33,6 +33,7 @@
 #include "los_task.h"
 #include "los_typedef.h"
 #include "los_sys.h"
+#include "atiny_log.h"
 
 #if defined LOSCFG_COMPONENTS_NET_AT
 #include "at_api.h"

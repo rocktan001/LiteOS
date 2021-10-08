@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Flash Manager
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -26,7 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include <stdio.h>
+#include <string.h>
 #include "flash_manager.h"
+#include "osdepends/atiny_osdep.h"
 #include "atiny_log.h"
 
 #ifdef __cplusplus

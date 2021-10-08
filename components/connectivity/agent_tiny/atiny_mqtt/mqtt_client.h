@@ -28,9 +28,10 @@
 
 #ifndef _MQTT_CLIENT_H
 #define _MQTT_CLIENT_H
-#include "atiny_error.h"
+
 #include <stdbool.h>
 #include <stdint.h>
+#include "atiny_error.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -43,7 +44,7 @@ extern "C" {
 #endif
 
 #ifndef MQTT_EVENTS_HANDLE_PERIOD_MS
-#define MQTT_EVENTS_HANDLE_PERIOD_MS (1*1000)
+#define MQTT_EVENTS_HANDLE_PERIOD_MS (1 * 1000)
 #endif
 
 #ifndef MQTT_KEEPALIVE_INTERVAL_S
@@ -63,92 +64,16 @@ extern "C" {
 #define MQTT_WRITE_FOR_SECRET_TIMEOUT (30 * 1000)
 #endif
 
-/* MQTT retry connection delay interval. The delay inteval is
-(MQTT_CONN_FAILED_BASE_DELAY << MIN(coutinious_fail_count, MQTT_CONN_FAILED_MAX_TIMES)) */
-#ifndef MQTT_CONN_FAILED_MAX_TIMES
-#define MQTT_CONN_FAILED_MAX_TIMES  6
-#endif
-
+/* MQTT retry connection delay interval. */
 /* The unit is millisecond */
-#ifndef MQTT_CONN_FAILED_BASE_DELAY
-#define MQTT_CONN_FAILED_BASE_DELAY 1000
+#ifndef MQTT_CONN_RETRY_DELAY
+#define MQTT_CONN_RETRY_DELAY 3000
 #endif
 
-/* deviceReq data msg jason format example to server
-the message can be decoded in json or binary.
-{
-        "msgType":      "deviceReq",
-        "hasMore":      0,
-        "data": [{
-                        "serviceId":    "serviceIdValue",
-                        "data": {
-                                "defineData": "defineValue"
-                        },
-                        "eventTime":    "20161219T114920Z"
-                }]
-}
+/* The size of this value must be 11 */
+#define MQTT_TIME_BUF_LEN 11
 
-cloudReq data msg jason format example from server
-{
-	"msgType":"cloudReq",
-	"serviceId":"serviceIdValue",
-	"paras":{
-		"paraName":"paraValue"
-    },
-	"cmd":"cmdValue",
-	"hasMore":0,
-	"mid":0
-}
-
-deviceRsp data msg jason format example to server
-{
-	"msgType":	"deviceRsp",
-	"mid":	0,
-	"errcode":	0,
-	"hasMore":	0,
-	"body":	{
-		"bodyParaName":	"bodyParaValue"
-	}
-}
-*/
-
-/* msg type, json name, its value is string */
-#define MQTT_MSG_TYPE "msgType"
-/* msg type report data, json value */
-#define MQTT_DEVICE_REQ "deviceReq"
-
-#define MQTT_CLOUD_REQ "cloudReq"
-
-#define MQTT_DEVICE_RSP "deviceRsp"
-
-/* more data, json name, its value is int, 0 for no more data, 1 for more data */
-#define MQTT_HAS_MORE "hasMore"
-#define MQTT_NO_MORE_DATA 0
-#define MQTT_MORE_DATA 1
-
-
-/* ServiceData array, json name, its value is ServiceData array */
-#define MQTT_DATA "data"
-
-/* ServiceData */
-/* service id, json name, its value is string */
-#define MQTT_SERVICEID "serviceId"
-
-/* service data, json name, its value is an object defined in profile for the device */
-#define MQTT_SERVICE_DATA "serviceData"
-
-/* service data, json name, its value is string, format yyyyMMddTHHmmssZ such as 20161219T114920Z */
-#define MQTT_EVENT_TIME "eventTime"
-
-#define MQTT_CMD "cmd"
-#define MQTT_PARAS "paras"
-#define MQTT_MID "mid"
-
-#define MQTT_ERR_CODE "errcode"
-#define MQTT_ERR_CODE_OK 0
-#define MQTT_ERR_CODE_ERR 1
-
-#define MQTT_BODY "body"
+#define MQTT_STRING_MAX_LEN 256
 
 typedef struct mqtt_client_tag_s mqtt_client_s;
 
@@ -176,7 +101,7 @@ typedef struct {
     union {
         mqtt_security_psk_s psk;
         mqtt_security_ca_s ca;
-    }u;
+    } u;
 } mqtt_security_info_s;
 
 typedef enum {
@@ -188,7 +113,9 @@ typedef enum {
 
 typedef struct {
     char *server_ip;
+    uint8_t ip_len;
     char *server_port;
+    uint8_t port_len;
     mqtt_security_info_s info;
     int (*cmd_ioctl)(mqtt_cmd_e cmd, void *arg, int32_t len); // command io control
 } mqtt_param_s;
@@ -198,22 +125,6 @@ typedef enum {
     MQTT_DYNAMIC_CONNECT, // dynamic connection, one product type one password mode
     MQTT_MAX_CONNECTION_TYPE
 } mqtt_connection_type_e;
-
-typedef struct {
-    char *deviceid;
-} mqtt_static_connection_info_s;
-
-typedef struct {
-    char *productid;
-    char *nodeid;
-} mqtt_dynamic_connection_info_s;
-
-typedef enum {
-    MQTT_QOS_MOST_ONCE,  // MQTT QOS 0
-    MQTT_QOS_LEAST_ONCE, // MQTT QOS 1
-    MQTT_QOS_ONLY_ONCE,  // MQTT QOS 2
-    MQTT_QOS_MAX
-} mqtt_qos_e;
 
 typedef enum {
     MQTT_CODEC_MODE_BINARY,
@@ -228,15 +139,35 @@ typedef enum {
 } mqtt_password_sign_type_e;
 
 typedef struct {
+    char *deviceid;
+    uint16_t deviceid_len;
+} mqtt_static_connection_info_s;
+
+typedef struct {
+    char *productid;
+    uint16_t productid_len;
+    char *nodeid;
+    uint16_t nodeid_len;
+} mqtt_dynamic_connection_info_s;
+
+typedef struct {
     mqtt_connection_type_e connection_type;
     mqtt_codec_mode_e codec_mode;
     mqtt_password_sign_type_e sign_type;
-    char *password;
+    char *secret;
+    uint16_t secret_len;
     union {
         mqtt_static_connection_info_s s_info;
         mqtt_dynamic_connection_info_s d_info;
-    }u;
+    } u;
 } mqtt_device_info_s;
+
+typedef enum {
+    MQTT_QOS_MOST_ONCE,  // MQTT QOS 0
+    MQTT_QOS_LEAST_ONCE, // MQTT QOS 1
+    MQTT_QOS_ONLY_ONCE,  // MQTT QOS 2
+    MQTT_QOS_MAX
+} mqtt_qos_e;
 
 /**
  * @ingroup agenttiny
@@ -247,13 +178,12 @@ typedef struct {
  * @attention none.
  *
  * @param mqtt_param_s   [IN]  Configure parameters of MQTT.
- * @param phandle        [OUT] The handle of the agent_tiny.
  *
  * @retval #int          0 if succeed, or the error number @ref mqtt_error_e if failed.
  * @par Dependency: none.
  * @see atiny_bind | atiny_deinit.
  */
-int atiny_mqtt_init(const mqtt_param_s *atiny_params, mqtt_client_s **phandle);
+int atiny_mqtt_init(const mqtt_param_s *atiny_params);
 
 /**
  * @ingroup agenttiny
@@ -265,13 +195,12 @@ int atiny_mqtt_init(const mqtt_param_s *atiny_params, mqtt_client_s **phandle);
  * @attention none.
  *
  * @param device_info    [IN] The information of devices to be bound.
- * @param phandle        [IN] The handle of the agent_tiny.
  *
  * @retval #int          0 if succeed, or the error number @ref mqtt_error_e if failed.
  * @par Dependency: none.
  * @see atiny_init | atiny_deinit.
  */
-int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *phandle);
+int atiny_mqtt_bind(const mqtt_device_info_s *device_info);
 
 /**
  * @ingroup agenttiny
@@ -282,7 +211,7 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *phandl
  * atiny_mqtt_init and atiny_mqtt_bind must be called in one task or thread.
  * @attention none.
  *
- * @param phandle         [IN] The handle of the agent_tiny.
+ * @param topic           [IN] topic to be sended.
  * @param msg             [IN] Message to be sended.
  * @param msg_len         [IN] Message length.
  * @param qos             [IN] quality of service used in MQTT protocol.
@@ -291,7 +220,7 @@ int atiny_mqtt_bind(const mqtt_device_info_s *device_info, mqtt_client_s *phandl
  * @par Dependency: none.
  * @see none.
  */
-int atiny_mqtt_data_send(mqtt_client_s *phandle, const char *msg, uint32_t msg_len, mqtt_qos_e qos);
+int atiny_mqtt_data_send(char *topic, const char *msg, uint32_t msg_len, mqtt_qos_e qos);
 
 /**
  * @ingroup agenttiny
@@ -308,6 +237,8 @@ int atiny_mqtt_data_send(mqtt_client_s *phandle, const char *msg, uint32_t msg_l
  * @see atiny_bind | atiny_deinit.
  */
 int atiny_mqtt_isconnected(mqtt_client_s *phandle);
+
+char *mqtt_get_topic(const char *fmt, uint32_t fixed_size);
 
 #ifdef __cplusplus
 #if __cplusplus

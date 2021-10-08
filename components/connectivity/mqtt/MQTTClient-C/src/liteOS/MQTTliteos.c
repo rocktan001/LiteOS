@@ -54,9 +54,7 @@
 #endif
 #include "osdepends/atiny_osdep.h"
 
-#if defined(LOSCFG_COMPONENTS_ATINY_LOG)
 #include "atiny_log.h"
-#endif /* LOSCFG_COMPONENTS_ATINY_LOG */
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -233,7 +231,6 @@ void NetworkInit(Network *n, mqtt_security_info_s *(*get_security_info)(void))
         ATINY_LOG(LOG_FATAL, "invalid params.");
         return;
     }
-    memset(n, 0x0, sizeof(Network));
     n->mqttread = los_read;
     n->mqttwrite = los_write;
     n->get_security_info = get_security_info;

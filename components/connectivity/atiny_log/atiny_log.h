@@ -78,8 +78,8 @@ void atiny_set_log_level(atiny_log_e level);
  * @see atiny_set_log_level.
  */
 atiny_log_e atiny_get_log_level(void);
-#define ATINY_DEBUG
-#ifdef ATINY_DEBUG
+
+#ifdef LOSCFG_COMPONENTS_ATINY_LOG
 const char *atiny_get_log_level_name(atiny_log_e log_level);
 
 #define ATINY_LOG(level, fmt, ...)                                                               \

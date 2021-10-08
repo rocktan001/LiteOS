@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Mbedtls Cert Config HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -130,10 +130,18 @@
 #define MBEDTLS_ONLY_CCM_8_CHIPERS
 #else
 #define MBEDTLS_CIPHER_MODE_CBC
-#define MBEDTLS_SSL_CIPHERSUITES                        \
+#define MBEDTLS_SSL_CIPHERSUITES                 \
         MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA256, \
-		MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA256, \
-		MBEDTLS_TLS_RSA_WITH_AES_128_GCM_SHA256
+        MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA256, \
+	MBEDTLS_TLS_RSA_WITH_AES_128_GCM_SHA256, \
+        MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, \
+        MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, \
+        MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CCM, \
+        MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, \
+        MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, \
+        MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, \
+        MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, \
+        MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8
 #endif
 
 #define MBEDTLS_TLS_DEFAULT_ALLOW_SHA1_IN_CERTIFICATES

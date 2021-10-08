@@ -39,4 +39,3 @@ config LOSCFG_COMPONENTS_NET_AT_DEBUG
     bool "Enable AT DEBUG"
     depends on LOSCFG_COMPONENTS_NET_AT
     default n
-

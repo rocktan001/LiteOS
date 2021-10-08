@@ -21,7 +21,7 @@ cp tools/build/config/Cloud_STM32F429IGTx_FIRE.config .config
 * `lwip`, `sal`组件提供了网络通信接口。
 * `mbedtls` 组件提供了加解密算法。   
 
-在`menuconfig`中， 使能`Demos` --->` Agent Tiny Mqtt Demo`选项时，加密通信时`encryption mode`加密方式可选择`PSK_ENCRYPT`或`CRET_ENCRYPT`，无加密时可选择`NO_ENCRYPT`， 具体设置如下。
+在`menuconfig`中， 使能`Demos` --->` Agent Tiny Mqtt Demo`选项时，加密通信时`encryption mode`加密方式可选择`PSK_ENCRYPT`或`CERT_ENCRYPT`，无加密时可选择`NO_ENCRYPT`， 具体设置如下。
 ```c
 /* menuconfig 配置如下 */
 Componetns --->
@@ -48,17 +48,17 @@ Demos --->
                         encryption mode (NO_ENCRYPT)  --->
                                                 (X) NO_ENCRYPT
                                                 ( ) PSK_ENCRYPT
-                                                ( ) CRET_ENCRYPT
+                                                ( ) CERT_ENCRYPT
 ```
 ### 配置 `Agent Tiny Mqtt Demo`
 Agent Tiny Mqtt Demo源码文件为<a href="https://gitee.com/LiteOS/LiteOS/blob/master/demos/agenttiny_mqtt/agent_tiny_mqtt_demo.c" target="_blank">demos/agenttiny_mqtt/agent_tiny_mqtt_demo.c</a>。   
 
-在上面`menuconfig`选择`encryption mode`加密方式为`PSK_ENCRYPT`或`CRET_ENCRYPT`以使能`agent_tiny_mqtt_demo.c`中对应的以下宏开关：
+在上面`menuconfig`选择`encryption mode`加密方式为`PSK_ENCRYPT`或`CERT_ENCRYPT`以使能`agent_tiny_mqtt_demo.c`中对应的以下宏开关：
 
 ```c
 #ifdef LOSCFG_DTLS_PSK_ENCRYPT
 #define MQTT_DEMO_USE_PSK 1
-#elif LOSCFG_DTLS_CRET_ENCRYPT
+#elif LOSCFG_DTLS_CERT_ENCRYPT
 #define MQTT_DEMO_USE_CERT 1
 #endif
 ```
@@ -99,7 +99,7 @@ void net_init(void)
    ```c
    #define DEFAULT_SERVER_PORT "1883"
    ```
-2，选择 `PSK_ENCRYPT` 或 `CRET_ENCRYPT` 时, 示例中port设置为：
+2，选择 `PSK_ENCRYPT` 或 `CERT_ENCRYPT` 时, 示例中port设置为：
    ```c
    #define DEFAULT_SERVER_PORT "8883"
    ```
@@ -113,7 +113,7 @@ unsigned char g_demo_psk[AGENT_TINY_DEMO_PSK_LEN] = {0xab, 0xcd, 0xef}; //供测
 ```
 
 
-2, 当选择 `CRET_ENCRYPT` 时，`g_mqtt_ca_crt[]`数组内容是由openssl生成的ca.crt，生成方式在后面`使用openssl生成mosuqitto单向认证证书步骤`中进行介绍。
+2, 当选择 `CERT_ENCRYPT` 时，`g_mqtt_ca_crt[]`数组内容是由openssl生成的ca.crt，生成方式在后面`使用openssl生成mosuqitto单向认证证书步骤`中进行介绍。
 ```c
 static char g_mqtt_ca_crt[] =
 "-----BEGIN CERTIFICATE-----\r\n"
@@ -391,7 +391,7 @@ mosquitto -c /home/liteos/mosquitto/mosquitto_crt.conf -v
 * -v 打印更多消息；
 
 
-2， 设备编译烧录使用`CRET_ENCRYPT`的Demo程序，上电重启。   
+2， 设备编译烧录使用`CERT_ENCRYPT`的Demo程序，上电重启。   
 mosquitto服务开启后， 终端打印以下消息内容：    
 ```c
 /* mosquitto服务运行消息 */

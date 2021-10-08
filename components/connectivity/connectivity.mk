@@ -15,10 +15,8 @@ include $(LITEOSTOPDIR)/components/connectivity/lwm2m/lwm2m.mk
 COMPONENTS_CONNECTIVITY_INCLUDE += $(COMPONENTS_LWM2M_INCLUDE)
 endif
 
-ifeq ($(LOSCFG_COMPONENTS_ATINY_LOG), y)
 include $(LITEOSTOPDIR)/components/connectivity/atiny_log/atiny_log.mk
 COMPONENTS_CONNECTIVITY_INCLUDE += $(COMPONENTS_ATINY_LOG_INCLUDE)
-endif
 
 ifeq ($(LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT), y)
 include $(LITEOSTOPDIR)/components/connectivity/nb_iot/nb_iot.mk
