@@ -1,12 +1,15 @@
 include $(LITEOSTOPDIR)/config.mk
+include $(LITEOSTOPDIR)/components/components.mk
 
 MODULE_NAME := $(notdir $(CURDIR))
 
-LOCAL_SRCS_y := nb_demo.c
+LOCAL_SRCS := nb_demo.c
 
-LOCAL_INCLUDE := -I $(LITEOSTOPDIR)/include
+LOCAL_INCLUDE := \
+    -I $(LITEOSTOPDIR)/include
 
-LOCAL_SRCS := $(LOCAL_SRCS_y)
+LOCAL_INCLUDE += $(COMPONENTS_INCLUDE)
+
 LOCAL_FLAGS := $(LOCAL_INCLUDE)
 
 include $(MODULE)

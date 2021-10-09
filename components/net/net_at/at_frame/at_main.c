@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: At Main Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -26,41 +26,26 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_memory.h"
 #include "at_main.h"
-#include "at_hal.h"
+#include "los_memory.h"
+#include "los_sys.h"
+#include "los_tick.h"
 #ifdef WITH_SOTA
 #include "sota/sota.h"
 #endif
-#include "los_sys.h"
-#include "los_tick.h"
+#include "at_hal.h"
 
-static at_config at_user_conf;
+AtOobType g_atOob;
 
-/* FUNCTION */
-void at_set_config(at_config *config);
-at_config *at_get_config(void);
+AtTaskHandle g_at;
 
-int32_t at_init(at_config *config);
-int32_t at_write(int8_t *cmd, int8_t *suffix, int8_t *buf, int32_t len);
-int32_t at_get_unuse_linkid(void);
-void at_listener_list_add(at_listener *p);
-void at_listner_list_del(at_listener *p);
-int32_t at_cmd(int8_t *cmd, int32_t len, const char *suffix, char *resp_buf, int* resp_len);
-int32_t at_oob_register(char *featurestr, int cmdlen, oob_callback callback, oob_cmd_match cmd_match);
-
-void at_deinit(void);
-
-at_oob_t at_oob;
-char rbuf[AT_DATA_LEN] = {0};
-char wbuf[AT_DATA_LEN] = {0};
-
-uint32_t at_get_time(void)
+uint32_t AtGetTime(void)
 {
     return ((uint32_t)(LOS_TickCountGet()* (OS_SYS_MS_PER_SECOND / LOSCFG_BASE_CORE_TICK_PER_SECOND)))/ 1000;
 }
 
-int chartoint(const char* port)
+/* Data type conversion */
+int CharToInt(const char* port)
 {
     int tmp = 0;
     while ((*port >= '0') && (*port <= '9')) {
@@ -70,14 +55,28 @@ int chartoint(const char* port)
     return tmp;
 }
 
-void at_listener_list_add(at_listener *p)
+void *AtMalloc(size_t size)
 {
-    at_listener *head = at.head;
-    at_listener *cur;
+    void *pMem = LOS_MemAlloc(m_aucSysMem0, size);
+    if (pMem != NULL) {
+        memset(pMem, 0, size);
+    }
+    return pMem;
+}
+
+void AtFree(void *ptr)
+{
+    (void)LOS_MemFree(m_aucSysMem0, ptr);
+}
+
+void AtListenerListAdd(AtListener *p)
+{
+    AtListener *head = g_at.listener.head;
+    AtListener *cur = NULL;
 
     p->next = NULL;
     if (head == NULL) {
-        at.head = p;
+        g_at.listener.head = p;
         return;
     }
 
@@ -89,13 +88,13 @@ void at_listener_list_add(at_listener *p)
     cur->next = p;
  }
 
-void at_listner_list_del(at_listener *p)
+void AtListenerListDel(AtListener *p)
 {
-    at_listener *head = at.head;
-    at_listener *cur;
+    AtListener *head = g_at.listener.head;
+    AtListener *cur = NULL;
 
     if (p == head) {
-        at.head = head->next;
+        g_at.listener.head = head->next;
         return;
     }
 
@@ -108,48 +107,45 @@ void at_listner_list_del(at_listener *p)
     }
 }
 
-void at_listner_list_destroy(at_task *at_tsk)
+void AtListnerListDestroy(AtListener *pHead)
 {
-    at_listener *head;
-    while (at_tsk->head != NULL) {
-        head = at_tsk->head;
-        at_tsk->head = head->next;
-        if (head->handle_data != NULL) {
-            at_free(head);
+    AtListener *head = NULL;
+    while (pHead != NULL) {
+        head = pHead;
+        pHead = head->next;
+        if (head->HandleData != NULL) {
+            AtFree(head);
         }
     }
 }
 
-static void at_rm_node(at_listener *listener, at_listener *pre)
+static void AtListenerNodeDel(AtListener *listener, AtListener *pre)
 {
-    if (at.head == listener) {
-        at.head = listener->next;
+    if (g_at.listener.head == listener) {
+        g_at.listener.head = listener->next;
     } else {
         if (pre) {
             pre->next = listener->next;
         }
     }
-    at_free(listener);
+    AtFree(listener);
 
-    LOS_MuxPost(at.trx_mux);
+    g_at.mutex.post(g_at.mutex.sendMux);
 }
 
-static void at_rm_timeout_nodes(void)
+static void AtListenerTimeoutNodesDel(AtListener *pHead)
 {
-    at_listener *pre = NULL;
-    at_listener *next = NULL;
-
-    for (at_listener *listener = at.head; listener != NULL; listener = next) {
+    AtListener *pre = NULL;
+    AtListener *next = NULL;
+    AtListener *listener = NULL;
+    for (listener = pHead; listener != NULL; listener = next) {
         next = listener->next;
-
-        if (listener->handle_data == NULL) {
-            pre = listener;
+        if (listener->HandleData == NULL) {
             continue;
         }
-
-        if (listener->expire_time <= at_get_time()) {
+        if (listener->expireTime <= AtGetTime()) {
             AT_LOG("get recv data timeout");
-            at_rm_node(listener, pre);
+            AtListenerNodeDel(listener, pre);
         }
         else {
             pre = listener;
@@ -157,448 +153,471 @@ static void at_rm_timeout_nodes(void)
     }
 }
 
-int32_t at_get_unuse_linkid(void)
+int32_t AtGetUnusedLinkId(void)
 {
     int i = 0;
 
-    if (at.mux_mode == AT_MUXMODE_MULTI) {
-        for (i = 0; i < at_user_conf.linkid_num; i++) {
-            if (at.linkid[i].usable == AT_LINK_UNUSE) {
+    if (g_at.multiMode == AT_MUXMODE_MULTI) {
+        for (i = 0; i < g_at.config.maxLinkIdNum; i++) {
+            if (g_at.linkedId[i].usable == AT_LINK_UNUSE) {
                 break;
             }
         }
     }
 
-    if (i < at_user_conf.linkid_num)
-        at.linkid[i].usable = AT_LINK_INUSE;
+    if (i < g_at.config.maxLinkIdNum) {
+        g_at.linkedId[i].usable = AT_LINK_INUSE;
+    }
 
     return i;
 }
 
-void store_resp_buf(int8_t *resp_buf, const int8_t *src, uint32_t src_len, uint32_t* maxlen)
+static void StoreRespBuffer(int8_t *respBuffer, const int8_t *src, uint32_t src_len, uint32_t* maxlen)
 {
     int copy_len;
 
     copy_len = MIN(*maxlen, src_len);
-    memcpy((char *)resp_buf, (char *)src, copy_len);
+    memcpy((char *)respBuffer, (char *)src, copy_len);
     *maxlen = copy_len;
 }
 
-int32_t at_cmd_in_callback(const int8_t *cmd, int32_t len,
-                    int32_t (*handle_data)(const int8_t *data, uint32_t len),  uint32_t timeout)
+int32_t AtCmdInCallback(const int8_t *cmd, int32_t len,
+                    int32_t (*HandleData)(const int8_t *data, uint32_t len),  uint32_t timeout)
 {
     int32_t ret = AT_FAILED;
 
-    if (handle_data != NULL) {
-        if (LOS_MuxPend(at.trx_mux, 0) != AT_OK) {
+    if (HandleData != NULL) {
+        if (g_at.mutex.pend(g_at.mutex.sendMux, 0) != AT_OK) {
             return AT_FAILED;
         }
     }
 
-    LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-    at_transmit((uint8_t *)cmd, len, 1);
+    g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER);
+    g_at.config.transmit((uint8_t *)cmd, len, 1);
+    if (HandleData != NULL) {
+        AtListener *listener = NULL;
 
-    if (handle_data != NULL) {
-        at_listener *listener = NULL;
-
-        listener = at_malloc(sizeof(*listener));
+        listener = AtMalloc(sizeof(AtListener));
         if (listener == NULL) {
-            AT_LOG("at_malloc fail");
+            AT_LOG("AtMalloc fail");
             goto EXIT;
         }
-        memset(listener, 0, sizeof(*listener));
+        memset(listener, 0, sizeof(AtListener));
 
-        listener->handle_data = handle_data;
-        listener->expire_time = at_get_time() + timeout;
-        at_listener_list_add(listener);
+        listener->HandleData = HandleData;
+        listener->expireTime = AtGetTime() + timeout;
+        AtListenerListAdd(listener);
     }
     ret = AT_OK;
 
 EXIT:
-    LOS_MuxPost(at.cmd_mux);
+    g_at.mutex.post(g_at.mutex.cmdMux);
 
     AT_LOG("len %ld,cmd %s", len, cmd);
 
     return ret;
 }
 
-int32_t at_cmd_multi_suffix(const int8_t *cmd, int  len, at_cmd_info_s *cmd_info)
+static void AtWriteTaskMsg(AtMsgType type)
 {
-    at_listener listener;
+    AtRecvQueue recvBuffer;
+    int ret;
+
+    (void)memset_s(&recvBuffer, sizeof(AtRecvQueue), 0, sizeof(AtRecvQueue));
+    recvBuffer.msgType = type;
+
+    ret = g_at.queue.write(g_at.queue.queueRecvId, &recvBuffer, sizeof(AtRecvQueue), 0);
+    if (ret != LOS_OK) {
+        g_at.queue.queueWrErrorCounts++;
+    }
+}
+
+int32_t AtCmdMultiSuffix(const int8_t *cmd, int  len, AtCmdInfo *cmdInfo)
+{
+    AtListener listener;
     int ret;
     int print_len;
 
-    if ((cmd_info == NULL) || (cmd == NULL)) {
+    if ((cmdInfo == NULL) || (cmd == NULL)) {
         return AT_FAILED;
     }
 
     memset(&listener, 0, sizeof(listener));
-    listener.cmd_info = *cmd_info;
-    print_len = ((cmd_info->resp_buf && cmd_info->resp_len) ? (int)*(cmd_info->resp_len) : -1);
-    AT_LOG("cmd len %d, %p,%d", print_len, cmd_info->resp_buf, (int)cmd_info->resp_len);
+    listener.cmdInfo = *cmdInfo;
+    print_len = ((cmdInfo->respBuffer && cmdInfo->respLen) ? (int)*(cmdInfo->respLen) : -1);
+    AT_LOG("cmd len %d, %p, %d", print_len, cmdInfo->respBuffer, (int)cmdInfo->respLen);
 
-    LOS_MuxPend(at.trx_mux, LOS_WAIT_FOREVER);
+    g_at.mutex.pend(g_at.mutex.sendMux, LOS_WAIT_FOREVER);
 
-    LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-    at_listener_list_add(&listener);
-    at_transmit((uint8_t *)cmd, len, 1);
-    LOS_MuxPost(at.cmd_mux);
+    g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER);
+    AtListenerListAdd(&listener);
+    if (g_at.config.transmit == NULL) {
+        AT_LOG("transmit is null.");
+    }
+    g_at.config.transmit((uint8_t *)cmd, len, 1);
+    g_at.mutex.post(g_at.mutex.cmdMux);
 
-    ret = LOS_SemPend(at.resp_sem, at.timeout);
+    ret = g_at.sem.pend(g_at.sem.respSem, g_at.timeout); // wait for receive response
+    g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER); 
+    AtListenerListDel(&listener);
+    g_at.mutex.post(g_at.mutex.cmdMux);
 
-    LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-    at_listner_list_del(&listener);
-    LOS_MuxPost(at.cmd_mux);
-
-    LOS_MuxPost(at.trx_mux);
-    write_at_task_msg(AT_SENT_DONE);
+    g_at.mutex.post(g_at.mutex.sendMux);
+    AtWriteTaskMsg(AT_SENT_DONE);
 
     if (ret != LOS_OK) {
-        AT_LOG("LOS_SemPend for listener.resp_sem failed(ret = %x, cmd = %s)!", ret, cmd);
+        AT_LOG("g_at.sem.pend for listener.respSem failed(ret = %x, cmd = %s)!", ret, cmd);
         return AT_FAILED;
     }
 
-    *cmd_info = listener.cmd_info;
+    *cmdInfo = listener.cmdInfo;
     return AT_OK;
 }
 
-int32_t at_cmd(int8_t *cmd, int32_t len, const char *suffix, char *resp_buf, int* resp_len)
+int32_t AtWriteCmd(int8_t *cmd, int32_t len, const char *suffix, char *respBuffer, int *respLen)
 {
     const char *suffix_array[1] = {suffix};
-    at_cmd_info_s cmd_info;
+    AtCmdInfo cmdInfo;
 
-    memset(&cmd_info, 0, sizeof(cmd_info));
-    cmd_info.suffix = suffix_array;
-    cmd_info.suffix_num = array_size(suffix_array);
-    cmd_info.resp_buf = resp_buf;
-    cmd_info.resp_len = (uint32_t *)resp_len;
+    memset(&cmdInfo, 0, sizeof(cmdInfo));
+    cmdInfo.suffix = suffix_array;
+    cmdInfo.suffixNumber = array_size(suffix_array);
+    cmdInfo.respBuffer = respBuffer;
+    cmdInfo.respLen = (uint32_t *)respLen;
 
-    return at_cmd_multi_suffix(cmd, len, &cmd_info);
+    return AtCmdMultiSuffix(cmd, len, &cmdInfo);
 }
 
-int32_t at_write(int8_t *cmd, int8_t *suffix, int8_t *buf, int32_t len)
+static int32_t AtWriteData(int8_t *cmd, int8_t *suffix, int8_t *buf, int32_t len)
 {
     const char *suffix_array[1];
-    at_listener listener;
+    AtListener listener;
     int ret = AT_FAILED;
 
     memset(&listener, 0, sizeof(listener));
-    listener.cmd_info.suffix_num = 1;
-    suffix_array[0] = ">";
-    listener.cmd_info.suffix = suffix_array;
+    suffix_array[0] = ">"; //ready to write data.
+    listener.cmdInfo.suffixNumber = 1;
+    listener.cmdInfo.suffix = suffix_array;
+    g_at.mutex.pend(g_at.mutex.sendMux, LOS_WAIT_FOREVER);
+    AtListenerListAdd(&listener);
+    
+    g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER);
+    g_at.config.transmit((uint8_t *)cmd, strlen((char *)cmd), 1);
+    g_at.mutex.post(g_at.mutex.cmdMux);
 
-    LOS_MuxPend(at.trx_mux, LOS_WAIT_FOREVER);
+    (void)g_at.sem.pend(g_at.sem.respSem, 200);
 
-    LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-    at_listener_list_add(&listener);
-    at_transmit((uint8_t *)cmd, strlen((char *)cmd), 1);
-    LOS_MuxPost(at.cmd_mux);
-
-    (void)LOS_SemPend(at.resp_sem, 200);
-
-    LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
+    g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER);
     suffix_array[0] = (char *)suffix;
-    at_listner_list_del(&listener);
-    at_listener_list_add(&listener);
-    at_transmit((uint8_t *)buf, len, 0);
-    LOS_MuxPost(at.cmd_mux);
+    AtListenerListDel(&listener);
+    AtListenerListAdd(&listener);
+    g_at.config.transmit((uint8_t *)buf, len, 0);
+    g_at.mutex.post(g_at.mutex.cmdMux);
 
-    ret = LOS_SemPend(at.resp_sem, at.timeout);
+    ret = g_at.sem.pend(g_at.sem.respSem, g_at.timeout);
 
-    LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-    at_listner_list_del(&listener);
-    LOS_MuxPost(at.cmd_mux);
+    g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER);
+    AtListenerListDel(&listener);
+    g_at.mutex.post(g_at.mutex.cmdMux);
 
-    LOS_MuxPost(at.trx_mux);
-    write_at_task_msg(AT_SENT_DONE);
+    g_at.mutex.post(g_at.mutex.sendMux);
+    AtWriteTaskMsg(AT_SENT_DONE);
 
     if (ret != LOS_OK) {
-        AT_LOG("LOS_SemPend for listener.resp_sem failed(ret = %x)!", ret);
+        AT_LOG("g_at.sem.pend for listener.respSem failed(ret = %x)!", ret);
         return AT_FAILED;
     }
     return len;
 }
 
-int cloud_cmd_matching(int8_t *buf, int32_t len)
+static int CloudCmdMatching(int8_t *buf, int32_t len)
 {
-    int ret = 0;
     char *cmp = NULL;
-    int i;
-
-    for (i = 0; i < at_oob.oob_num; i++) {
-        ret = at_oob.oob[i].cmd_match((const char *)buf, at_oob.oob[i].featurestr, at_oob.oob[i].len);
-        if (ret == 0) {
-            cmp += at_oob.oob[i].len;
-            if (at_oob.oob[i].callback != NULL) {
-                (void)at_oob.oob[i].callback(at_oob.oob[i].arg, (int8_t *)buf, (int32_t)len);
-            }
+    for (int i = 0; i < g_atOob.oobNum; i++) {
+        cmp = g_atOob.oob[i].cmdMatch((const char *)buf, g_atOob.oob[i].featureStr, g_atOob.oob[i].len);
+        if ((cmp != NULL) && g_atOob.oob[i].callback != NULL) {
+            (void)g_atOob.oob[i].callback(g_atOob.oob[i].arg, (int8_t *)buf, (int32_t)len);
             return len;
         }
     }
     return 0;
 }
 
-static int at_handle_callback_cmd_resp(at_listener *listener, int8_t *resp_buf, uint32_t resp_len)
+static int AtHandleCallbackCmdResponse(AtListener *listener, int8_t *respBuffer, uint32_t respLen)
 {
-    if (listener->handle_data == NULL) {
+    if (listener->HandleData == NULL) {
         return AT_FAILED;
     }
 
-    if (listener->handle_data(resp_buf, resp_len) == AT_OK) {
-        at_rm_node(listener, NULL);
+    if (listener->HandleData(respBuffer, respLen) == AT_OK) {
+        AtListenerNodeDel(listener, NULL);
         return AT_OK;
     }
 
     return AT_FAILED;
 }
 
-static void at_handle_resp(int8_t *resp_buf, uint32_t resp_len)
+static void AtHandleResponse(int8_t *respBuffer, uint32_t respLen)
 {
-    at_listener *listener = NULL;
+    AtListener *listener = NULL;
 
-    listener = at.head;
+    listener = g_at.listener.head;
     if (listener == NULL) {
         return;
     }
-
-    if (at_handle_callback_cmd_resp(listener, resp_buf, resp_len) == AT_OK) {
+    
+    if (AtHandleCallbackCmdResponse(listener, respBuffer, respLen) == AT_OK) {
         return;
     }
 
-    if (listener->cmd_info.suffix == NULL) {
-        (void)LOS_SemPost(at.resp_sem);
-        listener = NULL;
-        return;
-    }
-
-    for (uint32_t i = 0;  i < listener->cmd_info.suffix_num; i++) {
-        char *suffix;
-
-        if (listener->cmd_info.suffix[i] == NULL) {
+    for (uint32_t i = 0; i < listener->cmdInfo.suffixNumber; i++) {
+        if (listener->cmdInfo.suffix[i] == NULL) {
             continue;
         }
-
-        suffix = strstr((char *)resp_buf, (const char *)listener->cmd_info.suffix[i]);
+        char *suffix = strstr((char *)respBuffer, (const char *)listener->cmdInfo.suffix[i]);
         if (suffix != NULL) {
-            if ((listener->cmd_info.resp_buf != NULL) && (listener->cmd_info.resp_len != NULL) && (resp_len > 0)) {
-                store_resp_buf((int8_t *)listener->cmd_info.resp_buf, resp_buf, resp_len, listener->cmd_info.resp_len);
+            AT_LOG("match suffix=%s\n", suffix);
+            if ((listener->cmdInfo.respBuffer != NULL) && (listener->cmdInfo.respLen != NULL) && (respLen > 0)) {
+                StoreRespBuffer((int8_t *)listener->cmdInfo.respBuffer, respBuffer, respLen, listener->cmdInfo.respLen);
             }
-            listener->cmd_info.match_idx = i;
-            (void)LOS_SemPost(at.resp_sem);
+            listener->cmdInfo.matchIndex = i;
+            (void)g_at.sem.post(g_at.sem.respSem);
             break;
+        } else {
+             AT_LOG("match suffix is null\n");
         }
     }
 }
 
-static uint32_t at_get_queue_wait_time(void)
+static uint32_t AtGetQueueWaitTime(void)
 {
     uint32_t ret;
 
-    if (at.step_callback == NULL) {
+    if (g_at.stepCallback == NULL) {
         return LOS_WAIT_FOREVER;
     }
 
-    LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-    if ((at.head == NULL) || (at.head->handle_data == NULL)) {
+    g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER);
+    if ((g_at.listener.head == NULL) || (g_at.listener.head->HandleData == NULL)) {
         ret = LOS_WAIT_FOREVER;
     } else {
         const uint32_t min_wait_time = 100;
-        uint32_t  current = at_get_time();
-        ret = ((current >= at.head->expire_time) ? min_wait_time : ((at.head->expire_time - current) * 1000));
+        uint32_t current = AtGetTime();
+        ret = ((current >= g_at.listener.head->expireTime) ? min_wait_time : ((g_at.listener.head->expireTime - current) * 1000));
     }
 
-    LOS_MuxPost(at.cmd_mux);
+    g_at.mutex.post(g_at.mutex.cmdMux);
     return ret;
 }
 
-void at_recv_task(void)
+void AtRecvTask(void)
 {
-    uint32_t recv_len = 0;
-    uint8_t *tmp = at.userdata;
+    uint32_t recvLen = 0;
+    uint8_t *buffer = g_at.userData;
     int ret = 0;
-    recv_buff recv_buf;
-    UINT32 rlen = sizeof(recv_buff);
-
+    AtRecvQueue queueBuffer;
+    UINT32 queueLen = sizeof(AtRecvQueue);
     while (1) {
-        uint32_t wait_time = at_get_queue_wait_time();
-        ret = LOS_QueueReadCopy(at.rid, &recv_buf, &rlen, wait_time);
+        uint32_t waitTime = AtGetQueueWaitTime();
+        ret = g_at.queue.read(g_at.queue.queueRecvId, &queueBuffer, &queueLen, waitTime); //recv usart buffer.
         if (ret != LOS_OK) {
             continue;
         }
 
-        if (recv_buf.msg_type == AT_TASK_QUIT) {
+        if (queueBuffer.msgType == AT_TASK_QUIT) {
             AT_LOG("at recv task quit");
             break;
         }
+        g_at.mutex.pend(g_at.mutex.recvMux, LOS_WAIT_FOREVER);
+        g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER);
+        AtListenerTimeoutNodesDel(g_at.listener.head);
+        g_at.mutex.post(g_at.mutex.cmdMux);
 
-        LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-        at_rm_timeout_nodes();
-		LOS_MuxPost(at.cmd_mux);
-
-        if (at.step_callback) {
-            at.step_callback();
+        if (g_at.stepCallback) {
+            g_at.stepCallback();
         }
 
-        if (recv_buf.msg_type != AT_USART_RX) {
+        if (queueBuffer.msgType != AT_USART_RX) {
             AT_LOG("at recv msg sent done");
+            g_at.mutex.post(g_at.mutex.recvMux);
             continue;
         }
+        
+        if (g_at.config.maxBufferLen <= 0) {
+            AT_LOG("no buffer, task quit");
+            g_at.mutex.post(g_at.mutex.recvMux);
+            break;
+        }
+        memset(buffer, 0, g_at.config.maxBufferLen);
+        AtReadQueueBuffer(buffer, &recvLen, (AtRecvQueue *)&queueBuffer);
 
-        memset(tmp, 0, at_user_conf.user_buf_len);
-        recv_len = read_resp(tmp, &recv_buf);
-        if (recv_len <= 0) {
-            AT_LOG("err, recv_len = %ld", recv_len);
+        if (recvLen <= 0) {
+            AT_LOG("err, recvLen = %ld", recvLen);
+            g_at.mutex.post(g_at.mutex.recvMux);
             continue;
         }
+        AT_LOG_DEBUG("recvLen len = %lu buf = %s ", recvLen, buffer);
+        
+        g_at.mutex.pend(g_at.mutex.cmdMux, LOS_WAIT_FOREVER);
+        AtListenerTimeoutNodesDel(g_at.listener.head);
+        AtHandleResponse((int8_t *)buffer, recvLen);
+        g_at.mutex.post(g_at.mutex.cmdMux);
 
-        AT_LOG_DEBUG("recv len = %lu buf = %s ", recv_len, tmp);
-
-        ret = cloud_cmd_matching((int8_t *)tmp, recv_len);
-        if (ret > 0) {
-            continue;
-        }
-
-        LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-        at_rm_timeout_nodes();
-        at_handle_resp((int8_t *)tmp, recv_len);
-        LOS_MuxPost(at.cmd_mux);
+        CloudCmdMatching((int8_t *)buffer, recvLen);
+        g_at.mutex.post(g_at.mutex.recvMux);
     }
+    g_at.queue.delete(g_at.queue.queueRecvId); // After the task exits, delete queue
+    LOS_TaskDelete(g_at.atTaskId);
 }
 
-uint32_t create_at_recv_task(void)
+uint32_t AtRecvTaskCreate(AtTaskHandle *at)
 {
     uint32_t ret = LOS_OK;
-    TSK_INIT_PARAM_S task_init_param;
+    TSK_INIT_PARAM_S taskInitParam;
 
-    task_init_param.usTaskPrio = 0;
-    task_init_param.pcName = "at_recv_task";
-    task_init_param.pfnTaskEntry = (TSK_ENTRY_FUNC)at_recv_task;
-    task_init_param.uwStackSize = 0x1000;
+    taskInitParam.usTaskPrio = 0;
+    taskInitParam.pcName = "AtRecvTask";
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)AtRecvTask;
+    taskInitParam.uwStackSize = 0x1000;
 
-    ret = LOS_TaskCreate((UINT32 *)&at.tsk_hdl, &task_init_param);
+    ret = LOS_TaskCreate((UINT32 *)at->atTaskId, &taskInitParam);
     if (ret != LOS_OK) {
         return ret;
     }
     return ret;
 }
 
-void at_init_oob(void)
+void AtOobInit(void)
 {
-    at_oob.oob_num = 0;
-    memset(at_oob.oob, 0, OOB_MAX_NUM * sizeof(struct oob_s));
+    g_atOob.oobNum = 0;
+    memset(g_atOob.oob, 0, OOB_MAX_NUM * sizeof(struct oob_s));
 }
 
-int32_t at_struct_init(at_task *at)
+static int32_t AtTaskInit(AtTaskHandle *at)
 {
     int ret = -1;
     if (at == NULL) {
         AT_LOG("invaild param!");
         return ret;
     }
-
-    ret = LOS_QueueCreate("recvQueue", 32, (UINT32 *)&at->rid, 0, sizeof(recv_buff));
+    printf("%s\n", __func__);
+    /* init uart received queue */
+    ret = at->queue.create("recvQueue", 32, (UINT32 *)at->queue.queueRecvId, 0, sizeof(AtRecvQueue));
     if (ret != LOS_OK) {
         AT_LOG("init recvQueue failed!");
         return AT_FAILED;
     }
-    at->rid_flag = true;
+    at->queue.queueRecvFlag = true;
 
-    ret = LOS_SemCreate(0, (UINT32 *)&at->recv_sem);
+    ret = at->sem.create(0, (UINT32 *)at->sem.recvSem);
     if (ret != LOS_OK) {
         AT_LOG("init at_recv_sem failed!");
         goto at_recv_sem_failed;
     }
 
-    ret = LOS_MuxCreate((UINT32 *)&at->cmd_mux);
+    ret = at->mutex.create((UINT32 *)at->mutex.cmdMux);
     if (ret != LOS_OK) {
-        AT_LOG("init cmd_mux failed!");
+        AT_LOG("init cmdMux failed!");
         goto at_cmd_mux_failed;
     }
 
-    ret = LOS_MuxCreate((UINT32 *)&at->trx_mux);
+    ret = at->mutex.create((UINT32 *)at->mutex.sendMux);
     if (ret != LOS_OK) {
-        AT_LOG("init cmd_mux failed!");
-        goto at_cmd_mux_failed;
+        AT_LOG("init sendMux failed!");
+        goto atSendMuxFailed;
     }
-    at->trx_mux_flag = true;
+    at->sendMuxFlag = true;
 
-    ret = LOS_SemCreate(0, (UINT32 *)&at->resp_sem);
+    ret = at->mutex.create((UINT32 *)at->mutex.recvMux);
     if (ret != LOS_OK) {
-        AT_LOG("init resp_sem failed!");
+        AT_LOG("init sendMux failed!");
+        goto at_recv_mux_failed;
+    }
+
+
+    ret = at->sem.create(0, (UINT32 *)at->sem.respSem);
+    if (ret != LOS_OK) {
+        AT_LOG("init respSem failed!");
         goto at_resp_sem_failed;
     }
 #ifndef USE_USARTRX_DMA
-    at->recv_buf = at_malloc(at_user_conf.user_buf_len);
-    if (at->recv_buf == NULL) {
-        AT_LOG("malloc recv_buf failed!");
-        goto malloc_recv_buf;
+    at->recv.buff = AtMalloc(at->config.maxBufferLen);
+    if (at->recv.buff == NULL) {
+        AT_LOG("malloc recvBuffer failed!");
+        goto mallocRecvBuffError;
     }
+    at->recv.maxLen = at->config.maxBufferLen;
 #else
-    at->recv_buf = at_malloc(at_user_conf.recv_buf_len);
-    if (at->recv_buf == NULL) {
-        AT_LOG("malloc recv_buf failed!");
-        goto malloc_recv_buf;
+    at->recv.buff = AtMalloc(at->config.maxBufferLen);
+    if (at->recv.buff == NULL) {
+        AT_LOG("malloc recvBuffer failed!");
+        goto mallocRecvBuffError;
     }
+    at->recv.maxLen = at->config.maxBufferLen;
 #endif
 
-    at->cmdresp = at_malloc(at_user_conf.user_buf_len);
-    if (at->cmdresp == NULL) {
-        AT_LOG("malloc cmdresp failed!");
-        goto malloc_resp_buf;
+    // init AT cmd response
+    at->cmdResp = AtMalloc(at->config.maxBufferLen);
+    if (at->cmdResp == NULL) {
+        AT_LOG("malloc cmdResp failed!");
+        goto malloc_respBuffer;
     }
 
-    at->userdata = at_malloc(at_user_conf.user_buf_len);
-    if (at->userdata == NULL) {
-        AT_LOG("malloc userdata failed!");
+    at->userData = AtMalloc(at->config.maxBufferLen);
+    if (at->userData == NULL) {
+        AT_LOG("malloc userData failed!");
         goto malloc_userdata_buf;
     }
-    at->saveddata = at_malloc(at_user_conf.user_buf_len);
-    if (at->saveddata == NULL) {
-        AT_LOG("malloc saveddata failed!");
+    at->savedData = AtMalloc(at->config.maxBufferLen);
+    if (at->savedData == NULL) {
+        AT_LOG("malloc savedData failed!");
         goto malloc_saveddata_buf;
     }
-
-    at->linkid = (at_link *)at_malloc(at_user_conf.linkid_num * sizeof(at_link));
-    if (at->linkid == NULL) {
-        AT_LOG("malloc for at linkid array failed!");
+    uint32_t size = at->config.maxLinkIdNum * sizeof(AtNetLink);
+    at->linkedId = (AtNetLink *)AtMalloc(size);
+    if (at->linkedId == NULL) {
+        AT_LOG("malloc for at linkedId array failed!");
         goto malloc_linkid_failed;
     }
-    memset(at->linkid, 0, at_user_conf.linkid_num * sizeof(at_link));
+    memset(at->linkedId, 0, size);
 
-    at->head = NULL;
-    at->mux_mode = at_user_conf.mux_mode;
-    at->timeout = at_user_conf.timeout;
+    at->listener.head = NULL;
+    at->multiMode =at->config.multiMode;
+    at->timeout =at->config.timeout;
     return AT_OK;
 
 malloc_linkid_failed:
-    at_free(at->saveddata);
+  AtFree(at->savedData);
 malloc_saveddata_buf:
-    at_free(at->userdata);
+  AtFree(at->userData);
 malloc_userdata_buf:
-    at_free(at->cmdresp);
-malloc_resp_buf:
-    at_free(at->recv_buf);
-malloc_recv_buf:
-    (void)LOS_SemDelete(at->resp_sem);
+  AtFree(at->cmdResp);
+malloc_respBuffer:
+  AtFree(at->recv.buff);
+mallocRecvBuffError:
+    (void)at->sem.delete(at->sem.respSem);
 at_resp_sem_failed:
-    (void)LOS_MuxDelete(at->cmd_mux);
+    (void)at->mutex.delete(at->mutex.recvMux);
+at_recv_mux_failed:
+atSendMuxFailed:
+    (void)at->mutex.delete(at->mutex.cmdMux);
 at_cmd_mux_failed:
-    (void)LOS_SemDelete(at->recv_sem);
+    (void)at->sem.delete(at->sem.recvSem);
 at_recv_sem_failed:
 
-    if (at->trx_mux_flag) {
-        (void)LOS_MuxDelete(at->trx_mux);
-        at->trx_mux_flag = false;
+    if (at->sendMuxFlag) {
+        (void)at->mutex.delete(at->mutex.sendMux);
+        at->sendMuxFlag = false;
     }
 
-    if (at->rid_flag) {
-        (VOID)LOS_QueueDelete(at->rid);
-        at->rid_flag = false;
+    if (at->queue.queueRecvFlag) {
+        (VOID)at->queue.delete(at->queue.queueRecvId);
+        at->queue.queueRecvFlag = false;
     }
     return AT_FAILED;
 }
 
-int32_t at_struct_deinit(at_task *at)
+static int32_t AtTaskDeinit(AtTaskHandle *at)
 {
     int32_t ret = AT_OK;
 
@@ -607,106 +626,130 @@ int32_t at_struct_deinit(at_task *at)
         return AT_FAILED;
     }
 
-    LOS_MuxPend(at->cmd_mux, LOS_WAIT_FOREVER);
-    at_listner_list_destroy(at);
-    LOS_MuxPost(at->cmd_mux);
+   at->mutex.pend(at->mutex.cmdMux, LOS_WAIT_FOREVER);
+   AtListnerListDestroy(at->listener.head);
+   at->mutex.post(at->mutex.cmdMux);
 
-    if (LOS_SemDelete(at->recv_sem) != LOS_OK) {
-        AT_LOG("delete at.recv_sem failed!");
+    if (at->sem.delete(at->sem.recvSem) != LOS_OK) {
+        AT_LOG("delete g_at.recvSem failed!");
         ret = AT_FAILED;
     }
 
-    if (LOS_MuxDelete(at->cmd_mux) != LOS_OK) {
-        AT_LOG("delete at.cmd_mux failed!");
+    if (at->mutex.delete(at->mutex.cmdMux) != LOS_OK) {
+        AT_LOG("delete g_at.mutex.cmdMux failed!");
         ret = AT_FAILED;
     }
 
-    if (LOS_SemDelete(at->resp_sem) != LOS_OK) {
-        AT_LOG("delete at.resp_sem failed!");
+    if (at->sem.delete(at->sem.respSem) != LOS_OK) {
+        AT_LOG("delete g_at.sem.respSem failed!");
         ret = AT_FAILED;
     }
 
-    if (at->trx_mux_flag) {
-        (void)LOS_MuxDelete(at->trx_mux);
-        at->trx_mux_flag = false;
+    if (at->sendMuxFlag) {
+        (void)at->mutex.delete(at->mutex.sendMux);
+      at->sendMuxFlag = false;
     }
 
-    if (at->rid_flag) {
-        (VOID)LOS_QueueDelete(at->rid);
-        at->rid_flag = false;
+    if (at->queue.queueRecvFlag) {
+        (VOID)at->queue.delete(at->queue.queueRecvId);
+      at->queue.queueRecvFlag = false;
     }
 
-    if (at->recv_buf) {
-        at_free(at->recv_buf);
-        at->recv_buf = NULL;
+    if (at->recv.buff) {
+      AtFree(at->recv.buff);
+      at->recv.buff = NULL;
     }
 
-    if (at->cmdresp != NULL) {
-        at_free(at->cmdresp);
-        at->cmdresp = NULL;
+    if (at->cmdResp != NULL) {
+      AtFree(at->cmdResp);
+      at->cmdResp = NULL;
     }
 
-    if (at->userdata != NULL) {
-        at_free(at->userdata);
-        at->userdata = NULL;
+    if (at->userData != NULL) {
+      AtFree(at->userData);
+      at->userData = NULL;
     }
 
-    if (at->saveddata != NULL) {
-        at_free(at->saveddata);
-        at->saveddata = NULL;
+    if (at->savedData != NULL) {
+      AtFree(at->savedData);
+      at->savedData = NULL;
     }
 
-    if (at->linkid != NULL) {
-        at_free(at->linkid);
-        at->linkid = NULL;
+    if (at->linkedId != NULL) {
+      AtFree(at->linkedId);
+      at->linkedId = NULL;
     }
 
-    at->tsk_hdl = 0xFFFF;
-    at->head = NULL;
-    at->mux_mode = AT_MUXMODE_SINGLE;
-    at->timeout = 0;
+  at->atTaskId = 0xFFFF;
+  at->listener.head = NULL;
+  at->multiMode = AT_MUXMODE_SINGLE;
+  at->timeout = 0;
 
     return ret;
 }
 
-void at_set_config(at_config *config)
+static void AtSetConfig(AtConfig *config)
 {
     if (config != NULL) {
-        memcpy(&at_user_conf, config, sizeof(at_config));
-    }
+        memcpy(&g_at.config, config, sizeof(AtConfig));
+    }  
+    g_at.config.transmit = AtUsartTransmit;
+    g_at.config.transmitDeinit = AtUsartDeinit;
 }
 
-at_config *at_get_config(void)
+static AtConfig *AtGetConfig(void)
 {
-    return &at_user_conf;
+    return &g_at.config;
 }
 
-int32_t at_init(at_config *config)
+static void AtListenerInit(AtListenerHandle *listenerHandle)
 {
+    listenerHandle->head = NULL;
+    listenerHandle->ListAdd = AtListenerListAdd;
+    listenerHandle->ListDel = AtListenerListDel;
+    listenerHandle->ListDestroy = AtListnerListDestroy;
+    listenerHandle->NodeDel = AtListenerNodeDel;
+    listenerHandle->TimeoutNodesDel = AtListenerTimeoutNodesDel;
+}
+
+static int32_t AtInit(AtConfig *config)
+{
+    AtUsartRecv uartRecv;
     if (config == NULL) {
         AT_LOG("Config is NULL, failed!!\n");
         return AT_FAILED;
     }
 
-    memcpy(&at_user_conf, config, sizeof(at_config));
+    /* AT user config init */
+ 
+    if (g_at.config.set != NULL) {
+        g_at.config.set(config);
+    }
 
-    AT_LOG_DEBUG("Config %s(buffer total is %lu)......\n", at_user_conf.name, at_user_conf.user_buf_len);
+    AT_LOG_DEBUG("Config %s(buffer total is %lu)......\n", g_at.config.name, g_at.config.maxBufferLen);
 
-    if (at_struct_init(&at) != AT_OK) {
+    if (AtTaskInit(&g_at) != AT_OK) {
         AT_LOG("prepare AT struct failed!");
         return AT_FAILED;
     }
-    at_init_oob();
 
-    if (at_usart_init() != AT_OK) {
-        AT_LOG("at_usart_init failed!");
-        (void)at_struct_deinit(&at);
+    AtOobInit();
+    uartRecv.uartPort = g_at.config.usartPort;
+    uartRecv.buardrate = g_at.config.buardrate;
+    uartRecv.queueId = g_at.queue.queueRecvId;
+    uartRecv.buffer = g_at.recv.buff;
+    uartRecv.maxLen = g_at.recv.maxLen;
+    if (AtUsartInit(&uartRecv) != AT_OK) {
+        AT_LOG("UsartInit failed!");
+        (void)AtTaskDeinit(&g_at);
         return AT_FAILED;
     }
-    if (create_at_recv_task() != AT_OK) {
-        AT_LOG("create_at_recv_task failed!");
-        at_usart_deinit();
-        (void)at_struct_deinit(&at);
+
+    AtListenerInit(&g_at.listener);
+
+    if (AtRecvTaskCreate(&g_at) != AT_OK) {
+        AT_LOG("AtRecvTaskCreate failed!");
+        (void)AtTaskDeinit(&g_at);
         return AT_FAILED;
     }
 
@@ -714,77 +757,82 @@ int32_t at_init(at_config *config)
     return AT_OK;
 }
 
-void at_deinit(void)
+void AtDeInit(void)
 {
     int cnt = 0;
-    const int max_try_num = 10;
+    const int maxTryNum = 10;
     TSK_INFO_S stTaskInfo;
 
-    while ((LOS_TaskInfoGet(at.tsk_hdl, &stTaskInfo) != LOS_OK) && (cnt < max_try_num)) {
-        write_at_task_msg(AT_TASK_QUIT);
+    while ((LOS_TaskInfoGet(g_at.atTaskId, &stTaskInfo) != LOS_OK) && (cnt < maxTryNum)) {
+        AtWriteTaskMsg(AT_TASK_QUIT);
         LOS_TaskDelay(1000);
         cnt++;
     }
 
-    if (LOS_TaskInfoGet(at.tsk_hdl, &stTaskInfo) != LOS_OK) {
-        if (LOS_TaskDelete(at.tsk_hdl) != LOS_OK) {
-            AT_LOG("at_recv_task delete failed!");
+    if (LOS_TaskInfoGet(g_at.atTaskId, &stTaskInfo) != LOS_OK) {
+        if (LOS_TaskDelete(g_at.atTaskId) != LOS_OK) {
+            AT_LOG("AtRecvTask delete failed!");
         }
     }
 
-    at_usart_deinit();
-    if (at_struct_deinit(&at) != LOS_OK) {
-        AT_LOG("at_struct_deinit failed!");
+    g_at.config.transmitDeinit();
+    if (AtTaskDeinit(&g_at) != LOS_OK) {
+        AT_LOG("AtTaskDeinit failed!");
     }
-    at_init_oob();
+    AtOobInit();
 }
 
 
-int32_t at_oob_register(char *featurestr, int cmdlen, oob_callback callback, oob_cmd_match cmd_match)
+static int32_t AtOobRegister(char *featureStr, int cmdlen, OobCallback callback, OobCmdMatch cmdMatch)
 {
-    oob_t *oob;
-    if ((featurestr == NULL) || (cmd_match == NULL) || (at_oob.oob_num == OOB_MAX_NUM) || (cmdlen >= OOB_CMD_LEN - 1)) {
+    OobType *oob = NULL;
+    if ((featureStr == NULL) || (cmdMatch == NULL) || (g_atOob.oobNum == OOB_MAX_NUM) || (cmdlen >= OOB_CMD_LEN - 1)) {
         return -1;
     }
-    oob = &(at_oob.oob[at_oob.oob_num++]);
-    memcpy(oob->featurestr, featurestr, cmdlen);
-    oob->len = strlen(featurestr);
+    oob = &(g_atOob.oob[g_atOob.oobNum++]);
+    memcpy(oob->featureStr, featureStr, cmdlen);
+    oob->len = strlen(featureStr);
     oob->callback = callback;
-    oob->cmd_match = cmd_match;
+    oob->cmdMatch = cmdMatch;
     return 0;
 }
 
-void *at_malloc(size_t size)
+void AtRegStepCallback(AtTaskHandle *atTask, void (*stepCallback)(void))
 {
-    void *pMem = LOS_MemAlloc(m_aucSysMem0, size);
-    if (pMem != NULL) {
-        memset(pMem, 0, size);
-    }
-    return pMem;
+    atTask->stepCallback = stepCallback;
 }
 
-void at_free(void *ptr)
+void AtTaskHandleInit(void)
 {
-    (void)LOS_MemFree(m_aucSysMem0, ptr);
+    g_at.atTaskId = 0xFFFF;
+    g_at.recv.buff = NULL;
+    g_at.cmdResp = NULL;
+    g_at.userData = NULL;
+    g_at.linkedId = NULL;
+    g_at.init = AtInit;
+    g_at.deInit = AtDeInit;
+    g_at.writeCmd = AtWriteCmd;
+    g_at.write = AtWriteData;
+    g_at.oobRegister = AtOobRegister;
+    g_at.getLinkedId = AtGetUnusedLinkId;
+    g_at.cmdMultiSuffix = AtCmdMultiSuffix;
+    g_at.config.set = AtSetConfig;
+    g_at.config.get = AtGetConfig;
+    g_at.sem.create = LOS_SemCreate;
+    g_at.sem.pend = LOS_SemPend;
+    g_at.sem.post = LOS_SemPost;
+    g_at.sem.delete = LOS_SemDelete;
+    g_at.mutex.create = LOS_MuxCreate;
+    g_at.mutex.pend = LOS_MuxPend;
+    g_at.mutex.post = LOS_MuxPost;
+    g_at.mutex.delete = LOS_MuxDelete;
+    g_at.queue.create = LOS_QueueCreate;
+    g_at.queue.read = LOS_QueueReadCopy;
+    g_at.queue.write = LOS_QueueWriteCopy;
+    g_at.queue.delete = LOS_QueueDelete;
 }
 
-void at_reg_step_callback(at_task *at_tsk, void (*step_callback)(void))
+AtTaskHandle *AtGetTaskHandle()
 {
-    at_tsk->step_callback = step_callback;
+    return &g_at;
 }
-
-at_task at = {
-    .tsk_hdl = 0xFFFF,
-    .recv_buf = NULL,
-    .cmdresp = NULL,
-    .userdata = NULL,
-    .linkid = NULL,
-    .head = NULL,
-    .init = at_init,
-    .deinit = at_deinit,
-    .cmd = at_cmd,
-    .write = at_write,
-    .oob_register = at_oob_register,
-    .get_id = at_get_unuse_linkid,
-    .cmd_multi_suffix = at_cmd_multi_suffix
-};

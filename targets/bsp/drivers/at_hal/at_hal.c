@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: At Hal Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -29,23 +29,25 @@
 #include "at_hal.h"
 #include "usart.h"
 #include "main.h"
+#include <string.h>
+#include "los_task.h"
+#include "los_queue.h"
 
-UART_HandleTypeDef at_usart;
+UART_HandleTypeDef g_usartHandle;
 
-static USART_TypeDef *g_atUSART = USART2;
-static uint32_t g_atIRQn = USART2_IRQn;
+static USART_TypeDef *g_atUsartId = USART2; //default set
+static uint32_t g_atIRQn = USART2_IRQn; //default set
+static AtUsartRecv g_atUsartRecv;
+static AtUsartRingBuffer ringBuffer;
 
-uint8_t buff_full = 0;
-static uint32_t g_disscard_cnt = 0;
+#define USART_LINE_END "\r\n"
 
-uint32_t wi = 0;
-uint32_t pre_ri = 0; /* only save cur msg start */
-uint32_t ri = 0;
+#define USART_TRANSMIT_TIMEOUT 0xffff
 
-static void at_usart_adapter(uint32_t port)
+static void UsartAdaptor(uint32_t port)
 {
 #ifdef LOSCFG_PLATFORM_STM32L431_BearPi
-    g_atUSART = LPUART1;
+    g_atUsartId = LPUART1;
     g_atIRQn = LPUART1_IRQn;
     return;
 #endif
@@ -53,7 +55,7 @@ static void at_usart_adapter(uint32_t port)
 #if  defined(STM32F072xB)
     switch (port) {
         case 3: // 3: usart3
-            g_atUSART = USART3;
+            g_atUsartId = USART3;
         case 4:
             g_atIRQn = USART3_4_IRQn;
             return;
@@ -64,7 +66,7 @@ static void at_usart_adapter(uint32_t port)
     switch (port) {
         case 6: // 6: usart6
 #if  defined(USART6)  
-            g_atUSART = USART6;
+            g_atUsartId = USART6;
             g_atIRQn = USART6_IRQn;
 #else
             return;
@@ -72,7 +74,7 @@ static void at_usart_adapter(uint32_t port)
             break;
         case 1: // 1: usart1
 #if  defined(USART1)        
-            g_atUSART = USART1;
+            g_atUsartId = USART1;
             g_atIRQn = USART1_IRQn;
 #else
             return;
@@ -80,7 +82,7 @@ static void at_usart_adapter(uint32_t port)
             break;
         case 2: // 2: usart2
 #if  defined(USART2)        
-            g_atUSART = USART2;
+            g_atUsartId = USART2;
             g_atIRQn = USART2_IRQn;
 #else
             return;
@@ -88,8 +90,16 @@ static void at_usart_adapter(uint32_t port)
             break;
         case 3: // 3: usart3
 #if  defined(USART3)        
-            g_atUSART = USART3;
+            g_atUsartId = USART3;
             g_atIRQn = USART3_IRQn;
+#else
+            return;
+#endif
+            break;
+        case 5:
+#if  defined(UART5)        
+            g_atUsartId = UART5;
+            g_atIRQn = UART5_IRQn;
 #else
             return;
 #endif
@@ -100,23 +110,22 @@ static void at_usart_adapter(uint32_t port)
     }
 }
 
-void at_irq_handler(void)
+void AtUsartIrqHandler(void)
 {
     uint8_t ch;
-    recv_buff recv_buf;
-    at_config *at_user_conf = at_get_config();
+    AtRecvQueue recv;
 
-    if (__HAL_UART_GET_FLAG(&at_usart, UART_FLAG_RXNE) != RESET) {
-        HAL_UART_Receive(&at_usart, &ch, 1, 0);
-        at.recv_buf[wi++] = ch;
-        if (wi == ri) {
-            buff_full = 1;
+    if (__HAL_UART_GET_FLAG(&g_usartHandle, UART_FLAG_RXNE) != RESET) {
+        HAL_UART_Receive(&g_usartHandle, &ch, 1, 0);
+        g_atUsartRecv.buffer[ringBuffer.wi++] = ch;
+        if (ringBuffer.wi == ringBuffer.ri) {
+            ringBuffer.buff_full = true;
         }
-        if (wi >= at_user_conf->user_buf_len) {
-            wi = 0;
+        if (ringBuffer.wi >= g_atUsartRecv.maxLen) {
+            ringBuffer.wi = 0;
         }
-    } else if (__HAL_UART_GET_FLAG(&at_usart, UART_FLAG_IDLE) != RESET) {
-        __HAL_UART_CLEAR_IDLEFLAG(&at_usart);
+    } else if (__HAL_UART_GET_FLAG(&g_usartHandle, UART_FLAG_IDLE) != RESET) {
+        __HAL_UART_CLEAR_IDLEFLAG(&g_usartHandle);
         /*
         Ring Buffer ri------------------------>wi
 
@@ -127,27 +136,62 @@ void at_irq_handler(void)
 
          read_resp ---->ri= pre_ri1----------->---------->ri=wi=pre_ri3(end)
         */
-        recv_buf.ori = pre_ri;
-        recv_buf.end = wi;
+        
+        recv.ori = ringBuffer.ri;
+        recv.end = ringBuffer.wi;
+        ringBuffer.ri = ringBuffer.wi;
 
-        pre_ri = recv_buf.end;
-        recv_buf.msg_type = AT_USART_RX;
-
-        if (LOS_QueueWriteCopy(at.rid, &recv_buf, sizeof(recv_buff), 0) != LOS_OK) {
-            g_disscard_cnt++;
-        }
+        recv.msgType = AT_USART_RX;
+        LOS_QueueWriteCopy(g_atUsartRecv.queueId, &recv, sizeof(AtRecvQueue), 0);
     }
 }
 
-int32_t at_usart_init(void)
+void AtReadQueueBuffer(uint8_t *buffer, uint32_t *bufferLen, AtRecvQueue *recvQueue)
 {
-    UART_HandleTypeDef *usart = &at_usart;
-    at_config *at_user_conf = at_get_config();
+    uint32_t len = 0;
+    
+    if (buffer == NULL) {
+        *bufferLen = 0;
+        return;
+    }
 
-    at_usart_adapter(at_user_conf->usart_port);
+    if (ringBuffer.buff_full == true) {
+        printf("buf maybe full,buff_full is %d", ringBuffer.buff_full);
+    }
 
-    usart->Instance = g_atUSART;
-    usart->Init.BaudRate = at_user_conf->buardrate;
+    if (recvQueue->end == recvQueue->ori) {
+        *bufferLen = 0;
+        return;
+    }
+    /* Copy uart queue cache to buffer  */
+    if (recvQueue->end > recvQueue->ori) {
+        /* current buffer: | [0]-----[ri]-------[wi]--------[end]| */
+        len = recvQueue->end - recvQueue->ori;
+        /* copy buffer: | [ri]-------[wi] | */
+        (void)memcpy_s(buffer, len, &g_atUsartRecv.buffer[recvQueue->ori], len);
+    } else {
+        /* current buffer: | [0]-----[wi]-------[ri]--------[end] | */
+        uint32_t tmp_len = g_atUsartRecv.maxLen - recvQueue->ori;
+        /* first copy buffer: | [ri]-------[end] | */
+        (void)memcpy_s(buffer, tmp_len, &g_atUsartRecv.buffer[recvQueue->ori], tmp_len);
+        /* step 2: | [0]-------[wi] | */
+        (void)memcpy_s(buffer + tmp_len, recvQueue->end, &g_atUsartRecv.buffer[0], recvQueue->end);
+        len = recvQueue->end + tmp_len;
+    }
+    
+    *bufferLen = len;
+}
+
+int32_t AtUsartInit(AtUsartRecv *handle)
+{
+    UART_HandleTypeDef *usart = &g_usartHandle;
+    
+    g_atUsartRecv.buffer = handle->buffer;
+    g_atUsartRecv.maxLen = handle->maxLen;
+    g_atUsartRecv.queueId = handle->queueId;
+    UsartAdaptor(handle->uartPort);
+    usart->Instance = g_atUsartId;
+    usart->Init.BaudRate = handle->buardrate;
 
     usart->Init.WordLength = UART_WORDLENGTH_8B;
     usart->Init.StopBits = UART_STOPBITS_1;
@@ -159,78 +203,25 @@ int32_t at_usart_init(void)
     }
     HAL_NVIC_EnableIRQ(g_atIRQn);
     __HAL_UART_CLEAR_FLAG(usart, UART_FLAG_TC);
-    LOS_HwiCreate(g_atIRQn + 16, 0, 0, at_irq_handler, 0);
+    LOS_HwiCreate(g_atIRQn + 16, 0, 0, AtUsartIrqHandler, 0);
     __HAL_UART_ENABLE_IT(usart, UART_IT_IDLE);
     __HAL_UART_ENABLE_IT(usart, UART_IT_RXNE);
 
-    return AT_OK;
+    return LOS_OK;
 }
 
-void at_usart_deinit(void)
+void AtUsartDeinit(void)
 {
-    UART_HandleTypeDef *husart = &at_usart;
+    UART_HandleTypeDef *husart = &g_usartHandle;
     __HAL_UART_DISABLE(husart);
     __HAL_UART_DISABLE_IT(husart, UART_IT_IDLE);
     __HAL_UART_DISABLE_IT(husart, UART_IT_RXNE);
 }
 
-void at_transmit(uint8_t *cmd, int32_t len, int flag)
+void AtUsartTransmit(uint8_t *cmd, int32_t len, int lineEndFlag)
 {
-    at_config *at_user_conf = at_get_config();
-
-    char *line_end = at_user_conf->line_end;
-    (void)HAL_UART_Transmit(&at_usart, (uint8_t *)cmd, len, 0xffff);
-    if (flag == 1) {
-        (void)HAL_UART_Transmit(&at_usart, (uint8_t *)line_end, strlen(at_user_conf->line_end), 0xffff);
-    }
-}
-
-int read_resp(uint8_t *buf, recv_buff *recv_buf)
-{
-    uint32_t len = 0;
-    uint32_t tmp_len;
-
-    at_config *at_user_conf = at_get_config();
-
-    if (buf == NULL) {
-        return -1;
-    }
-
-    if (buff_full == 1) {
-        AT_LOG("buf maybe full,buff_full is %d", buff_full);
-    }
-
-    if (recv_buf->end == recv_buf->ori) {
-        len = 0;
-        goto END;
-    }
-
-    if (recv_buf->end > recv_buf->ori) {
-        len = recv_buf->end - recv_buf->ori;
-        (void)memcpy_s(buf, len, &at.recv_buf[recv_buf->ori], len);
-    } else {
-        tmp_len = at_user_conf->user_buf_len - recv_buf->ori;
-        (void)memcpy_s(buf, tmp_len, &at.recv_buf[recv_buf->ori], tmp_len);
-        (void)memcpy_s(buf + tmp_len, recv_buf->end, at.recv_buf, recv_buf->end);
-        len = recv_buf->end + tmp_len;
-    }
-
-    ri = recv_buf->end;
-
-END:
-    return len;
-}
-
-void write_at_task_msg(at_msg_type_e type)
-{
-    recv_buff recv_buf;
-    int ret;
-
-    (void)memset_s(&recv_buf, sizeof(recv_buf), 0, sizeof(recv_buf));
-    recv_buf.msg_type = type;
-
-    ret = LOS_QueueWriteCopy(at.rid, &recv_buf, sizeof(recv_buff), 0);
-    if (ret != LOS_OK) {
-        g_disscard_cnt++;
+    (void)HAL_UART_Transmit(&g_usartHandle, (uint8_t *)cmd, len, USART_TRANSMIT_TIMEOUT);
+    if (lineEndFlag) {
+        (void)HAL_UART_Transmit(&g_usartHandle, (uint8_t *)USART_LINE_END, sizeof(USART_LINE_END), USART_TRANSMIT_TIMEOUT);
     }
 }

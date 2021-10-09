@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Nb Demo Implementation
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -34,7 +34,7 @@
 #include "nb_demo.h"
 
 #ifdef LOSCFG_COMPONENTS_CONNECTIVITY_NB_IOT
-#include "nb_iot/los_nb_api.h"
+#include "los_nb_api.h"
 #endif
 
 #define TELECON_IP          "119.3.250.80"
@@ -47,9 +47,9 @@
 VOID NBIoT_DemoEntry(VOID)
 {
 #if LOSCFG_DEMOS_NBIOT_DTLS
-    sec_param_s sec;
-    sec.setpsk = 1;
-    sec.pskid = DEV_PSKID;
+    SecureParam sec;
+    sec.setPskFlag = 1;
+    sec.pskId = DEV_PSKID;
     sec.psk = DEV_PSK;
 #endif
 

@@ -261,6 +261,9 @@ LOCAL_SRCS += $(wildcard common/fs/*.c)
 
 ifeq ($(LOSCFG_COMPONENTS_NET_AT), y)
 LOCAL_SRCS += $(wildcard drivers/at_hal/at_hal.c)
+LOCAL_INCLUDE += \
+    -I $(LITEOSTOPDIR)/components/net/net_at/at_frame \
+    -I $(LITEOSTOPDIR)/components/net/net_at/at_device
 endif
 
 ifeq ($(LOSCFG_PLATFORM_HIFIVE1_REV1_B01), y)

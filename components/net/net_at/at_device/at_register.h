@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: BG36 At Device HeadFile
+ * Description: AT Register
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,47 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _EMTC_BG36_H
-#define _EMTC_BG36_H
+#ifndef _AT_REGISTER_H
+#define _AT_REGISTER_H
 
-#include "at_main.h"
+void AT_DeviceRegister(void);
 
-#define AT_MODU_NAME            "BG36"
-#define AT_USART_PORT           3
-#define AT_BUARDRATE            115200
-#define BG36_TIMEOUT            10000 // ms
-#define MAX_AT_USERDATA_LEN     (1024 * 4)
-#define MAX_SEND_DATA_LEN       1400
 
-#define AT_LINE_END             "\r"
-#define AT_CMD_BEGIN            "\r\n"
-
-typedef struct emtc_socket_info_t {
-    int len;
-    int offset;
-    char *buf;
-    bool usedFlag;
-} emtc_socket_info;
-
-#define ATI                     "ATI\r"
-#define ATE0                    "ATE0\r"
-#define CMEE                    "AT+CMEE=2\r"
-#define QCFG                    "AT+QCFG=\"nwscanseq\",03\r"
-
-#define CPIN                    "AT+CPIN?\r"
-#define CREG                    "AT+CREG?\r"
-#define GETQICSGP               "AT+QICSGP=1\r"
-#define SETCELL                 "AT+CGREG=2\r"
-#define QUERYCELL               "AT+CGREG?\r"
-
-#define QICSGP                  "AT+QICSGP=1,1,\"HUAWEI.COM\",\"\",\"\",1\r"
-#define QIACT                   "AT+QIACT=1\r"
-#define QIACTQUERY              "AT+QIACT?\r"
-#define CSQ                     "AT+CSQ\r"
-#define QIOPEN_SOCKET           "AT+QIOPEN=1"
-#define QUERYCFATT              "AT+CGATT?\r"
-#define AT_DATAF_PREFIX         "+QIURC:"
-
-AtAdaptorApi AtGetEmtcBg36Interface(void);
-
-#endif /* _EMTC_BG36_H */
+#endif /* _AT_REGISTER_H */

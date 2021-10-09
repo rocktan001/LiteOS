@@ -6,7 +6,7 @@ LiteOS提供一套NB IoT的组件和例程。目前支持通过AT指令控制BC9
 
 ### NB IoT初始化函数
 ```c
-int los_nb_init(const int8_t *host, const int8_t *port, sec_param_s *psk);
+int los_nb_init(const int8_t *host, const int8_t *port, SecureParam *psk);
 ```
 - host：云服务器IPv4地址
 - port：云服务器端口
