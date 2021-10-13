@@ -154,7 +154,7 @@ VOID StringParseDemo(const CHAR *string)
     g_prevSection[0] = '\0';
     ret = ini_parse_string(string, StringHandler, &num);
     if (ret != LOS_OK) {
-        printf("Ini parse string failed, ret = %d\n", ret);
+        printf("Parse string failed, ret = %d\n", ret);
     }
 }
 
