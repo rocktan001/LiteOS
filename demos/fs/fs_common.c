@@ -43,7 +43,7 @@ int write_file(const char *name, char *buff, int len)
         FS_LOG_ERR("Invalid parameter.");
         return -1;
     }
-    fd = open(name, O_CREAT | O_WRONLY | O_TRUNC, 644);
+    fd = open(name, O_CREAT | O_RDWR | O_TRUNC);
     if (fd < 0) {
         FS_LOG_ERR("Open file %s failed.", name);
         return -1;
@@ -114,9 +114,7 @@ int open_dir(const char *name, struct dir **dir)
 
 int read_dir(const char *name, struct dir *dir)
 {
-    int flag = 1;
     struct dirent *pDirent = NULL;
-
     if ((name == NULL) || (dir == NULL)) {
         FS_LOG_ERR("Invalid parameter.");
         return -1;
@@ -125,17 +123,10 @@ int read_dir(const char *name, struct dir *dir)
     while (1) {
         pDirent = readdir(dir);
         if ((pDirent == NULL) || (pDirent->name[0] == '\0')) {
-            if (flag == 1) {
-                FS_LOG_ERR("Read dir %s failed.", name);
-                closedir(dir);
-                return -1;
-            } else
-                break;
+            return -1;
         }
-        flag = 0;
-        printf("Read dir %s: name=%s, type=%d, size=%d.\n", name, pDirent->name, pDirent->type, pDirent->size);
+        printf("Read dir name=%s, type=%d, size=%d.\n", pDirent->name, pDirent->type, pDirent->size);
     }
-    closedir(dir);
     return 0;
 }
 
@@ -170,25 +161,24 @@ void los_vfs_io(char *file_name, char *dir_name)
      * dir operation
      ****************************/
     sprintf(file_name, "%s/%s", (char *)dir_name, LOS_FILE);
-    ret = open_dir(dir_name, &pDir);
-    if (ret < 0) {
-        (void)unlink(file_name);
-        return;
-    }
-
     ret = write_file(file_name, s_ucaWriteBuffer, wrlen);
     if (ret < 0) {
+        FS_LOG_ERR("Write file %s failed.", file_name);
         (void)closedir(pDir);
         (void)unlink(file_name);
         return;
     }
-
+    ret = open_dir(dir_name, &pDir);
+    if (ret < 0) {
+        FS_LOG_ERR("Open dir %s failed.", dir_name);
+        (void)unlink(file_name);
+        return;
+    }
     ret = read_dir(dir_name, pDir);
     if (ret < 0) {
-        (void)closedir(pDir);
-        (void)unlink(file_name);
-        return;
+        FS_LOG_ERR("no other files in %s.", dir_name);
     }
+    (void)closedir(pDir);
     (void)unlink(file_name);     // remove file_name
 }
 

@@ -286,21 +286,23 @@ static int LittlefsOperationOpendir(struct dir *dir, const char *path)
 
 static int LittlefsOperationReaddir(struct dir *dir, struct dirent *dent)
 {
+    int ret = 0;
     LFS_P *p = (LFS_P *)dir->d_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
     lfs_dir_t *lfs_dir = (lfs_dir_t *)dir->d_data;
     struct lfs_info info;
-    int ret;
     (void)memset_s(&info, sizeof(struct lfs_info), 0, sizeof(struct lfs_info));
     if (lfs_dir == NULL) {
-        return -EINVAL;
+        return 1;
     }
-    do {
+    while (1) {
         ret = lfs_dir_read(lfs, lfs_dir, &info);
-    } while ((ret >= 0) && ((strcmp(info.name, ".") == 0) || (strcmp(info.name, "..") == 0)));
-    if (ret < 0) {
-        return ENOENT;
-    } else {
+        if (ret == 0) {
+            return 1;
+        }
+        if((strcmp(info.name, ".") == 0) || (strcmp(info.name, "..") == 0)) {
+            continue;
+        }
         strncpy_s((char *)dent->name, LOS_MAX_DIR_NAME_LEN, (const char *)info.name, LOS_MAX_FILE_NAME_LEN - 1);
         dent->name[LOS_MAX_FILE_NAME_LEN - 1] = '\0';
         dent->size = info.size;
@@ -309,8 +311,9 @@ static int LittlefsOperationReaddir(struct dir *dir, struct dirent *dent)
         } else {
             dent->type = VFS_TYPE_FILE;
         }
+        return 0;
     }
-    return LOS_OK;
+    return 1;
 }
 
 static int LittlefsOperationClosedir(struct dir *dir)

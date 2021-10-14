@@ -68,7 +68,7 @@ void RamfsDemo(void)
 
     ret = read_dir("/ramfs/dir", testDir);
     if (ret != LOS_OK) {
-        FS_LOG_ERR("Read dir /ramfs/dir failed.");
+        FS_LOG_ERR("no other files in /ramfs/dir.");
         return;
     }
 
