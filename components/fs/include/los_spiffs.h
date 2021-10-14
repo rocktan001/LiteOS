@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Spi Flash Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -60,6 +60,7 @@ int SpiffsUnmount(const char *path);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
 #endif /* LOSCFG_COMPONENTS_FS_SPIFFS */
 #endif /* _LOS_SPIFFS_H */
 

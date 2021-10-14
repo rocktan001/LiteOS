@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Fat Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -79,5 +79,6 @@ int FatfsUnmount(const char *path, uint8_t drive);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
 #endif /* LOSCFG_COMPONENTS_FS_FATFS */
 #endif /* _LOS_FATFS_H */

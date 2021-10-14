@@ -51,4 +51,3 @@ config LOSCFG_COMPONENTS_FS
     bool
 
 endmenu
-

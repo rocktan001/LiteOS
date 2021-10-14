@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Ki Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -30,7 +30,6 @@
 #define _LOS_KIFS_H
 
 #if defined(LOSCFG_COMPONENTS_FS_KIFS)
-
 #include <los_vfs.h>
 
 #define KIFS_ATTR_R (1 << 0)

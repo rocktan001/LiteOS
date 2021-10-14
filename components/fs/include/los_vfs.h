@@ -30,7 +30,6 @@
 #define _LOS_VFS_H
 
 #if defined(LOSCFG_COMPONENTS_FS_VFS)
-
 #include <stdio.h>
 #include <stdint.h>
 #include <los_typedef.h>
