@@ -190,12 +190,6 @@ void los_vfs_io(char *file_name, char *dir_name)
         return;
     }
 
-    ret = closedir(pDir);
-    if (ret < 0) {
-        FS_LOG_ERR("Close dir %s failed.", dir_name);
-        (void)unlink(file_name); // remove file_name
-        return;
-    }
     (void)unlink(file_name);     // remove file_name
 }
 
