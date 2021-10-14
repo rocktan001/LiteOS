@@ -189,7 +189,6 @@ void los_vfs_io(char *file_name, char *dir_name)
         (void)unlink(file_name);
         return;
     }
-
     (void)unlink(file_name);     // remove file_name
 }
 
