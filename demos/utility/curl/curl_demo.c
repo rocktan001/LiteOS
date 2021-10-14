@@ -32,7 +32,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "los_task.h"
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 #include "fcntl.h"
 #include "curl/curl.h"
 

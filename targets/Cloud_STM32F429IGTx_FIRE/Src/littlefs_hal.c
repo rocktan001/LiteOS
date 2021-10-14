@@ -31,8 +31,8 @@
 
 #include <los_printf.h>
 
-#include "fs/los_vfs.h"
-#include "fs/los_littlefs.h"
+#include "los_vfs.h"
+#include "los_littlefs.h"
 #include "hal_spi_flash.h"
 
 #ifdef __cplusplus

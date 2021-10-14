@@ -34,8 +34,8 @@
 #include "errno.h"
 #include "fcntl.h"
 #include "sys/stat.h"
-#include "fs/los_vfs.h"
-#include "fs/los_fatfs.h"
+#include "los_vfs.h"
+#include "los_fatfs.h"
 #include "los_printf.h"
 #include "los_base.h"
 

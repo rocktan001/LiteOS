@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "fs_common.h"
-#include "fs/los_ramfs.h"
+#include "los_ramfs.h"
 
 #define DEMO_BUF_LEN      128
 

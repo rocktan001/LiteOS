@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Dev Fs HeadFile
  * Author: Huawei LiteOS Team
@@ -29,6 +29,7 @@
 #ifndef _LOS_DEVFS_H
 #define _LOS_DEVFS_H
 
+#if defined(LOSCFG_COMPONENTS_FS_DEVFS)
 #include <los_kifs.h>
 
 #define DEVFS_FLAGS_R KIFS_ATTR_R
@@ -43,5 +44,5 @@ extern UINT32 los_devfs_init(void);
 extern UINT32 los_devfs_create(const char *name, uint32_t flags, struct devfs_ops *devops, void *arg);
 
 extern UINT32 los_devfs_link(const char *path_in_mp, uint32_t flags, void *buff, size_t size);
-
-#endif
+#endif /* LOSCFG_COMPONENTS_FS_DEVFS */
+#endif /* _LOS_DEVFS_H */

@@ -33,7 +33,7 @@
 #include <unistd.h>
 #include "fcntl.h"
 #include "los_task.h"
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 #include "ini.h"
 
 #ifdef __cplusplus

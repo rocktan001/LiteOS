@@ -33,8 +33,8 @@
 #include "errno.h"
 #include "fcntl.h"
 #include "sys/stat.h"
-#include "fs/los_vfs.h"
-#include "fs/los_littlefs.h"
+#include "los_vfs.h"
+#include "los_littlefs.h"
 #include "los_printf.h"
 #include "los_hwi.h"
 

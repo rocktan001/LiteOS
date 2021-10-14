@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ki Fs HeadFile
  * Author: Huawei LiteOS Team
@@ -29,6 +29,8 @@
 #ifndef _LOS_KIFS_H
 #define _LOS_KIFS_H
 
+#if defined(LOSCFG_COMPONENTS_FS_KIFS)
+
 #include <los_vfs.h>
 
 #define KIFS_ATTR_R (1 << 0)
@@ -49,4 +51,5 @@ extern int los_kifs_create(void *root, const char *path_in_mp, uint32_t flags, s
 extern int los_kifs_link(void *root, const char *path_in_mp, uint32_t flags, void *buff, size_t size);
 extern void *los_kifs_mount(const char *path);
 
-#endif
+#endif /* LOSCFG_COMPONENTS_FS_LITTLEFS */
+#endif /* _LOS_KIFS_H */

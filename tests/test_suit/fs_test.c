@@ -23,7 +23,7 @@
 #include <los_printf.h>
 #endif
 
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 
 
 /* Defines ------------------------------------------------------------------*/

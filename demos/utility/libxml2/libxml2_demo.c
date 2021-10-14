@@ -44,7 +44,7 @@ extern "C" {
 #define XML2_TASK_PRIORITY      6
 #define XML2_TASK_STACK_SIZE    0x2000
 #define FATFS_MAIN_DIR          "/fatfs"
-#define XML2_FILENAME           "/fatfs/los_test.xml"
+#define XML2_FILENAME           "/fatlos_test.xml"
 
 STATIC UINT32 g_demoTaskId;
 

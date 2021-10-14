@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "los_task.h"
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 #include "hash-int.h"
 #include "queue.h"
 #include "arraylist.h"

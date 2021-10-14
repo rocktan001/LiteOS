@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Fs Common HeadFile
+ * Description: Fat Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,52 +26,58 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _FS_COMMON_H
-#define _FS_COMMON_H
+/* Define to prevent recursive inclusion ------------------------------------ */
+#ifndef _LOS_FATFS_H
+#define _LOS_FATFS_H
 
-#include <stdio.h>
-#include <stdint.h>
-#include "los_task.h"
-#include "los_vfs.h"
-
+#if defined(LOSCFG_COMPONENTS_FS_FATFS)
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#ifndef FS_LOG_ERR
-#define FS_LOG_ERR(fmt, arg...) printf("[%s:%d]" fmt "\n", __func__, __LINE__, ##arg)
-#endif
-
-#ifndef MIN
-#define MIN(a, b)               ((a) < (b) ? (a) : (b))
-#endif
-
-#define LOS_FILE                "f.txt"
-#define LOS_DIR                 "d"
-
+/* Includes ----------------------------------------------------------------- */
+#include "ff.h"
+#include "diskio.h"
+#include <stdint.h>
+/* Defines ------------------------------------------------------------------ */
+// #define DISK_STATE_INITIALIZED 1
+// typedef unsigned char DSTATUS;
+#define FF_VOLUMES 1
+/* Macros ------------------------------------------------------------------- */
 /* Typedefs ----------------------------------------------------------------- */
+struct diskio_drv {
+    DSTATUS (*initialize)(BYTE);                       /* !< Initialize Disk Drive  */
+    DSTATUS (*status)(BYTE);                           /* !< Get Disk Status        */
+    DRESULT (*read)(BYTE, BYTE *, DWORD, UINT);        /* !< Read Sector(s)         */
+    DRESULT (*write)(BYTE, const BYTE *, DWORD, UINT); /* !< Write Sector(s)        */
+    DRESULT (*ioctl)(BYTE, BYTE, void *);              /* !< I/O control operation  */
+};
+
+struct disk_dev {
+    uint8_t state;
+    const struct diskio_drv *drv;
+    uint8_t lun;
+};
+
+struct disk_mnt {
+    struct disk_dev dev[FF_VOLUMES];
+    volatile uint8_t num;
+};
+
 /* Extern variables --------------------------------------------------------- */
 /* Functions API ------------------------------------------------------------ */
-int write_file(const char *name, char *buff, int len);
-int read_file(const char *name, char *buff, int len);
-int open_dir(const char *name, struct dir **dir);
-int read_dir(const char *name, struct dir *dir);
-void make_dir(const char *name);
-void print_dir(const char *name, int level);
 
-void los_vfs_io(char *file_name, char *dir_name);
-
-void SpiffsDemo(void);
-void FatfsDemo(void);
-void RamfsDemo(void);
-void LittlefsDemo(void);
+void FatfsDriverInit(int needErase);
+int FatfsInit(int needErase, struct diskio_drv *drv, uint8_t *drive);
+int FatfsMount(const char *path, struct diskio_drv *drv, uint8_t *drive);
+int FatfsUnmount(const char *path, uint8_t drive);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#endif /* _FS_COMMON_H */
+#endif /* LOSCFG_COMPONENTS_FS_FATFS */
+#endif /* _LOS_FATFS_H */

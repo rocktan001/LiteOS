@@ -29,7 +29,7 @@
 #include "tinyxml2_demo.h"
 #include <iostream>
 #include "tinyxml2.h"
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 #ifdef LOSCFG_LIB_CPP_EXTEND
 #include <thread>
 #endif /* LOSCFG_LIB_CPP_EXTEND */

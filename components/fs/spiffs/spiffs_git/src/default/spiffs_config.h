@@ -9,7 +9,7 @@
 #define SPIFFS_CONFIG_H_
 
 #include <stddef.h>
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 
 
 // Physical offset(in bytes) in spi flash used for spiffs

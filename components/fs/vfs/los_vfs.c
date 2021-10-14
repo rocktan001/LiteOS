@@ -26,7 +26,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>

@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Fat Fs HeadFile
+ * Description: Spi Flash Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,10 +26,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-/* Define to prevent recursive inclusion ------------------------------------ */
-#ifndef _LOS_FATFS_H
-#define _LOS_FATFS_H
+#ifndef _LOS_SPIFFS_H
+#define _LOS_SPIFFS_H
 
+#if defined(LOSCFG_COMPONENTS_FS_SPIFFS)
+#include <spiffs_config.h>
+#include <spiffs.h>
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,46 +39,27 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/* Includes ----------------------------------------------------------------- */
-#include "ff.h"
-#include "diskio.h"
-#include <stdint.h>
-/* Defines ------------------------------------------------------------------ */
-#define DISK_STATE_INITIALIZED 1
-/* Macros ------------------------------------------------------------------- */
-/* Typedefs ----------------------------------------------------------------- */
-struct diskio_drv {
-    DSTATUS (*initialize)(BYTE);                       /* !< Initialize Disk Drive  */
-    DSTATUS (*status)(BYTE);                           /* !< Get Disk Status        */
-    DRESULT (*read)(BYTE, BYTE *, DWORD, UINT);        /* !< Read Sector(s)         */
-    DRESULT (*write)(BYTE, const BYTE *, DWORD, UINT); /* !< Write Sector(s)        */
-    DRESULT (*ioctl)(BYTE, BYTE, void *);              /* !< I/O control operation  */
+struct spiffs_drv_t {
+    void (*SpiDriverInit)(int);
+    s32_t (*SpiRead)(struct spiffs_t *, u32_t, u32_t, u8_t *);
+    s32_t (*SpiWrite)(struct spiffs_t *, u32_t, u32_t, u8_t *);
+    s32_t (*SpiErase)(struct spiffs_t *, u32_t, u32_t);
+    u32_t physAddr;
+    u32_t physSize;
+    u32_t phyEraseBlock;
+    u32_t logBlockSize;
+    u32_t logPageSize;
 };
 
-struct disk_dev {
-    uint8_t state;
-    const struct diskio_drv *drv;
-    uint8_t lun;
-};
-
-struct disk_mnt {
-    struct disk_dev dev[FF_VOLUMES];
-    volatile uint8_t num;
-};
-
-/* Extern variables --------------------------------------------------------- */
-/* Functions API ------------------------------------------------------------ */
-
-void FatfsDriverInit(int needErase);
-int FatfsInit(int needErase, struct diskio_drv *drv, uint8_t *drive);
-int FatfsMount(const char *path, struct diskio_drv *drv, uint8_t *drive);
-int FatfsUnmount(const char *path, uint8_t drive);
+int SpiffsInit(int needErase, struct spiffs_drv_t *spiffsDriver);
+int SpiffsMount(const char *path, struct spiffs_drv_t *spiffsDrv);
+int SpiffsUnmount(const char *path);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+#endif /* LOSCFG_COMPONENTS_FS_SPIFFS */
+#endif /* _LOS_SPIFFS_H */
 
-
-#endif /* _LOS_FATFS_H */

@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "limits.h"
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 #include "json_object.h"
 #include "json_tokener.h"
 #include "json_util.h"

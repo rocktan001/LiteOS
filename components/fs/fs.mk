@@ -1,7 +1,8 @@
-LITTLEFD_VERSION = littlefs-2.3.0
+COMPONENTS_FS_INCLUDE := \
+    -I $(LITEOSTOPDIR)/components/fs/include
 
 ifeq ($(LOSCFG_COMPONENTS_FS_FATFS), y)
-COMPONENTS_FS_INCLUDE := \
+COMPONENTS_FS_INCLUDE += \
     -I $(LITEOSTOPDIR)/components/fs/fatfs/ff13b/source \
     -I $(LITEOSTOPDIR)/components/fs/fatfs/ff13b/source/default
 endif
@@ -13,6 +14,7 @@ COMPONENTS_FS_INCLUDE += \
 endif
 
 ifeq ($(LOSCFG_COMPONENTS_FS_LITTLEFS), y)
+LITTLEFS_VERSION := littlefs-2.3.0
 COMPONENTS_FS_INCLUDE += \
-    -I $(LITEOSTOPDIR)/components/fs/littlefs/$(LITTLEFD_VERSION)
+    -I $(LITEOSTOPDIR)/components/fs/littlefs/$(LITTLEFS_VERSION)
 endif

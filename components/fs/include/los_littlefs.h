@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Ram Fs HeadFile
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Little Fs HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-01-07
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_RAMFS_H
-#define _LOS_RAMFS_H
+#ifndef _LOS_LITTLEFS_H
+#define _LOS_LITTLEFS_H
 
-#include <stddef.h>
+#if defined(LOSCFG_COMPONENTS_FS_LITTLEFS)
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,8 +37,13 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-int RamfsInit(void);
-int RamfsMount(const char *path, size_t blockSize);
+#include "lfs.h"
+#include <stdint.h>
+
+void LittlefsDriverInit(int needErase);
+int LittlefsInit(int needErase, const struct lfs_config *lfsConfig);
+int LittlefsMount(const char *path, const struct lfs_config *lfsConfig);
+int LittlefsUnmount(const char *path);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -46,4 +51,5 @@ int RamfsMount(const char *path, size_t blockSize);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif /* LOSCFG_COMPONENTS_FS_LITTLEFS */
+#endif /* _LOS_LITTLEFS_H */

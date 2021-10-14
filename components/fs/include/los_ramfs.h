@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Spi Flash Fs HeadFile
+ * Description: Ram Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,11 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_SPIFFS_H
-#define _LOS_SPIFFS_H
+#ifndef _LOS_RAMFS_H
+#define _LOS_RAMFS_H
 
-#include <spiffs_config.h>
-#include <spiffs.h>
+#if defined(LOSCFG_COMPONENTS_FS_RAMFS)
+#include <stddef.h>
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -38,21 +38,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-struct spiffs_drv_t {
-    void (*SpiDriverInit)(int);
-    s32_t (*SpiRead)(struct spiffs_t *, u32_t, u32_t, u8_t *);
-    s32_t (*SpiWrite)(struct spiffs_t *, u32_t, u32_t, u8_t *);
-    s32_t (*SpiErase)(struct spiffs_t *, u32_t, u32_t);
-    u32_t physAddr;
-    u32_t physSize;
-    u32_t phyEraseBlock;
-    u32_t logBlockSize;
-    u32_t logPageSize;
-};
-
-int SpiffsInit(int needErase, struct spiffs_drv_t *spiffsDriver);
-int SpiffsMount(const char *path, struct spiffs_drv_t *spiffsDrv);
-int SpiffsUnmount(const char *path);
+int RamfsInit(void);
+int RamfsMount(const char *path, size_t blockSize);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -60,5 +47,6 @@ int SpiffsUnmount(const char *path);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif /* LOSCFG_COMPONENTS_FS_RAMFS */
 
+#endif /* _LOS_RAMFS_H */
