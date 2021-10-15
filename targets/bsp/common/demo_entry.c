@@ -43,32 +43,15 @@
 #endif /* LOSCFG_COMPONENTS_NET_LWIP */
 
 #ifdef LOSCFG_COMPONENTS_NET_AT
-#include "nb_iot/los_nb_api.h"
-#include "at_api.h"
+#include "at_register.h"
 #endif /* LOSCFG_COMPONENTS_NET_AT */
 
-#ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
-#include "esp8266.h"
-#endif /* LOSCFG_COMPONENTS_NET_AT_ESP8266 */
-
-#ifdef LOSCFG_COMPONENTS_NET_AT_BG36
-#include "bg36.h"
-#endif /* LOSCFG_COMPONENTS_NET_AT_BG36 */
-
-#ifdef LOSCFG_COMPONENTS_NET_AT_SIM900A
-#include "sim900a.h"
-#endif /* LOSCFG_COMPONENTS_NET_AT_SIM900A */
-
-#ifdef LOSCFG_COMPONENTS_NET_AT_BC95
-#include "bc95.h"
-#endif /* LOSCFG_COMPONENTS_NET_AT_BC95 */
 
 #ifdef LOSCFG_GUI_ENABLE
 #include "lvgl_demo.h"
 #endif /* LOSCFG_GUI_ENABLE */
 
 #ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
-#include "flash_adaptor.h"
 #include "agent_tiny_mqtt_demo.h"
 #endif /* LOSCFG_DEMOS_AGENT_TINY_MQTT */
 
@@ -275,50 +258,36 @@
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
-#define USER_TASK_PRIORITY          2
+#define NETWORK_DEMO_TASK_PRIORITY 2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
-#define AGENT_DEMO_TASK_MQTT_SIZE   0x2000
+#define NETWORK_DEMO_TASK_SIZE 0x2000
 #else
-#define AGENT_DEMO_TASK_SIZE        0x1000
+#define NETWORK_DEMO_TASK_SIZE 0x1000
 #endif
-STATIC UINT32 g_atinyTaskId;
-#endif
+STATIC UINT32 g_networkTaskId;
 
-#ifdef LOSCFG_COMPONENTS_NETWORK
-STATIC VOID AtinyDemoTaskEntry(VOID)
+STATIC VOID NetworkDemoTaskEntry(VOID)
 {
 #ifdef LOSCFG_COMPONENTS_NET_LWIP
     hieth_hw_init();
     net_init();
-#endif
-
-#ifdef LOSCFG_COMPONENTS_NET_AT
-#ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
-    Esp8266Register();
-#elif defined LOSCFG_COMPONENTS_NET_AT_BG36
-    Bg36Register();
-#elif defined LOSCFG_COMPONENTS_NET_AT_SIM900A
-    Sim900aRegister();
-#elif defined LOSCFG_COMPONENTS_NET_AT_BC95
-    Bc95Register();
+#elif defined (LOSCFG_COMPONENTS_NET_AT)
+    AT_DeviceRegister();
 #endif
 
 #ifdef LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
     NBIoT_DemoEntry();
-#endif
-#endif
-
-#ifndef LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY
 #ifdef CONFIG_FEATURE_FOTA
     hal_init_ota();
-#endif
+#endif /* CONFIG_FEATURE_FOTA */
+#endif /* LOSCFG_DEMOS_NBIOT_WITHOUT_ATINY */
+
 #ifdef LOSCFG_DEMOS_AGENT_TINY_MQTT
     AgentTinyMqttDemoEntry();
 #endif
 
 #ifdef LOSCFG_DEMOS_AGENT_TINY_LWM2M
     AgentTinyLwm2mDemoEntry();
-#endif
 #endif
 
 #ifdef LOSCFG_DEMOS_LIBRWS
@@ -329,10 +298,8 @@ STATIC VOID AtinyDemoTaskEntry(VOID)
     HttpClientDemoTask();
 #endif
 }
-#endif
 
-#ifdef LOSCFG_COMPONENTS_NETWORK
-VOID AgenttinyDemoTask(VOID)
+VOID NetworkDemoTask(VOID)
 {
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
@@ -342,21 +309,16 @@ VOID AgenttinyDemoTask(VOID)
         return;
     }
 
-    taskInitParam.usTaskPrio = USER_TASK_PRIORITY;
-    taskInitParam.pcName = "AgenttinyDemoTask";
-    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)AtinyDemoTaskEntry;
-#if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
-    /* fota use mbedtls bignum to verify signature consuming more stack */
-    taskInitParam.uwStackSize = AGENT_DEMO_TASK_MQTT_SIZE;
-#else
-    taskInitParam.uwStackSize = AGENT_DEMO_TASK_SIZE;
-#endif
-    ret = LOS_TaskCreate(&g_atinyTaskId, &taskInitParam);
+    taskInitParam.usTaskPrio = NETWORK_DEMO_TASK_PRIORITY;
+    taskInitParam.pcName = "NetworkDemoTask";
+    taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)NetworkDemoTaskEntry;
+    taskInitParam.uwStackSize = NETWORK_DEMO_TASK_SIZE;
+    ret = LOS_TaskCreate(&g_networkTaskId, &taskInitParam);
     if (ret != LOS_OK) {
         printf("Create agenttiny demo task failed.\n");
     }
 }
-#endif
+#endif /* LOSCFG_COMPONENTS_NETWORK */
 
 VOID DemoEntry(VOID)
 {
@@ -401,7 +363,7 @@ VOID DemoEntry(VOID)
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NETWORK
-    AgenttinyDemoTask();
+    NetworkDemoTask();
 #endif
 
 #ifdef LOSCFG_DEMOS_IPV6_CLIENT

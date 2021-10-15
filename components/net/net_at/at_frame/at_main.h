@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: At Main HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -34,7 +34,6 @@
 #include "los_task.h"
 #include "los_sem.h"
 
-#include "atiny_socket.h"
 #include "at_api.h"
 
 #ifdef __cplusplus
@@ -45,14 +44,14 @@ extern "C" {
 
 /* MACRO DEFINE */
 #ifdef LOSCFG_COMPONENTS_NET_AT_INFO
-#define AT_LOG(fmt, arg...)  printf("[%lu][%s:%d][I]"fmt"\n", at_get_time(), __func__, __LINE__, ##arg)
+#define AT_LOG(fmt, arg...)  printf("[%lu][%s:%d][I]"fmt"\n", AtGetTime(), __func__, __LINE__, ##arg)
 #else
 static inline void __do_nothing(const char *fmt, ...) { (void)fmt; }
 #define AT_LOG(fmt, arg...)  __do_nothing(fmt, ##arg)
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NET_AT_DEBUG
-#define AT_LOG_DEBUG(fmt, arg...)  printf("[%lu][%s:%d][D]"fmt"\n", at_get_time(), __func__, __LINE__, ##arg)
+#define AT_LOG_DEBUG(fmt, arg...)  printf("[%lu][%s:%d][D]"fmt"\n", AtGetTime(), __func__, __LINE__, ##arg)
 #else
 #define AT_LOG_DEBUG(fmt, arg...)
 #endif
@@ -78,8 +77,9 @@ static inline void __do_nothing(const char *fmt, ...) { (void)fmt; }
 /* VARIABLE DECLEAR */
 
 /* TYPE REDEFINE */
-typedef int32_t (*oob_callback)(void *arg, int8_t *buf, int32_t buflen);
-typedef int32_t (*oob_cmd_match)(const char *buf, char *featurestr, int len);
+typedef int32_t (*OobCallback)(void *arg, int8_t *buf, int32_t buflen);
+
+typedef char *(*OobCmdMatch)(const char *buf, char *featureStr, int len);
 
 #define MAXIPLEN  40
 typedef struct {
@@ -87,118 +87,167 @@ typedef struct {
     uint8_t *addr;
     char ipaddr[MAXIPLEN];
     int port;
-} QUEUE_BUFF;
-
-enum {
-    AT_USART_RX,
-    AT_TASK_QUIT,
-    AT_SENT_DONE
-};
-typedef uint32_t at_msg_type_e;
+} QueueBuffer;
 
 typedef struct {
-    uint32_t ori;
-    uint32_t end;
-    at_msg_type_e msg_type;
-} recv_buff;
+    uint32_t recvSem; // waiting to read net payload
+    uint32_t totalSize; // net recv size
+    uint32_t offset; // current read position
+    uint32_t lastEnd; 
+    uint8_t *buff; // net pyaload, (malloc(size))
+} AtNetRcvBuff;
 
 typedef struct {
-    UINT32 fd; /* convert between socket_fd and linkid */
-    UINT32 qid; /* queue id */
-    UINT32 usable;
-    UINT8 remote_ip[16];
-    UINT32 remote_port;
-} at_link;
+    uint32_t fd; // convert between socket_fd and linkedId
+    uint32_t maxFd; // max link number of socket fd
+    uint32_t qid; // queue id
+    uint32_t usable; // used or not
+    uint8_t remoteIP[16]; // server ip
+    uint32_t remotePort;  // server port
+    AtNetRcvBuff payload; // current recv palyload
+} AtNetLink;
 
 typedef struct {
     const char **suffix;
-    int suffix_num;
-    int match_idx;
-    char *resp_buf;
-    uint32_t *resp_len;
-} at_cmd_info_s;
+    int suffixNumber;
+    int matchIndex;
+    char *respBuffer;
+    uint32_t *respLen;
+} AtCmdInfo;
 
-typedef struct _listner {
-    struct _listner *next;
-    at_cmd_info_s cmd_info;
-    uint32_t expire_time;
-    int32_t (*handle_data)(const int8_t *data, uint32_t len);
-} at_listener;
+typedef struct _listener {
+    struct _listener *next;
+    AtCmdInfo cmdInfo;
+    uint32_t expireTime;
+    int32_t (*HandleData)(const int8_t *data, uint32_t len);
+} AtListener;
+
+typedef struct {
+    AtListener *head;
+    void (*ListAdd)(AtListener *p);
+    void (*ListDel)(AtListener *p);
+    void (*ListDestroy)(AtListener *pHead);
+    void (*NodeDel)(AtListener *listener, AtListener *pre);
+    void (*TimeoutNodesDel)(AtListener *pHead);
+} AtListenerHandle;
 
 #define OOB_MAX_NUM  5
 #define OOB_CMD_LEN  40
 #define AT_DATA_LEN  1024
 typedef struct oob_s {
-    char featurestr[OOB_CMD_LEN];
+    char featureStr[OOB_CMD_LEN];
     int len;
-    int runflag;
-    oob_cmd_match cmd_match;
-    oob_callback callback;
+    int runFlag;
+    OobCmdMatch cmdMatch;
+    OobCallback callback;
     void *arg;
-} oob_t;
+} OobType;
 
 typedef struct at_oob_s {
-    oob_t oob[OOB_MAX_NUM];
-    int32_t oob_num;
-} at_oob_t;
+    OobType oob[OOB_MAX_NUM];
+    int32_t oobNum;
+} AtOobType;
 
-typedef struct __config {
+/* AT device configure operation */
+typedef struct _AtConfig {
     char *name;
-    uint32_t usart_port;
+    uint32_t usartPort;
     uint32_t buardrate;
-    uint32_t linkid_num;
-    uint32_t user_buf_len; /* malloc 3 block memory for intener use, len * 3 */
-    char *cmd_begin;
-    char *line_end;
-    uint32_t  mux_mode;
-    uint32_t timeout; /* command respond timeout */
-} at_config;
+    uint32_t maxLinkIdNum;
+    uint32_t maxBufferLen; // malloc 3 block memory for intener use, len * 3
+    char *cmdBeginStr;
+    char *lineEndStr;
+    uint32_t multiMode; 
+#ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
+    uint32_t dinfo;
+#endif
+    uint32_t timeout; // command respond timeout
+    uint8_t  *userData; // extension field
+    void (*set)(struct _AtConfig *config);
+    struct _AtConfig *(*get)(void);
+    void (*transmit)(uint8_t *cmd, int32_t len, int lineEndFlag); // at device data transport method.
+    void (*transmitDeinit)(void);
+} AtConfig;
+
+/* AT semaphore interface */
+typedef struct {
+    uint32_t recvSem;
+    uint32_t respSem;   // the response semaphore of recv
+    uint32_t (*create)(uint16_t count, uint32_t *semHandle);
+    uint32_t (*pend)(uint32_t semHandle, uint32_t timeout);
+    uint32_t (*post)(uint32_t semHandle);
+    uint32_t (*delete)(uint32_t semHandle);
+} AtSemHandle;
+
+/* AT mutex interface */
+typedef struct {
+    uint32_t cmdMux;   // send cmd mutex
+    uint32_t sendMux;  // transport mutex
+    uint32_t recvMux;  // transport mutex
+    uint32_t (*create)(uint32_t *muxHandle);
+    uint32_t (*pend)(uint32_t muxHandle, uint32_t timeout);
+    uint32_t (*post)(uint32_t muxHandle);
+    uint32_t (*delete)(uint32_t muxHandle);
+} AtMutexHandle;
+
+/* AT uart recvived queue */
+typedef struct {
+    uint32_t queueRecvId;
+    bool     queueRecvFlag;
+    uint32_t queueWrErrorCounts;
+    uint32_t (*create)(const char *queueName, uint16_t len, uint32_t *queueId, uint32_t flags, uint16_t maxMsgSize);
+    uint32_t (*delete)(uint32_t queueId);
+    uint32_t (*read)(uint32_t queueId, void *bufferAddr, uint32_t *bufferSize, uint32_t timeout);
+    uint32_t (*write)(uint32_t queueId, void *bufferAddr, uint32_t bufferSize, uint32_t timeout);
+} AtQueueHandle;
+
+typedef struct {
+    uint8_t *buff;
+    uint32_t maxLen;
+} AtRecvBuff;
 
 typedef struct at_task {
-    uint32_t  tsk_hdl;
-    uint32_t recv_sem;
-    uint32_t rid;
-    bool     rid_flag;
-    uint32_t resp_sem;
-    uint32_t cmd_mux;
-    uint32_t trx_mux;
-    bool     trx_mux_flag;
-    uint8_t  *recv_buf;
-    uint8_t  *cmdresp; /* AT cmd response,default 512 bytes */
-    uint8_t  *userdata; /* data form servers,default 512 bytes */
-    uint8_t  *saveddata;
-    uint32_t  mux_mode;
-    at_link  *linkid;
-    at_listener *head;
-    uint32_t timeout; /* command respond timeout */
-
-    void (*step_callback)(void);
-
-    int32_t (*init)(at_config *config);
-    int32_t (*cmd)(int8_t *cmd, int32_t len, const char *suffix, char *resp_buf, int *resp_len);
+    uint32_t atTaskId;
+    AtSemHandle sem;
+    AtMutexHandle mutex;
+    AtQueueHandle queue;
+    AtListenerHandle listener;
+    bool sendMuxFlag;
+    AtRecvBuff recv;
+    uint8_t *cmdResp; // AT cmd response, default 512 bytes
+    uint8_t *userData; // data form servers, default 512 bytes
+    uint8_t *savedData;
+    uint32_t multiMode; // support multi connection mode
+    AtNetLink *linkedId;
+    uint32_t timeout; // command respond timeout
+    AtConfig config;
+    
+    /* AT Callback function */
+    void (*stepCallback)(void);
+    int32_t (*init)(AtConfig *config);
+    int32_t (*writeCmd)(int8_t *cmd, int32_t len, const char *suffix, char *resp_buf, int *resp_len);
     int32_t (*write)(int8_t *cmd, int8_t *suffix, int8_t *buf, int32_t len);
-    /* get unused linkid, use in multi connection mode */
-    int32_t (*get_id)(void);
+    /* get unused linkedId, use in multi connection mode */
+    int32_t (*getLinkedId)(void);
     /* register uset msg process to the listener list */
-    int32_t (*oob_register)(char *featurestr, int cmdlen, oob_callback callback, oob_cmd_match cmd_match);
-    void (*deinit)(void);
-    int32_t (*cmd_multi_suffix)(const int8_t *cmd, int len, at_cmd_info_s *cmd_info);
-} at_task;
+    int32_t (*oobRegister)(char *featureStr, int cmdlen, OobCallback callback, OobCmdMatch cmd_match);
+    void (*deInit)(void);
+    int32_t (*cmdMultiSuffix)(const int8_t *cmd, int len, AtCmdInfo *cmdInfo);
+} AtTaskHandle;
 
-void at_set_config(at_config *config);
-at_config *at_get_config(void);
+int CharToInt(const char *port);
+int AtUpdateResultSend(void);
+int32_t AtCmdInCallback(const int8_t *cmd, int32_t len, int32_t (*HandleData)(const int8_t *data, uint32_t len), uint32_t timeout);
+uint32_t AtGetTime(void);
+void AtRegStepCallback(AtTaskHandle *atTask, void (*stepCallback)(void));
 
-void *at_malloc(size_t size);
-void at_free(void *ptr);
-int chartoint(const char *port);
-extern int at_update_result_send(void);
-int32_t at_cmd_in_callback(const int8_t *cmd, int32_t len, int32_t (*handle_data)(const int8_t *data, uint32_t len), uint32_t timeout);
-uint32_t at_get_time(void);
-void at_reg_step_callback(at_task *at_tsk, void (*step_callback)(void));
+void *AtMalloc(size_t size);
+void AtFree(void *ptr);
 
-extern at_task at;
+extern uint16_t AtFotaTimer;
 
-extern uint16_t at_fota_timer;
+void AtTaskHandleInit(void);
+AtTaskHandle *AtGetTaskHandle(void);
 
 #ifdef __cplusplus
 #if __cplusplus

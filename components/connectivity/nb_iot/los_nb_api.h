@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: BG36 At Device HeadFile
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: NB API HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,47 +26,70 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _EMTC_BG36_H
-#define _EMTC_BG36_H
+/**@defgroup nbiot
+ * @ingroup nbiot
+ */
 
+#ifndef _NB_IOT_H
+#define _NB_IOT_H
 #include "at_main.h"
 
-#define AT_MODU_NAME            "BG36"
-#define AT_USART_PORT           3
-#define AT_BUARDRATE            115200
-#define BG36_TIMEOUT            10000 // ms
-#define MAX_AT_USERDATA_LEN     (1024 * 4)
-#define MAX_SEND_DATA_LEN       1400
+typedef struct sec_param {
+char *psk;
+char *pskId;
+uint8_t setPskFlag;
+} SecureParam;
 
-#define AT_LINE_END             "\r"
-#define AT_CMD_BEGIN            "\r\n"
+/*
+Func Name: los_nb_init
 
-typedef struct emtc_socket_info_t {
-    int len;
-    int offset;
-    char *buf;
-    bool usedFlag;
-} emtc_socket_info;
+@par Description
+    This API is used to init nb module and connect to cloud.
+@param[in]  host  cloud ip
+@param[in]  port  cloud port
+@param[in]  psk   if not null,the security param
+@par Return value
+*  0:on success
+*  negative value: on failure
+*/
+int los_nb_init(const int8_t *host, const int8_t *port, SecureParam *psk);
+/*
+Func Name: los_nb_report
 
-#define ATI                     "ATI\r"
-#define ATE0                    "ATE0\r"
-#define CMEE                    "AT+CMEE=2\r"
-#define QCFG                    "AT+QCFG=\"nwscanseq\",03\r"
+@par Description
+    This API is used for nb module to report data to cloud.
+@param[in] buf point to data to be reported
+@param[in] buflen data length
+@par Return value
+*  0:on success
+*  negative value: on failure
+*/
+int los_nb_report(const char *buf, int buflen);
+/*
+Func Name: los_nb_notify
 
-#define CPIN                    "AT+CPIN?\r"
-#define CREG                    "AT+CREG?\r"
-#define GETQICSGP               "AT+QICSGP=1\r"
-#define SETCELL                 "AT+CGREG=2\r"
-#define QUERYCELL               "AT+CGREG?\r"
+@par Description
+    This API is used to regist callback when receive the cmd from cloud.
+@param[in] featurestr feature string that in cmd
+@param[in] cmdlen length of feature string
+@param[in] callback callback of device
+@par Return value
+*  0:on success
+*  negative value: on failure
+*/
 
-#define QICSGP                  "AT+QICSGP=1,1,\"HUAWEI.COM\",\"\",\"\",1\r"
-#define QIACT                   "AT+QIACT=1\r"
-#define QIACTQUERY              "AT+QIACT?\r"
-#define CSQ                     "AT+CSQ\r"
-#define QIOPEN_SOCKET           "AT+QIOPEN=1"
-#define QUERYCFATT              "AT+CGATT?\r"
-#define AT_DATAF_PREFIX         "+QIURC:"
+int los_nb_notify(char *featureStr, int cmdLen, OobCallback callback, OobCmdMatch cmdMatch);
+/*
+Func Name: los_nb_deinit
 
-AtAdaptorApi AtGetEmtcBg36Interface(void);
+@par Description
+    This API is used to deinit the nb module.
+@param[in] NULL
+@par Return value
+*  0:on success
+*  negative value: on failure
+*/
 
-#endif /* _EMTC_BG36_H */
+int los_nb_deinit(void);
+
+#endif /* _NB_IOT_H */

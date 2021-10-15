@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: At Hal HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -29,12 +29,39 @@
 #ifndef _AT_HAL_H
 #define _AT_HAL_H
 
-#include "at_main.h"
+#include <stdio.h>
+#include <los_typedef.h>
 
-int32_t at_usart_init(void);
-void at_usart_deinit(void);
-void at_transmit(uint8_t *cmd, int32_t len, int flag);
-void write_at_task_msg(at_msg_type_e type);
-int read_resp(uint8_t *buf, recv_buff *recv_buf);
+enum {
+    AT_USART_RX,
+    AT_TASK_QUIT,
+    AT_SENT_DONE
+};
 
+/* AT ring buff, save the received serial data */
+typedef struct {
+    uint32_t wi; // write position
+    uint32_t ri; // read postion
+    uint8_t buff_full; // write full flag
+} AtUsartRingBuffer;
+
+typedef struct {
+    uint32_t uartPort;
+    uint32_t buardrate;
+    uint32_t queueId;
+    uint8_t *buffer; // recv buff;
+    uint32_t maxLen; // at frame buffer max length.
+} AtUsartRecv;
+
+typedef uint32_t AtMsgType;
+typedef struct {
+    uint32_t ori;
+    uint32_t end;
+    AtMsgType msgType;
+} AtRecvQueue;
+
+int32_t AtUsartInit(AtUsartRecv *handle);
+void AtUsartDeinit(void);
+void AtUsartTransmit(uint8_t *cmd, int32_t len, int lineEndFlag);
+void AtReadQueueBuffer(uint8_t *buffer, uint32_t *bufferLen, AtRecvQueue *recvQueue);
 #endif /* _AT_HAL_H */

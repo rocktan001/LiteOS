@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: NB IOT API
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -32,56 +32,56 @@
 #include "bc95.h"
 #endif
 
-int los_nb_init(const int8_t *host, const int8_t *port, sec_param_s *psk)
+int los_nb_init(const int8_t *host, const int8_t *port, SecureParam *psk)
 {
     int ret;
-    int timecnt = 0;
-
+    int timeCount = 0;
+    AtTaskHandle *at = AtGetTaskHandle();
     /* when used nb with agenttiny */
     /* the following para is replaced by call nb_int() */
-    at_config at_user_conf = {
+    AtConfig atDeviceConfig = {
         .name = AT_MODU_NAME,
-        .usart_port = AT_USART_PORT,
+        .usartPort = AT_USART_PORT,
         .buardrate = AT_BUARDRATE,
-        .linkid_num = AT_MAX_LINK_NUM,
-        .user_buf_len = MAX_AT_USERDATA_LEN,
-        .cmd_begin = AT_CMD_BEGIN,
-        .line_end = AT_LINE_END,
-        .mux_mode = 1, // support multi connection mode
+        .maxLinkIdNum = AT_MAX_LINK_NUM,
+        .maxBufferLen = MAX_AT_USERDATA_LEN,
+        .cmdBeginStr = AT_CMD_BEGIN,
+        .lineEndStr = AT_LINE_END,
+        .multiMode = 1, // support multi connection mode
         .timeout = AT_CMD_TIMEOUT, // ms
     };
 
-    at.init(&at_user_conf);
+    at->init(&atDeviceConfig);
 
-    nb_reboot();
+    NbReboot();
     if (psk != NULL) {
-        if (psk->setpsk) {
-            nb_send_psk(psk->pskid, psk->psk);
+        if (psk->setPskFlag) {
+            NbSendPsk(psk->pskId, psk->psk);
         } else {
-            nb_set_no_encrypt();
+            NbSetNoEncrypt();
         }
     }
 
     while (1) {
-        ret = nb_hw_detect();
-        printf("call nb_hw_detect,ret is %d\n", ret);
+        ret = NbHwDetect();
+        printf("call NbHwDetect, ret is %d\n", ret);
         if (ret == AT_OK) {
             break;
         }
     }
-    while (timecnt < 120) {
-        ret = nb_get_netstat();
-        nb_check_csq();
+    while (timeCount < 120) {
+        ret = NbGetNetStat();
+        NbCheckCsq();
         if (ret != AT_FAILED) {
-            ret = nb_query_ip();
+            ret = NbQueryIp();
             break;
         }
-        timecnt++;
+        timeCount++;
     }
     if (ret != AT_FAILED) {
-        nb_query_ip();
+        NbQueryIp();
     }
-    ret = nb_set_cdpserver((char *)host, (char *)port);
+    ret = NbSetCdpServer((char *)host, (char *)port);
     return ret;
 }
 
@@ -90,20 +90,22 @@ int los_nb_report(const char *buf, int len)
     if ((buf == NULL) || (len <= 0)) {
         return -1;
     }
-    return nb_send_payload(buf, len);
+    return NbSendPayload(buf, len);
 }
 
-int los_nb_notify(char *featurestr, int cmdlen, oob_callback callback, oob_cmd_match cmd_match)
+int los_nb_notify(char *featureStr, int cmdlen, OobCallback callback, OobCmdMatch cmdMatch)
 {
-    if ((featurestr == NULL) || (cmdlen <= 0) || (cmdlen >= OOB_CMD_LEN - 1)) {
+    if ((featureStr == NULL) || (cmdlen <= 0) || (cmdlen >= OOB_CMD_LEN - 1)) {
         return -1;
     }
-    return at.oob_register(featurestr, cmdlen, callback, cmd_match);
+    AtTaskHandle *at = AtGetTaskHandle();
+    return at->oobRegister(featureStr, cmdlen, callback, cmdMatch);
 }
 
 int los_nb_deinit(void)
 {
-    nb_reboot();
-    at.deinit();
+    AtTaskHandle *at = AtGetTaskHandle();
+    NbReboot();
+    at->deInit();
     return 0;
 }

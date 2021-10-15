@@ -46,7 +46,7 @@
 #define AT_LINE_END             "\r\n"
 #define AT_CMD_BEGIN            "\r\n"
 
-#define AT_USART_PORT           3
+#define AT_USART_PORT           2
 #define AT_BUARDRATE            9600
 #define AT_CMD_TIMEOUT          10000 // ms
 #define AT_MAX_LINK_NUM         4
@@ -64,30 +64,30 @@
 #endif
 
 #define IP_LEN                  16
-typedef struct _socket_info_t {
+typedef struct {
     int socket;
-    short localport;
-    char localip[IP_LEN];
-    short remoteport;
-    char remoteip[IP_LEN];
-    bool used_flag;
-} socket_info; // struct to save socket info
+    short localPort;
+    char localIp[IP_LEN];
+    short remotePort;
+    char remoteIp[IP_LEN];
+    bool usedFlag;
+} SocketInfo; // struct to save socket info
 
-int str_to_hex(const char *bufin, int len, char *bufout);
-int32_t nb_set_cdpserver(char *host, char *port);
-int32_t nb_hw_detect(void);
-int32_t nb_get_netstat(void);
-int nb_query_ip(void);
-int32_t nb_send_payload(const char *buf, int len);
-int32_t nb_check_csq(void);
-int32_t nb_send_psk(char *pskid, char *psk);
-int32_t nb_set_no_encrypt(void);
-int32_t nb_reboot(void);
-int32_t nb_recv_timeout(int32_t id, uint8_t *buf, uint32_t len, char *ipaddr, int *port, int32_t timeout);
-int32_t nb_cmd_match(const char *buf, char *featurestr, int len);
-void nb_step(void);
-void nb_reattach(void);
+int32_t StrToHex(const char *bufin, int len, char *bufout);
+int32_t NbSetCdpServer(char *host, char *port);
+int32_t NbHwDetect(void);
+int32_t NbGetNetStat(void);
+int32_t NbQueryIp(void);
+int32_t NbSendPayload(const char *buf, int len);
+int32_t NbCheckCsq(void);
+int32_t NbSendPsk(char *pskId, char *psk);
+int32_t NbSetNoEncrypt(void);
+int32_t NbReboot(void);
+int32_t NbRecvTimeout(int32_t id, uint8_t *buf, uint32_t len, char *ipaddr, int *port, int32_t timeout);
+int32_t NbCmdMatch(const char *buf, char *featureStr, int len);
+void NbStep(void);
+void NbReattach(void);
 
-void Bc95Register(void);
+AtAdaptorApi AtGetBC95Interface(void);
 
 #endif /* _BC95_H */

@@ -31,25 +31,19 @@
 
 #include "at_main.h"
 
-#ifndef WIFI_SSID
-#define WIFI_SSID                 "HWTEST"
-#endif
-#ifndef WIFI_PASSWD
-#define WIFI_PASSWD               ""
-#endif
+#define MAX_AT_USERDATA_LEN       (1024)
+
+#define WIFI_SSID                 "" // set ssid name
+#define WIFI_PASSWD               "" // set ssid passwd
 
 #define AT_MODU_NAME              "ESP8266"
-#ifndef AT_USART_PORT
-#define AT_USART_PORT             2
-#endif
+#define AT_USART_PORT             3
 #define AT_BUARDRATE              115200
 #define AT_CMD_TIMEOUT            10000 // ms
 #define AT_MAX_LINK_NUM           4
 
 #define AT_LINE_END               "\r\n"
 #define AT_CMD_BEGIN              "\r\n"
-
-#define MAX_AT_USERDATA_LEN       (1024)
 
 #define AT_CMD_RST                "AT+RST"
 #define AT_CMD_ECHO_OFF           "ATE0"
@@ -69,7 +63,7 @@ typedef enum {
     STA = 1,
     AP,
     ATA_AP,
-} enum_net_mode;
+} NetModeType;
 
 void Esp8266Register(void);
 

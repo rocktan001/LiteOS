@@ -32,7 +32,7 @@
 #include "at_main.h"
 
 #define AT_MODU_NAME            "SIM900A"
-#define AT_USART_PORT           2
+#define AT_USART_PORT           3
 #define AT_BUARDRATE            115200
 #define AT_CMD_TIMEOUT          10000 // ms
 #define AT_MAX_LINK_NUM         4
@@ -49,6 +49,7 @@
 #define AT_CMD_ECHO_OFF         "ATE0"
 #define AT_CMD_ECHO_ON          "ATE1"
 #define AT_CMD_MUX              "AT+CIPMUX"
+#define AT_CMD_CHECK_MUX        "AT+CIPMUX?"
 #define AT_CMD_CLASS            "AT+CGCLASS"    // set MS type
 #define AT_CMD_PDP_CONT         "AT+CGDCONT"    // configure pdp context
 #define AT_CMD_PDP_ATT          "AT+CGATT"      // pdp attach network
@@ -65,6 +66,5 @@
 #define AT_DATAF_PREFIX_MULTI   "\r\n+RECEIVE"
 #define SIM900A_DELAY           LOS_TaskDelay
 
-void Sim900aRegister(void);
-
+AtAdaptorApi AtGetSim900aInterface(void);
 #endif /* _SIM900A_H */

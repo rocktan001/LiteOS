@@ -123,7 +123,7 @@ exit_failed:
         return NULL;
     }
 
-    ctx->fd = at_api_bind(host, port, proto);
+    ctx->fd = AtApiBind(host, port, proto);
     if (ctx->fd < 0) {
         SOCKET_LOG("unknown host or port");
         atiny_free(ctx);
@@ -324,7 +324,7 @@ int atiny_net_connect(atiny_net_context *ctx, const char *host, const char *port
         return -1;
     }
 
-    ctx->fd = at_api_connect(host, port, proto);
+    ctx->fd = AtApiConnect(host, port, proto);
     if (ctx->fd < 0) {
         SOCKET_LOG("unknown host or port");
         atiny_free(ctx);
@@ -354,7 +354,7 @@ int atiny_net_recv(void *ctx, unsigned char *buf, size_t len)
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     ret = recv(fd, buf, len, 0);
 #elif defined(LOSCFG_COMPONENTS_NET_AT)
-    ret = at_api_recv(fd, buf, len);
+    ret = AtApiRecv(fd, buf, len);
 #elif defined(WITH_WIZNET)
     ret = wiznet_recv(fd, buf, len);
 #else
@@ -413,7 +413,7 @@ int atiny_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t t
     ret = atiny_net_recv(ctx, buf, len);
 
 #elif defined(LOSCFG_COMPONENTS_NET_AT)
-    ret = at_api_recv_timeout(fd, buf, len, NULL,NULL,timeout);
+    ret = AtApiRecvTimeout(fd, buf, len, NULL,NULL,timeout);
 #elif defined(WITH_WIZNET)
     ret = wiznet_recv_timeout(fd, buf, len, timeout);
 #else
@@ -435,7 +435,7 @@ int atiny_net_send(void *ctx, const unsigned char *buf, size_t len)
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
     ret = send(fd, buf, len, 0);
 #elif defined(LOSCFG_COMPONENTS_NET_AT)
-    ret = at_api_send(fd, buf, len);
+    ret = AtApiSend(fd, buf, len);
 #elif defined(WITH_WIZNET)
     ret = wiznet_send(fd, buf, len);
 #else
@@ -463,7 +463,7 @@ void atiny_net_close(void *ctx)
 #if defined(WITH_LINUX) || defined(LOSCFG_COMPONENTS_NET_LWIP)
         close(fd);
 #elif defined(LOSCFG_COMPONENTS_NET_AT)
-        at_api_close(fd);
+        AtApiRecvClose(fd);
 #elif defined(WITH_WIZNET)
         wiznet_close(fd);
 #endif
@@ -494,7 +494,7 @@ int atiny_net_send_timeout(void *ctx, const unsigned char *buf, size_t len, uint
     return atiny_net_write_sock(ctx, buf, len, timeout);
 #elif defined(LOSCFG_COMPONENTS_NET_AT)
         int fd = ((atiny_net_context *)ctx)->fd;
-        return at_api_send(fd, buf, (uint32_t)len);
+        return AtApiSend(fd, buf, (uint32_t)len);
 #endif
    return -1;
 }

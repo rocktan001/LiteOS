@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Bc95 At Device
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -30,40 +30,39 @@
 #include <ctype.h>
 #include "bc95.h"
 #include "at_hal.h"
-#include "at_api.h"
 
-at_adaptor_api bc95_interface;
-extern char rbuf[AT_DATA_LEN];
-extern char wbuf[AT_DATA_LEN];
+AtAdaptorApi bc95_interface;
+char rbuf[AT_DATA_LEN];
+char wbuf[AT_DATA_LEN];
 
 typedef struct {
-    uint32_t data_len;
-    int link_idx;
-    bool valid_flag;
-} nb_data_ind_info_s;
+    uint32_t dataLen;
+    int linkIndex;
+    bool validFlag;
+} NbDataInfoHandle;
 
-char tmpbuf[AT_DATA_LEN] = {0}; // transform to hex
+char tmpbuffer[AT_DATA_LEN] = {0}; // transform to hex
 
-socket_info sockinfo[MAX_SOCK_NUM];
-static nb_data_ind_info_s g_data_ind_info;
+SocketInfo sockInfo[MAX_SOCK_NUM];
+static NbDataInfoHandle g_nbDataInfo;
 
-static int nb_alloc_sock(int socket)
+static int NbAllocSock(int socket)
 {
     int idx;
 
     for (uint32_t i = 0; i < MAX_SOCK_NUM; ++i) {
-        if (sockinfo[i].used_flag && (sockinfo[i].socket == socket)) {
+        if (sockInfo[i].usedFlag && (sockInfo[i].socket == socket)) {
             return i;
         }
     }
 
     idx = (socket % MAX_SOCK_NUM);
-    if (!sockinfo[idx].used_flag) {
+    if (!sockInfo[idx].usedFlag) {
         return idx;
     }
 
     for (uint32_t i = 0; i < MAX_SOCK_NUM; ++i) {
-        if (!sockinfo[i].used_flag) {
+        if (!sockInfo[i].usedFlag) {
             return i;
         }
     }
@@ -71,18 +70,18 @@ static int nb_alloc_sock(int socket)
     return MAX_SOCK_NUM;
 }
 
-static int nb_sock_to_idx(int socket)
+static int NbSockToIndex(int socket)
 {
     int idx;
 
     idx = (socket % MAX_SOCK_NUM);
 
-    if (sockinfo[idx].used_flag && (socket == sockinfo[idx].socket)) {
+    if (sockInfo[idx].usedFlag && (socket == sockInfo[idx].socket)) {
         return idx;
     }
 
     for (uint32_t i = 0; i < MAX_SOCK_NUM; ++i) {
-        if (sockinfo[i].used_flag && (socket == sockinfo[i].socket)) {
+        if (sockInfo[i].usedFlag && (socket == sockInfo[i].socket)) {
             return i;
         }
     }
@@ -90,7 +89,7 @@ static int nb_sock_to_idx(int socket)
     return MAX_SOCK_NUM;
 }
 
-int str_to_hex(const char *bufin, int len, char *bufout)
+int32_t StrToHex(const char *bufin, int len, char *bufout)
 {
     int i = 0;
     if (NULL == bufin || len <= 0 || NULL == bufout) {
@@ -104,10 +103,10 @@ int str_to_hex(const char *bufin, int len, char *bufout)
     return 0;
 }
 
-void HexStrToStr(const unsigned char *source, unsigned char *dest, int sourceLen)
+static void HexStrToStr(const uint8_t *source, uint8_t *dest, int sourceLen)
 {
     short i;
-    unsigned char highByte, lowByte;
+    uint8_t highByte, lowByte;
     for (i = 0; i < sourceLen; i += 2) {
         highByte = toupper(source[i]);
         lowByte = toupper(source[i + 1]);
@@ -130,23 +129,26 @@ void HexStrToStr(const unsigned char *source, unsigned char *dest, int sourceLen
     return;
 }
 
-int32_t nb_reboot(void)
+int32_t NbReboot(void)
 {
-    return at.cmd((int8_t *)AT_NB_reboot, strlen(AT_NB_reboot), "OK", NULL, NULL);
+    AtTaskHandle *at = AtGetTaskHandle();
+    return at->writeCmd((int8_t *)AT_NB_reboot, strlen(AT_NB_reboot), "OK", NULL, NULL);
 }
 
 // "AT+CFUN?\r"
-int32_t nb_hw_detect(void) {
-    return at.cmd((int8_t *)AT_NB_hw_detect, strlen(AT_NB_hw_detect), "+CFUN:1", NULL, NULL);
+int32_t NbHwDetect(void) {
+    AtTaskHandle *at = AtGetTaskHandle();
+    return at->writeCmd((int8_t *)AT_NB_hw_detect, strlen(AT_NB_hw_detect), "+CFUN:1", NULL, NULL);
 }
 
-int32_t nb_check_csq(void)
+int32_t NbCheckCsq(void)
 {
     char *cmd = "AT+CSQ\r";
-    return at.cmd((int8_t *)cmd, strlen(cmd), "+CSQ:", NULL, NULL);
+    AtTaskHandle *at = AtGetTaskHandle();
+    return at->writeCmd((int8_t *)cmd, strlen(cmd), "+CSQ:", NULL, NULL);
 }
 
-int32_t nb_set_cdpserver(char *host, char *port)
+int32_t NbSetCdpServer(char *host, char *port)
 {
     char *cmd = "AT+NCDP=";
     char *cmd2 = "AT+NCDP?";
@@ -155,47 +157,51 @@ int32_t nb_set_cdpserver(char *host, char *port)
     char cdpbuf[128] = {0};
     int ret = -1;
     char ipaddr[100] = {0};
+    AtTaskHandle *at = AtGetTaskHandle();
     if ((strlen(host) > 70) || (strlen(port) > 20) || (host == NULL) || (port == NULL)) {
-        ret = at.cmd((int8_t *)cmdNNMI, strlen(cmdNNMI), "OK", NULL, NULL);
-        ret = at.cmd((int8_t *)cmdCMEE, strlen(cmdCMEE), "OK", NULL, NULL);
+        ret = at->writeCmd((int8_t *)cmdNNMI, strlen(cmdNNMI), "OK", NULL, NULL);
+        ret = at->writeCmd((int8_t *)cmdCMEE, strlen(cmdCMEE), "OK", NULL, NULL);
         return ret;
     }
 
     snprintf(ipaddr, sizeof(ipaddr) - 1, "%s,%s\r", host, port);
     snprintf(cdpbuf, sizeof(cdpbuf) - 1, "%s%s%c", cmd, ipaddr, '\r');
 
-    ret = at.cmd((int8_t *)cdpbuf, strlen(cdpbuf), "OK", NULL, NULL);
+    ret = at->writeCmd((int8_t *)cdpbuf, strlen(cdpbuf), "OK", NULL, NULL);
     if (ret < 0) {
         return ret;
     }
-    ret = at.cmd((int8_t *)cmd2, strlen(cmd2), ipaddr, NULL, NULL);
-    ret = at.cmd((int8_t *)cmdNNMI, strlen(cmdNNMI), "OK", NULL, NULL);
+    ret = at->writeCmd((int8_t *)cmd2, strlen(cmd2), ipaddr, NULL, NULL);
+    ret = at->writeCmd((int8_t *)cmdNNMI, strlen(cmdNNMI), "OK", NULL, NULL);
     return ret;
 }
 
-int32_t nb_send_psk(char *pskid, char *psk)
+int32_t NbSendPsk(char *pskId, char *psk)
 {
     char *cmds = "AT+QSECSWT";                 // AT+QSECSWT=1,100    OK
     char *cmdp = "AT+QSETPSK";                 // AT+QSETPSK=86775942,E6F4C799   OK
     sprintf(wbuf, "%s=%d,%d\r", cmds, 1, 100); // min
-    at.cmd((int8_t *)wbuf, strlen(wbuf), "OK", NULL, NULL);
-    snprintf(wbuf, AT_DATA_LEN, "%s=%s,%s\r", cmdp, pskid, psk);
-    return at.cmd((int8_t *)wbuf, strlen(wbuf), "OK", NULL, NULL);
+    AtTaskHandle *at = AtGetTaskHandle();
+    at->writeCmd((int8_t *)wbuf, strlen(wbuf), "OK", NULL, NULL);
+    snprintf(wbuf, AT_DATA_LEN, "%s=%s,%s\r", cmdp, pskId, psk);
+    return at->writeCmd((int8_t *)wbuf, strlen(wbuf), "OK", NULL, NULL);
 }
 
-int32_t nb_set_no_encrypt(void)
+int32_t NbSetNoEncrypt(void)
 {
     char *cmd = "AT+QSECSWT=0\r";
-    return at.cmd((int8_t *)cmd, strlen(cmd), "OK", NULL, NULL);
+    AtTaskHandle *at = AtGetTaskHandle();
+    return at->writeCmd((int8_t *)cmd, strlen(cmd), "OK", NULL, NULL);
 }
 
 #ifdef WITH_SOTA
-int sota_cmd(int8_t *cmd, int32_t len, const char *suffix, char *resp_buf, int *resp_len)
+int sota_cmd(int8_t *cmd, int32_t len, const char *suffix, char *respBuffer, int *respLen)
 {
     AT_LOG("sota_cmd:%s", cmd);
-    LOS_MuxPend(at.cmd_mux, LOS_WAIT_FOREVER);
-    at_transmit((uint8_t *)cmd, len, 1);
-    LOS_MuxPost(at.cmd_mux);
+    AtTaskHandle *at = AtGetTaskHandle();
+    LOS_MuxPend(at->cmdMux, LOS_WAIT_FOREVER);
+    at->config.UsartTtransmit((uint8_t *)cmd, len, 1);
+    LOS_MuxPost(at->cmdMux);
 
     return AT_OK;
 }
@@ -209,29 +215,30 @@ int nb_send_str(const char *buf, int len)
     return sota_cmd((int8_t *)wbuf, strlen(wbuf), "OK", NULL, NULL);
 }
 #endif
-int32_t nb_send_payload(const char *buf, int len)
+int32_t NbSendPayload(const char *buf, int len)
 {
     char *cmd1 = "AT+NMGS=";
     char *cmd2 = "AT+NQMGS\r";
     int ret;
     char *str = NULL;
     int curcnt = 0;
-    int rbuflen;
+    int recvBufferlen;
     static int sndcnt = 0;
     if ((buf == NULL) || (len > AT_MAX_PAYLOADLEN)) {
         AT_LOG("payload too long");
         return -1;
     }
-    memset(tmpbuf, 0, AT_DATA_LEN);
+    memset(tmpbuffer, 0, AT_DATA_LEN);
     memset(wbuf, 0, AT_DATA_LEN);
-    str_to_hex(buf, len, tmpbuf);
+    StrToHex(buf, len, tmpbuffer);
     memset(rbuf, 0, AT_DATA_LEN);
-    snprintf(wbuf, AT_DATA_LEN, "%s%d,%s%c", cmd1, (int)len, tmpbuf, '\r');
-    ret = at.cmd((int8_t *)wbuf, strlen(wbuf), "OK", NULL, NULL);
+    snprintf(wbuf, AT_DATA_LEN, "%s%d,%s%c", cmd1, (int)len, tmpbuffer, '\r');
+    AtTaskHandle *at = AtGetTaskHandle();
+    ret = at->writeCmd((int8_t *)wbuf, strlen(wbuf), "OK", NULL, NULL);
     if (ret < 0) {
         return -1;
     }
-    ret = at.cmd((int8_t *)cmd2, strlen(cmd2), "SENT=", rbuf, &rbuflen);
+    ret = at->writeCmd((int8_t *)cmd2, strlen(cmd2), "SENT=", rbuf, &recvBufferlen);
     if (ret < 0) {
         return -1;
     }
@@ -247,54 +254,56 @@ int32_t nb_send_payload(const char *buf, int len)
     return ret;
 }
 
-int nb_query_ip(void)
+int32_t NbQueryIp(void)
 {
     char *cmd = "AT+CGPADDR\r";
-    return at.cmd((int8_t *)cmd, strlen(cmd), "+CGPADDR:0,", NULL, NULL);
+    AtTaskHandle *at = AtGetTaskHandle();
+    return at->writeCmd((int8_t *)cmd, strlen(cmd), "+CGPADDR:0,", NULL, NULL);
 }
 
-int32_t nb_get_netstat(void)
+int32_t NbGetNetStat(void)
 {
     char *cmd = "AT+CGATT?\r";
-    return at.cmd((int8_t *)cmd, strlen(cmd), "CGATT:1", NULL, NULL);
+    AtTaskHandle *at = AtGetTaskHandle();
+    return at->writeCmd((int8_t *)cmd, strlen(cmd), "CGATT:1", NULL, NULL);
 }
 
-static int32_t nb_cmd_with_2_suffix(const int8_t *cmd, int len, const char *suffix_ok, const char *suffix_err,
-    char *resp_buf, uint32_t *resp_len)
+static int32_t NbCmdWithSuffixes(const int8_t *cmd, int len, const char *suffix_ok, const char *suffix_err,
+    char *respBuffer, uint32_t *respLen)
 {
     const char *suffix[2] = {0};
-    at_cmd_info_s cmd_info = {0};
+    AtCmdInfo cmdInfo = {0};
 
     suffix[0] = suffix_ok;
     suffix[1] = suffix_err;
 
-    cmd_info.suffix = suffix;
-    cmd_info.suffix_num = array_size(suffix);
+    cmdInfo.suffix = suffix;
+    cmdInfo.suffixNumber = array_size(suffix);
 
-    cmd_info.resp_buf = resp_buf;
-    cmd_info.resp_len = resp_len;
-
-    if (at.cmd_multi_suffix(cmd, len, &cmd_info) != AT_OK) {
+    cmdInfo.respBuffer = respBuffer;
+    cmdInfo.respLen = respLen;
+    AtTaskHandle *at = AtGetTaskHandle();
+    if (at->cmdMultiSuffix(cmd, len, &cmdInfo) != AT_OK) {
         return AT_FAILED;
     }
 
-    if (cmd_info.match_idx != 0) {
-        AT_LOG("cmd_info.match_idx %d", cmd_info.match_idx);
+    if (cmdInfo.matchIndex != 0) {
+        AT_LOG("cmdInfo.matchIndex %d", cmdInfo.matchIndex);
         return AT_FAILED;
     }
 
     return AT_OK;
 }
 
-int32_t nb_create_sock(int port, int proto)
+int32_t NbCreateSock(int port, int proto)
 {
     int socket;
-    int rbuflen = AT_DATA_LEN;
+    int recvBufferlen = AT_DATA_LEN;
     const char *cmdudp = "AT+NSOCR=DGRAM,17,"; // udp
     const char *cmdtcp = "AT+NSOCR=STREAM,6,"; // tcp
     int ret;
     char buf[64];
-    int cmd_len;
+    int cmdLen;
 
     if (proto != 17 && proto != 6) {
         AT_LOG("proto invalid!");
@@ -303,14 +312,14 @@ int32_t nb_create_sock(int port, int proto)
     memset(rbuf, 0, AT_DATA_LEN);
 
     if (proto == 17) {
-        cmd_len = snprintf(buf, sizeof(buf), "%s%d,1\r", cmdudp, port); // udp
+        cmdLen = snprintf(buf, sizeof(buf), "%s%d,1\r", cmdudp, port); // udp
     } else {
-        cmd_len = snprintf(buf, sizeof(buf), "%s%d,1\r", cmdtcp, port);
+        cmdLen = snprintf(buf, sizeof(buf), "%s%d,1\r", cmdtcp, port);
     }
 
-    nb_cmd_with_2_suffix((int8_t *)buf, cmd_len, "OK", "ERROR", rbuf, (uint32_t *)&rbuflen);
-    ret = sscanf(rbuf, "%d\r%s", &socket, tmpbuf);
-    if ((2 == ret) && (socket >= 0) && (strnstr(tmpbuf, "OK", sizeof(tmpbuf)))) {
+    NbCmdWithSuffixes((int8_t *)buf, cmdLen, "OK", "ERROR", rbuf, (uint32_t *)&recvBufferlen);
+    ret = sscanf(rbuf, "%d\r%s", &socket, tmpbuffer);
+    if ((2 == ret) && (socket >= 0) && (strnstr(tmpbuffer, "OK", sizeof(tmpbuffer)))) {
         return socket;
     }
 
@@ -318,7 +327,7 @@ int32_t nb_create_sock(int port, int proto)
     return -1;
 }
 
-static bool nb_is_addr_valid(const char *addr)
+static bool NbAddrIsValid(const char *addr)
 {
     const int size = 4;
     int tmp[4];
@@ -328,37 +337,37 @@ static bool nb_is_addr_valid(const char *addr)
     return (size == ret);
 }
 
-int nb_decompose_str(const char *str, int *readleft, int *out_sockid)
+int NbDecomposeStr(const char *str, int *readLeft, int *out_sockid)
 {
     const char *tmp, *trans;
     int sockid;
-    QUEUE_BUFF qbuf;
-    int ret = AT_FAILED;
+    QueueBuffer qbuf;
+    // int ret = AT_FAILED;
     int rlen;
-    int link_id;
+    int linkId;
 
     tmp = strstr(str, ",");
     if (tmp == NULL) {
         return AT_FAILED;
     }
 
-    sockid = chartoint(str);
+    sockid = CharToInt(str);
     trans = strstr(tmp + 1, ",");
     if (trans == NULL) {
         return AT_FAILED;
     }
     strncpy(qbuf.ipaddr, tmp + 1, MIN((trans - tmp), AT_DATA_LEN / 2));
     qbuf.ipaddr[trans - tmp - 1] = '\0';
-    if (!nb_is_addr_valid(qbuf.ipaddr)) {
+    if (!NbAddrIsValid(qbuf.ipaddr)) {
         return AT_FAILED;
     }
 
-    qbuf.port = chartoint((char *)(trans + 1));
+    qbuf.port = CharToInt((char *)(trans + 1));
     tmp = strstr(trans + 1, ",");
     if (tmp == NULL) {
         return AT_FAILED;
     }
-    rlen = chartoint((char *)(tmp + 1));
+    rlen = CharToInt((char *)(tmp + 1));
     if (rlen >= AT_DATA_LEN / 2 || rlen < 0) {
         AT_LOG("rlen %d", rlen);
         return AT_FAILED;
@@ -374,70 +383,73 @@ int nb_decompose_str(const char *str, int *readleft, int *out_sockid)
         return AT_FAILED;
     }
 
-    *readleft = chartoint((char *)(tmp + 1));
+    *readLeft = CharToInt((char *)(tmp + 1));
 
     *out_sockid = sockid;
 
-    link_id = nb_sock_to_idx(sockid);
-    if (link_id >= MAX_SOCK_NUM) {
+    linkId = NbSockToIndex(sockid);
+    if (linkId >= MAX_SOCK_NUM) {
         AT_LOG("sockid invalid %d", sockid);
         return AT_OK;
     }
 
-    qbuf.addr = at_malloc(rlen);
-    if (qbuf.addr == NULL) {
-        AT_LOG("at_malloc null");
-        return AT_OK;
+    // memcpy buffer
+    AtTaskHandle *at = AtGetTaskHandle();
+    if (at->linkedId[linkId].payload.buff != NULL) {
+        AtFree(at->linkedId[linkId].payload.buff);
+    }
+    at->linkedId[linkId].payload.buff = AtMalloc(rlen);
+    if (at->linkedId[linkId].payload.buff == NULL) {
+        AT_LOG("malloc for recv payload failed!");
+        goto END;
     }
 
-    HexStrToStr((const unsigned char *)(trans + 1), qbuf.addr, (rlen)*2);
-    qbuf.len = rlen;
+    HexStrToStr((const uint8_t *)(trans + 1), at->linkedId[linkId].payload.buff, (rlen * 2));
 
-    ret = LOS_QueueWriteCopy(at.linkid[link_id].qid, &qbuf, sizeof(qbuf), 0);
-    if (LOS_OK != ret) {
-        AT_LOG("LOS_QueueWriteCopy  failed! ret %d", ret);
-        at_free(qbuf.addr);
-    }
-
+    at->linkedId[linkId].payload.totalSize = rlen;
+    at->linkedId[linkId].payload.offset = 0;
+    at->linkedId[linkId].payload.lastEnd = 0;
+    (void)at->sem.post(at->linkedId[linkId].payload.recvSem);
+END:
     return AT_OK;
 }
 
 static void nb_close_sock(int sock)
 {
-    const char *cmd = "AT+NSOCL=";
     char buf[64];
-    int cmd_len;
-
-    cmd_len = snprintf(buf, sizeof(buf), "%s%d\r", cmd, sock);
-    nb_cmd_with_2_suffix((int8_t *)buf, cmd_len, "OK", "ERROR", NULL, NULL);
+    int cmdLen = snprintf(buf, sizeof(buf), "%s%d\r", "AT+NSOCL=", sock);
+    NbCmdWithSuffixes((int8_t *)buf, cmdLen, "OK", "ERROR", NULL, NULL);
 }
 
 
-static int nb_create_sock_link(int portnum, int *link_id)
+static int NbCreateSockLink(int portNum, int *linkId)
 {
     int ret = 0;
     int sock;
-
-    sock = nb_create_sock(portnum, UDP_PROTO);
+    int id;
+    sock = NbCreateSock(portNum, UDP_PROTO);
     if (sock < 0) {
         AT_LOG("sock num exceeded,ret is %d", sock);
         return AT_FAILED;
     }
 
-    ret = nb_alloc_sock(sock);
-    if (ret >= MAX_SOCK_NUM) {
+    id = NbAllocSock(sock);
+    if (id >= MAX_SOCK_NUM) {
         AT_LOG("sock num exceeded,socket is %d", sock);
         goto CLOSE_SOCk;
     }
 
-    if (LOS_QueueCreate("dataQueue", 16, &at.linkid[ret].qid, 0, sizeof(QUEUE_BUFF)) != LOS_OK) {
-        AT_LOG("init dataQueue failed, ret is %d!", ret);
-        goto CLOSE_SOCk;
+    // create recv payload sem;
+    AtTaskHandle *at = AtGetTaskHandle();
+    ret = at->sem.create(0, (UINT32 *)&at->linkedId[id].payload.recvSem);
+    if (ret != LOS_OK) {
+        AT_LOG("esp8266 init at_recv_sem failed!");
+        return AT_FAILED;
     }
 
-    *link_id = ret;
-    sockinfo[ret].socket = sock;
-    sockinfo[ret].used_flag = true;
+    *linkId = id;
+    sockInfo[id].socket = sock;
+    sockInfo[id].usedFlag = true;
     return AT_OK;
 
 CLOSE_SOCk:
@@ -446,69 +458,69 @@ CLOSE_SOCk:
     return AT_FAILED;
 }
 
-int32_t nb_bind(const int8_t *host, const int8_t *port, int32_t proto)
+int32_t NbBind(const int8_t *host, const int8_t *port, int32_t proto)
 {
-    int ret = 0;
-    int portnum;
+    int id = 0;
+    int portNum;
 
     (void)host;
     (void)proto;
-    portnum = chartoint((char *)port);
+    portNum = CharToInt((char *)port);
 
-    if (nb_create_sock_link(portnum, &ret) != AT_OK) {
+    if (NbCreateSockLink(portNum, &id) != AT_OK) {
         return AT_FAILED;
     }
 
-    sockinfo[ret].localport = *(unsigned short *)portnum;
+    sockInfo[id].localPort = *(unsigned short *)portNum;
 
     return AT_OK;
 }
 
-int32_t nb_connect(const int8_t *host, const int8_t *port, int32_t proto)
+int32_t NbConnect(const int8_t *host, const int8_t *port, int32_t proto)
 {
-    int ret = 0;
-    static uint16_t localport = NB_STAT_LOCALPORT;
+    int id = 0;
+    static uint16_t localPort = NB_STAT_LOCALPORT;
     const int COAP_SEVER_PORT = 5683;
 
-    if (nb_create_sock_link(localport, &ret) != AT_OK) {
+    if (NbCreateSockLink(localPort, &id) != AT_OK) {
         return AT_FAILED;
     }
 
-    localport++;
-    if (localport == COAP_SEVER_PORT || localport == (COAP_SEVER_PORT + 1)) {
-        localport = 5685;
+    localPort++;
+    if (localPort == COAP_SEVER_PORT || localPort == (COAP_SEVER_PORT + 1)) {
+        localPort = 5685;
     }
 
-    strncpy(sockinfo[ret].remoteip, (const char *)host, sizeof(sockinfo[ret].remoteip));
-    sockinfo[ret].remoteip[sizeof(sockinfo[ret].remoteip) - 1] = '\0';
-    sockinfo[ret].remoteport = chartoint((char *)port);
+    strncpy(sockInfo[id].remoteIp, (const char *)host, sizeof(sockInfo[id].remoteIp));
+    sockInfo[id].remoteIp[sizeof(sockInfo[id].remoteIp) - 1] = '\0';
+    sockInfo[id].remotePort = CharToInt((char *)port);
 
-    AT_LOG("ret:%d remoteip:%s port:%d", ret, sockinfo[ret].remoteip, sockinfo[ret].remoteport);
+    AT_LOG("id:%d remoteIp:%s port:%d", id, sockInfo[id].remoteIp, sockInfo[id].remotePort);
 
-    return ret;
+    return id;
 }
 
-int32_t nb_sendto(int32_t id, const uint8_t *buf, uint32_t len, char *ipaddr, int port)
+int32_t NbSendto(int32_t id, const uint8_t *buf, uint32_t len, char *ipaddr, int port)
 {
     char *cmd = "AT+NSOST=";
-    int data_len = len / 2;
-    int cmd_len;
+    int dataLen = len / 2;
+    int cmdLen;
 
-    if ((buf == NULL) || (data_len > AT_MAX_PAYLOADLEN) || (id >= MAX_SOCK_NUM)) {
+    if ((buf == NULL) || (dataLen > AT_MAX_PAYLOADLEN) || (id >= MAX_SOCK_NUM)) {
         AT_LOG("invalid args");
         return -1;
     }
 
-    AT_LOG("id:%d remoteip:%s port:%d", (int)sockinfo[id].socket, ipaddr, port);
+    AT_LOG("id:%d remoteIp:%s port:%d", (int)sockInfo[id].socket, ipaddr, port);
     memset(wbuf, 0, AT_DATA_LEN);
-    memset(tmpbuf, 0, AT_DATA_LEN);
-    str_to_hex((const char *)buf, len, tmpbuf);
+    memset(tmpbuffer, 0, AT_DATA_LEN);
+    StrToHex((const char *)buf, len, tmpbuffer);
 
-    cmd_len = snprintf(wbuf, AT_DATA_LEN, "%s%d,%s,%d,%d,%s\r", cmd, (int)sockinfo[id].socket, ipaddr, port, (int)len,
-        tmpbuf);
+    cmdLen = snprintf(wbuf, AT_DATA_LEN, "%s%d,%s,%d,%d,%s\r", cmd, (int)sockInfo[id].socket, ipaddr, port, (int)len,
+        tmpbuffer);
 
 
-    if (nb_cmd_with_2_suffix((int8_t *)wbuf, cmd_len, "OK", "ERROR", NULL, NULL) != AT_OK) {
+    if (NbCmdWithSuffixes((int8_t *)wbuf, cmdLen, "OK", "ERROR", NULL, NULL) != AT_OK) {
         return AT_FAILED;
     }
 
@@ -516,154 +528,130 @@ int32_t nb_sendto(int32_t id, const uint8_t *buf, uint32_t len, char *ipaddr, in
 }
 
 
-int32_t nb_send(int32_t id, const uint8_t *buf, uint32_t len)
+int32_t NbSend(int32_t id, const uint8_t *buf, uint32_t len)
 {
     if (id >= MAX_SOCK_NUM) {
         AT_LOG("invalid args");
         return AT_FAILED;
     }
-    return nb_sendto(id, buf, len, sockinfo[id].remoteip, (int)sockinfo[id].remoteport);
+    return NbSendto(id, buf, len, sockInfo[id].remoteIp, (int)sockInfo[id].remotePort);
 }
 
-int32_t nb_recv(int32_t id, uint8_t *buf, uint32_t len)
+int32_t NbRecv(int32_t id, uint8_t *buf, uint32_t len)
 {
-    return nb_recv_timeout(id, buf, len, NULL, NULL, LOS_WAIT_FOREVER);
+    return NbRecvTimeout(id, buf, len, NULL, NULL, LOS_WAIT_FOREVER);
 }
 
-int32_t nb_recvfrom(int32_t id, uint8_t *buf, uint32_t len, char *ipaddr, int *port)
+int32_t NbRecvFrom(int32_t id, uint8_t *buf, uint32_t len, char *ipaddr, int *port)
 {
-    return nb_recv_timeout(id, buf, len, ipaddr, port, LOS_WAIT_FOREVER);
+    return NbRecvTimeout(id, buf, len, ipaddr, port, LOS_WAIT_FOREVER);
 }
 
-int32_t nb_recv_timeout(int32_t id, uint8_t *buf, uint32_t len, char *ipaddr, int *port, int32_t timeout)
+int32_t NbRecvTimeout(int32_t id, uint8_t *buf, uint32_t len, char *ipaddr, int *port, int32_t timeout)
 {
-    int rlen = 0;
-    int ret;
-    QUEUE_BUFF qbuf;
-    UINT32 qlen = sizeof(QUEUE_BUFF);
+    (void)ipaddr; // gprs not need remote ip
+    (void)port;   // gprs not need remote port
 
-    if (id >= MAX_SOCK_NUM) {
+    uint32_t ret;
+    uint32_t totalSize;
+    uint32_t readBytes;
+    uint32_t remainBytes;
+
+    if (id > AT_MAX_LINK_NUM) {
+        return 0;
+    }
+    AtTaskHandle *at = AtGetTaskHandle();
+    ret = at->sem.pend(at->linkedId[id].payload.recvSem, timeout);
+    if (ret != LOS_OK) {
+        AT_LOG("%s, sempend timeout, time=%d\n", __func__, timeout);
+        return 0;
+    }
+    if (at->linkedId[id].payload.offset < 0) {
+        at->linkedId[id].payload.offset = 0;
+    }
+    totalSize = at->linkedId[id].payload.totalSize;
+    
+    if (totalSize <= at->linkedId[id].payload.offset) { /* nothing to read */
+        return 0;
+    }
+
+    remainBytes = totalSize - at->linkedId[id].payload.offset;
+    readBytes = (remainBytes < len ? remainBytes : len);
+
+    memcpy(buf, at->linkedId[id].payload.buff + at->linkedId[id].payload.offset, readBytes);
+    at->linkedId[id].payload.offset += readBytes;
+    at->sem.post(at->linkedId[id].payload.recvSem); // 
+
+    return readBytes;
+}
+
+
+int32_t NbClose(int32_t id)
+{
+    if ((id >= MAX_SOCK_NUM) || (!sockInfo[id].usedFlag)) {
         AT_LOG("link id %ld invalid", id);
         return AT_FAILED;
     }
 
-    ret = LOS_QueueReadCopy(at.linkid[id].qid, &qbuf, &qlen, timeout);
-    if (ret != LOS_OK) {
-        return AT_TIMEOUT;
-    }
-
-    if ((sockinfo[id].remoteip[0] == '\0') || (sockinfo[id].remoteport == 0)) {
-        AT_LOG("update ip and port for link %ld", id);
-        strncpy(sockinfo[id].remoteip, qbuf.ipaddr, sizeof(sockinfo[id].remoteip));
-        sockinfo[id].remoteip[sizeof(sockinfo[id].remoteip) - 1] = '\0';
-        sockinfo[id].remoteport = qbuf.port;
-    }
-
-    if (ipaddr != NULL) {
-        memcpy(ipaddr, qbuf.ipaddr, strlen(qbuf.ipaddr));
-        *port = qbuf.port;
-    }
-
-    rlen = MIN(qbuf.len, len);
-
-    if (rlen) {
-        memcpy(buf, qbuf.addr, rlen);
-        at_free(qbuf.addr);
-    }
-    return rlen;
-}
-
-
-int32_t nb_close(int32_t id)
-{
-    int ret;
-
-    if ((id >= MAX_SOCK_NUM) || (!sockinfo[id].used_flag)) {
-        AT_LOG("link id %ld invalid", id);
-        return AT_FAILED;
-    }
-
-    nb_close_sock(sockinfo[id].socket);
-
-    do {
-        QUEUE_BUFF qbuf = {0};
-        UINT32 qlen = sizeof(QUEUE_BUFF);
-        ret = LOS_QueueReadCopy(at.linkid[id].qid, &qbuf, &qlen, 0);
-        if ((ret == LOS_OK) && (qbuf.addr != NULL)) {
-            at_free(qbuf.addr);
-        }
-    } while (ret == LOS_OK);
-    ret = LOS_QueueDelete(at.linkid[id].qid);
-    if (ret != LOS_OK) {
-        AT_LOG("LOS_QueueDelete failed, ret is %d!,qid %d", ret, at.linkid[id].qid);
-    }
-    (void)memset(&sockinfo[id], 0, sizeof(sockinfo[id]));
+    nb_close_sock(sockInfo[id].socket);
+  
+    (void)memset(&sockInfo[id], 0, sizeof(sockInfo[id]));
 
     return AT_OK;
 }
 
-int32_t nb_recv_cb(int32_t id)
+int32_t NbRecvCb(int32_t id)
 {
     return AT_FAILED;
 }
 
-static int32_t nb_init(void)
+static int32_t NbInit(void)
 {
-    at_config at_user_conf = {
+    AtConfig atDeviceConf = {
         .name = AT_MODU_NAME,
-        .usart_port = AT_USART_PORT,
+        .usartPort = AT_USART_PORT,
         .buardrate = AT_BUARDRATE,
-        .linkid_num = AT_MAX_LINK_NUM,
-        .user_buf_len = MAX_AT_USERDATA_LEN,
-        .cmd_begin = AT_CMD_BEGIN,
-        .line_end = AT_LINE_END,
-        .mux_mode = 1,             // support multi connection mode
+        .maxLinkIdNum = AT_MAX_LINK_NUM,
+        .maxBufferLen = MAX_AT_USERDATA_LEN,
+        .cmdBeginStr = AT_CMD_BEGIN,
+        .lineEndStr = AT_LINE_END,
+        .multiMode = 1,             // support multi connection mode
         .timeout = AT_CMD_TIMEOUT, // ms
     };
-
-    at_set_config(&at_user_conf);
-    memset(&sockinfo, 0, sizeof(sockinfo));
-    memset(&g_data_ind_info, 0, sizeof(g_data_ind_info));
-    at_reg_step_callback(&at, nb_step);
+    AtTaskHandle *at = AtGetTaskHandle();
+    at->config.set(&atDeviceConf);
+    memset(&sockInfo, 0, sizeof(sockInfo));
+    memset(&g_nbDataInfo, 0, sizeof(g_nbDataInfo));
+    AtRegStepCallback(at, NbStep);
 
     return AT_OK;
 }
 
-int32_t nb_deinit(void)
+int32_t NbDeinit(void)
 {
     for (int i = 0; i < MAX_SOCK_NUM; ++i) {
-        if (sockinfo[i].used_flag) {
-            nb_close(i);
+        if (sockInfo[i].usedFlag) {
+            NbClose(i);
         }
     }
-    return nb_reboot();
+    return NbReboot();
 }
 
-at_adaptor_api bc95_interface = {
-    .init = nb_init,
-    .bind = nb_bind,
-    .connect = nb_connect,
-    .send = nb_send,
-    .sendto = nb_sendto,
-    .recv_timeout = nb_recv_timeout,
-    .recv = nb_recv,
-    .recvfrom = nb_recvfrom,
-    .close = nb_close,
-    .recv_cb = nb_recv_cb,
-    .deinit = nb_deinit,
-};
+static int32_t BC95GetLocalMaxFd(void) {
+    return AT_MAX_LINK_NUM;
+}
 
-void nb_reattach(void)
+void NbReattach(void)
 {
-    (void)nb_cmd_with_2_suffix((int8_t *)CGATT, strlen(CGATT), "OK", "ERROR", NULL, NULL);
-    (void)nb_cmd_with_2_suffix((int8_t *)CGATT_DEATTACH, strlen(CGATT_DEATTACH), "OK", "ERROR", NULL, NULL);
+    (void)NbCmdWithSuffixes((int8_t *)CGATT, strlen(CGATT), "OK", "ERROR", NULL, NULL);
+    (void)NbCmdWithSuffixes((int8_t *)CGATT_DEATTACH, strlen(CGATT_DEATTACH), "OK", "ERROR", NULL, NULL);
     LOS_TaskDelay(1000);
-    (void)nb_cmd_with_2_suffix((int8_t *)CGATT_ATTACH, strlen(CGATT_ATTACH), "OK", "ERROR", NULL, NULL);
+    (void)NbCmdWithSuffixes((int8_t *)CGATT_ATTACH, strlen(CGATT_ATTACH), "OK", "ERROR", NULL, NULL);
 }
 
-static int nb_cmd_rcv_data(int sockid, int readleft);
+static int NbCmdRecvData(int sockid, int readLeft);
 
-static int32_t nb_handle_sock_data(const int8_t *data, uint32_t len)
+static int32_t NbHandleSockData(const int8_t *data, uint32_t len)
 {
     (void)len;
     char *curr = (char *)data;
@@ -673,7 +661,7 @@ static int32_t nb_handle_sock_data(const int8_t *data, uint32_t len)
     }
 
     do {
-        int readleft;
+        int readLeft;
         int sockid;
 
         char *next = strstr(curr, "\r\n");
@@ -686,7 +674,7 @@ static int32_t nb_handle_sock_data(const int8_t *data, uint32_t len)
             next += 2;
         }
 
-        if (nb_decompose_str(curr, &readleft, &sockid) == AT_OK) {
+        if (NbDecomposeStr(curr, &readLeft, &sockid) == AT_OK) {
             return AT_OK;
         }
         curr = next;
@@ -695,23 +683,23 @@ static int32_t nb_handle_sock_data(const int8_t *data, uint32_t len)
     return AT_FAILED;
 }
 
-static int nb_cmd_rcv_data(int sockid, int readleft)
+static int NbCmdRecvData(int sockid, int readLeft)
 {
     int cmdlen;
     char cmdbuf[40];
     const char *cmd = "AT+NSORF=";
     const uint32_t timeout = 10;
 
-    cmdlen = snprintf(cmdbuf, sizeof(cmdbuf), "%s%d,%d\r", cmd, sockid, readleft);
-    return at_cmd_in_callback((int8_t *)cmdbuf, cmdlen, nb_handle_sock_data, timeout);
+    cmdlen = snprintf(cmdbuf, sizeof(cmdbuf), "%s%d,%d\r", cmd, sockid, readLeft);
+    return AtCmdInCallback((int8_t *)cmdbuf, cmdlen, NbHandleSockData, timeout);
 }
 
-static int32_t nb_handle_data_ind(const char *buf)
+static int32_t NbHandleData(const char *buf)
 {
     int32_t sockid;
-    int32_t data_len;
+    int32_t dataLen;
     const char *p1, *p2;
-    int link_idx;
+    int linkIndex;
 
     p2 = strstr(buf, AT_DATAF_PREFIX);
     if (p2 == NULL) {
@@ -723,48 +711,62 @@ static int32_t nb_handle_data_ind(const char *buf)
     if (p1 == NULL) {
         return AT_FAILED;
     }
-    sockid = chartoint(p2);
-    data_len = chartoint(p1 + 1);
-    link_idx = nb_sock_to_idx(sockid);
-    if (link_idx >= MAX_SOCK_NUM) {
+    sockid = CharToInt(p2);
+    dataLen = CharToInt(p1 + 1);
+    linkIndex = NbSockToIndex(sockid);
+    if (linkIndex >= MAX_SOCK_NUM) {
         AT_LOG("invalid sock id %ld", sockid);
         return AT_OK;
     }
 
-    if (nb_cmd_rcv_data(sockid, data_len) != AT_OK) {
-        g_data_ind_info.data_len = (uint32_t)data_len;
-        g_data_ind_info.link_idx = link_idx;
-        g_data_ind_info.valid_flag = true;
+    if (NbCmdRecvData(sockid, dataLen) != AT_OK) {
+        g_nbDataInfo.dataLen = (uint32_t)dataLen;
+        g_nbDataInfo.linkIndex = linkIndex;
+        g_nbDataInfo.validFlag = true;
     } else {
-        g_data_ind_info.valid_flag = false;
+        g_nbDataInfo.validFlag = false;
     }
 
     return AT_OK;
 }
 
-int32_t nb_cmd_match(const char *buf, char *featurestr, int len)
+int32_t NbCmdMatch(const char *buf, char *featureStr, int len)
 {
     if (buf == NULL) {
         return AT_FAILED;
     }
 
-    nb_handle_data_ind(buf);
+    NbHandleData(buf);
 
     return AT_FAILED;
 }
 
-void nb_step(void)
+void NbStep(void)
 {
-    if ((!g_data_ind_info.valid_flag) || (!sockinfo[g_data_ind_info.link_idx].used_flag)) {
+    if ((!g_nbDataInfo.validFlag) || (!sockInfo[g_nbDataInfo.linkIndex].usedFlag)) {
         return;
     }
 
-    if (nb_cmd_rcv_data(sockinfo[g_data_ind_info.link_idx].socket, g_data_ind_info.data_len) == AT_OK) {
-        g_data_ind_info.valid_flag = false;
+    if (NbCmdRecvData(sockInfo[g_nbDataInfo.linkIndex].socket, g_nbDataInfo.dataLen) == AT_OK) {
+        g_nbDataInfo.validFlag = false;
     }
 }
 
-void Bc95Register(void)
+AtAdaptorApi AtGetBC95Interface(void)
 {
-    at_api_register(&bc95_interface);
+    AtAdaptorApi bc95Interface = {
+        .init = NbInit,
+        .bind = NbBind,
+        .connect = NbConnect,
+        .getLocalMaxFd = BC95GetLocalMaxFd,
+        .send = NbSend,
+        .sendto = NbSendto,
+        .recvTimeout = NbRecvTimeout,
+        .recv = NbRecv,
+        .recvFrom = NbRecvFrom,
+        .close = NbClose,
+        .recvCallback = NbRecvCb,
+        .deInit = NbDeinit,
+    };
+    return bc95Interface;
 }

@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: NB API HeadFile
+ * Description: AT Register
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,72 +26,47 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-/**@defgroup nbiot
- * @ingroup nbiot
- */
+#include "stdio.h"
+#include "stdint.h"
+#include "los_typedef.h"
+#include "at_api.h"
+#include "securec.h"
 
-#ifndef _NB_IOT_H
-#define _NB_IOT_H
-#include "at_main.h"
+#ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
+#include "esp8266.h"
+#endif /* LOSCFG_COMPONENTS_NET_AT_ESP8266 */
 
-typedef struct sec_param {
-char *psk;
-char *pskid;
-uint8_t setpsk;
-} sec_param_s;
+#ifdef LOSCFG_COMPONENTS_NET_AT_BG36
+#include "bg36.h"
+#endif /* LOSCFG_COMPONENTS_NET_AT_BG36 */
 
-extern at_task at;
+#ifdef LOSCFG_COMPONENTS_NET_AT_SIM900A
+#include "sim900a.h"
+#endif /* LOSCFG_COMPONENTS_NET_AT_SIM900A */
 
-/*
-Func Name: los_nb_init
+#ifdef LOSCFG_COMPONENTS_NET_AT_BC95
+#include "bc95.h"
+#endif /* LOSCFG_COMPONENTS_NET_AT_BC95 */
 
-@par Description
-    This API is used to init nb module and connect to cloud.
-@param[in]  host  cloud ip
-@param[in]  port  cloud port
-@param[in]  psk   if not null,the security param
-@par Return value
-*  0:on success
-*  negative value: on failure
-*/
-int los_nb_init(const int8_t *host, const int8_t *port, sec_param_s *psk);
-/*
-Func Name: los_nb_report
+static AtAdaptorApi g_atApi;
 
-@par Description
-    This API is used for nb module to report data to cloud.
-@param[in] buf point to data to be reported
-@param[in] buflen data length
-@par Return value
-*  0:on success
-*  negative value: on failure
-*/
-int los_nb_report(const char *buf, int buflen);
-/*
-Func Name: los_nb_notify
+void AT_DeviceRegister(void)
+{
+    AtTaskHandleInit();
+    (void)memset_s(&g_atApi, sizeof(AtAdaptorApi), 0, sizeof(AtAdaptorApi));
+#ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_ESP8266============================\n");
+    g_atApi = AtGetEsp8266Interface();
+#elif defined LOSCFG_COMPONENTS_NET_AT_BG36
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BG36============================\n");
+    g_atApi = AtGetEmtcBg36Interface();
+#elif defined LOSCFG_COMPONENTS_NET_AT_SIM900A
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_SIM900A============================\n");
+    g_atApi = AtGetSim900aInterface();
+#elif defined LOSCFG_COMPONENTS_NET_AT_BC95
+    printf("\r\n=============agent_tiny_entry  LOSCFG_COMPONENTS_NET_AT_BC95============================\n");
+    g_atApi = AtGetBC95Interface();
+#endif
+    AtApiRegister(&g_atApi);
+}
 
-@par Description
-    This API is used to regist callback when receive the cmd from cloud.
-@param[in] featurestr feature string that in cmd
-@param[in] cmdlen length of feature string
-@param[in] callback callback of device
-@par Return value
-*  0:on success
-*  negative value: on failure
-*/
-
-int los_nb_notify(char *featurestr, int cmdlen, oob_callback callback, oob_cmd_match cmd_match);
-/*
-Func Name: los_nb_deinit
-
-@par Description
-    This API is used to deinit the nb module.
-@param[in] NULL
-@par Return value
-*  0:on success
-*  negative value: on failure
-*/
-
-int los_nb_deinit(void);
-
-#endif /* _NB_IOT_H */
