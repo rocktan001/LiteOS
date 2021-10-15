@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "fs_common.h"
-#include "fs/los_ramfs.h"
+#include "los_ramfs.h"
 
 #define DEMO_BUF_LEN      128
 
@@ -68,7 +68,7 @@ void RamfsDemo(void)
 
     ret = read_dir("/ramfs/dir", testDir);
     if (ret != LOS_OK) {
-        FS_LOG_ERR("Read dir /ramfs/dir failed.");
+        FS_LOG_ERR("no other files in /ramfs/dir.");
         return;
     }
 

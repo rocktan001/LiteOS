@@ -30,16 +30,16 @@
 #define _FS_INIT_H
 
 #ifdef LOSCFG_COMPONENTS_FS_SPIFFS
-#include "fs/los_spiffs.h"
+#include "los_spiffs.h"
 #endif
 #ifdef LOSCFG_COMPONENTS_FS_FATFS
-#include "fs/los_fatfs.h"
+#include "los_fatfs.h"
 #endif
 #ifdef LOSCFG_COMPONENTS_FS_LITTLEFS
-#include "fs/los_littlefs.h"
+#include "los_littlefs.h"
 #endif
 #ifdef LOSCFG_COMPONENTS_FS_RAMFS
-#include "fs/los_ramfs.h"
+#include "los_ramfs.h"
 
 #define RAMFS_PATH "/ramfs"
 #define RAMFS_SIZE (2 * 1024)

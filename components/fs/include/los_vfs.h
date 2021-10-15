@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Virtual Fs HeadFile
  * Author: Huawei LiteOS Team
@@ -29,6 +29,7 @@
 #ifndef _LOS_VFS_H
 #define _LOS_VFS_H
 
+#if defined(LOSCFG_COMPONENTS_FS_VFS)
 #include <stdio.h>
 #include <stdint.h>
 #include <los_typedef.h>
@@ -150,4 +151,5 @@ int LOS_FsUnmount(const char *path);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif /* LOSCFG_COMPONENTS_FS_VFS */
+#endif /* _LOS_VFS_H */

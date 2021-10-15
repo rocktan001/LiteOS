@@ -27,7 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "fs_common.h"
-#include "fs/los_littlefs.h"
+#include "los_littlefs.h"
 
 #ifdef __cplusplus
 #if __cplusplus

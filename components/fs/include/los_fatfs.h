@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Fat Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -30,7 +30,7 @@
 #ifndef _LOS_FATFS_H
 #define _LOS_FATFS_H
 
-
+#if defined(LOSCFG_COMPONENTS_FS_FATFS)
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -42,7 +42,9 @@ extern "C" {
 #include "diskio.h"
 #include <stdint.h>
 /* Defines ------------------------------------------------------------------ */
-#define DISK_STATE_INITIALIZED 1
+// #define DISK_STATE_INITIALIZED 1
+// typedef unsigned char DSTATUS;
+#define FF_VOLUMES 1
 /* Macros ------------------------------------------------------------------- */
 /* Typedefs ----------------------------------------------------------------- */
 struct diskio_drv {
@@ -78,5 +80,5 @@ int FatfsUnmount(const char *path, uint8_t drive);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-
+#endif /* LOSCFG_COMPONENTS_FS_FATFS */
 #endif /* _LOS_FATFS_H */

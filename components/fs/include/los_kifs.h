@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Little Fs HeadFile
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: Ki Fs HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-01-07
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,27 +26,29 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_LITTLEFS_H
-#define _LOS_LITTLEFS_H
+#ifndef _LOS_KIFS_H
+#define _LOS_KIFS_H
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+#if defined(LOSCFG_COMPONENTS_FS_KIFS)
+#include <los_vfs.h>
 
-#include "lfs.h"
-#include <stdint.h>
+#define KIFS_ATTR_R (1 << 0)
+#define KIFS_ATTR_W (1 << 1)
+#define KIFS_ATTR_D (1 << 2)
+#define KIFS_ATTR_B (1 << 3)
 
-void LittlefsDriverInit(int needErase);
-int LittlefsInit(int needErase, const struct lfs_config *lfsConfig);
-int LittlefsMount(const char *path, const struct lfs_config *lfsConfig);
-int LittlefsUnmount(const char *path);
+struct kifs_ops {
+    int     (*open)(void *, int);
+    int     (*close)(void *);
+    ssize_t (*read)(void *, char *, size_t);
+    ssize_t (*write)(void *, const char *, size_t);
+    int     (*ioctl)(void *, int, unsigned long);
+};
 
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+extern int los_kifs_init(void);
+extern int los_kifs_create(void *root, const char *path_in_mp, uint32_t flags, struct kifs_ops *kiops, void *arg);
+extern int los_kifs_link(void *root, const char *path_in_mp, uint32_t flags, void *buff, size_t size);
+extern void *los_kifs_mount(const char *path);
 
-#endif /* _LOS_LITTLEFS_H */
+#endif /* LOSCFG_COMPONENTS_FS_LITTLEFS */
+#endif /* _LOS_KIFS_H */

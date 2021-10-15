@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Ram Fs HeadFile
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
+ * Description: Dev Fs HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,24 +26,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_RAMFS_H
-#define _LOS_RAMFS_H
+#ifndef _LOS_DEVFS_H
+#define _LOS_DEVFS_H
 
-#include <stddef.h>
+#if defined(LOSCFG_COMPONENTS_FS_DEVFS)
+#include <los_kifs.h>
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+#define DEVFS_FLAGS_R KIFS_ATTR_R
+#define DEVFS_FLAGS_W KIFS_ATTR_W
 
-int RamfsInit(void);
-int RamfsMount(const char *path, size_t blockSize);
+struct devfs_ops {
+    struct kifs_ops kiops;
+};
 
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+extern UINT32 los_devfs_init(void);
 
-#endif
+extern UINT32 los_devfs_create(const char *name, uint32_t flags, struct devfs_ops *devops, void *arg);
+
+extern UINT32 los_devfs_link(const char *path_in_mp, uint32_t flags, void *buff, size_t size);
+
+#endif /* LOSCFG_COMPONENTS_FS_DEVFS */
+#endif /* _LOS_DEVFS_H */

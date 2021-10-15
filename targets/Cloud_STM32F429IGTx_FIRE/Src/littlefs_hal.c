@@ -28,12 +28,11 @@
 
 #include <stdio.h>
 #include <string.h>
-
 #include <los_printf.h>
-
-#include "fs/los_vfs.h"
-#include "fs/los_littlefs.h"
+#include "los_vfs.h"
+#include "los_littlefs.h"
 #include "hal_spi_flash.h"
+#include "los_mux_pri.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -53,6 +52,10 @@ extern "C" {
 #define CACHE_SIZE     16
 #define LOOKAHEAD_SIZE 16
 #define BLOCK_CYCLES   500
+
+#if defined(LFS_THREADSAFE)
+static uint32_t g_lfsMutex;
+#endif /* LFS_THREADSAFE */
 
 static int LittlefsRead(const struct lfs_config *cfg, lfs_block_t block,
                         lfs_off_t off, void *buffer, lfs_size_t size)
@@ -86,6 +89,22 @@ static int LittlefsSync(const struct lfs_config *cfg)
     return LFS_ERR_OK;
 }
 
+#if defined(LFS_THREADSAFE)
+static int LittlefsLock(const struct lfs_config *conf)
+{
+    (void)conf;
+    (void)LOS_MuxPend(g_lfsMutex, LOS_WAIT_FOREVER);
+    return LFS_ERR_OK;
+}
+
+static int LittlefsUnlock(const struct lfs_config *conf)
+{
+    (void)conf;
+    (void)LOS_MuxPost(g_lfsMutex);
+    return LFS_ERR_OK;
+}
+#endif /* LFS_THREADSAFE */
+
 static struct lfs_config g_lfsConfig = {
     // block device operations
     .context = NULL,
@@ -93,7 +112,10 @@ static struct lfs_config g_lfsConfig = {
     .prog  = LittlefsProg,
     .erase = LittlefsErase,
     .sync  = LittlefsSync,
-
+#if defined(LFS_THREADSAFE)
+    .lock = LittlefsLock,
+    .unlock = LittlefsUnlock,
+#endif /* LFS_THREADSAFE */
     // block device configuration
     .read_size = READ_SIZE,
     .prog_size = PROG_SIZE,
@@ -114,6 +136,9 @@ void LittlefsDriverInit(int needErase)
 
 struct lfs_config* LittlefsConfigGet(void)
 {
+#if defined(LFS_THREADSAFE)
+    (void)LOS_MuxCreate(&g_lfsMutex);
+#endif /* LFS_THREADSAFE */
     return &g_lfsConfig;
 }
 

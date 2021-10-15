@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Spi Flash Fs HeadFile
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Little Fs HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-01-07
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,11 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _LOS_SPIFFS_H
-#define _LOS_SPIFFS_H
+#ifndef _LOS_LITTLEFS_H
+#define _LOS_LITTLEFS_H
 
-#include <spiffs_config.h>
-#include <spiffs.h>
+#if defined(LOSCFG_COMPONENTS_FS_LITTLEFS)
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -38,21 +37,13 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-struct spiffs_drv_t {
-    void (*SpiDriverInit)(int);
-    s32_t (*SpiRead)(struct spiffs_t *, u32_t, u32_t, u8_t *);
-    s32_t (*SpiWrite)(struct spiffs_t *, u32_t, u32_t, u8_t *);
-    s32_t (*SpiErase)(struct spiffs_t *, u32_t, u32_t);
-    u32_t physAddr;
-    u32_t physSize;
-    u32_t phyEraseBlock;
-    u32_t logBlockSize;
-    u32_t logPageSize;
-};
+#include "lfs.h"
+#include <stdint.h>
 
-int SpiffsInit(int needErase, struct spiffs_drv_t *spiffsDriver);
-int SpiffsMount(const char *path, struct spiffs_drv_t *spiffsDrv);
-int SpiffsUnmount(const char *path);
+void LittlefsDriverInit(int needErase);
+int LittlefsInit(int needErase, const struct lfs_config *lfsConfig);
+int LittlefsMount(const char *path, const struct lfs_config *lfsConfig);
+int LittlefsUnmount(const char *path);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -60,5 +51,5 @@ int SpiffsUnmount(const char *path);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
-
+#endif /* LOSCFG_COMPONENTS_FS_LITTLEFS */
+#endif /* _LOS_LITTLEFS_H */

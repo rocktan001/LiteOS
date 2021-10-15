@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Fat Fs Demo
  * Author: Huawei LiteOS Team
@@ -28,7 +28,7 @@
 
 /* Includes ----------------------------------------------------------------- */
 #include "fs_common.h"
-#include "fs/los_fatfs.h"
+#include "los_fatfs.h"
 
 #define FATFS_PATH "/fatfs"
 #define NAME_LEN   100

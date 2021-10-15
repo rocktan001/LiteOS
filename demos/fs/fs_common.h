@@ -32,8 +32,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "los_task.h"
-
-#include "fs/los_vfs.h"
+#include "los_vfs.h"
 
 #ifdef __cplusplus
 #if __cplusplus

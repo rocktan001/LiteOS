@@ -41,6 +41,7 @@
 #endif
 
 #include "los_vfs.h"
+#include "los_ramfs.h"
 #include "los_base.h"
 
 #define RAMFS_TYPE_DIR VFS_TYPE_DIR
