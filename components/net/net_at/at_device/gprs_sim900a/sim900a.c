@@ -141,7 +141,7 @@ int32_t Sim900aRecvTimeout(int32_t id, uint8_t *buf, uint32_t len, char *ipaddr,
 
     memcpy(buf, at->linkedId[id].payload.buff + at->linkedId[id].payload.offset, readBytes);
     at->linkedId[id].payload.offset += readBytes;
-    at->sem.post(at->linkedId[id].payload.recvSem); // 
+    at->sem.post(at->linkedId[id].payload.recvSem);
 
     return readBytes;
 }

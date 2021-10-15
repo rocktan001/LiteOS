@@ -64,7 +64,7 @@ int los_nb_init(const int8_t *host, const int8_t *port, SecureParam *psk)
 
     while (1) {
         ret = NbHwDetect();
-        printf("call NbHwDetect,ret is %d\n", ret);
+        printf("call NbHwDetect, ret is %d\n", ret);
         if (ret == AT_OK) {
             break;
         }

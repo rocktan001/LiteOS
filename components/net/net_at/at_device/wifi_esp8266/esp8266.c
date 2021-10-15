@@ -149,7 +149,7 @@ static int32_t Esp8266RecvTimeout(int32_t id, uint8_t *buf, uint32_t len, char *
 
     memcpy(buf, at->linkedId[id].payload.buff + at->linkedId[id].payload.offset, read_bytes);
     at->linkedId[id].payload.offset += read_bytes;
-    at->sem.post(at->linkedId[id].payload.recvSem); // In order to copy the remaining data next time.
+    at->sem.post(at->linkedId[id].payload.recvSem); // in order to copy the remaining data next time.
     return read_bytes;
 }
 
@@ -213,7 +213,7 @@ static int32_t Esp8266DataHandler(void *arg, int8_t *buf, int32_t len)
         }
         
         if (at->config.dinfo == 1) {
-            // remote ip:str
+            // remote ip
             remoteIP = (char *)at->linkedId[linkedId].remoteIP;
             for (p2++; *p2 != ','; p2++) {
                 *(remoteIP++) = *p2;
@@ -227,7 +227,6 @@ static int32_t Esp8266DataHandler(void *arg, int8_t *buf, int32_t len)
         }
         p2++; // over ':'
 
-        // ??payload ? ???,? recv???
         if (at->linkedId[linkedId].payload.buff != NULL) {
             AtFree(at->linkedId[linkedId].payload.buff);
         }
@@ -354,7 +353,6 @@ static int32_t Esp8266ShowDinfo(int32_t s)
 
 static char *Esp8266SendCmdMatch(const char *buf, char *featureStr, int len)
 {
-    //printf("%s, match cmd=%s\n", __func__, featureStr);
     (void) len;
     if(buf == NULL || featureStr == NULL) {
         return NULL;
@@ -381,9 +379,9 @@ int32_t Esp8266Init(void)
     at->init(&g_deviceConf);
     at->oobRegister(AT_DATAF_PREFIX, strlen(AT_DATAF_PREFIX), Esp8266DataHandler, Esp8266SendCmdMatch);
 
-    Esp8266Reset();     //restart esp8266.
+    Esp8266Reset();     // restart esp8266.
     Esp8266EchoOff(); // close the echo
-    Esp8266ShowDinfo(g_deviceConf.dinfo); //?? +IPD--> ip, port
+    Esp8266ShowDinfo(g_deviceConf.dinfo); // +IPD--> ip, port
 
     Esp8266SetNetMode(STA);
     while (Esp8266JoinAP(WIFI_SSID, WIFI_PASSWD) == AT_FAILED) {

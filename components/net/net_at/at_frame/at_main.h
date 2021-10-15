@@ -79,7 +79,6 @@ static inline void __do_nothing(const char *fmt, ...) { (void)fmt; }
 /* TYPE REDEFINE */
 typedef int32_t (*OobCallback)(void *arg, int8_t *buf, int32_t buflen);
 
-// typedef int32_t (*OobCmdMatch)(const char *buf, char *featureStr, int len);
 typedef char *(*OobCmdMatch)(const char *buf, char *featureStr, int len);
 
 #define MAXIPLEN  40
@@ -91,21 +90,21 @@ typedef struct {
 } QueueBuffer;
 
 typedef struct {
-    uint32_t recvSem; /* waiting to read net payload */
-    uint32_t totalSize; /* net recv size */
-    uint32_t offset; /* current read position */
-    UINT32 lastEnd; 
-    uint8_t *buff; /* net pyaload, (malloc(size)) */
+    uint32_t recvSem; // waiting to read net payload
+    uint32_t totalSize; // net recv size
+    uint32_t offset; // current read position
+    uint32_t lastEnd; 
+    uint8_t *buff; // net pyaload, (malloc(size))
 } AtNetRcvBuff;
 
 typedef struct {
-    UINT32 fd; /* convert between socket_fd and linkedId */
-    UINT32 maxFd; /* max link number of socket fd */
-    UINT32 qid; /* queue id */
-    UINT32 usable; // used or not
-    UINT8 remoteIP[16]; // server ip
-    UINT32 remotePort;  // server port
-    AtNetRcvBuff payload; /* current recv palyload */
+    uint32_t fd; // convert between socket_fd and linkedId
+    uint32_t maxFd; // max link number of socket fd
+    uint32_t qid; // queue id
+    uint32_t usable; // used or not
+    uint8_t remoteIP[16]; // server ip
+    uint32_t remotePort;  // server port
+    AtNetRcvBuff payload; // current recv palyload
 } AtNetLink;
 
 typedef struct {
@@ -155,15 +154,15 @@ typedef struct _AtConfig {
     uint32_t usartPort;
     uint32_t buardrate;
     uint32_t maxLinkIdNum;
-    uint32_t maxBufferLen; /* malloc 3 block memory for intener use, len * 3 */
+    uint32_t maxBufferLen; // malloc 3 block memory for intener use, len * 3
     char *cmdBeginStr;
     char *lineEndStr;
     uint32_t multiMode; 
 #ifdef LOSCFG_COMPONENTS_NET_AT_ESP8266
     uint32_t dinfo;
 #endif
-    uint32_t timeout; /* command respond timeout */
-    uint8_t  *userData; /* extension field */
+    uint32_t timeout; // command respond timeout
+    uint8_t  *userData; // extension field
     void (*set)(struct _AtConfig *config);
     struct _AtConfig *(*get)(void);
     void (*transmit)(uint8_t *cmd, int32_t len, int lineEndFlag); // at device data transport method.
@@ -173,7 +172,7 @@ typedef struct _AtConfig {
 /* AT semaphore interface */
 typedef struct {
     uint32_t recvSem;
-    uint32_t respSem;   /* the response semaphore of recv */
+    uint32_t respSem;   // the response semaphore of recv
     uint32_t (*create)(uint16_t count, uint32_t *semHandle);
     uint32_t (*pend)(uint32_t semHandle, uint32_t timeout);
     uint32_t (*post)(uint32_t semHandle);
@@ -182,13 +181,13 @@ typedef struct {
 
 /* AT mutex interface */
 typedef struct {
-    uint32_t cmdMux;   /* send cmd mutex */
-    uint32_t sendMux;  /* transport mutex */
-    uint32_t recvMux;  /* transport mutex */
+    uint32_t cmdMux;   // send cmd mutex
+    uint32_t sendMux;  // transport mutex
+    uint32_t recvMux;  // transport mutex
     uint32_t (*create)(uint32_t *muxHandle);
     uint32_t (*pend)(uint32_t muxHandle, uint32_t timeout);
     uint32_t (*post)(uint32_t muxHandle);
-    UINT32 (*delete)(UINT32 muxHandle);
+    uint32_t (*delete)(uint32_t muxHandle);
 } AtMutexHandle;
 
 /* AT uart recvived queue */
@@ -215,12 +214,12 @@ typedef struct at_task {
     AtListenerHandle listener;
     bool sendMuxFlag;
     AtRecvBuff recv;
-    uint8_t *cmdResp; /* AT cmd response, default 512 bytes */
-    uint8_t *userData; /* data form servers, default 512 bytes */
+    uint8_t *cmdResp; // AT cmd response, default 512 bytes
+    uint8_t *userData; // data form servers, default 512 bytes
     uint8_t *savedData;
-    uint32_t multiMode; /* support multi connection mode */
+    uint32_t multiMode; // support multi connection mode
     AtNetLink *linkedId;
-    uint32_t timeout; /* command respond timeout */
+    uint32_t timeout; // command respond timeout
     AtConfig config;
     
     /* AT Callback function */

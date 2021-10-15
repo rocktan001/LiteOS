@@ -40,8 +40,8 @@ enum {
 
 /* AT ring buff, save the received serial data */
 typedef struct {
-    uint32_t wi; //write position
-    uint32_t ri; //read postion
+    uint32_t wi; // write position
+    uint32_t ri; // read postion
     uint8_t buff_full; // write full flag
 } AtUsartRingBuffer;
 
@@ -50,7 +50,7 @@ typedef struct {
     uint32_t buardrate;
     uint32_t queueId;
     uint8_t *buffer; // recv buff;
-    uint32_t maxLen; //at frame buffer max length.
+    uint32_t maxLen; // at frame buffer max length.
 } AtUsartRecv;
 
 typedef uint32_t AtMsgType;

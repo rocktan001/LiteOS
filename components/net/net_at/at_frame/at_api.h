@@ -36,7 +36,7 @@ typedef struct {
     int32_t (*init)(void);
     int8_t (*getLocalMac)(int8_t *mac);
     int8_t (*getLocalIp)(int8_t *ip, int8_t *gw, int8_t *mask);
-    int32_t (*getLocalMaxFd)(void); //get max socket fd.
+    int32_t (*getLocalMaxFd)(void); // get max socket fd.
     int32_t (*bind)(const int8_t *host, const int8_t *port, int32_t proto);
     int32_t (*connect)(const int8_t *host, const int8_t *port, int32_t proto);
     int32_t (*send)(int32_t id, const uint8_t *buf, uint32_t len);

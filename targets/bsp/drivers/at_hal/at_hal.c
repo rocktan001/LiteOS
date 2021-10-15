@@ -36,7 +36,7 @@
 UART_HandleTypeDef g_usartHandle;
 
 static USART_TypeDef *g_atUsartId = USART2; //default set
-static uint32_t g_atIRQn = USART2_IRQn; //default set
+static uint32_t g_atIRQn = USART2_IRQn; // default set
 static AtUsartRecv g_atUsartRecv;
 static AtUsartRingBuffer ringBuffer;
 

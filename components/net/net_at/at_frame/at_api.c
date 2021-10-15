@@ -106,13 +106,10 @@ int32_t AtApiRecvTimeout(int32_t id, uint8_t *buf, uint32_t len, char *ipaddr, i
 
 int32_t AtApiRecvClose(int32_t fd)
 {
-    printf("%d %s\n", __LINE__, __func__);
     if (fd < g_atApi->getLocalMaxFd()) {
         if (g_atApi && g_atApi->close) {
-            printf("%d %s\n", __LINE__, __func__);
             return g_atApi->close(fd);
         }
     }
-    printf("%d %s\n", __LINE__, __func__);
     return -1;
 }

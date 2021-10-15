@@ -500,7 +500,6 @@ static int32_t AtTaskInit(AtTaskHandle *at)
         AT_LOG("invaild param!");
         return ret;
     }
-    printf("%s\n", __func__);
     /* init uart received queue */
     ret = at->queue.create("recvQueue", 32, (UINT32 *)at->queue.queueRecvId, 0, sizeof(AtRecvQueue));
     if (ret != LOS_OK) {
@@ -721,7 +720,6 @@ static int32_t AtInit(AtConfig *config)
     }
 
     /* AT user config init */
- 
     if (g_at.config.set != NULL) {
         g_at.config.set(config);
     }
