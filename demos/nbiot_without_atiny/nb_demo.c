@@ -37,12 +37,11 @@
 #include "los_nb_api.h"
 #endif
 
-#define TELECON_IP          "119.3.250.80"
-#define OCEAN_IP            "139.159.140.34"
-#define SECURITY_PORT       "5684"
-#define NON_SECURITY_PORT   "5683"
-#define DEV_PSKID           "868744031131026"
-#define DEV_PSK             "d1e1be0c05ac5b8c78ce196412f0cdb0"
+#define TELECON_IP "cloud server ip" // connected cloud server ip
+#define SECURITY_PORT "security port" // connected cloud server security port
+#define NON_SECURITY_PORT "no security port" // connected cloud server no security port
+#define DEV_PSKID "device id" // cloud server device id
+#define DEV_PSK "device secret" // cloud server device secret
 
 VOID NBIoT_DemoEntry(VOID)
 {
@@ -65,7 +64,7 @@ VOID NBIoT_DemoEntry(VOID)
 #endif
     while (1) {
         los_nb_report("22", 2); // "22" is a random string, 2 is the string length
-        LOS_TaskDelay(60000);
+        LOS_TaskDelay(60000); // delay 60s
     }
     printf("NB-IoT demo task start to run.\n");
 }

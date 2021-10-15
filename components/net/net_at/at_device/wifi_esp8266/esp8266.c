@@ -250,7 +250,7 @@ int8_t Esp8266GetLocalIp(int8_t *ip, int8_t *gw, int8_t *mask)
     char resp[512] = {0};
     int len = 512;
     AtTaskHandle *at = AtGetTaskHandle();
-     at->writeCmd((int8_t *)AT_CMD_CHECK_IP, strlen((char *)AT_CMD_CHECK_IP), "OK", resp, &len);
+    at->writeCmd((int8_t *)AT_CMD_CHECK_IP, strlen((char *)AT_CMD_CHECK_IP), "OK", resp, &len);
 
     AT_LOG("resp:%s", resp);
     char *p1, *p2;
@@ -311,12 +311,9 @@ int32_t Esp8266Bind(const int8_t *host, const int8_t *port, int32_t proto)
         AT_LOG("Only support in multi mode!\r\n");
         return ret;
     }
-
     int id = at->getLinkedId();
-
     snprintf(cmd, 64, "%s=%d,\"%s\",\"0.0.0.0\",0,%d,0", AT_CMD_CONN, id, proto == ATINY_PROTO_UDP ? "UDP" : "TCP", port_i);
-
-     at->writeCmd((int8_t *)cmd, strlen(cmd), "OK\r\n", NULL, NULL);
+    at->writeCmd((int8_t *)cmd, strlen(cmd), "OK\r\n", NULL, NULL);
     return id;
 }
 
@@ -348,13 +345,13 @@ static int32_t Esp8266ShowDinfo(int32_t s)
     char cmd[64] = {0};
     snprintf(cmd, 64, "%s=%ld", AT_CMD_SHOW_DINFO, s);
     AtTaskHandle *at = AtGetTaskHandle();
-    return  at->writeCmd((int8_t *)cmd, strlen(cmd), "OK\r\n", NULL, NULL);
+    return at->writeCmd((int8_t *)cmd, strlen(cmd), "OK\r\n", NULL, NULL);
 }
 
 static char *Esp8266SendCmdMatch(const char *buf, char *featureStr, int len)
 {
     (void) len;
-    if(buf == NULL || featureStr == NULL) {
+    if (buf == NULL || featureStr == NULL) {
         return NULL;
     }
     return strstr(buf, featureStr);

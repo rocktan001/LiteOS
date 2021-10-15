@@ -33,8 +33,8 @@
 
 #define MAX_AT_USERDATA_LEN       (1024)
 
-#define WIFI_SSID                 "HWTEST"
-#define WIFI_PASSWD               ""
+#define WIFI_SSID                 "" // set ssid name
+#define WIFI_PASSWD               "" // set ssid passwd
 
 #define AT_MODU_NAME              "ESP8266"
 #define AT_USART_PORT             3
@@ -63,7 +63,7 @@ typedef enum {
     STA = 1,
     AP,
     ATA_AP,
-} enum_net_mode;
+} NetModeType;
 
 void Esp8266Register(void);
 
