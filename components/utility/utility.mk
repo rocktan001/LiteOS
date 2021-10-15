@@ -125,3 +125,8 @@ include $(LITEOSTOPDIR)/components/utility/easyflash/easyflash.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_EASYFLASH_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_LIBEVENT), y)
+include $(LITEOSTOPDIR)/components/utility/libevent/libevent.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_LIBEVENT_INCLUDE)
+endif
+
