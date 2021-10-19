@@ -73,6 +73,7 @@ UINT8 uart_getc(VOID)
 STATIC VOID UartHandler(VOID)
 {
     (VOID)uart_getc();
+    LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
 }
 
 INT32 ShellQueueCreat(VOID)

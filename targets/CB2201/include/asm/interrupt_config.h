@@ -2,7 +2,7 @@
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Interrupt Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2020-05-20
+ * Create: 2021-05-20
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,8 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _ASM_INTERRUPT_CONFIG_H
-#define _ASM_INTERRUPT_CONFIG_H
+#ifndef _INTERRUPT_CONFIG_H
+#define _INTERRUPT_CONFIG_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -44,4 +44,5 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ASM_INTERRUPT_CONFIG_H */
+#endif /* _INTERRUPT_CONFIG_H */
+

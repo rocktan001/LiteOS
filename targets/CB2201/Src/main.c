@@ -27,10 +27,6 @@
  * --------------------------------------------------------------------------- */
 
 #include "los_task_pri.h"
-#include "los_swtmr_pri.h"
-#include "los_config.h"
-#include "los_printf.h"
-#include "asm/platform.h"
 #include "soc.h"
 #include "arch/canary.h"
 
@@ -45,21 +41,12 @@ LITE_OS_SEC_TEXT_INIT void osSystemInfo(void)
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n\n"
         "LiteOS Kernel Version : %s\n"
         "Processor  : %s"
-#if (LOSCFG_KERNEL_SMP == YES)
-        " * %d\n"
-        "Run Mode   : SMP\n"
-#else
         "\n"
         "Run Mode   : UP\n"
-#endif
         "GIC Rev    : %s\n"
         "build time : %s %s\n\n"
         "**********************************\n",
-        HW_LITEOS_KERNEL_VERSION_STRING, LOS_CpuInfo(),
-#if (LOSCFG_KERNEL_SMP == YES)
-        LOSCFG_KERNEL_SMP_CORE_NUM,
-#endif
-        HalIrqVersion(), __DATE__, __TIME__);
+        HW_LITEOS_KERNEL_VERSION_STRING, LOS_CpuInfo(), HalIrqVersion(), __DATE__, __TIME__);
 }
 
 void SystemInit(void)
@@ -96,3 +83,4 @@ LITE_OS_SEC_TEXT_INIT int main(void)
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+

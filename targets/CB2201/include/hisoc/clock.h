@@ -46,3 +46,4 @@ extern "C"{
 #endif /* __cplusplus */
 
 #endif /* _CLOCK_H */
+

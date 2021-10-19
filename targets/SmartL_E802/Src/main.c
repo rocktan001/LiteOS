@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: LiteOS adaptor file.
+ * Description: Main Process Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-10-20
+ * Create: 2021-10-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,7 +26,68 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_typedef.h"
+#include "los_task_pri.h"
+#include "soc.h"
+#include "arch/canary.h"
 
-VOID OsBackTrace(VOID) {}
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#ifndef CONFIG_SYSTICK_HZ
+#define CONFIG_SYSTICK_HZ 1000
+#endif
+
+int g_system_clock = IHS_VALUE;
+
+LITE_OS_SEC_TEXT_INIT void osSystemInfo(void)
+{
+    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n\n"
+        "LiteOS Kernel Version : %s\n"
+        "Processor  : %s"
+        "\n"
+        "Run Mode   : UP\n"
+        "GIC Rev    : %s\n"
+        "build time : %s %s\n\n"
+        "**********************************\n",
+        HW_LITEOS_KERNEL_VERSION_STRING, LOS_CpuInfo(), HalIrqVersion(), __DATE__, __TIME__);
+}
+
+void SystemInit(void)
+{
+    csi_coret_config(drv_get_sys_freq() / CONFIG_SYSTICK_HZ, CORET_IRQn);
+}
+
+LITE_OS_SEC_TEXT_INIT int main(void)
+{
+#ifdef __GNUC__
+    ArchStackGuardInit();
+#endif
+    OsSetMainTask();
+    OsCurrTaskSet(OsGetMainTask());
+
+    /* system and chip info */
+    osSystemInfo();
+
+    PRINTK("\nmain core booting up...\n");
+
+    UINT32 ret = OsMain();
+    if (ret != LOS_OK) {
+        return LOS_NOK;
+    }
+
+    OsStart();
+
+    while (1) {
+        __asm volatile("wait");
+    }
+}
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 

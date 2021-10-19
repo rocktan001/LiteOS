@@ -2,7 +2,7 @@
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Platform HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-04-02
+ * Create: 2021-10-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -42,7 +42,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define OS_SYS_CLOCK              24000000
+#define OS_SYS_CLOCK              1200000000
 #define PMU_REG_BASE              (0x40002000UL)
 #define RTC_CLOCK_SEL_MASK        (0x1U << 0)
 #define PMU_CLOCK_SEL_MASK        (0x1U << 1)

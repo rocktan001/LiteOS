@@ -49,24 +49,26 @@
  * --------------------------------------------------------------------------- */
 MEMORY
 {
-  ROM (rx)    : ORIGIN = 0x0        , LENGTH = 8k     /* ROM  8KB */
-  EFLASH (rx) : ORIGIN = 0x10000800 , LENGTH = 252k   /* E-FLASH 256KB*/
-  SRAM (rwx)  : ORIGIN = 0x60000000 , LENGTH = 80k    /* on-chip SRAM 80KB */
+  I-SRAM : ORIGIN = 0x0        , LENGTH = 0x20000   /* I-SRAM  128KB */
+  D-SRAM : ORIGIN = 0x20000000 , LENGTH = 0x20000   /* D-SRAM  128KB */
+  O-SRAM : ORIGIN = 0x50000000 , LENGTH = 0x800000  /* off-chip SRAM 8MB */
+  SRAM   : ORIGIN = 0x60000000 , LENGTH = 0x20000   /* on-chip SRAM 128KB */
 }
 
 _Min_Heap_Size = 0x200;
-_Min_Stack_Size = 0x1000;
+_Min_Stack_Size = 0x400;
 
-PROVIDE (__ram_end  = ORIGIN(SRAM) + LENGTH(SRAM));
+PROVIDE (__ram_end  = ORIGIN(O-SRAM) + LENGTH(O-SRAM));
 
-REGION_ALIAS("REGION_TEXT",    EFLASH);
-REGION_ALIAS("REGION_RODATA",  EFLASH);
-REGION_ALIAS("REGION_DATA",    SRAM);
-REGION_ALIAS("REGION_BSS",     SRAM);
+REGION_ALIAS("REGION_TEXT",    O-SRAM);
+REGION_ALIAS("REGION_RODATA",  O-SRAM);
+REGION_ALIAS("REGION_DATA",    O-SRAM);
+REGION_ALIAS("REGION_BSS",     O-SRAM);
 
 ENTRY(Reset_Handler)
 SECTIONS
 {
+
   .text : {
     . = ALIGN(0x4) ;
     *reset_vector.o(.text)
@@ -103,6 +105,15 @@ SECTIONS
   .gcc_except_table : ONLY_IF_RO {
     *(.gcc_except_table .gcc_except_table.*)
   } > REGION_TEXT
+
+  /* Initialized liteos vector sections goes into RAM, load LMA copy after code */
+  .vector_ram :
+  {
+    . = ORIGIN(SRAM);
+    _s_liteos_vector = .;
+    *(.data.vector)    /* liteos vector in ram */
+    _e_liteos_vector = .;
+  } > SRAM
 
   .rodata : {
     . = ALIGN(0x4) ;
@@ -155,16 +166,12 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >REGION_RODATA
 
-  .data : {
-    . = ALIGN(0x4) ;
+  .data :
+  {
     __sdata = . ;
     __data_start__ = . ;
     __ram_data_start = __data_start__;
     data_start = . ;
-    KEEP(*startup.o(.vectors))
-    _s_liteos_vector = .;
-    *(.data.vector)    /* liteos vector in ram */
-    _e_liteos_vector = .;
     *(.got.plt)
     *(.got)
     *(.gnu.linkonce.r*)

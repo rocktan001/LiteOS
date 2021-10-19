@@ -45,6 +45,7 @@ HandleEntry:
 
     mov   r1, r15
 
+    mov    sp, r10
     lrw    r2, OsExcHandleEntry
     jmp    r2
 
