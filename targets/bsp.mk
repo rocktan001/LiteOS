@@ -337,6 +337,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_EASYFLASH), y)
         LITEOS_BASELIB += -leasyflash
     endif
+    ifeq ($(LOSCFG_COMPONENTS_LIBEVENT), y)
+        LITEOS_BASELIB += -llibevent
+    endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
     endif
@@ -477,6 +480,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_TINYFRAME), y)
         LITEOS_BASELIB += -ltinyframe_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_LIBEVENT), y)
+        LITEOS_BASELIB += -llibevent_demo
     endif
 endif
 
