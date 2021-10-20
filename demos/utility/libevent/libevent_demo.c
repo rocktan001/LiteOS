@@ -42,18 +42,16 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-
+#define PORT                       23232
+#define LISTEN                     5
+#define EVENT_SIZE                 1024
+#define BUFFER_LEN                 50
 #define LIBEVENT_TASK_PRIORITY     3
 #define LIBEVENT_TASK_STACK_SIZE   0x1000
 
 STATIC UINT32 g_demoTaskId;
 
-#define PORT        23232
-#define LISTEN      5
-#define EVENT_SIZE  1024
-#define BUFFER_LEN  50
-
-struct event_base *g_base;
+struct event_base *g_base = NULL;
 
 struct sockEvent {
     struct event *readEvent;
@@ -89,8 +87,14 @@ void ReadEvent(int sock, short event, void *arg)
     (VOID)event;
     INT32 size;
     INT32 ret;
+    if (arg == NULL) {
+        return;
+    }
     struct sockEvent *ev = (struct sockEvent*)arg;
     ev->buffer = (CHAR *)malloc(EVENT_SIZE);
+    if (ev->buffer == NULL) {
+        return;
+    }
     bzero(ev->buffer, EVENT_SIZE);
     size = recv(sock, ev->buffer, EVENT_SIZE, 0);
     printf("Receive data : %s, size : %d\n", ev->buffer, size);
@@ -122,6 +126,9 @@ void AcceptEvent(int sock, short event, void *arg)
     struct sockEvent *ev = (struct sockEvent*)malloc(sizeof(struct sockEvent));
     ev->readEvent = (struct event*)malloc(sizeof(struct event));
     ev->writeEvent = (struct event*)malloc(sizeof(struct event));
+    if ((ev == NULL) || (ev->readEvent == NULL) || (ev->writeEvent == NULL)) {
+        return;
+    }
     sinSize = sizeof(struct sockaddr_in);
     newFd = accept(sock, (struct sockaddr*)&clientAddr, &sinSize);
     if (newFd < 0) {
@@ -147,7 +154,7 @@ void AcceptEvent(int sock, short event, void *arg)
 
 VOID DemoTaskEntry(VOID)
 {
-    printf("Libevents demo begin.\n");
+    printf("Libevents demo task star to run.\n");
     struct sockaddr_in myAddr;
     INT32 ret;
     INT32 sock;
@@ -169,7 +176,7 @@ VOID DemoTaskEntry(VOID)
     g_base = event_base_new();
     event_set(&listenEvent, sock, EV_READ|EV_PERSIST, AcceptEvent, NULL);
     event_base_set(g_base, &listenEvent);
-    if (ret != 0) {
+    if (ret != EOK) {
         printf("Event base set failed.\n");
 	return;
     }
@@ -182,6 +189,7 @@ VOID DemoTaskEntry(VOID)
     if (ret == -1) {
         printf("Event base dispatch failed.\n");
     }
+    printf("Libevents demo task finished.\n");
 }
 
 VOID LibeventDemoTask(VOID)
