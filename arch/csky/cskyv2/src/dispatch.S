@@ -26,7 +26,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#define OS_TASK_STATUS_RUNNING    0x0010
 #define VIC_TSPDR                 0XE000EC08
 
 .section .text
@@ -39,9 +38,6 @@ OsStartToRun:
 
     st.w   r0, (r1)
     st.w   r0, (r2)
-
-    lrw    r6, OS_TASK_STATUS_RUNNING
-    st.w   r6, (r0, 4)
 
     ldw    sp, (r0)
 

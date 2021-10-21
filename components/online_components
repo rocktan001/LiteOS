@@ -8,6 +8,7 @@ STM32L0xx_HAL_Driver       &#& targets/bsp/drivers/STM32L0xx_Firmware &#& LOSCFG
 CMSIS                      &#& targets/bsp/drivers/STM32L0xx_Firmware &#& LOSCFG_PLATFORM_STM32L073_NUCLEO=y      &#& https://github.com/STMicroelectronics/cmsis_device_l0/archive/refs/tags/v1.9.1.zip       &#& STM32L073_Nucleo
 STM32L5xx_HAL_Driver       &#& targets/bsp/drivers/STM32L5xx_Firmware &#& LOSCFG_PLATFORM_STM32L552_NUCLEO=y        &#& https://github.com/STMicroelectronics/stm32l5xx_hal_driver/archive/refs/tags/v1.0.4.zip  &#& STM32L552_Nucleo
 CMSIS                      &#& targets/bsp/drivers/STM32L5xx_Firmware &#& LOSCFG_PLATFORM_STM32L552_NUCLEO=y        &#& https://github.com/STMicroelectronics/cmsis_device_l5/archive/refs/tags/v1.0.4.zip       &#& STM32L552_Nucleo
+SMARTL-E802-SDK            &#& targets/bsp/drivers/csky_driver_qemu &#& LOSCFG_PLATFORM_SMARTL_E802=y             &#& https://occ-oss-prod.oss-cn-hangzhou.aliyuncs.com/cop-image-prod/resource/420257228264570880/1577156180657/SmartL_CK802-v1.6.zip
 
 gcc            &#& lib                                    &#& LOSCFG_LIB_CPP_EXTEND=y           &#& https://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-10.2.0.zip
 origin.patch   &#& components/net/lwip                    &#& LOSCFG_COMPONENTS_NET_LWIP=y      &#&

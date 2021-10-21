@@ -61,9 +61,17 @@ typedef struct {
 
 LITE_OS_SEC_BSS UINT32 g_cyclesPerTick;
 
+LITE_OS_SEC_TEXT VOID CskyTickHandler(VOID) {
+    /* Need to read SysTick->CTRL to clear the COUNTFLAG of CTRL,
+    otherwise it will keep entering systick interrupt */
+    if (SysTick->CTRL) {
+        OsTickHandler();
+    }
+}
+
 VOID HalClockInit(VOID)
 {
-    UINT32 ret = LOS_HwiCreate(TIM_INT_NUM, 0, 0, OsTickHandler, 0);
+    UINT32 ret = LOS_HwiCreate(TIM_INT_NUM, 0, 0, CskyTickHandler, 0);
     if (ret != 0) {
         PRINTK("ret of LOS_HwiCreate = %#x\n", ret);
     }

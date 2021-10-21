@@ -4,6 +4,9 @@ HAL_DRIVER_TYPE :=
 ########################## CB2201 Options ####################################
 ifeq ($(LOSCFG_PLATFORM_CB2201), y)
     HAL_DRIVER_TYPE := csky_driver
+########################## SMARTL_E802 Options ####################################
+else ifeq ($(LOSCFG_PLATFORM_SMARTL_E802), y)
+    HAL_DRIVER_TYPE := csky_driver_qemu
 ######################### GD32E103C_START Options ###############################
 else ifeq ($(LOSCFG_PLATFORM_GD32E103C_START), y)
     LITEOS_CMACRO_TEST += -DGD32E103R_START
@@ -116,6 +119,10 @@ PLATFORM_DEFS +=  -DUSE_STDPERIPH_DRIVER
 endif
 
 ifeq ($(LOSCFG_DRIVER_CSKY_LIB), y)
+PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/targets/bsp/drivers/$(HAL_DRIVER_TYPE)/Inc
+endif
+
+ifeq ($(LOSCFG_DRIVER_QEMU_CSKY_LIB), y)
 PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/targets/bsp/drivers/$(HAL_DRIVER_TYPE)/Inc
 endif
 

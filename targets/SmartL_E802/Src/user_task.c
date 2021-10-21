@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: LiteOS adaptor file.
+ * Description: User Task Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-10-20
+ * Create: 2021-10-19
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,7 +26,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
+#include <stdio.h>
 #include "los_typedef.h"
+#include "demo_entry.h"
 
-VOID OsBackTrace(VOID) {}
+VOID app_init(VOID)
+{
+    printf("app init!\n");
+    DemoEntry();
+}
 

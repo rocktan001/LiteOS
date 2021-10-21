@@ -2,6 +2,7 @@ config LOSCFG_PLATFORM
     string
     default "realview-pbx-a9" if LOSCFG_PLATFORM_PBX_A9
     default "qemu-virt-a53"   if LOSCFG_PLATFORM_QEMU_VIRT_A53
+    default "SmartL_E802"     if LOSCFG_PLATFORM_SMARTL_E802
 
 choice
     prompt "Target"
@@ -26,6 +27,15 @@ config LOSCFG_PLATFORM_QEMU_VIRT_A53
     select LOSCFG_ARM_GENERIC_TIMER
     select LOSCFG_DRIVERS_UART_ARM_PL011
     select LOSCFG_ARCH_ARM_AARCH64
+    select LOSCFG_USING_BOARD_LD
+
+config LOSCFG_PLATFORM_SMARTL_E802
+    bool "SmartL_E802"
+    select LOSCFG_ARCH_CSKY_CK802
+    select LOSCFG_PLATFORM_BSP_VIC
+    select LOSCFG_CSKY_SYSTICK
+    select LOSCFG_DRIVERS_UART_CSKY_PORT
+    select LOSCFG_DRIVER_CSKY_LIB
     select LOSCFG_USING_BOARD_LD
 
 endchoice

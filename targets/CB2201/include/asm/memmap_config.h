@@ -35,7 +35,6 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-
 #ifdef __cplusplus
 #if __cplusplus
 }
@@ -43,3 +42,4 @@ extern "C" {
 #endif /* __cplusplus */
 
 #endif /* _MEMMAP_CONFIG_H */
+

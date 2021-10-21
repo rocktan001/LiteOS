@@ -78,8 +78,8 @@ UINT32 HalIrqUnmask(UINT32 hwiNum)
 
     intSave = LOS_IntLock();
     VIC_REG->ISER[hwiNum / OS_SYS_VECTOR_CNT] = (UINT32)(1UL << (hwiNum % OS_SYS_VECTOR_CNT));
-    VIC_REG->ISSR[hwiNum / OS_SYS_VECTOR_CNT] = (UINT32)(1UL << (hwiNum % OS_SYS_VECTOR_CNT));
     LOS_IntRestore(intSave);
+
     return LOS_OK;
 }
 

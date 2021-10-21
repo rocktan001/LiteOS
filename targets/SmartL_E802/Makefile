@@ -17,7 +17,7 @@ ASSRCS := $(ALL_ASSRCS)
 
 # C defines
 C_DEFS += \
-    -DCK802 \
+    -D__E802__ \
     -D__LITEOS__
 
 LOCAL_SRCS += $(ASSRCS)
@@ -29,7 +29,7 @@ LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/hisoc \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/asm \
     -I $(LITEOSTOPDIR)/targets/bsp/drivers/$(HAL_DRIVER_TYPE)/Inc \
-    -I $(LITEOSTOPDIR)/include
+    -I $(LITEOSTOPDIR)/include \
 
 BOARD_DEF += $(C_DEFS)
 
