@@ -97,12 +97,12 @@ void ReadEvent(int sock, short event, void *arg)
     }
     bzero(ev->buffer, EVENT_SIZE);
     size = recv(sock, ev->buffer, EVENT_SIZE, 0);
-    printf("Receive data : %s, size : %d\n", ev->buffer, size);
     if (size == 0) {
         FreeSocketEvent(ev);
         close(sock);
         return;
     }
+    printf("Receive data : %s, size : %d\n", ev->buffer, size);
     event_set(ev->writeEvent, sock, EV_WRITE, WriteEvent, ev->buffer);
     ret = event_base_set(g_base, ev->writeEvent);
     if (ret != 0) {
@@ -114,6 +114,9 @@ void ReadEvent(int sock, short event, void *arg)
     ret = event_add(ev->writeEvent, NULL);
     if (ret == -1) {
         printf("Event add failed.\n");
+    }
+    if (ev->buffer != NULL) {
+        free(ev->buffer);
     }
 }
 
