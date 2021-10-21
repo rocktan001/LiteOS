@@ -95,6 +95,11 @@ void ReadEvent(int sock, short event, void *arg)
     if (ev->buffer == NULL) {
         return;
     }
+    ev->writeEvent = (struct event *)malloc(sizeof(struct event));
+    if (ev->writeEvent == NULL) {
+        free(ev->buffer);
+	return;
+    }
     bzero(ev->buffer, EVENT_SIZE);
     size = recv(sock, ev->buffer, EVENT_SIZE, 0);
     if (size == 0) {
@@ -107,8 +112,8 @@ void ReadEvent(int sock, short event, void *arg)
     ret = event_base_set(g_base, ev->writeEvent);
     if (ret != 0) {
         printf("Event base set failed.\n");
-        FreeSocketEvent(ev);
-        close(sock);
+        free(ev->buffer);
+        free(ev->writeEvent);
 	return;
     }
     ret = event_add(ev->writeEvent, NULL);
@@ -118,6 +123,9 @@ void ReadEvent(int sock, short event, void *arg)
     if (ev->buffer != NULL) {
         free(ev->buffer);
     }
+    if (ev->writeEvent != NULL) {
+        free(ev->writeEvent);
+    }
 }
 
 void AcceptEvent(int sock, short event, void *arg)
@@ -126,18 +134,21 @@ void AcceptEvent(int sock, short event, void *arg)
     INT32 ret;
     INT32 newFd;
     INT32 sinSize;
-    struct sockEvent *ev = (struct sockEvent*)malloc(sizeof(struct sockEvent));
-    ev->readEvent = (struct event*)malloc(sizeof(struct event));
-    ev->writeEvent = (struct event*)malloc(sizeof(struct event));
-    if ((ev == NULL) || (ev->readEvent == NULL) || (ev->writeEvent == NULL)) {
+    struct sockEvent *ev = (struct sockEvent *)malloc(sizeof(struct sockEvent));
+    if (ev == NULL) {
         return;
+    }
+    ev->readEvent = (struct event *)malloc(sizeof(struct event));
+    if (ev->readEvent == NULL) {
+        free(ev);
+	return;
     }
     sinSize = sizeof(struct sockaddr_in);
     newFd = accept(sock, (struct sockaddr*)&clientAddr, &sinSize);
     if (newFd < 0) {
         printf("Establish a connection with the client failed.\n");
+	free(ev);
 	free(ev->readEvent);
-	free(ev->writeEvent);
 	return;
     }
     printf("Establish a connection with the client success.\n");
@@ -145,19 +156,13 @@ void AcceptEvent(int sock, short event, void *arg)
     ret = event_base_set(g_base, ev->readEvent);
     if (ret != 0) {
         printf("Event base set failed.\n");
+	free(ev);
 	free(ev->readEvent);
-	free(ev->writeEvent);
 	return;
     }
     ret = event_add(ev->readEvent, NULL);
     if (ret == -1) {
         printf("Event add failed.\n");
-    }
-    if (ev->readEvent != NULL) {
-        free(ev->readEvent);
-    }
-    if (ev->writeEvent != NULL) {
-        free(ev->writeEvent);
     }
 }
 
