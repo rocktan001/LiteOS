@@ -31,7 +31,6 @@
 #include "demo_entry.h"
 #include "los_task.h"
 
-
 STATIC UINT32 LedTask(VOID)
 {
     while (1) {
