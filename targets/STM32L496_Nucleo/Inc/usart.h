@@ -41,7 +41,7 @@ extern UART_HandleTypeDef hlpuart1;
 void MX_LPUART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

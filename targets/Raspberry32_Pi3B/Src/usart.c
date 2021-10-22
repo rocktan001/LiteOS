@@ -115,7 +115,7 @@ STATIC INT32 MiniUartHwi(VOID)
     return ret;
 }
 
-UartControllerOps g_armGenericUart = {
+UartControllerOps g_genericUart = {
     .uartInit = MiniUartInit,
     .uartWriteChar = MiniUartWriteChar,
     .uartReadChar = MiniUartReadChar,

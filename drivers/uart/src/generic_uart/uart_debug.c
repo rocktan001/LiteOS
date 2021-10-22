@@ -1,9 +1,8 @@
-
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Uart Module Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-04-28
+ * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -27,65 +26,48 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include <los_hwi.h>
-#include <los_task.h>
+#include "los_task.h"
 #include "los_queue.h"
-#include "drv_usart.h"
-#include "pin.h"
-
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+#include "usart.h"
 
 #define UART_QUEUE_SIZE        64
 #define UART_QUEUE_BUF_MAX_LEN 1
 #define UART_QUEUE_REC_DELAY   5
-#define UART_BAUDRATE          115200
 
 STATIC UINT32 g_uartQueue;
-STATIC usart_handle_t g_consoleHandle;
 
 INT32 uart_putc(CHAR c)
 {
-    if (g_consoleHandle == NULL) {
-        return -1;
-    }
-    csi_usart_putchar(g_consoleHandle, c);
-
-    return 1;
+    return uart_write(&c, 1, 0);
 }
 
 UINT8 uart_getc(VOID)
 {
     UINT8 ch = 0;
-
-    if (g_consoleHandle == NULL) {
-        return -1;
+    if (g_genericUart.uartReadChar != NULL) {
+        ch = g_genericUart.uartReadChar();
     }
-
-    csi_usart_getchar(g_consoleHandle, &ch);
     (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
     return ch;
 }
 
-STATIC VOID UartHandler(VOID)
+VOID uart_early_init(VOID)
 {
-    (VOID)uart_getc();
-    LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
+    if (g_genericUart.uartInit != NULL) {
+        g_genericUart.uartInit();
+    }
 }
 
 INT32 ShellQueueCreat(VOID)
 {
-    return LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
+    return (INT32)LOS_QueueCreate("uartQueue", UART_QUEUE_SIZE, &g_uartQueue, 0, UART_QUEUE_BUF_MAX_LEN);
 }
 
 INT32 uart_hwiCreate(VOID)
 {
-    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
-
+    if (g_genericUart.uartHwiCreate != NULL) {
+        g_genericUart.uartHwiCreate();
+    }
     return LOS_OK;
 }
 
@@ -97,7 +79,7 @@ UINT8 uart_read(VOID)
     len = UART_QUEUE_BUF_MAX_LEN;
     ret = LOS_QueueReadCopy(g_uartQueue, &rec, &len, LOS_WAIT_FOREVER);
     if (ret == LOS_OK) {
-        LOS_TaskDelay(UART_QUEUE_REC_DELAY);
+        (VOID)LOS_TaskDelay(UART_QUEUE_REC_DELAY);
         return rec;
     }
     return rec;
@@ -106,8 +88,11 @@ UINT8 uart_read(VOID)
 INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 {
     (VOID)timeout;
-    for (int i = 0; i < len; i++) {
-        uart_putc(buf[i]);
+    UINT32 i;
+    for (i = 0; i < len; i++) {  
+        if (g_genericUart.uartWriteChar != NULL) {
+            g_genericUart.uartWriteChar(buf[i]);
+        }
     }
     return len;
 }
@@ -115,6 +100,7 @@ INT32 uart_write(const CHAR *buf, INT32 len, INT32 timeout)
 VOID UartPuts(const CHAR *s, UINT32 len, BOOL isLock)
 {
     UINT32 i;
+    (VOID)isLock;
     if (s == NULL) {
         return;
     }
@@ -124,29 +110,13 @@ VOID UartPuts(const CHAR *s, UINT32 len, BOOL isLock)
          * the compatibility.
          */
         if (*(s + i) == '\n') {
-            uart_putc('\r');
+            (VOID)uart_putc('\r');
         }
-        uart_putc(*(s + i));
+        (VOID)uart_putc(*(s + i));
     }
 }
 
-void uart_early_init(void)
+VOID uart_init(VOID) 
 {
-    drv_pinmux_config(CONSOLE_TXD, CONSOLE_TXD_FUNC);
-    drv_pinmux_config(CONSOLE_RXD, CONSOLE_RXD_FUNC);
-
-    /* init the console */
-    g_consoleHandle = csi_usart_initialize(CONSOLE_IDX, NULL);
-    /* config the UART */
-    csi_usart_config(g_consoleHandle, UART_BAUDRATE, USART_MODE_ASYNCHRONOUS,
-                     USART_PARITY_NONE, USART_STOP_BITS_1, USART_DATA_BITS_8);
 }
 
-VOID uart_init(VOID) {
-}
-
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */

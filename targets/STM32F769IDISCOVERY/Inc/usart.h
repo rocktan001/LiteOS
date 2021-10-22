@@ -31,7 +31,7 @@
 /* USER CODE BEGIN Includes */
 void MX_USART3_UART_Init(void);
 
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;

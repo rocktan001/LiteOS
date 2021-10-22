@@ -24,7 +24,6 @@ LOCAL_SRCS += $(ASSRCS)
 
 LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/Inc \
-    -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/driver \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/hisoc \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include/asm \

@@ -42,7 +42,7 @@ extern "C" {
 
 VOID Usart1Init(UINT32 bound);
 
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Usart Init Implementation
+ * Description: Uart Module Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-09-13
+ * Create: 2021-10-21
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -28,78 +28,62 @@
 
 #include "usart.h"
 #include "los_hwi.h"
-#include "platform.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+#define UART_BAUDRATE          115200
 
-#define UART_INT_RAW_REG           ((volatile UINT32 *)0x3FF40004)
-#define UART_INT_ENA_REG           ((volatile UINT32 *)0x3FF4000C)
-#define UART_INT_CLR_REG           ((volatile UINT32 *)0x3FF40010)
-#define UART_CONF1_REG             ((volatile UINT32 *)0x3FF40024)
-#define PRO_UART_INTR_MAP_REG      ((volatile UINT32 *)0x3FF0018C)
-#define PRO_INTR_STATUS_REG_1_REG  ((volatile UINT32 *)0x3FF000F0)
+STATIC usart_handle_t g_consoleHandle;
 
-extern int uart_tx_one_char(uint8_t ch);
-extern int uart_rx_one_char(uint8_t *ch);
-
-VOID UartPutc(CHAR c)
+VOID UsartInit(VOID)
 {
-    uart_tx_one_char(c);
+    drv_pinmux_config(CONSOLE_TXD, CONSOLE_TXD_FUNC);
+    drv_pinmux_config(CONSOLE_RXD, CONSOLE_RXD_FUNC);
+
+    /* init the console */
+    g_consoleHandle = csi_usart_initialize(CONSOLE_IDX, NULL);
+
+    /* config the UART */
+    csi_usart_config(g_consoleHandle, UART_BAUDRATE, USART_MODE_ASYNCHRONOUS,
+                     USART_PARITY_NONE, USART_STOP_BITS_1, USART_DATA_BITS_8);
 }
 
-STATIC VOID UartWriteChar(const CHAR c)
+void UsartWrite(const CHAR ch)
 {
-    UartPutc(c);
+    LOS_ASSERT(g_consoleHandle);
+
+    csi_usart_putchar(g_consoleHandle, ch);
 }
 
-STATIC UINT8 UartReadChar(VOID)
+UINT8 UsartRead(VOID)
 {
-    uint8_t ch;
+    UINT8 ch = 0;
 
-    uart_rx_one_char(&ch);
+    if (g_consoleHandle == NULL) {
+        return -1;
+    }
+
+    csi_usart_getchar(g_consoleHandle, &ch);
 
     return ch;
 }
- 
+
 STATIC VOID UartHandler(VOID)
 {
-    uart_getc();
-    *(UART_INT_CLR_REG) |= (1 << 0);        /* 1 << 0: clear UART_RXFIFO_FULL_INT interrupt */
+    (VOID)uart_getc();
     LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
 }
 
-STATIC INT32 UartHwi(VOID)
+INT32 UsartHwi(VOID)
 {
-    UINT32 reg;
-    UINT32 ret = LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    if (ret != LOS_OK) {
-        PRINT_ERR("%s, %d, uart interrupt created failed, ret = %x.\n", __FILE__, __LINE__, ret);
-    } else {
-        *(UART_INT_ENA_REG) |= (1 << 0);    /* 1 << 0: UART_RXFIFO_FULL_INT interrupt enable bit */
-        *(UART_INT_ENA_REG) |= (1 << 4);    /* 1 << 4: UART_FRM_ERR_INT interrupt enable bit */
-        reg = *(UART_CONF1_REG);
-        reg = (reg & (~0x7f)) | 0x1;
-        *UART_CONF1_REG = reg;
-        *(PRO_UART_INTR_MAP_REG) = NUM_HAL_INTERRUPT_UART;
-        LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
-    }
-    return ret;
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+
+    return LOS_OK;
 }
 
 UartControllerOps g_genericUart = {
-    .uartInit = NULL,
-    .uartWriteChar = UartWriteChar,
-    .uartReadChar = UartReadChar,
-    .uartHwiCreate = UartHwi,
+    .uartInit = UsartInit,
+    .uartWriteChar = UsartWrite,
+    .uartReadChar = UsartRead,
+    .uartHwiCreate = UsartHwi
 };
-
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
 

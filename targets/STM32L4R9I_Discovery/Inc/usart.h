@@ -34,7 +34,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */

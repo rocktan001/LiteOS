@@ -26,12 +26,25 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_typedef.h"
-#include "uart.h"
-
 #ifndef _USART_H
 #define _USART_H
 
-extern UartControllerOps g_armGenericUart;
+#include "los_typedef.h"
+#include "uart.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+extern UartControllerOps g_genericUart;
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* _USART_H */
+

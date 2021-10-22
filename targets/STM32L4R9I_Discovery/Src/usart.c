@@ -147,7 +147,7 @@ INT32 UsartHwi(VOID)
     return LOS_OK;
 }
 
-UartControllerOps g_armGenericUart = {
+UartControllerOps g_genericUart = {
     .uartInit = MX_USART2_UART_Init,
     .uartWriteChar = UsartWrite,
     .uartReadChar = UsartRead,

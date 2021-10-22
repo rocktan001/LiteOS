@@ -35,6 +35,7 @@
 
 #include "interrupt_config.h"
 #include "memmap_config.h"
+#include "csi_config.h"
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -1,9 +1,6 @@
 config LOSCFG_DRIVERS_UART_ARM_PL011
     bool
 
-config LOSCFG_DRIVERS_UART_CSKY_PORT
-    bool
-
 choice
     prompt "Enable Uart"
     default LOSCFG_DRIVERS_SIMPLE_UART

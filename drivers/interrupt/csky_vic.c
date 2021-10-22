@@ -78,6 +78,9 @@ UINT32 HalIrqUnmask(UINT32 hwiNum)
 
     intSave = LOS_IntLock();
     VIC_REG->ISER[hwiNum / OS_SYS_VECTOR_CNT] = (UINT32)(1UL << (hwiNum % OS_SYS_VECTOR_CNT));
+#ifdef CONFIG_SYSTEM_SECURE
+    VIC_REG->ISSR[hwiNum / OS_SYS_VECTOR_CNT] = (UINT32)(1UL << (hwiNum % OS_SYS_VECTOR_CNT));
+#endif
     LOS_IntRestore(intSave);
 
     return LOS_OK;
@@ -188,7 +191,6 @@ VOID HalIrqInit(VOID)
         VIC_REG->IABR[i] = 0x0;
         VIC_REG->ICPR[i] = MASK_32_BITS;
     }
-    return;
 }
 
 #ifdef __cplusplus

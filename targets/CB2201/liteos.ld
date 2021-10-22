@@ -69,7 +69,6 @@ SECTIONS
 {
   .text : {
     . = ALIGN(0x4) ;
-    *reset_vector.o(.text)
     __text_start = .;
     __stext = . ;
     *(.text)
@@ -161,7 +160,6 @@ SECTIONS
     __data_start__ = . ;
     __ram_data_start = __data_start__;
     data_start = . ;
-    KEEP(*startup.o(.vectors))
     _s_liteos_vector = .;
     *(.data.vector)    /* liteos vector in ram */
     _e_liteos_vector = .;

@@ -39,7 +39,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 VOID GD_Uart0Init(VOID);
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 
 #ifdef __cplusplus
 #if __cplusplus
