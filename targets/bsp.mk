@@ -153,9 +153,6 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_DRIVERS_UART_ARM_PL011), y)
         LITEOS_BASELIB += -larm_pl011
     endif
-    ifeq ($(LOSCFG_DRIVERS_UART_CSKY_PORT), y)
-        LITEOS_BASELIB += -lcsky
-    endif
     ifeq ($(LOSCFG_DRIVERS_SIMPLE_UART), y)
         LITEOS_BASELIB += -luart
     endif

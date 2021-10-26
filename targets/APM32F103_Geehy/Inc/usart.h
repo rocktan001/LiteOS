@@ -41,7 +41,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 VOID ApmMiniCom1Init(VOID);
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 
 #ifdef __cplusplus
 #if __cplusplus

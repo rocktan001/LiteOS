@@ -35,7 +35,7 @@ extern "C" {
 extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 /* USER CODE END Private defines */
 
 void MX_USART2_UART_Init(void);

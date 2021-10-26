@@ -57,7 +57,7 @@ INT32 UsartHwi(VOID)
     return LOS_OK;
 }
 
-UartControllerOps g_armGenericUart = {
+UartControllerOps g_genericUart = {
     .uartInit = NULL,
     .uartWriteChar = UsartWrite,
     .uartReadChar = UsartRead,

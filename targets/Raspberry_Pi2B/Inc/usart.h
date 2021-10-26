@@ -87,7 +87,7 @@ typedef struct tagMiniUartInfo {
     volatile UINT32 BAUD;       /* Mini Uart Baudrate */
 } MINIUART_INFO;
 
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 
 #ifdef __cplusplus
 #if __cplusplus
