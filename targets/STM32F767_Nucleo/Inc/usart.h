@@ -40,7 +40,7 @@ extern "C" {
 
 void MX_USART3_UART_Init(void);
 
-extern UartControllerOps g_armGenericUart;
+extern UartControllerOps g_genericUart;
 
 #ifdef __cplusplus
 #if __cplusplus

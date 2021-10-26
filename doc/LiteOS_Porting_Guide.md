@@ -605,7 +605,7 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
     #include "stm32f4xx_hal.h"
     #include "los_typedef.h"
     #include "uart.h"
-    extern UartControllerOps g_armGenericUart;
+    extern UartControllerOps g_genericUart;
     ```
 
 3.  在**targets\\STM32F407\_OpenEdv\\Src\\usart.c**文件尾部添加如下函数定义：
