@@ -155,7 +155,7 @@ VOID OsExcHandleEntry(const ExcContext *excSp, UINT32 faultAddr)
     g_curNestCount++;
     g_excInfo.nestCnt = (UINT16)g_curNestCount;
     UINT32 excIndex = (ArchGetPsr() >> PSR_VEC_OFFSET) & MASK_8_BITS;
-    UINT32 IntNum = ((excSp->EPSR >> PSR_VEC_OFFSET) & MASK_8_BITS) - OS_SYS_VECTOR_CNT;
+    INT32 IntNum = ((excSp->EPSR >> PSR_VEC_OFFSET) & MASK_8_BITS) - OS_SYS_VECTOR_CNT;
 
     g_excInfo.type = excIndex & EXC_VEC_MASK;
     g_excInfo.faultAddr = faultAddr;
