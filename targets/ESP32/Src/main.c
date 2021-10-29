@@ -53,6 +53,9 @@ INT32 main(VOID)
     WdtDisable();
 
     __asm__ __volatile__("mov sp, %0\n" : : "r"(&__init_stack_e));
+#ifdef LOSCFG_ARCH_FPU_ENABLE
+    __asm__ __volatile__("wsr %0, CPENABLE;rsync" : : "r"(1));
+#endif
 
 #ifdef __GNUC__
     ArchStackGuardInit();

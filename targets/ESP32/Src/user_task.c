@@ -29,6 +29,7 @@
 #include "los_task_pri.h"
 #include "demo_entry.h"
 
+#ifndef LOSCFG_PLATFORM_ESP32_QEMU
 #define LED_TASK_PRIORITY   7
 #define LED_TASK_STACK_SIZE 0x500
 
@@ -66,10 +67,13 @@ VOID LedTask(VOID)
         printf("Create led task failed.\n");
     }
 }
+#endif
 
 VOID app_init(VOID)
 {
     printf("app init!\n");
+#ifndef LOSCFG_PLATFORM_ESP32_QEMU
     LedTask();
+#endif
     DemoEntry();
 }

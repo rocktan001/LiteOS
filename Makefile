@@ -80,8 +80,8 @@ else
 	$(OBJCOPY) -O binary $(OUT)/$@.elf $(OUT)/kernel7.img
 endif
 endif
-ifeq ($(LOSCFG_PLATFORM_ESP32), y)
-	esptool.py --chip esp32 elf2image --flash_mode dio --flash_freq 80m --flash_size 4MB -o $(OUT)/$@.bin $(OUT)/$@.elf
+ifeq ($(LOSCFG_PLATFORM_ESP32)$(LOSCFG_PLATFORM_ESP32_QEMU), y)
+	esptool.py --chip esp32 elf2image -o $(OUT)/$@.bin $(OUT)/$@.elf
 else
 	$(OBJCOPY) -O binary $(OUT)/$@.elf $(OUT)/$@.bin
 endif
