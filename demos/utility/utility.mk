@@ -115,3 +115,8 @@ include $(LITEOSTOPDIR)/demos/utility/easyflash/easyflash.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_EASYFLASH_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_LIBEVENT), y)
+include $(LITEOSTOPDIR)/demos/utility/libevent/libevent.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_LIBEVENT_INCLUDE)
+endif
+

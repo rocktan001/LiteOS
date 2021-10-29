@@ -29,6 +29,7 @@ harfbuzz-2.8.0 &#& components/utility/harfbuzz            &#& LOSCFG_COMPONENTS_
 http-parser-2.9.4 &#& components/net/http_parser          &#& LOSCFG_COMPONENTS_HTTP_PARSER=y   &#& https://github.com/nodejs/http-parser/archive/refs/tags/v2.9.4.zip
 libiconv-1.14  &#& components/utility/iconv               &#& LOSCFG_COMPONENTS_ICONV=y         &#& https://github.com/winlibs/libiconv/archive/refs/tags/libiconv-1.14.zip
 libpcap-1.7.3  &#& components/net/pcap                    &#& LOSCFG_COMPONENTS_PCAP=y          &#& https://github.com/the-tcpdump-group/libpcap/archive/refs/tags/libpcap-1.7.3.zip
+libevent-2.1.12 &#& components/utility/libevent           &#& LOSCFG_COMPONENTS_LIBEVENT=y      &#& https://github.com/libevent/libevent/archive/refs/tags/release-2.1.12-stable.zip
 libpng-1.6.29  &#& components/media/libpng                &#& LOSCFG_COMPONENTS_LIBPNG=y        &#& https://github.com/glennrp/libpng/archive/refs/tags/v1.6.29.zip
 librws-1.2.4   &#& components/net/librws                  &#& LOSCFG_COMPONENTS_LIBRWS=y        &#& https://github.com/OlehKulykov/librws/archive/refs/tags/1.2.4.zip
 libupnp-1.6.22 &#& components/media/upnp                  &#& LOSCFG_COMPONENTS_UPNP=y          &#& https://github.com/pupnp/pupnp/archive/refs/tags/release-1.6.22.zip
