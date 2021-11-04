@@ -126,7 +126,7 @@ VOID HalClockStart(VOID)
     __asm__ __volatile__("rsr %0, ccount" : "=a"(ccount) :);
     OS_HWTMR_ADJUST_CCOMPARE(OS_TICK_INT_NUM, (ccount + g_cyclesPerTick));
 
-    (VOID)HalIrqUnmask(OS_TICK_INT_NUM);
+    (VOID)ArchIrqUnmask(OS_TICK_INT_NUM);
 }
 
 VOID HalDelayUs(UINT32 usecs)

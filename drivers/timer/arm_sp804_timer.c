@@ -78,7 +78,7 @@ VOID HalClockTickTimerReload(UINT32 cycles)
     /* int clear */
     WRITE_UINT32(1, TIMER_TICK_REG_BASE + TIMER_INT_CLR);
     dsb(); /* Make sure pending bit of int source clear */
-    (void)HalIrqClear(NUM_HAL_INTERRUPT_TIMER);
+    (void)ArchIrqClear(NUM_HAL_INTERRUPT_TIMER);
 }
 
 VOID ResetTimerMasked(VOID)
@@ -340,7 +340,7 @@ LITE_OS_SEC_TEXT VOID HalTickEntry(VOID)
     dsb(); /* Make sure pending bit of int source clear for riscv SoC */
 #endif
 #ifdef LOSCFG_PLATFORM_BSP_RISCV_PLIC
-    (void)HalIrqClear(NUM_HAL_INTERRUPT_TIMER);
+    (void)ArchIrqClear(NUM_HAL_INTERRUPT_TIMER);
 #endif
 
     OsTickHandler();
@@ -414,7 +414,7 @@ LITE_OS_SEC_TEXT_INIT VOID HalClockStart(VOID)
     WRITE_UINT32(temp, TIMER_TICK_REG_BASE + TIMER_CONTROL);
 
     /* clock start */
-    (void)HalIrqUnmask(NUM_HAL_INTERRUPT_TIMER);
+    (void)ArchIrqUnmask(NUM_HAL_INTERRUPT_TIMER);
     HalClockEnable();
 
     /* start adjusting swtmer */

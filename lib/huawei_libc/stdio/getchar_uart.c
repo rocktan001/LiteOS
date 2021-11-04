@@ -41,11 +41,11 @@ int do_uart_getc(void)
     static int num = 0;
     static int pos = 0;
     char ch;
-    (void)HalIrqMask(NUM_HAL_INTERRUPT_UART);
+    (void)ArchIrqMask(NUM_HAL_INTERRUPT_UART);
     if (buf == NULL) {
         buf = (char *)malloc(INPUT_BUF_SIZE);
         if (buf == NULL) {
-            (void)HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
+            (void)ArchIrqUnmask(NUM_HAL_INTERRUPT_UART);
             return EOF;
         }
         pos = 0;
@@ -72,7 +72,8 @@ int do_uart_getc(void)
 
     num--;
     ret = buf[pos++];
-    (void)HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
+    (void)ArchIrqUnmask(NUM_HAL_INTERRUPT_UART);
     return ret;
 }
 #endif
+

@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Xtensa Lx6 Interrupt HeadFile
+ * Description: Main HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-09-10
+ * Create: 2021-10-28
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _XTENSA_LX6_H
-#define _XTENSA_LX6_H
-
-#include "los_config.h"
+#ifndef _MAIN_H
+#define _MAIN_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,10 +35,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/* hardware interrupt entry */
-VOID ArchInterrupt(VOID);
-VOID ArchIrqInit(VOID);
-UINT32 ArchCurIrqGet(VOID);
+extern char __bss_start, __bss_end;
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,4 +43,4 @@ UINT32 ArchCurIrqGet(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _XTENSA_LX6_H */
+#endif /* _MAIN_H */

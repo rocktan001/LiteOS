@@ -499,7 +499,7 @@ LITE_OS_SEC_TEXT_MINOR VOID LOS_IntWakeupHookReg(WAKEUPFROMINTHOOK hook)
 /* Initialization of the hardware interrupt */
 LITE_OS_SEC_TEXT_INIT VOID OsHwiInit(VOID)
 {
-    HalIrqInit();
+    ArchIrqInit();
     return;
 }
 

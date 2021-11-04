@@ -64,7 +64,7 @@ VOID HalClockFreqWrite(UINT32 freq)
 
 VOID HalClockStart(VOID)
 {
-    (void)HalIrqUnmask(PRVTIMER_INT_NUM);
+    (void)ArchIrqUnmask(PRVTIMER_INT_NUM);
 
     g_privateTimer->load = OS_CYCLE_PER_TICK;
     g_privateTimer->control = 0x06; /* IAE bits = 110, not enabled yet */
@@ -121,7 +121,7 @@ UINT32 HalClockGetTickTimerCycles(VOID)
 
 VOID HalClockTickTimerReload(UINT32 cycles)
 {
-    (void)HalIrqUnmask(PRVTIMER_INT_NUM);
+    (void)ArchIrqUnmask(PRVTIMER_INT_NUM);
 
     /* set control counter regs to defaults */
     g_privateTimer->load = cycles;

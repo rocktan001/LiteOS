@@ -209,7 +209,7 @@ INT32 uart_hwiCreate(VOID)
         /* enable receive */
         UARTREG(UART_REG_BASE, UART_CR) |= (1 << 9);
 
-        HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
+        ArchIrqUnmask(NUM_HAL_INTERRUPT_UART);
     }
     return ret;
 }

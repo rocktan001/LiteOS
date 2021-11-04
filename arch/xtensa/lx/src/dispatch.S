@@ -39,7 +39,9 @@
  * a3: run task
  */
 OsTaskSchedule:
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     entry   sp, 16
+#endif
     mov     a4, a2
     mov     a5, a3
     addi    a2, sp, -CONTEXT_SIZE    
@@ -50,6 +52,7 @@ OsTaskSchedule:
     beqi    a3, 1, .switchdone    
 
     s32i    a2, a5, 0 /* store old sp */
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     l32i    a4, a4, 0 /* get new sp */
     rsr     a5, PS
     movi    a3, ~(WOE_ENABLE | LEVEL_MASK)
@@ -59,12 +62,20 @@ OsTaskSchedule:
     rsync
     call0   SpillWindow
     mov     a2, a4
-    POP_ALL_REG a2 EPC5 EPS5
-    rfi 5
+#else
+    l32i    a2, a4, 0
+#endif
+    POP_ALL_REG a2 EPC2 EPS2
+    rfi     2
 
 .switchdone:
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     retw
+#else
+    ret
+#endif
 
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
 .type HakSpillWindow, %function
 .global HakSpillWindow
 .align      4
@@ -92,7 +103,7 @@ HakSpillWindow:
     l32i    a1,  a4, CONTEXT_OFF_A1
 
     retw
-
+#endif
 /*
  * a2: new task
  */
@@ -100,7 +111,9 @@ HakSpillWindow:
 .global OsStartToRun
 .align      4
 OsStartToRun:
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     entry  sp, 16
+#endif
     /* disable interrupt */
     rsil    a3, INT_MASK
     
@@ -112,6 +125,7 @@ OsStartToRun:
     movi    a3, g_newTask
     s32i    a2, a3, 0
 
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     l32i    a5, a2, 0   /* get sp */
 
     rsr     a4, PS
@@ -124,9 +138,11 @@ OsStartToRun:
     call0   SpillWindow
 
     mov     a2, a5
-
-    POP_ALL_REG a2 EPC5 EPS5
-    rfi     5
+#else 
+    l32i    a2, a2, 0   /* get sp */
+#endif
+    POP_ALL_REG a2 EPC2 EPS2
+    rfi     2
 
 .global SaveRetAddr
 .type   SaveRetAddr, @function

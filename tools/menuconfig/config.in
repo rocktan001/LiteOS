@@ -79,6 +79,11 @@ config LOSCFG_COMPILER_XTENSA_LX6
     depends on LOSCFG_ARCH_XTENSA_ARCH32
     select LOSCFG_COMPILER_GCC
 
+config LOSCFG_COMPILER_XTENSA_L106
+    bool "xtensa-lx106-elf-"
+    depends on LOSCFG_ARCH_XTENSA_ARCH32
+    select LOSCFG_COMPILER_GCC
+
 endchoice
 
 menu "Compiler Options"
@@ -201,9 +206,8 @@ config LOSCFG_PLATFORM_ADAPT
 config LOSCFG_BACKTRACE
     bool "Enable Backtrace"
     default y
-    depends on !LOSCFG_ARCH_XTENSA
     help
-        Answer Y to enable backtrace for LiteOS.
+      Answer Y to enable backtrace for LiteOS.
 
 #config LOSCFG_GDB
 #    bool "Enable GDB"

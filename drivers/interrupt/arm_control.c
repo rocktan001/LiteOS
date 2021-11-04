@@ -61,12 +61,12 @@ LITE_OS_SEC_TEXT_MINOR VOID IrqEntryArmControl(VOID)
         return;
     }
 
-    HalIrqClear(hwiIndex);
+    ArchIrqClear(hwiIndex);
     OsIntHandle(hwiIndex, &g_hwiForm[hwiIndex]);
     return;
 }
 
-UINT32 HalIrqUnmask(UINT32 hwiNum)
+UINT32 ArchIrqUnmask(UINT32 hwiNum)
 {
     INTERRUPTS_INFO *irq = IRQ_REG_BASE;
     MAILBOXES_INFO *coreirq = CORE_MAILBOX_REG_BASE;
@@ -89,7 +89,7 @@ UINT32 HalIrqUnmask(UINT32 hwiNum)
     return LOS_OK;
 }
 
-UINT32 HalIrqMask(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqMask(HWI_HANDLE_T hwiNum)
 {
     INTERRUPTS_INFO *irq = IRQ_REG_BASE;
     MAILBOXES_INFO *coreirq = CORE_MAILBOX_REG_BASE;
@@ -144,7 +144,7 @@ UINT32 HalCurIrqGet(VOID)
     return irqNum;
 }
 
-UINT32 HalIrqClear(UINT32 hwiNum)
+UINT32 ArchIrqClear(UINT32 hwiNum)
 {
     UINT32 currCpuid = ArchCurrCpuid();
     ARMTIMER_INFO *timer = ARMTIMER_REG_BASE;
@@ -164,7 +164,7 @@ UINT32 HalIrqClear(UINT32 hwiNum)
     return LOS_OK;
 }
 
-UINT32 HalIrqPending(UINT32 hwiNum)
+UINT32 ArchIrqPending(UINT32 hwiNum)
 {
     UINT32 intSave;
     UINT32 currCpuid = ArchCurrCpuid();
@@ -187,7 +187,7 @@ CHAR *HalIrqVersion(VOID)
     return "arm control";
 }
 
-HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
+HwiHandleInfo *ArchIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return NULL;
@@ -213,14 +213,14 @@ UINT32 HalIrqSendIpi(UINT32 target, UINT32 ipi)
 #endif
 
 STATIC const HwiControllerOps g_armControlOps = {
-    .enableIrq      = HalIrqUnmask,
-    .disableIrq     = HalIrqMask,
+    .enableIrq      = ArchIrqUnmask,
+    .disableIrq     = ArchIrqMask,
     .getCurIrqNum   = HalCurIrqGet,
     .getIrqVersion  = HalIrqVersion,
-    .getHandleForm  = HalIrqGetHandleForm,
+    .getHandleForm  = ArchIrqGetHandleForm,
     .handleIrq      = IrqEntryArmControl,
-    .clearIrq       = HalIrqClear,
-    .triggerIrq     = HalIrqPending,
+    .clearIrq       = ArchIrqClear,
+    .triggerIrq     = ArchIrqPending,
 #ifdef LOSCFG_KERNEL_SMP
     .sendIpi            = HalIrqSendIpi,
     .setIrqCpuAffinity  = NULL,
@@ -272,7 +272,7 @@ VOID HalIrqInitPercpu(VOID)
 #endif
 }
 
-VOID HalIrqInit(VOID)
+VOID ArchIrqInit(VOID)
 {
     HalIrqInitPercpu();
     /* register interrupt controller's operations */

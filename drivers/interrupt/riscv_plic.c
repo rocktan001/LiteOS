@@ -207,7 +207,7 @@ STATIC const HwiControllerOps g_plicOps = {
     .getHandleForm  = PlicIrqGetHandleForm,
 };
 
-VOID HalIrqInit(VOID)
+VOID ArchIrqInit(VOID)
 {
     UINT32 i;
 

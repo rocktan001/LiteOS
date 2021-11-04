@@ -45,7 +45,7 @@ extern "C" {
 #define TIMER_GROUP1                   0x3ff60000
 #define WDT_TIMER_GROUP1_CNTL          0x3ff60048
 #define REG32_READ(reg)                (*(volatile UINT32*) (reg))
-#define REG32_WRITE(reg, value)        (*(volatile UINT32*) (reg) = value)
+#define REG32_WRITE(reg, value)        (*(volatile UINT32*) (reg) = (value))
 #define RTC_CNTL_WDT_FEED_BIT          (31)
 #define RTC_CNTL_WDT_FLASHBOOT_MOD_EN  (10)
 

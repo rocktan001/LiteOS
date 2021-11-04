@@ -35,6 +35,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#define STACK_ALING    (0xF)
+
 /* Save the TaskTcb of the new task */
 VOID *g_newTask = NULL;
 
@@ -60,9 +62,11 @@ UINT32 g_stackDefault[] = {
     0x00000000,     /* REG_OFF_RESERVED */
     0x00000000,     /* REG_OFF_EXCCAUSE */
     0x00000000,     /* REG_OFF_EXCVASSR */
+#ifdef LOSCFG_XTENSA_LOOPS
     0x00000000,     /* REG_OFF_LCOUNT */
     0x00000000,     /* REG_OFF_LEND */
     0x00000000,     /* REG_OFF_LBEG */
+#endif
 #ifdef LOSCFG_ARCH_FPU_ENABLE
     0x00000000,     /* REG_OFF_TMP0 */
     0x00000000,     /* REG_OFF_CPENABLE | CONTEXT_OFF_CPSTORED */
@@ -85,10 +89,12 @@ UINT32 g_stackDefault[] = {
     0x00000000,     /* REG_OFF_F14 */
     0x00000000,     /* REG_OFF_F15 */
 #endif /* LOSCFG_ARCH_FPU_ENABLE */
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     0x00000000,     /* REG_OFF_SPILL_RESERVED */
     0x00000000,     /* REG_OFF_SPILL_RESERVED */
     0x00000000,     /* REG_OFF_SPILL_RESERVED */
     0x00000000,     /* REG_OFF_SPILL_RESERVED */
+#endif
 };
 
 LITE_OS_SEC_TEXT_MINOR VOID OsTaskExit(VOID)
@@ -109,8 +115,7 @@ LITE_OS_SEC_TEXT_INIT VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOI
     }
     *((UINT32 *)(topStack)) = OS_STACK_MAGIC_WORD;
 
-    taskContext = (TaskContext *)((((UINTPTR)topStack + stackSize) - sizeof(TaskContext)));
-
+    taskContext = (TaskContext *)(((((UINTPTR)topStack + stackSize) - sizeof(TaskContext))) & ~STACK_ALING);
     /* initialize the task context */
     result = memcpy_s(taskContext, sizeof(TaskContext), g_stackDefault, sizeof(TaskContext));
     if (result != EOK) {
@@ -118,10 +123,13 @@ LITE_OS_SEC_TEXT_INIT VOID *OsTaskStackInit(UINT32 taskId, UINT32 stackSize, VOI
     }
 
     taskContext->pc = (UINT32)(UINTPTR)OsTaskEntry;
-    taskContext->regA[INDEX_OF_SP]  = (UINTPTR)topStack + stackSize;        /* endStack */
-    taskContext->regA[INDEX_OF_ARGS0]  = taskId;                            /* argument1 */
+    taskContext->regA[INDEX_OF_SP] = ((UINTPTR)topStack + stackSize) & ~STACK_ALING;        /* endStack */
+    taskContext->regA[INDEX_OF_ARGS0] = taskId;                                             /* argument1 */
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     taskContext->ps = SPREG_PS_STACK_CROSS | WOE_ENABLE | 1 << BIT_CALLINC; /* set to kernel stack */
-
+#else
+    taskContext->ps = SPREG_PS_STACK_CROSS; /* set to kernel stack */
+#endif
 #ifdef LOSCFG_ARCH_FPU_ENABLE
     taskContext->cpenable = 1; /* 1: enable */
 #endif

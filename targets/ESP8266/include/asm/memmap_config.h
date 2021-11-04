@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Task Operations HeadFile
+ * Description: Memory Map Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-09-07
+ * Create: 2021-10-28
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,62 +26,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-/**
- * @defgroup los_task
- * @ingroup kernel
- */
-
-#ifndef _ARCH_TASK_H
-#define _ARCH_TASK_H
+#ifndef _MEMMAP_CONFIG_H
+#define _MEMMAP_CONFIG_H
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-extern VOID *g_newTask;
-
-#define LOSCFG_STACK_POINT_ALIGN_SIZE 16
-#define SAVED_REG_NUM                 8
-#define SPILL_WINDOW_SIZE             8
-
-#define SAVED_REGA_NUM               16
-#define SAVED_REGF_NUM               16
-#define BASE_AREA_REG_NUM            4
-
-typedef struct {
-    UINT32 pc;
-    UINT32 ps;
-    UINT32 regA[SAVED_REGA_NUM];
-    UINT32 sar;
-    UINT32 excCause;
-    UINT32 excVaddr;
-    UINT32 lbeg;
-    UINT32 lend;
-    UINT32 lcount;
-#ifdef LOSCFG_ARCH_FPU_ENABLE
-    UINT32 temp;
-    UINT16 cpenable;
-    UINT16 cpstored;
-    UINT32 fcr;
-    UINT32 fsr;
-    UINT32 regF[SAVED_REGF_NUM];
-#endif
-    UINT32 res[BASE_AREA_REG_NUM];
-} TaskContext;
-
-STATIC INLINE VOID *ArchCurrTaskGet(VOID)
-{
-    return g_newTask;
-}
-
-STATIC INLINE VOID ArchCurrTaskSet(VOID *val)
-{
-    g_newTask = val;
-}
-
-extern VOID *OsTaskStackInit(UINT32 taskId, UINT32 uwStackSize, VOID *pTopStack);
+ 
+extern char __heap_start;
+#define OS_SYS_MEM_ADDR        ((VOID *)(&__heap_start))
+#define OS_SYS_MEM_SIZE        (UINT32)(0x3FFE8000 + 0x18000 - (UINT32)&__heap_start)
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -89,4 +45,4 @@ extern VOID *OsTaskStackInit(UINT32 taskId, UINT32 uwStackSize, VOID *pTopStack)
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _ARCH_TASK_H */
+#endif /* _MEMMAP_CONFIG_H */

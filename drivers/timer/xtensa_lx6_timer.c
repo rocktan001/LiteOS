@@ -132,14 +132,15 @@ VOID HalClockStart(VOID)
     g_cyclesPerTick = OS_CYCLE_PER_TICK;
     SetCcompare(g_cyclesPerTick);
     ResetCcount();
+#ifdef LOSCFG_COMPILER_XTENSA_LX6
     __asm__ __volatile__("wsr %0, ccompare1; rsync" : : "a"(0));
     __asm__ __volatile__("wsr %0, ccompare2; rsync" : : "a"(0));
-
+#endif
     UINT32 ret = LOS_HwiEnable(OS_TICK_INT_NUM);
     if (ret != 0) {
         PRINTK("LOS_HwiEnable failed. ret = %#x\n", ret);
     }
-    (VOID)HalIrqUnmask(OS_TICK_INT_NUM);
+    (VOID)ArchIrqUnmask(OS_TICK_INT_NUM);
 }
 
 UINT64 HalClockGetCycles(VOID)

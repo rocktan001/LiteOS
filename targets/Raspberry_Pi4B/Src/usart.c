@@ -96,7 +96,7 @@ INT32 UsartHwi(VOID)
         PRINT_ERR("%s,%d, uart interrupt created error:%x\n", __FUNCTION__, __LINE__, ret);
     } else {
         REG32_WRITE(AUX_MU_IER_REG, 0x1);
-        HalIrqUnmask(NUM_HAL_INTERRUPT_UART);
+        ArchIrqUnmask(NUM_HAL_INTERRUPT_UART);
     }
     return ret;
 }

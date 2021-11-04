@@ -158,7 +158,7 @@ LITE_OS_SEC_TEXT_INIT VOID HalClockInit(VOID)
 
 LITE_OS_SEC_TEXT_INIT VOID HalClockStart(VOID)
 {
-    (void)HalIrqUnmask(OS_TICK_INT_NUM);
+    (void)ArchIrqUnmask(OS_TICK_INT_NUM);
 
     /* triggle the first tick */
     TimerCtlWrite(0);
@@ -191,14 +191,14 @@ UINT32 HalClockGetTickTimerCycles(VOID)
 
 VOID HalClockTickTimerReload(UINT32 cycles)
 {
-    (void)HalIrqMask(OS_TICK_INT_NUM);
-    (void)HalIrqClear(OS_TICK_INT_NUM);
+    (void)ArchIrqMask(OS_TICK_INT_NUM);
+    (void)ArchIrqClear(OS_TICK_INT_NUM);
 
     TimerCtlWrite(0);
     TimerCvalWrite(HalClockGetCycles() + cycles);
     TimerCtlWrite(1);
 
-    (void)HalIrqUnmask(OS_TICK_INT_NUM);
+    (void)ArchIrqUnmask(OS_TICK_INT_NUM);
 }
 
 UINT32 HalGetRemainingCycles(UINT32 *ticks)

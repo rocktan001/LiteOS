@@ -19,6 +19,11 @@ config LOSCFG_ARCH_XTENSA_LX6
     select LOSCFG_LIB_LIBC
     select LOSCFG_ARCH_XTENSA_ARCH32
 
+config LOSCFG_ARCH_XTENSA_L106
+    bool
+    select LOSCFG_LIB_LIBC
+    select LOSCFG_ARCH_XTENSA_ARCH32
+
 config LOSCFG_ARCH_XTENSA_XEA2
     bool
     select LOSCFG_ARCH_XTENSA
@@ -31,6 +36,7 @@ config LOSCFG_ARCH_XTENSA_XEA3
 config LOSCFG_ARCH_CPU
     string
     default "xtensa-lx6"  if LOSCFG_ARCH_XTENSA_LX6
+    default "xtensa-l106" if LOSCFG_ARCH_XTENSA_L106
     default "xtensa-xea2" if LOSCFG_ARCH_XTENSA_XEA2
     default "xtensa-xea3" if LOSCFG_ARCH_XTENSA_XEA3
 

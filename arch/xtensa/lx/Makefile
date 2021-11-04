@@ -3,7 +3,12 @@ include $(LITEOSTOPDIR)/config.mk
 MODULE_NAME := $(LOSCFG_ARCH_CPU)
 
 LOCAL_SRCS := $(wildcard src/*.c) $(wildcard src/*.S)
-LOCAL_INCLUDE := -I $(LITEOSTOPDIR)/arch/xtensa/lx6/include
+
+ifneq ($(LOSCFG_XTENSA_WINDOWSPILL), y)
+LOCAL_SRCS := $(filter-out src/los_window.S, $(LOCAL_SRCS))
+endif
+
+LOCAL_INCLUDE := -I $(LITEOSTOPDIR)/arch/xtensa/esp/include
 
 LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 

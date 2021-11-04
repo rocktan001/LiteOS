@@ -51,12 +51,12 @@ extern "C" {
 
 #define HWI_NUM_VALID(num)              (((num) >= OS_USER_HWI_MIN) && ((num) <= OS_USER_HWI_MAX))
 
-extern VOID HalIrqInit(VOID);
+extern VOID ArchIrqInit(VOID);
 extern VOID HalIrqInitPercpu(VOID);
-extern UINT32 HalIrqMask(UINT32 vector);
-extern UINT32 HalIrqUnmask(UINT32 vector);
-extern UINT32 HalIrqPending(UINT32 vector);
-extern UINT32 HalIrqClear(UINT32 vector);
+extern UINT32 ArchIrqMask(UINT32 vector);
+extern UINT32 ArchIrqUnmask(UINT32 vector);
+extern UINT32 ArchIrqPending(UINT32 vector);
+extern UINT32 ArchIrqClear(UINT32 vector);
 extern CHAR *HalIrqVersion(VOID);
 extern UINT32 HalCurIrqGet(VOID);
 extern UINT32 HalIrqSetPrio(UINT32 vector, UINT8 priority);

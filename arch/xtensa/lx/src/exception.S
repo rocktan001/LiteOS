@@ -29,7 +29,7 @@
 #include "arch/regs.h"
 #include "arch/los_arch_macro.h"
 
-.extern HalInterrupt
+.extern ArchInterrupt
 .extern UserException
 
 .section    .iram,"ax"
@@ -49,23 +49,179 @@ HandleEntry:
     rsr     a0, EXCSAVE1
     s32i    a0, sp, CONTEXT_OFF_A0
 
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     wsr     a1, EXCSAVE1
     l32i    a1, a1, CONTEXT_OFF_A1
     call0   SpillWindow
     rsr     a1, EXCSAVE1
+#endif
     rsr     a0, EXCCAUSE
     s32i    a0, sp, CONTEXT_OFF_EXCCAUSE
     rsr     a0, EXCVADDR
     s32i    a0, sp, CONTEXT_OFF_EXCVADDR
+#ifndef LOSCFG_XTENSA_WINDOWSPILL
+    movi    a0, INT_MASK | USER_VECTOR_MODE
+#else 
     movi    a0, INT_MASK | USER_VECTOR_MODE | WOE_ENABLE
+#endif
     wsr     a0, PS
 
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     rsr     a6, EPC1
     mov     a7, sp
     rsr     a8, EXCCAUSE
-    call4   HalExcHandleEntry
+    call4   OsExcHandleEntry
+#else
+    rsr     a2, EPC1
+    mov     a3, a1
+    rsr     a4, EXCCAUSE
+    movi    a0, OsExcHandleEntry
+    callx0  a0
+#endif
 1:
     j       1b
+
+#ifdef LOSCFG_COMPILER_XTENSA_L106
+.literal_position
+        .type   LoadStoreErr, @function
+        .balign 4
+LoadStoreErr:
+    rsr     a0,  EXCSAVE1
+    addi    a1, a1, -28
+    LOADSTORE_EXP_PUSH a1
+    rsr     a0,  SAR
+    s32i    a0, a1, 4
+    rsr     a2, EPC1
+    ssa8l   a2
+    srli    a2,  a2,  2
+    slli    a2,  a2,  2         /* epc1 align 4 byte */
+    l32i    a4,  a2,  0
+    l32i    a2,  a2,  4
+    movi    a3,  LOAD_STORE_ERROR_MASK
+    src     a2,  a2,  a4        /* get epc1 code */
+    and     a3,  a2,  a3
+    movi    a4,  LOAD8_OPCODE
+    xor     a4,  a4,  a3
+    beqz    a4,  .Load8
+    movi    a4,  LOAD16_OPCODE
+    xor     a4,  a4,  a3
+    beqz    a4,  .Load16
+    movi    a4,  STOTE8_OPCODE
+    xor     a4,  a4,  a3
+    beqz    a4,  .Store8
+    movi    a4,  STOTE16_OPCODE
+    xor     a4,  a4,  a3
+    beqz    a4,  .Store16
+    j       .ExpCode
+
+    .balign 4
+.Load16:
+    movi    a4,  0xFF00
+.Load8:
+    GET_EXCVADDR  a3, a0
+    l32i    a0,  a0,  0
+    ssa8l   a3
+    srl     a3,  a0
+    addi    a4,  a4,  0xFF
+    and     a3,  a3,  a4
+    movi    a0,  0xFF
+    beq     a4,  a0, .CommonLoad
+    bbci    a3,  15, .CommonLoad
+    movi    a4, 0xFFFF0000
+    or      a3,  a3,  a4
+    j       .CommonLoad
+
+.CommonLoad:
+    mov     a4,  a3
+    l32i    a0,  a1, 4
+    wsr     a0,  SAR
+    rsr     a0,  EPC1
+    addi    a0,  a0,  0x3
+    wsr     a0,  EPC1
+    srli    a2,  a2,  4
+    movi    a3,  0xF
+    and     a2,  a2,  a3
+    beqi    a2,  1,  .GetA1
+    bgei    a2,  5,  .GetTable
+    addx4   a2,  a2,  a1
+    s32i    a4,  a2,  0
+    LOADSTORE_EXP_POP a1
+    addi    a1,  a1, 28
+    rfe
+
+.GetTable:
+    movi    a3,  .StoreLoadTableBase
+    l32i    a0,  a1,  0
+    slli    a2,  a2,  4
+    add     a2,  a2,  a3
+    l32i    a3,  a1,  0x0c
+    jx      a2
+
+    .balign 4
+.Store16:
+    movi    a4,  0xFF00
+.Store8:
+    addi    a4,  a4,  0xFF
+    s32i    a5,  a1,  0x14
+    s32i    a6,  a1,  0x18
+    mov     a5,  a4
+    GET_EXCVADDR a6, a4
+    GET_EXCVADDR a3, a4
+    ssa8b   a3
+    l32i    a3,  a4,  0
+    sll     a4,  a5
+    movi    a6,  -1
+    xor     a4,  a6,  a4
+    and     a3,  a3,  a4
+    extui   a2,  a2,  4,  4
+    movi    a6,  4
+    mull    a6,  a2,  a6
+    add     a2,  a6,  a1
+    l32i    a2,  a2,  0
+
+    and     a2,  a2,  a5
+    sll     a2,  a2
+    or      a3,  a3,  a2
+    s32i    a3,  a4,  0
+    wsr     a0,  SAR
+    rsr     a0,  EPC1
+    addi    a0,  a0,  0x3
+    wsr     a0,  EPC1
+    l32i    a5,  a1,  0x14
+    l32i    a6,  a1,  0x18
+    LOADSTORE_EXP_POP a1
+    addi    a1,  a1,  28
+    rfe
+
+.ExpCode:
+    wsr     a0,  SAR
+    LOADSTORE_EXP_POP a1
+    addi    a1,  a1, 28
+    call0   HandleEntry
+
+    .balign 4
+.GetA1:
+    s32i    a4,  a1,  0x04
+    LOADSTORE_EXP_POP a1
+    l32i    a1,  a1,  0x04
+    rfe
+
+    .balign 4
+.StoreLoadTable:
+    .set    .StoreLoadTableBase, .StoreLoadTable - 80
+    STORE_LOAD_TABLE 5
+    STORE_LOAD_TABLE 6
+    STORE_LOAD_TABLE 7
+    STORE_LOAD_TABLE 8
+    STORE_LOAD_TABLE 9
+    STORE_LOAD_TABLE 10
+    STORE_LOAD_TABLE 11
+    STORE_LOAD_TABLE 12
+    STORE_LOAD_TABLE 13
+    STORE_LOAD_TABLE 14
+    STORE_LOAD_TABLE 15
+.balign 4
+#endif
 
 .begin      literal_prefix .DebugExceptionHandler
 .section    .DebugExceptionHandler.text, "ax"
@@ -96,9 +252,6 @@ NMIExceptionHandler:
 .literal_position
 DoubleExceptionHandler:
 
-    movi    a0, INT_MASK | USER_VECTOR_MODE | WOE_ENABLE
-    wsr     a0, PS
-    rsr     a2, EXCCAUSE
     call0   UserException
 
 .end        literal_prefix
@@ -132,9 +285,9 @@ KernelException:
 .literal_position
 UserExceptionHandler:
 
-    wsr     a0, EXCSAVE1
+    wsr a0, EXCSAVE1    /* save lr */
+    wsr a1, EXCSAVE2
     call0   UserException
-
 .end        literal_prefix
 
 .section    .iram,"ax"
@@ -142,11 +295,13 @@ UserExceptionHandler:
 .align      4
 UserException:
 
-    rsr     a0, EXCCAUSE
+    rsr     a0, EXCCAUSE    /* read reason */
+#ifdef LOSCFG_COMPILER_XTENSA_L106
+    beqi    a0, 3, LoadStoreErr
+#endif
     beqi    a0, 4, InterruptEntry1
-    call0   HandleEntry
-1:
-    j 1b
+    j       HandleEntry
+
 
 .section    .iram,"ax"
 .type       InterruptEntry1,@function
@@ -164,20 +319,28 @@ InterruptEntry1:
     rsr     a0, EXCSAVE1
     s32i    a0, sp, CONTEXT_OFF_A0
 
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
     wsr     a1, EXCSAVE1
     l32i    a1, a1, CONTEXT_OFF_A1
     call0   SpillWindow
     rsr     a1, EXCSAVE1
-    
     movi    a0, LEVEL1_INT_MASK | USER_VECTOR_MODE | WOE_ENABLE
+#else
+    movi    a0, LEVEL1_INT_MASK | USER_VECTOR_MODE
+#endif
+
     wsr     a0, PS
     rsync
-
-    call4   HalInterrupt
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
+    call4   ArchInterrupt
+#else
+    call0   ArchInterrupt
+#endif
     mov     a2, a1
     POP_ALL_REG a2 EPC1 PS
     rfe
 
+#ifdef LOSCFG_COMPILER_XTENSA_LX6
 .begin      literal_prefix .InterruptEntry2
 .section    .InterruptEntry2.text, "ax"
 .global     InterruptEntry2
@@ -233,7 +396,9 @@ InterruptEntry5:
     call0   HandleEntry
 
 .end        literal_prefix
+#endif
 
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
 .section .WindowVectors.text, "ax"
 
 .org    0x0
@@ -358,3 +523,4 @@ UnderFlowGroup3:
     l32i    a5, a4, 4
     l32i    a4, a4, 0
     rfwu
+#endif

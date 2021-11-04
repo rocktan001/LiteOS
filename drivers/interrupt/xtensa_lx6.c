@@ -41,7 +41,7 @@ extern "C" {
 LITE_OS_SEC_BSS HwiHandleInfo g_hwiForm[LOSCFG_PLATFORM_HWI_LIMIT];
 extern VOID HalUpdateTimerCmpVal(VOID);
 
-UINT32 HalIrqPending(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqPending(HWI_HANDLE_T hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return LOS_ERRNO_HWI_NUM_INVALID;
@@ -52,7 +52,7 @@ UINT32 HalIrqPending(HWI_HANDLE_T hwiNum)
     return LOS_OK;
 }
 
-UINT32 HalIrqUnmask(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqUnmask(HWI_HANDLE_T hwiNum)
 {
     UINT32 ier;
 
@@ -66,7 +66,7 @@ UINT32 HalIrqUnmask(HWI_HANDLE_T hwiNum)
     return LOS_OK;
 }
 
-UINT32 HalIrqMask(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqMask(HWI_HANDLE_T hwiNum)
 {
     UINT32 ier;
 
@@ -80,12 +80,12 @@ UINT32 HalIrqMask(HWI_HANDLE_T hwiNum)
     return LOS_OK;
 }
 
-VOID HalInterrupt(VOID)
+__attribute__((section(".iram1"))) VOID ArchInterrupt(VOID)
 {
     UINT32 hwiIndex;
 
-    hwiIndex = HalIntNumGet();
-    HalIrqClear(hwiIndex);
+    hwiIndex = ArchCurIrqGet();
+    ArchIrqClear(hwiIndex);
     OsIntHandle(hwiIndex, &g_hwiForm[hwiIndex]);
     if (hwiIndex == HWI_NUM_SIX) {
         HalUpdateTimerCmpVal();
@@ -95,7 +95,7 @@ VOID HalInterrupt(VOID)
     }
 }
 
-UINT32 HalIrqClear(HWI_HANDLE_T vector)
+UINT32 ArchIrqClear(HWI_HANDLE_T vector)
 {
     if (!HWI_NUM_VALID(vector)) {
         return LOS_ERRNO_HWI_NUM_INVALID;
@@ -105,7 +105,7 @@ UINT32 HalIrqClear(HWI_HANDLE_T vector)
     return LOS_OK;
 }
 
-UINT32 HalIntNumGet(VOID)
+UINT32 ArchCurIrqGet(VOID)
 {
     UINT32 ier;
     UINT32 intenable;
@@ -119,7 +119,7 @@ UINT32 HalIntNumGet(VOID)
     return  __builtin_ffs(intSave) - 1;
 }
 
-STATIC HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
+STATIC HwiHandleInfo *ArchIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return NULL;
@@ -129,17 +129,17 @@ STATIC HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 }
 
 STATIC const HwiControllerOps g_lx6Ops = {
-    .triggerIrq     = HalIrqPending,
-    .clearIrq       = HalIrqClear,
-    .enableIrq      = HalIrqUnmask,
-    .disableIrq     = HalIrqMask,
-    .getHandleForm  = HalIrqGetHandleForm,
+    .triggerIrq     = ArchIrqPending,
+    .clearIrq       = ArchIrqClear,
+    .enableIrq      = ArchIrqUnmask,
+    .disableIrq     = ArchIrqMask,
+    .getHandleForm  = ArchIrqGetHandleForm,
 };
 
-VOID HalIrqInit(VOID)
+VOID ArchIrqInit(VOID)
 {
     for (UINT32 i = 0; i < OS_HWI_MAX_NUM; i++) {
-        HalIrqMask(i);
+        ArchIrqMask(i);
     }
     asm volatile ("wsr %0, vecbase" : : "r"(INIT_VECTOR_START));
     OsHwiControllerReg(&g_lx6Ops);

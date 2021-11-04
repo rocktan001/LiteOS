@@ -183,7 +183,7 @@ STATIC const HwiControllerOps g_eclicOps = {
     .getHandleForm  = EclicIrqGetHandleForm,
 };
 
-VOID HalIrqInit(VOID)
+VOID ArchIrqInit(VOID)
 {
     UINT32 i;
 

@@ -35,6 +35,43 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#ifdef LOSCFG_PLATFORM_ESP8266
+.macro LOADSTORE_EXP_POP SP
+    l32i    a0,  \SP,  0
+    l32i    a2,  \SP,  0x08
+    l32i    a3,  \SP,  0x0c
+    l32i    a4,  \SP,  0x10
+.endm
+
+.macro LOADSTORE_EXP_PUSH SP
+    s32i    a0,  \SP,  0
+    s32i    a2,  \SP,  0x08
+    s32i    a3,  \SP,  0x0c
+    s32i    a4,  \SP,  0x10
+.endm
+
+.macro REG_TABLE REGNUM LABEL
+    .org    .RegTable + 8 * (\REGNUM - 7)
+    mov     a2, a&REGNUM&
+    j       \LABEL
+.endm
+
+.macro STORE_LOAD_TABLE LAYER
+    .org    .StoreLoadTable + (16 * (\LAYER - 5))
+    mov a&LAYER&, a4
+    l32i    a2,  a1,  0x08
+    l32i    a4,  a1,  0x10
+    rsr     a1,  EXCSAVE1
+    rfe
+.endm
+
+.macro GET_EXCVADDR  VADDR ALIGADDR
+    movi   \ALIGADDR, (~3)
+    rsr    \VADDR, EXCVADDR
+    and    \ALIGADDR, \ALIGADDR, \VADDR
+.endm
+#endif
+
 .macro POP_ALL_REG SP PC PState
 #ifdef LOSCFG_ARCH_FPU_ENABLE
     l16ui  a3, \SP, CONTEXT_OFF_CPENABLE
@@ -69,13 +106,14 @@ extern "C" {
     movi   a4, 0
     s16i   a4, \SP, CONTEXT_OFF_CPSTORED
 #endif /* LOSCFG_ARCH_FPU_ENABLE */
-
+#ifdef LOSCFG_XTENSA_LOOPS
     l32i    a3,  \SP, CONTEXT_OFF_LBEG
     l32i    a4,  \SP, CONTEXT_OFF_LEND
     wsr     a3,  LBEG
     l32i    a3,  \SP, CONTEXT_OFF_LCOUNT
     wsr     a4,  LEND
     wsr     a3,  LCOUNT
+#endif
     l32i    a3,  \SP, CONTEXT_OFF_SAR
     l32i    a1,  \SP, CONTEXT_OFF_A1
     wsr     a3,  SAR
@@ -119,12 +157,14 @@ extern "C" {
     s32i    a15, \SP, CONTEXT_OFF_A15
     rsr     a3,  SAR
     s32i    a3,  \SP, CONTEXT_OFF_SAR
+#ifdef LOSCFG_XTENSA_LOOPS
     rsr     a3,  LBEG
     s32i    a3,  \SP, CONTEXT_OFF_LBEG
     rsr     a3,  LEND
     s32i    a3,  \SP, CONTEXT_OFF_LEND
     rsr     a3,  LCOUNT
     s32i    a3,  \SP, CONTEXT_OFF_LCOUNT
+#endif
     rsr     a3,  PS
     s32i    a3,  \SP, CONTEXT_OFF_PS
 #ifdef LOSCFG_ARCH_FPU_ENABLE

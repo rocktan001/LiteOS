@@ -259,7 +259,7 @@ UINT32 HalCurIrqGet(VOID)
     return g_curIrqNum;
 }
 
-UINT32 HalIrqMask(UINT32 vector)
+UINT32 ArchIrqMask(UINT32 vector)
 {
     INT32 i;
     const UINT32 mask = 1U << (vector % 32);
@@ -280,7 +280,7 @@ UINT32 HalIrqMask(UINT32 vector)
     return LOS_OK;
 }
 
-UINT32 HalIrqUnmask(UINT32 vector)
+UINT32 ArchIrqUnmask(UINT32 vector)
 {
     INT32 i;
     const UINT32 mask = 1U << (vector % 32);
@@ -302,7 +302,7 @@ UINT32 HalIrqUnmask(UINT32 vector)
     return LOS_OK;
 }
 
-UINT32 HalIrqPending(UINT32 vector)
+UINT32 ArchIrqPending(UINT32 vector)
 {
     if (!HWI_NUM_VALID(vector)) {
         return LOS_ERRNO_HWI_NUM_INVALID;
@@ -312,7 +312,7 @@ UINT32 HalIrqPending(UINT32 vector)
     return LOS_OK;
 }
 
-UINT32 HalIrqClear(UINT32 vector)
+UINT32 ArchIrqClear(UINT32 vector)
 {
     if (!HWI_NUM_VALID(vector)) {
         return LOS_ERRNO_HWI_NUM_INVALID;
@@ -347,7 +347,7 @@ UINT32 HalIrqSetPrio(UINT32 vector, UINT8 priority)
     return LOS_OK;
 }
 
-HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
+HwiHandleInfo *ArchIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return NULL;
@@ -418,20 +418,20 @@ VOID HalIrqInitPercpu(VOID)
 
 #ifdef LOSCFG_KERNEL_SMP
     /* unmask ipi interrupts */
-    (void)HalIrqUnmask(LOS_MP_IPI_WAKEUP);
-    (void)HalIrqUnmask(LOS_MP_IPI_HALT);
+    (void)ArchIrqUnmask(LOS_MP_IPI_WAKEUP);
+    (void)ArchIrqUnmask(LOS_MP_IPI_HALT);
 #endif
 }
 
 STATIC const HwiControllerOps g_gicv3Ops = {
-    .triggerIrq         = HalIrqPending,
-    .clearIrq           = HalIrqClear,
-    .enableIrq          = HalIrqUnmask,
-    .disableIrq         = HalIrqMask,
+    .triggerIrq         = ArchIrqPending,
+    .clearIrq           = ArchIrqClear,
+    .enableIrq          = ArchIrqUnmask,
+    .disableIrq         = ArchIrqMask,
     .setIrqPriority     = HalIrqSetPrio,
     .getCurIrqNum       = HalCurIrqGet,
     .getIrqVersion      = HalIrqVersion,
-    .getHandleForm      = HalIrqGetHandleForm,
+    .getHandleForm      = ArchIrqGetHandleForm,
     .handleIrq          = HalIrqHandler,
 #ifdef LOSCFG_KERNEL_SMP
     .sendIpi            = HalIrqSendIpi,
@@ -468,7 +468,7 @@ UINT32 HalSmpIrqInit(VOID)
 }
 #endif
 
-VOID HalIrqInit(VOID)
+VOID ArchIrqInit(VOID)
 {
     UINT32 i;
     UINT64 affinity;

@@ -258,7 +258,7 @@ LITE_OS_SEC_TEXT_MINOR VOID OsSystemWakeup(VOID)
     (VOID)memset_s((VOID *)&__bss_start, (((UINTPTR)&__bss_end) - ((UINTPTR)&__bss_start)), 0,
         (((UINTPTR)&__bss_end) - ((UINTPTR)&__bss_start)));
 
-    HalIrqInit();
+    ArchIrqInit();
 
 #ifndef LOSCFG_PLATFORM_NO_UART
     uart_early_init();

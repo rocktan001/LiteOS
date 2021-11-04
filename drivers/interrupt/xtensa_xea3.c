@@ -77,7 +77,7 @@ LITE_OS_SEC_TEXT_INIT VOID IrqEntryXea3(HWI_ARG_T arg)
     OsIntHandle(hwiIndex, &g_hwiForm[hwiIndex]);
 }
 
-UINT32 HalIrqPending(HWI_HANDLE_T irq)
+UINT32 ArchIrqPending(HWI_HANDLE_T irq)
 {
     UINTPTR uvIntSave;
 
@@ -91,7 +91,7 @@ UINT32 HalIrqPending(HWI_HANDLE_T irq)
     return LOS_OK;
 }
 
-UINT32 HalIrqUnmask(HWI_HANDLE_T irq)
+UINT32 ArchIrqUnmask(HWI_HANDLE_T irq)
 {
     UINTPTR uvIntSave;
 
@@ -105,7 +105,7 @@ UINT32 HalIrqUnmask(HWI_HANDLE_T irq)
     return LOS_OK;
 }
 
-UINT32 HalIrqMask(HWI_HANDLE_T irq)
+UINT32 ArchIrqMask(HWI_HANDLE_T irq)
 {
     UINTPTR uvIntSave;
 
@@ -124,7 +124,7 @@ UINT32 HalCurIrqGet(VOID)
     return g_curIrqNum;
 }
 
-UINT32 HalIrqClear(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqClear(HWI_HANDLE_T hwiNum)
 {
     UINTPTR uvIntSave;
 
@@ -139,7 +139,7 @@ UINT32 HalIrqClear(HWI_HANDLE_T hwiNum)
     return LOS_OK;
 }
 
-STATIC HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
+STATIC HwiHandleInfo *ArchIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return NULL;
@@ -149,15 +149,15 @@ STATIC HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 }
 
 STATIC const HwiControllerOps g_xea3Ops = {
-    .triggerIrq     = HalIrqPending,
-    .clearIrq       = HalIrqClear,
-    .enableIrq      = HalIrqUnmask,
-    .disableIrq     = HalIrqMask,
+    .triggerIrq     = ArchIrqPending,
+    .clearIrq       = ArchIrqClear,
+    .enableIrq      = ArchIrqUnmask,
+    .disableIrq     = ArchIrqMask,
     .getCurIrqNum   = HalCurIrqGet,
-    .getHandleForm  = HalIrqGetHandleForm,
+    .getHandleForm  = ArchIrqGetHandleForm,
 };
 
-LITE_OS_SEC_TEXT_INIT VOID HalIrqInit(VOID)
+LITE_OS_SEC_TEXT_INIT VOID ArchIrqInit(VOID)
 {
     UINT32 i;
 

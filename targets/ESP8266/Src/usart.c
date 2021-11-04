@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Xtensa Lx6 Interrupt HeadFile
+ * Description: Usart Init Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-09-10
+ * Create: 2021-10-28
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _XTENSA_LX6_H
-#define _XTENSA_LX6_H
-
-#include "los_config.h"
+#include "usart.h"
+#include "los_hwi.h"
+#include "platform.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,15 +36,58 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/* hardware interrupt entry */
-VOID ArchInterrupt(VOID);
-VOID ArchIrqInit(VOID);
-UINT32 ArchCurIrqGet(VOID);
+VOID UartWriteChar(const CHAR c)
+{
+    UINT32 txFifoCnt;
+    do {
+        txFifoCnt = (REG32_READ(UART_STATUS_REG) >> TXFIFP_CNT_SHIFT) & TXFIFO_CNT_MASK;
+    } while (txFifoCnt == (UART_FIFO_BUFFER - 1));
+    REG32_WRITE(UART_FIFO_REG, c);
+}
+
+UINT8 UartReadChar(VOID)
+{
+    UINT8 RxFifoCnt = REG32_READ(UART_STATUS_REG);;
+    UINT8 c = 0;
+    if (RxFifoCnt > 0) {
+        c = REG32_READ(UART_FIFO_REG);
+    }
+    return c;
+}
+
+VOID UartPutc(CHAR c) {
+    UartWriteChar(c);
+}
+
+STATIC VOID UartHandler(VOID)
+{
+    uart_getc();
+    REG32_MASK_SET(UART_INTCLR_REG, RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK);
+    LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
+}
+
+STATIC INT32 UartHwi(VOID)
+{
+    UINT32 ret = LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    if (ret != LOS_OK) {
+        PRINT_ERR("%s, %d, uart interrupt created failed, ret = %x.\n", __FILE__, __LINE__, ret);
+    } else {
+        REG32_MASK_SET(UART_INTCLR_REG, RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK);
+        REG32_MASK_SET(UART_INTENA_REG, RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK);
+        LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+    }
+    return ret;
+}
+
+UartControllerOps g_genericUart = {
+    .uartInit = NULL,
+    .uartWriteChar = UartWriteChar,
+    .uartReadChar = UartReadChar,
+    .uartHwiCreate = UartHwi,
+};
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#endif /* _XTENSA_LX6_H */

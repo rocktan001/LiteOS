@@ -68,7 +68,7 @@ VOID IrqEntryCsky(VOID)
     }
 }
 
-UINT32 HalIrqUnmask(UINT32 hwiNum)
+UINT32 ArchIrqUnmask(UINT32 hwiNum)
 {
     UINT32 intSave;
 
@@ -105,7 +105,7 @@ UINT32 HalIrqSetPriority(UINT32 hwiNum, UINT8 priority)
     return LOS_OK;
 }
 
-UINT32 HalIrqMask(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqMask(HWI_HANDLE_T hwiNum)
 {
     UINT32 intSave;
 
@@ -119,7 +119,7 @@ UINT32 HalIrqMask(HWI_HANDLE_T hwiNum)
     return LOS_OK;
 }
 
-UINT32 HalIrqPending(UINT32 hwiNum)
+UINT32 ArchIrqPending(UINT32 hwiNum)
 {
     UINT32 intSave;
 
@@ -133,7 +133,7 @@ UINT32 HalIrqPending(UINT32 hwiNum)
     return LOS_OK;
 }
 
-UINT32 HalIrqClear(UINT32 hwiNum)
+UINT32 ArchIrqClear(UINT32 hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return LOS_ERRNO_HWI_NUM_INVALID;
@@ -153,7 +153,7 @@ CHAR *HalIrqVersion(VOID)
     return "VIC";
 }
 
-HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
+HwiHandleInfo *ArchIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return NULL;
@@ -163,17 +163,17 @@ HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 }
 
 STATIC const HwiControllerOps g_nvicOps = {
-    .triggerIrq     = HalIrqPending,
-    .enableIrq      = HalIrqUnmask,
-    .disableIrq     = HalIrqMask,
+    .triggerIrq     = ArchIrqPending,
+    .enableIrq      = ArchIrqUnmask,
+    .disableIrq     = ArchIrqMask,
     .setIrqPriority = HalIrqSetPriority,
     .getCurIrqNum   = HalCurIrqGet,
     .getIrqVersion  = HalIrqVersion,
-    .getHandleForm  = HalIrqGetHandleForm,
-    .clearIrq       = HalIrqClear,
+    .getHandleForm  = ArchIrqGetHandleForm,
+    .clearIrq       = ArchIrqClear,
 };
 
-VOID HalIrqInit(VOID)
+VOID ArchIrqInit(VOID)
 {
     UINT32 i;
 

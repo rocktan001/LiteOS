@@ -36,7 +36,7 @@ extern "C" {
 
 LITE_OS_SEC_BSS HwiHandleInfo g_hwiForm[LOSCFG_PLATFORM_HWI_LIMIT];
 
-UINT32 HalIrqPending(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqPending(HWI_HANDLE_T hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return LOS_ERRNO_HWI_NUM_INVALID;
@@ -47,7 +47,7 @@ UINT32 HalIrqPending(HWI_HANDLE_T hwiNum)
     return LOS_OK;
 }
 
-UINT32 HalIrqUnmask(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqUnmask(HWI_HANDLE_T hwiNum)
 {
     UINT32 ier;
 
@@ -61,7 +61,7 @@ UINT32 HalIrqUnmask(HWI_HANDLE_T hwiNum)
     return LOS_OK;
 }
 
-UINT32 HalIrqMask(HWI_HANDLE_T hwiNum)
+UINT32 ArchIrqMask(HWI_HANDLE_T hwiNum)
 {
     UINT32 ier;
 
@@ -84,7 +84,7 @@ WEAK VOID IrqEntryXea2(UINT32 intrNo)
     OsIntHandle(intrNo, &g_hwiForm[intrNo]);
 }
 
-UINT32 HalIrqClear(HWI_HANDLE_T vector)
+UINT32 ArchIrqClear(HWI_HANDLE_T vector)
 {
     if (!HWI_NUM_VALID(vector)) {
         return LOS_ERRNO_HWI_NUM_INVALID;
@@ -95,7 +95,7 @@ UINT32 HalIrqClear(HWI_HANDLE_T vector)
     return LOS_OK;
 }
 
-STATIC HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
+STATIC HwiHandleInfo *ArchIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 {
     if (!HWI_NUM_VALID(hwiNum)) {
         return NULL;
@@ -105,14 +105,14 @@ STATIC HwiHandleInfo *HalIrqGetHandleForm(HWI_HANDLE_T hwiNum)
 }
 
 STATIC const HwiControllerOps g_xea2Ops = {
-    .triggerIrq     = HalIrqPending,
-    .clearIrq       = HalIrqClear,
-    .enableIrq      = HalIrqUnmask,
-    .disableIrq     = HalIrqMask,
-    .getHandleForm  = HalIrqGetHandleForm,
+    .triggerIrq     = ArchIrqPending,
+    .clearIrq       = ArchIrqClear,
+    .enableIrq      = ArchIrqUnmask,
+    .disableIrq     = ArchIrqMask,
+    .getHandleForm  = ArchIrqGetHandleForm,
 };
 
-LITE_OS_SEC_TEXT_INIT VOID HalIrqInit(VOID)
+LITE_OS_SEC_TEXT_INIT VOID ArchIrqInit(VOID)
 {
     /* register interrupt controller's operations */
     OsHwiControllerReg(&g_xea2Ops);

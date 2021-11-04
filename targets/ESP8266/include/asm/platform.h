@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Xtensa Lx6 Interrupt HeadFile
+ * Description: Platform HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-09-10
+ * Create: 2021-10-28
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,10 +26,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _XTENSA_LX6_H
-#define _XTENSA_LX6_H
+#ifndef _ASM_PLATFORM_H
+#define _ASM_PLATFORM_H
 
-#include "los_config.h"
+#include "los_typedef.h"
+#include "uart.h"
+#include "arch/regs.h"
+#include "interrupt_config.h"
+#include "memmap_config.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,10 +41,11 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-/* hardware interrupt entry */
-VOID ArchInterrupt(VOID);
-VOID ArchIrqInit(VOID);
-UINT32 ArchCurIrqGet(VOID);
+#define OS_SYS_CLOCK  80000000
+
+#ifdef LOSCFG_PLATFORM_OSAPPINIT
+extern VOID app_init(VOID);
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,4 +53,4 @@ UINT32 ArchCurIrqGet(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _XTENSA_LX6_H */
+#endif /* _ASM_PLATFORM_H */

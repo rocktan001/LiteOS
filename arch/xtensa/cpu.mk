@@ -8,8 +8,8 @@ LOSCFG_ARCH_FPU          = $(LOSCFG_ARCH_FPU_STRIP)
 
 LITEOS_BASELIB          += -l$(LOSCFG_ARCH_CPU)
 
-ifeq ($(LOSCFG_ARCH_XTENSA_LX6), y)
-XTENSA_ARCH_DIR := lx6
+ifeq ($(LOSCFG_ARCH_XTENSA_LX6)$(LOSCFG_ARCH_XTENSA_L106), y)
+XTENSA_ARCH_DIR := lx
 endif
 ifeq ($(LOSCFG_ARCH_XTENSA_XEA3), y)
 XTENSA_ARCH_DIR := xea3
@@ -27,7 +27,7 @@ XTENSA_CORE_OPTS        += -DXCHAL_NUM_AREGS=64 -DLOSCFG_DSP_COPROCESS
 endif
 
 XTENSA_SYSTEM            = $(XTENSA_TOOL_DIR)/config
-ifeq ($(LOSCFG_ARCH_XTENSA_LX6), y)
+ifeq ($(LOSCFG_ARCH_XTENSA_LX6)$(LOSCFG_ARCH_XTENSA_L106), y)
 XTENSA_CORE_OPTS        += -mtext-section-literals
 else
 XTENSA_CORE_OPTS        += --xtensa-core=$(XTENSA_CORE) --xtensa-system=$(XTENSA_SYSTEM)
