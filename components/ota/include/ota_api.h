@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Main
+ * Description: OTA HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,46 +26,51 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _SOTA_H
-#define _SOTA_H
+/**
+ * @defgroup agent AgentTiny
+ * @defgroup agenttiny Agenttiny Definition
+ * @ingroup agent
+ */
+#ifndef _OTA_API_H
+#define _OTA_API_H
 
+#include <stdbool.h>
 #include <stdint.h>
-#include "ota/ota_api.h"
-#include <stddef.h>
 
-#define SOTA_DEBUG 1
 
-typedef enum {
-    APPLICATION = 0,
-    BOOTLOADER = 1,
-} sota_run_mode_e;
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 typedef enum {
-    SOTA_OK = 0,
-    SOTA_DOWNLOADING = 1,
-    SOTA_UPDATING    = 2,
-    SOTA_UPDATED     = 3,
-    SOTA_FAILED             = 101,
-    SOTA_EXIT               = 102,
-    SOTA_INVALID_PACKET     = 103,
-    SOTA_UNEXPECT_PACKET    = 104,
-    SOTA_WRITE_FLASH_FAILED = 105
-} sota_ret_e;
+    OTA_FULL_SOFTWARE,
+    OTA_DIFF_SOFTWARE,
+    OTA_UPDATE_INFO
+} ota_flash_type_e;
 
 typedef struct {
-    int (*get_ver)(char *buf, uint32_t len);
-    int (*sota_send)(const char *buf, int len);
-    void *(*sota_malloc)(size_t size);
-    void (*sota_free)(void *ptr);
-    int (*sota_printf)(const char *fmt, ...);
-    sota_run_mode_e firmware_download_stage;
-    sota_run_mode_e current_run_stage;
-    ota_opt_s ota_info;
-} sota_arg_s;
+    const char *rsa_N; /* RSA public key N, should valid all the time */
+    const char *rsa_E; /* RSA public key E, should valid all the time */
+} ota_key_s;
 
-int32_t sota_init(const sota_arg_s *sota_arg);
-int32_t sota_parse(const int8_t *in_buf, int32_t in_len, int8_t *out_buf, int32_t out_len);
-int32_t sota_process(void *arg, const int8_t *buf, int32_t buf_len);
-void sota_timeout_handler(void);
+typedef enum {
+    OTA_DOWNLOAD_SUCCESS,
+    OTA_DOWNLOAD_FAIL
+} ota_download_result_e;
 
-#endif /* _SOTA_H */
+typedef struct {
+    int (*read_flash)(ota_flash_type_e type, void *buf, int32_t len, uint32_t location);
+    int (*write_flash)(ota_flash_type_e type, const void *buf, int32_t len, uint32_t location);
+    uint32_t flash_block_size;
+    ota_key_s key;
+} ota_opt_s;
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif /* _OTA_API_H */

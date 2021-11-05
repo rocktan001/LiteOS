@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Ota Sota Hal HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -35,7 +35,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 int32_t crc_check(const unsigned char *message, int len);
-void HexStrToByte(const unsigned char *source, unsigned char *dest, int sourceLen);
+int HexStrToBytes(const uint8_t *inStrings, uint8_t *outBytes, int inLen);
 int do_crc(int reg_init, unsigned char *massage, int len);
 
 #ifdef __cplusplus

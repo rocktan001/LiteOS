@@ -29,7 +29,7 @@
 #include "internals.h"
 #include "agenttiny.h"
 #include "atiny_log.h"
-#include "ota/package.h"
+#include "package.h"
 #include "firmware_update.h"
 
 #define FW_BLOCK_SIZE (512)

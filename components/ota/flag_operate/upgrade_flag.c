@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Ota Flag Operate Upgrade
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -34,21 +34,14 @@
 typedef struct {
     upgrade_type_e upgrade_type;
     upgrade_state_e upgrade_state;
-    uint32_t image_size;
-    uint32_t old_image_size;
-    uint32_t recover_verify;
+    uint32_t image_size; // new image size
+    uint32_t old_image_size; // old image size
+    uint32_t recover_verify; 
     uint32_t verify_length;
     uint32_t crc_flag;
 } upgrade_flag_s;
 
 static upgrade_flag_s g_flag;
-
-static int save_flag(void)
-{
-    g_flag.crc_flag = calc_crc32(0, &g_flag, sizeof(upgrade_flag_s) - sizeof(uint32_t));
-
-    return flag_write(FLAG_BOOTLOADER, &g_flag, sizeof(upgrade_flag_s));
-}
 
 int flag_upgrade_init(void)
 {
@@ -67,9 +60,9 @@ int flag_upgrade_init(void)
         g_flag.recover_verify = 0;
         g_flag.image_size = 0;
         g_flag.old_image_size = 0;
-        return save_flag();
+        g_flag.crc_flag = calc_crc32(0, &g_flag, sizeof(upgrade_flag_s) - sizeof(uint32_t));
+        return flag_write(FLAG_BOOTLOADER, &g_flag, sizeof(upgrade_flag_s));
     }
-
     return 0;
 }
 
@@ -78,8 +71,8 @@ int flag_set_info(upgrade_type_e upgrade_type, uint32_t image_size)
     g_flag.upgrade_type = upgrade_type;
     g_flag.image_size = image_size;
     g_flag.upgrade_state = OTA_NEED_UPGRADE;
-
-    return save_flag();
+    g_flag.crc_flag = calc_crc32(0, &g_flag, sizeof(upgrade_flag_s) - sizeof(uint32_t));
+    return flag_write(FLAG_BOOTLOADER, &g_flag, sizeof(upgrade_flag_s));
 }
 
 void flag_get_info(upgrade_type_e *upgrade_type, uint32_t *image_size, uint32_t *old_image_size,
@@ -103,8 +96,8 @@ int flag_upgrade_set_result(upgrade_state_e state, uint32_t image_size)
 {
     g_flag.upgrade_state = state;
     g_flag.image_size = image_size;
-
-    return save_flag();
+    g_flag.crc_flag = calc_crc32(0, &g_flag, sizeof(upgrade_flag_s) - sizeof(uint32_t));
+    return flag_write(FLAG_BOOTLOADER, &g_flag, sizeof(upgrade_flag_s));
 }
 
 int flag_upgrade_get_result(upgrade_state_e *state)
@@ -117,16 +110,16 @@ int flag_upgrade_get_result(upgrade_state_e *state)
     }
     g_flag.upgrade_state = OTA_IDLE;
     g_flag.upgrade_type = UPGRADE_NONE;
-
-    return save_flag();
+    g_flag.crc_flag = calc_crc32(0, &g_flag, sizeof(upgrade_flag_s) - sizeof(uint32_t));
+    return flag_write(FLAG_BOOTLOADER, &g_flag, sizeof(upgrade_flag_s));
 }
 
 int flag_set_recover_verify(uint32_t recover_verify, uint32_t verify_length)
 {
     g_flag.recover_verify = recover_verify;
     g_flag.verify_length = verify_length;
-
-    return save_flag();
+    g_flag.crc_flag = calc_crc32(0, &g_flag, sizeof(upgrade_flag_s) - sizeof(uint32_t));
+    return flag_write(FLAG_BOOTLOADER, &g_flag, sizeof(upgrade_flag_s));
 }
 
 void flag_get_recover_verify(uint32_t *recover_verify, uint32_t *verify_length)
@@ -142,6 +135,6 @@ void flag_get_recover_verify(uint32_t *recover_verify, uint32_t *verify_length)
 int recover_set_update_fail(void)
 {
     g_flag.upgrade_state = OTA_FAILED;
-
-    return save_flag();
+    g_flag.crc_flag = calc_crc32(0, &g_flag, sizeof(upgrade_flag_s) - sizeof(uint32_t));
+    return flag_write(FLAG_BOOTLOADER, &g_flag, sizeof(upgrade_flag_s));
 }

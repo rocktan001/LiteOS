@@ -99,6 +99,7 @@ STM32L4_HAL_SRC = \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c \
+    drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_qspi.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c_ex.c \
     drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_iwdg.c \

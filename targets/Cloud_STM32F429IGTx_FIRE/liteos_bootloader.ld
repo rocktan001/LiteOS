@@ -33,6 +33,7 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
+_sstack = 0x20000000;    /* start of RAM */
 _estack = 0x20030000;    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x200;      /* required amount of heap  */
@@ -41,7 +42,7 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-FLASH (rx)      : ORIGIN = 0x08020000, LENGTH = 896K
+FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 128K /* bootloader size */
 RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 192K
 CCMRAM (rw)     : ORIGIN = 0x10000000, LENGTH = 64K
 }
@@ -61,6 +62,7 @@ SECTIONS
   .text :
   {
     . = ALIGN(4);
+    __text_start = .;
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
     *(.glue_7)         /* glue arm to thumb code */
@@ -72,15 +74,19 @@ SECTIONS
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
+    __text_end = _etext;
   } >FLASH
 
   /* Constant data goes into FLASH */
   .rodata :
   {
     . = ALIGN(4);
+    __rodata_start = .;
+
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
+    __rodata_end = .;
   } >FLASH
 
   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
@@ -127,15 +133,18 @@ SECTIONS
   _sidata = LOADADDR(.data);
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data :
+    .data ALIGN(0x1000):
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
+    __ram_data_start = _sdata;
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
+    KEEP(*( SORT (.liteos.table.*)));
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
+    __ram_data_end = _edata;
   } >RAM AT> FLASH
 
 
@@ -166,6 +175,7 @@ SECTIONS
     /* This is used by the startup in order to initialize the .bss secion */
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
+    __bss_start = _sbss;
     *(.bss)
     *(.bss*)
     *(COMMON)
@@ -191,6 +201,7 @@ SECTIONS
   __los_heap_addr_start__ = .;
   __los_heap_addr_end__ = ORIGIN(RAM) + LENGTH(RAM) - _Min_Stack_Size - 1;
 
+  __fast_end = .;
   /* Remove information from the standard libraries */
   /DISCARD/ :
   {

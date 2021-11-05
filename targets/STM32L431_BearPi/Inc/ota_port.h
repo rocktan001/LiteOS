@@ -28,8 +28,8 @@
 
 #ifndef _OTA_PORT_H
 #define _OTA_PORT_H
-#include "ota/package.h"
-#include "ota/ota_api.h"
+#include "package.h"
+#include "ota_api.h"
 
 #ifdef __cplusplus
 #if __cplusplus

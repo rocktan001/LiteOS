@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Ota Flag Operate Manager
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -40,55 +40,67 @@ int flag_init(flag_op_s *flag)
     if ((flag == NULL) || (flag->func_flag_read == NULL) || (flag->func_flag_write == NULL)) {
         return -1;
     }
-
     g_flag_op.func_flag_read = flag->func_flag_read;
     g_flag_op.func_flag_write = flag->func_flag_write;
-
     return 0;
 }
 
-int flag_read(flag_type_e flag_type, void *buf, int32_t len)
+int flag_read(flag_type_e flagType, void *buf, int32_t len)
 {
-    uint8_t flag_buf[FLASH_FLAG_SIZE];
+    int ret;
+    uint8_t flagBuffer[FLASH_FLAG_SIZE];
 
-    if ((buf == NULL) || (len < 0) || (len > FLASH_UNIT_SIZE) ||
-        (g_flag_op.func_flag_read(flag_buf, FLASH_FLAG_SIZE) != 0)) {
+    if ((buf == NULL) || (len <= 0) || (len > FLASH_FLAG_SIZE)) {
         return -1;
     }
 
-    switch (flag_type) {
+    ret = g_flag_op.func_flag_read(flagBuffer, FLASH_FLAG_SIZE);
+    if (ret != 0) {
+        return -1;
+    }
+
+    switch (flagType) {
         case FLAG_BOOTLOADER:
-            memcpy(buf, flag_buf, len);
+            memcpy(buf, flagBuffer, len);
             break;
         case FLAG_APP:
-            memcpy(buf, flag_buf + FLASH_UNIT_SIZE, len);
+            memcpy(buf, flagBuffer + FLASH_UNIT_SIZE, len);
             break;
         default:
             break;
     }
-
     return 0;
 }
 
-int flag_write(flag_type_e flag_type, const void *buf, int32_t len)
+int flag_write(flag_type_e flagType, const void *buf, int32_t len)
 {
-    uint8_t flag_buf[FLASH_FLAG_SIZE];
+    int ret;
+    uint8_t flagBuffer[FLASH_FLAG_SIZE];
 
-    if ((buf == NULL) || (len < 0) || (len > FLASH_UNIT_SIZE) ||
-        (g_flag_op.func_flag_read(flag_buf, FLASH_FLAG_SIZE) != 0)) {
+    if ((buf == NULL) || (len <= 0) || (len > FLASH_FLAG_SIZE)) {
         return -1;
     }
 
-    switch (flag_type) {
+    // read flag from flash
+    ret = g_flag_op.func_flag_read(flagBuffer, FLASH_FLAG_SIZE);
+    if (ret != 0) {
+        return -1;
+    }
+
+    switch (flagType) {
         case FLAG_BOOTLOADER:
-            memcpy(flag_buf, buf, len);
+            memcpy(flagBuffer, buf, len);
             break;
         case FLAG_APP:
-            memcpy(flag_buf + FLASH_UNIT_SIZE, buf, len);
+            memcpy(flagBuffer + FLASH_UNIT_SIZE, buf, len);
             break;
         default:
             break;
     }
-
-    return g_flag_op.func_flag_write(flag_buf, FLASH_FLAG_SIZE);
+    // save new flag
+    if (g_flag_op.func_flag_write == NULL) {
+        return -1;
+    }
+    ret = g_flag_op.func_flag_write(flagBuffer, FLASH_FLAG_SIZE);
+    return ret; 
 }

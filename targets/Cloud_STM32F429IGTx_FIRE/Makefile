@@ -15,7 +15,6 @@ HARDWARE_SRC = \
 
 USER_SRC = \
     os_adapt/os_adapt.c \
-    Src/main.c \
     Src/system_stm32f4xx.c \
     Src/usart.c \
     Src/can.c \
@@ -25,6 +24,15 @@ USER_SRC = \
     Src/user_task.c \
     Src/tim.c
     C_SOURCES += $(USER_SRC)
+
+ifeq ($(LOSCFG_BOOTLOADER), y)
+USER_SRC += \
+    Src/bootloader_ota.c \
+    Src/board_ota.c \
+    Src/ota_port.c
+else
+    USER_SRC += Src/main.c
+endif
 
 ifeq ($(LOSCFG_COMPONENTS_FS), y)
     ifeq ($(LOSCFG_FATFS_USE_SD_CARD), y)
@@ -62,6 +70,11 @@ endif
 ifeq ($(LOSCFG_COMPONENTS_EASYFLASH), y)
 C_SOURCES += \
     Src/ef_port.c
+endif
+
+ifeq ($(LOSCFG_COMPONENTS_OTA), y)
+C_SOURCES += \
+    Src/ota_port.c
 endif
 
 # C includes
@@ -116,6 +129,8 @@ LOCAL_SRCS := $(subst $(CURDIR)/,, $(BOARD_SRCS))
 BOARD_DEF += $(C_DEFS)
 LOCAL_INCLUDE += $(BOARD_INCLUDES)
 
-LOCAL_FLAGS := $(LITEOS_CFLAGS_INTERWORK) $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
+LOCAL_EXT_FLAG :=  -Wno-unused-but-set-variable
+
+LOCAL_FLAGS := $(LITEOS_CFLAGS_INTERWORK) $(BOARD_DEF) $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS) $(LOCAL_EXT_FLAG)
 
 include $(MODULE)

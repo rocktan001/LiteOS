@@ -8,9 +8,10 @@ source "components/gui/Kconfig"
 source "components/language/Kconfig"
 source "components/lib/Kconfig"
 source "components/media/Kconfig"
-#source "components/ota/Kconfig"
+source "components/ota/Kconfig"
 source "components/security/Kconfig"
 source "components/sensorhub/Kconfig"
 source "components/utility/Kconfig"
+source "components/bootloader/Kconfig"
 
 endmenu

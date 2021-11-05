@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Ota Package Opt Sha256 Rsa2048 HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Upgrade HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-10-10
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,22 +26,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-/**
- * @defgroup atiny_adapter Agenttiny Adapter
- * @ingroup agent
- */
+#ifndef _UPGRADE_H
+#define _UPGRADE_H
 
-#ifndef _PACKAGE_SHA256_RSA2048_H
-#define _PACKAGE_SHA256_RSA2048_H
-
-#include "package_sha256.h"
-#include "../package_head.h"
-
-typedef struct {
-    pack_sha256_s sha256;
-    pack_head_s *head;
-} pack_sha256_rsa2048_s;
-
+#include "los_typedef.h"
+#include "los_base.h"
+#include "los_task.h"
+#include "los_typedef.h"
+#include "los_sys.h"
+#include "ota_port.h"
+#include "mbedtls/sha256.h"
+#include "flag_manager.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -49,8 +44,54 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-int pack_sha256_rsa2048_init(pack_sha256_rsa2048_s *thi, pack_head_s *head);
+typedef enum {
+    PROCESSING_SUCCEEDED = 0, 
+    EQUIPMENT_IN_USE,
+    POOR_SIGNAL_QUALITY,
+    LATEST_VERSION,
+    LOW_BATTERY,
+    SPACE_INSUFFICIENT,
+    DOWNLOAD_TIMEOUT,
+    VERFIY_FAILED,
+    TYPE_UNSUPPORTED,
+    OUT_OF_MEMORY,
+    INSTALL_FAILED,
+    INTERNAL_ABNORMAL = 0xFF
+} ResultCodeType;
 
+typedef struct {
+    int len;
+    int postion;
+    uint8_t buffer[];
+} FwBuffer;
+
+typedef struct {
+    char host[32];
+    char port[8];
+    char url[256];
+    char token[128];
+    char sign[128];
+    char version[32];
+    int fileSize;
+    uint8_t signCheck[32]; // sha256 length: 32 bytes
+    int writeSize;
+    ota_opt_s opt;
+    flag_op_s flagOp;
+    FwBuffer *fwBuffer;
+    int (*callback)(char *version, int resultCode, int progress);
+} UpgradeHandle;
+
+typedef struct {
+    char *buffer;
+    int size;
+    char version[16];
+    int progress; // device upgrade progress. The value ranges from 0 to 100
+    ResultCodeType resultCode; // Upgrade status of the device
+} UpgradeProgress;
+
+int UpgradeQueueWrite(UpgradeHandle *handle, int len);
+int UpgradeInit(void);
+uint32_t UpgradeMainTask(UpgradeHandle *handle, uint16_t len);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -58,4 +99,4 @@ int pack_sha256_rsa2048_init(pack_sha256_rsa2048_s *thi, pack_head_s *head);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _PACKAGE_SHA256_RSA2048_H */
+#endif /* _UPGRADE_H */

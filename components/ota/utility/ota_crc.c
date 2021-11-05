@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Utility Crc
  * Author: Huawei LiteOS Team
@@ -88,18 +88,15 @@ uint32_t calc_crc32(uint32_t origin, const void *buf, int32_t len)
 {
     int i;
     uint32_t crc;
-    const uint8_t *pbuf;
+    const uint8_t *pbuf = NULL;
 
     if ((buf == NULL) || (len < 0)) {
         return 0;
     }
-
     pbuf = (const uint8_t *)buf;
     crc = ~origin;
-
     for (i = 0; i < len; ++i) {
         crc = (crc >> 8) ^ crc_table[((crc & 0xff) ^ pbuf[i]) & 0xff];
     }
-
     return ~crc;
 }

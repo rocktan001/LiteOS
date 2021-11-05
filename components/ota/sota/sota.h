@@ -1,6 +1,6 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Hwpatch Errno HeadFile
+ * Description: Main
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,38 +26,46 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _HWPATCH_ERRNO_H
-#define _HWPATCH_ERRNO_H
+#ifndef _SOTA_H
+#define _SOTA_H
 
-#define ERR_OK                      0
-#define ERR_ILEGAL_PARAM            (-0x01)
-#define ERR_INTERNAL                (-0x02)
+#include <stdint.h>
+#include "ota_api.h"
+#include <stddef.h>
 
-#define ERR_DIFF_FILE_OPEN          (-0x101)
-#define ERR_DIFF_FILE_READ          (-0x102)
-#define ERR_DIFF_FILE_WRITE         (-0x103)
-#define ERR_DIFF_COMPRESS           (-0x104)
-#define ERR_DIFF_MALLOC             (-0x105)
-#define ERR_DIFF_BSDIFF             (-0x106)
-#define ERR_DIFF_BUFF_NOT_ENOUGHT   (-0x107)
-#define ERR_DIFF_GET_SETS           (-0x108)
-#define ERR_DIFF_GEN_CMD            (-0x109)
-#define ERR_DIFF_GEN_DEPENDENCY     (-0x10A)
-#define ERR_DIFF_TARGET_NOT_FOUND   (-0x10B)
+#define SOTA_DEBUG 1
 
-#define ERR_PATCH_WRITE_BCK         (-0x201)
-#define ERR_PATCH_READ_BCK          (-0x202)
-#define ERR_PATCH_WRITE_IMAGE       (-0x203)
-#define ERR_PATCH_READ_IMAGE        (-0x204)
-#define ERR_PATCH_READ_PATCH        (-0x205)
-#define ERR_PATCH_MALLOC            (-0x206)
-#define ERR_PATCH_RECOVER_BLOCK     (-0x207)
-#define ERR_PATCH_BUFF_NOT_ENOUGHT  (-0x207)
-#define ERR_PATCH_UNCOMPRESS        (-0x208)
-#define ERR_PATCH_CHECKSUM          (-0x209)
-#define ERR_PATCH_RECOVER_VERIFY    (-0x20A)
-#define ERR_PATCH_LAST_RECOVER      (-0x20B)
-#define ERR_PATCH_FLAG_INIT         (-0x20C)
-#define ERR_PATCH_WRONG_FLAG        (-0x20D)
+typedef enum {
+    APPLICATION = 0,
+    BOOTLOADER = 1,
+} sota_run_mode_e;
 
-#endif /* _HWPATCH_ERRNO_H */
+typedef enum {
+    SOTA_OK = 0,
+    SOTA_DOWNLOADING = 1,
+    SOTA_UPDATING    = 2,
+    SOTA_UPDATED     = 3,
+    SOTA_FAILED             = 101,
+    SOTA_EXIT               = 102,
+    SOTA_INVALID_PACKET     = 103,
+    SOTA_UNEXPECT_PACKET    = 104,
+    SOTA_WRITE_FLASH_FAILED = 105
+} sota_ret_e;
+
+typedef struct {
+    int (*get_ver)(char *buf, uint32_t len);
+    int (*sota_send)(const char *buf, int len);
+    void *(*sota_malloc)(size_t size);
+    void (*sota_free)(void *ptr);
+    int (*sota_printf)(const char *fmt, ...);
+    sota_run_mode_e firmware_download_stage;
+    sota_run_mode_e current_run_stage;
+    ota_opt_s ota_info;
+} sota_arg_s;
+
+int32_t sota_init(const sota_arg_s *sota_arg);
+int32_t sota_parse(const int8_t *in_buf, int32_t in_len, int8_t *out_buf, int32_t out_len);
+int32_t sota_process(void *arg, const int8_t *buf, int32_t buf_len);
+void sota_timeout_handler(void);
+
+#endif /* _SOTA_H */

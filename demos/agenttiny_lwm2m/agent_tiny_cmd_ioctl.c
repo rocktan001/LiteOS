@@ -30,7 +30,7 @@
 #include "agenttiny.h"
 #include "osdepends/atiny_osdep.h"
 #ifdef CONFIG_FEATURE_FOTA
-#include "ota/ota_api.h"
+#include "ota_api.h"
 #include "ota_port.h"
 #endif
 

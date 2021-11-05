@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Targets Stm32f429 Src Bootloader Recover
  * Author: Huawei LiteOS Team
@@ -35,7 +35,7 @@
 #include "hal_spi_flash.h"
 #include "usart.h"
 #include "board_ota.h"
-#include "ota/recover_image.h"
+#include "recover_image.h"
 
 void SysTick_Handler(void)
 {
@@ -158,18 +158,18 @@ static int jump(uint32_t oldbin_size)
     int ret;
 
     printf("info: begin to jump to application\n");
-    ret = board_jump2app();
+    ret = jumpToApp();
     if (ret != 0) {
         printf("warning: jump to app failed, try to roll back now\n");
         (void)recover_set_update_fail();
-        ret = board_rollback_copy(oldbin_size);
+        ret = ImgRollbackCopy(oldBinSize);
         if (ret != 0) {
             printf("fatal: roll back failed, system start up failed\n");
             _Error_Handler(__FILE__, __LINE__);
         }
     }
     printf("info: begin to try to jump to application again\n");
-    ret = board_jump2app();
+    ret = jumpToApp();
     if (ret != 0) {
         printf("fatal: roll back succeed, system start up failed\n");
         _Error_Handler(__FILE__, __LINE__);
@@ -181,13 +181,13 @@ static int jump(uint32_t oldbin_size)
 int main(void)
 {
     int ret;
-    recover_upgrade_type_e upgrade_type = RECOVER_UPGRADE_NONE;
-    uint32_t newbin_size = 0;
-    uint32_t oldbin_size = 0;
+    recover_upgrade_type_e upgradeType = RECOVER_UPGRADE_NONE;
+    uint32_t newBinSize = 0;
+    uint32_t oldBinSize = 0;
 
-    SystemClock_Config();
-    Debug_USART1_UART_Init();
-    hal_spi_flash_config();
+    SystemClock_Config();  // system clock initialize
+    MX_USART1_UART_Init(); // usart1 initialize
+    hal_spi_flash_config(); // spi flash initialize
 
     printf("bootloader begin\n");
 
@@ -198,17 +198,17 @@ int main(void)
 
     printf("info: begin to process upgrade\n");
     ret = recover_image(&upgrade_type, &newbin_size, &oldbin_size);
-    if (oldbin_size == 0) {
-        oldbin_size = OTA_IMAGE_DOWNLOAD_SIZE;
+    if (oldBinSize == 0) {
+        oldBinSize = OTA_IMAGE_DOWNLOAD_SIZE;
     }
     if (ret == 0) {
-        switch (upgrade_type) {
+        switch (upgradeType) {
             case RECOVER_UPGRADE_NONE:
                 printf("info: normal start up\n");
                 break;
             case RECOVER_UPGRADE_FULL:
                 printf("info: full upgrade\n");
-                ret = board_update_copy(oldbin_size, newbin_size, OTA_IMAGE_DOWNLOAD_ADDR);
+                ret = ImgUpdateCopy(oldBinSize, newBinSize, OTA_IMAGE_DOWNLOAD_ADDR);
                 if (ret != 0) {
                     printf("warning: [full] copy newimage to inner flash failed\n");
                     (void)recover_set_update_fail();
@@ -216,7 +216,7 @@ int main(void)
                 break;
             case RECOVER_UPGRADE_DIFF:
                 printf("info: diff upgrade\n");
-                ret = board_update_copy(oldbin_size, newbin_size, OTA_IMAGE_DIFF_UPGRADE_ADDR);
+                ret = ImgUpdateCopy(oldBinSize, newBinSize, OTA_IMAGE_DIFF_UPGRADE_ADDR);
                 if (ret != 0) {
                     printf("warning: [diff] copy newimage to inner flash failed\n");
                     (void)recover_set_update_fail();
@@ -229,7 +229,7 @@ int main(void)
         printf("warning: upgrade failed with ret %d\n", ret);
     }
 
-    ret = jump(oldbin_size);
+    ret = jump(oldBinSize);
 
     return ret;
 }

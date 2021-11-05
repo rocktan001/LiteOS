@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Hal Flash
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -131,9 +131,8 @@ int hal_flash_read(void *buf, int32_t len, uint32_t location)
         (prv_flash_get_sector(location + len) != FLASH_SECTOR_ILEGAL)) {
         memcpy(buf, (uint8_t *)location, len);
         return 0;
-    } else {
-        return -1;
     }
+    return -1;
 }
 
 int hal_flash_erase(uint32_t addr, int32_t len)

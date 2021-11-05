@@ -65,6 +65,6 @@ typedef enum {
     ATA_AP,
 } NetModeType;
 
-void Esp8266Register(void);
+AtAdaptorApi AtGetEsp8266Interface(void);
 
 #endif /* _ESP8266_H */

@@ -17,13 +17,7 @@ LOCAL_INCLUDE += \
 
 LOCAL_INCLUDE += $(COMPONENTS_NET_INCLUDE)
 
-ifeq ($(LOSCFG_DTLS_PSK_ENCRYPT), y)
-LOCAL_CDEFS += -DMBEDTLS_CONFIG_FILE=\"los_mbedtls_config_psk.h\"
-else ifeq ($(LOSCFG_DTLS_CERT_ENCRYPT), y)
-LOCAL_CDEFS += -DMBEDTLS_CONFIG_FILE=\"los_mbedtls_config_cert.h\"
-else
 LOCAL_CDEFS += -DMBEDTLS_CONFIG_FILE=\"los_mbedtls_config.h\"
-endif
 
 LOCAL_SRCS += $(foreach dir, $(LOCAL_DIRS_y), $(wildcard $(dir)/*.c))
 

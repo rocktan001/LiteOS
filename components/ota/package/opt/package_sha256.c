@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package Opt Sha256
  * Author: Huawei LiteOS Team
@@ -25,10 +25,9 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-#ifdef INCLUDE_PACK_OPTION_FILE
-#include "package_sha256.h"
 #include <string.h>
-#include "../package_head.h"
+#include "package_sha256.h"
+#include "package_head.h"
 
 static void pack_sha256_reset(pack_checksum_alg_s *thi)
 {
@@ -78,4 +77,4 @@ int pack_sha256_init(pack_sha256_s *thi)
     pack_sha256_reset(&thi->base);
     return PACK_OK;
 }
-#endif
+

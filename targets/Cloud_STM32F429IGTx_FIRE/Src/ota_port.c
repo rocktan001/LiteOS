@@ -60,7 +60,6 @@ static int hal_read_flash(ota_flash_type_e type, void *buf, int32_t len, uint32_
     if (hal_check_flash_param(type, len, location) != OK) {
         return ERR;
     }
-
     return hal_spi_flash_read(buf, len, g_flash_base_addrs[type] + location);
 }
 
@@ -69,7 +68,6 @@ static int hal_write_flash(ota_flash_type_e type, const void *buf, int32_t len, 
     if (hal_check_flash_param(type, len, location) != OK) {
         return ERR;
     }
-
     return FlashAdaptorWrite(g_flash_base_addrs[type] + location, (const uint8_t *)buf, len);
 }
 
@@ -85,7 +83,7 @@ void hal_get_ota_opt(ota_opt_s *opt)
         return;
     }
 
-    memset(opt, 0, sizeof(*opt));
+    memset(opt, 0, sizeof(ota_opt_s));
     opt->read_flash = hal_read_flash;
     opt->write_flash = hal_write_flash;
     opt->flash_block_size = FLASH_BLOCK_SIZE;

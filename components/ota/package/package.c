@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package
  * Author: Huawei LiteOS Team
@@ -26,11 +26,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "ota/package.h"
+#include "package.h"
 #include "package_device.h"
-#if (PACK_CHECKSUM != PACK_NO_CHECKSUM)
 #include "mbedtls/platform.h"
-#endif
+
+static pack_storage_device_s g_pack_storage_device;
 
 static inline pack_storage_device_s *pack_storage_get_storage_device(pack_storage_device_api_s *this)
 {
@@ -78,10 +78,9 @@ static int pack_storage_write_software_end(pack_storage_device_api_s *this, pack
     return ret;
 }
 
-static int pack_storage_write_software(pack_storage_device_api_s *this, uint32_t offset, const uint8_t *buffer,
-    uint32_t len)
+static int pack_storage_write_software(pack_storage_device_api_s *this, uint32_t offset, const uint8_t *buffer, uint32_t len)
 {
-    pack_storage_device_s *device;
+    pack_storage_device_s *device = NULL;
     uint16_t used_len = 0;
     int ret;
 
@@ -153,9 +152,6 @@ static void pack_init_pack_device(pack_storage_device_s *device)
     device->interface.active_software = pack_storage_active_software;
     device->init_flag = true;
 }
-
-
-static pack_storage_device_s g_pack_storage_device;
 
 pack_storage_device_api_s *pack_get_device(void)
 {
@@ -239,9 +235,7 @@ int pack_init_device(const pack_params_s *params)
 
     pack_wr_set_device(&device->writer, device_info.hardware);
 
-#if (PACK_CHECKSUM != PACK_NO_CHECKSUM)
     (void)mbedtls_platform_set_calloc_free(local_calloc, params->free);
-#endif
 
     return PACK_OK;
 }

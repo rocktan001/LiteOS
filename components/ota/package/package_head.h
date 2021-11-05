@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package Head HeadFile
  * Author: Huawei LiteOS Team
@@ -33,16 +33,18 @@
 
 #ifndef _PACKAGE_HEAD_H
 #define _PACKAGE_HEAD_H
-#include "ota/package.h"
+
+#include "package.h"
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
 #include "package_checksum.h"
 #include "upgrade_flag.h"
 
-
 #define PACK_MALLOC(size) pack_malloc(size)
 #define PACK_FREE(ptr)    pack_free(ptr)
+
+pack_params_s *pack_get_params(void);
 
 #define PACK_LOG_ENABLE
 #ifdef PACK_LOG_ENABLE
@@ -51,7 +53,7 @@
         pack_params_s *__pack_params__ = pack_get_params();                                             \
         if (__pack_params__->printf != NULL) {                                                          \
             (void)__pack_params__->printf("[%s:%d]" fmt "\r\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
-        }                                                                                               \
+        }                                                                                            \
     } while (0)
 #else
 #define PACK_LOG(fmt, ...) ((void)0)
@@ -76,7 +78,6 @@ enum {
     PACK_OK,
     PACK_ERR
 };
-
 
 typedef struct {
     pack_hardware_s *hardware;
@@ -119,8 +120,6 @@ int pack_head_set_head_info(pack_head_s *head, pack_device_info_s *device_info);
 pack_checksum_s *pack_head_get_checksum(pack_head_s *head);
 ota_key_s *pack_head_get_key(pack_head_s *head);
 
-
-pack_params_s *pack_get_params(void);
 void *pack_malloc(size_t size);
 void pack_free(void *ptr);
 

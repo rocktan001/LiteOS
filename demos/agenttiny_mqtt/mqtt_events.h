@@ -39,7 +39,12 @@ extern "C" {
 
 int EventsDownPayloadParse(char *payload, int payloadLen);
 int UpoladDeviceVerison(char *deviceId, char *eventTime);
-int DemoPropertiesReport(char *deviceId, char *eventTime);
+int PropertiesReport(char *deviceId, char *eventTime);
+int UploadUpgradeStatus(char *version, int resultCode, int progress);
+
+char *GetEventTime(void);
+char *GetSoftwareVersion(void);
+char *GetHardwareVersion(void);
 
 #ifdef __cplusplus
 #if __cplusplus

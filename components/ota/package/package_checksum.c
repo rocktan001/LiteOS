@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package Checksum
  * Author: Huawei LiteOS Team
@@ -26,16 +26,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "package_checksum.h"
 #include "package_head.h"
 
 #if (PACK_CHECKSUM != PACK_NO_CHECKSUM)
 #include <string.h>
 
 #if (PACK_CHECKSUM == PACK_SHA256_RSA2048)
-#include "opt/package_sha256_rsa2048.h"
+#include "package_sha256_rsa2048.h"
 #elif (PACK_CHECKSUM == PACK_SHA256)
-#include "opt/package_sha256.h"
+#include "package_sha256.h"
 #else
 #error PACK_CHECKSUM not define
 #endif
@@ -63,7 +62,7 @@ static inline pack_checksum_alg_s *pack_checksum_get_alg(pack_checksum_s *thi)
 
 static void pack_checksum_init(pack_checksum_s *thi, pack_head_s *head)
 {
-    memset(thi, 0, sizeof(*thi));
+    memset(thi, 0, sizeof(pack_checksum_s));
     thi->head = head;
 #if (PACK_CHECKSUM == PACK_SHA256_RSA2048)
     (void)pack_sha256_rsa2048_init(&thi->alg, thi->head);
@@ -102,14 +101,14 @@ static int pack_checksum_init_head_data(pack_checksum_s *thi)
     return pack_checksum_get_alg(thi)->update(pack_checksum_get_alg(thi), buff, len);
 }
 
-pack_checksum_s *pack_checksum_create(pack_head_s *head)
+pack_checksum_s *pack_checksum_create(void *head)
 {
     pack_checksum_s *thi = PACK_MALLOC(sizeof(pack_checksum_s));
     if (thi == NULL) {
         PACK_LOG("PACK_MALLOC fail");
         return NULL;
     }
-    pack_checksum_init(thi, head);
+    pack_checksum_init(thi, (pack_head_s *)head);
     (void)pack_checksum_init_head_data(thi);
     return thi;
 }
@@ -207,14 +206,14 @@ int pack_checksum_check(pack_checksum_s *thi, const uint8_t *expected_value, uin
 
 #define INCLUDE_PACK_OPTION_FILE
 #if (PACK_CHECKSUM == PACK_SHA256_RSA2048)
-#include "opt/package_sha256.c"
-#include "opt/package_sha256_rsa2048.c"
+#include "package_sha256.h"
+#include "package_sha256_rsa2048.h"
 #elif (PACK_CHECKSUM == PACK_SHA256)
-#include "opt/package_sha256.c"
+#include "package_sha256.h"
 #endif
 
 #else
-pack_checksum_s *pack_checksum_create(struct pack_head_tag_s *head)
+pack_checksum_s *pack_checksum_create(void *head)
 {
     (void)head;
     return NULL;

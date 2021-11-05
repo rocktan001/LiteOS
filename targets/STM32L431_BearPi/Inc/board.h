@@ -55,8 +55,8 @@ extern "C" {
 #define MQTT_INFO_ADDR                0x00008000
 #define MQTT_INFO_SIZE                0x00008000
 #define OTA_IMAGE_DOWNLOAD_ADDR       (MQTT_INFO_ADDR + MQTT_INFO_SIZE)
-#define OTA_IMAGE_DOWNLOAD_SIZE       0x00040000
-#define OTA_IMAGE_BCK_ADDR            (OTA_IMAGE_DOWNLOAD_ADDR + OTA_IMAGE_DOWNLOAD_SIZE)
+#define OTA_IMAGE_DOWNLOAD_SIZE       0x00040000 // new image size: 256K
+#define OTA_IMAGE_BCK_ADDR            (OTA_IMAGE_DOWNLOAD_ADDR + OTA_IMAGE_DOWNLOAD_SIZE) // backup firmware address
 #define OTA_IMAGE_BCK_SIZE            0x00040000
 #define OTA_IMAGE_DIFF_UPGRADE_ADDR   (OTA_IMAGE_BCK_ADDR + OTA_IMAGE_BCK_SIZE)
 #define OTA_IMAGE_DIFF_UPGRADE_SIZE   0x00040000
@@ -64,9 +64,9 @@ extern "C" {
 // Built in flash address
 #define OTA_DEFAULT_IMAGE_ADDR        0x08010000
 
-int board_jump2app(void);
-int board_update_copy(int32_t old_image_len, int32_t new_image_len, uint32_t new_image_addr);
-int board_rollback_copy(int32_t image_len);
+int jumpToApp(uint32_t binSize);
+int ImgUpdateCopy(int32_t old_image_len, int32_t new_image_len, uint32_t new_image_addr);
+int ImgRollbackCopy(int32_t image_len);
 
 #ifdef __cplusplus
 #if __cplusplus

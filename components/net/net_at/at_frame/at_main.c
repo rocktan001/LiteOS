@@ -480,7 +480,7 @@ uint32_t AtRecvTaskCreate(AtTaskHandle *at)
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)AtRecvTask;
     taskInitParam.uwStackSize = 0x1000;
 
-    ret = LOS_TaskCreate((UINT32 *)at->atTaskId, &taskInitParam);
+    ret = LOS_TaskCreate((UINT32 *)&at->atTaskId, &taskInitParam);
     if (ret != LOS_OK) {
         return ret;
     }
@@ -501,40 +501,40 @@ static int32_t AtTaskInit(AtTaskHandle *at)
         return ret;
     }
     /* init uart received queue */
-    ret = at->queue.create("recvQueue", 32, (UINT32 *)at->queue.queueRecvId, 0, sizeof(AtRecvQueue));
+    ret = at->queue.create("recvQueue", 32, (UINT32 *)&at->queue.queueRecvId, 0, sizeof(AtRecvQueue));
     if (ret != LOS_OK) {
         AT_LOG("init recvQueue failed!");
         return AT_FAILED;
     }
     at->queue.queueRecvFlag = true;
 
-    ret = at->sem.create(0, (UINT32 *)at->sem.recvSem);
+    ret = at->sem.create(0, (UINT32 *)&at->sem.recvSem);
     if (ret != LOS_OK) {
         AT_LOG("init at_recv_sem failed!");
         goto at_recv_sem_failed;
     }
 
-    ret = at->mutex.create((UINT32 *)at->mutex.cmdMux);
+    ret = at->mutex.create((UINT32 *)&at->mutex.cmdMux);
     if (ret != LOS_OK) {
         AT_LOG("init cmdMux failed!");
         goto at_cmd_mux_failed;
     }
 
-    ret = at->mutex.create((UINT32 *)at->mutex.sendMux);
+    ret = at->mutex.create((UINT32 *)&at->mutex.sendMux);
     if (ret != LOS_OK) {
         AT_LOG("init sendMux failed!");
         goto atSendMuxFailed;
     }
     at->sendMuxFlag = true;
 
-    ret = at->mutex.create((UINT32 *)at->mutex.recvMux);
+    ret = at->mutex.create((UINT32 *)&at->mutex.recvMux);
     if (ret != LOS_OK) {
         AT_LOG("init sendMux failed!");
         goto at_recv_mux_failed;
     }
 
 
-    ret = at->sem.create(0, (UINT32 *)at->sem.respSem);
+    ret = at->sem.create(0, (UINT32 *)&at->sem.respSem);
     if (ret != LOS_OK) {
         AT_LOG("init respSem failed!");
         goto at_resp_sem_failed;

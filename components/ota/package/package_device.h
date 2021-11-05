@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package Device HeadFile
  * Author: Huawei LiteOS Team
@@ -34,7 +34,7 @@
 #ifndef _PACKAGE_DEVICE_H
 #define _PACKAGE_DEVICE_H
 
-#include "ota/package.h"
+#include "package.h"
 #include "package_checksum.h"
 #include "package_head.h"
 #include "package_writer.h"

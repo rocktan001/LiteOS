@@ -39,6 +39,11 @@
 #include "mqtt_config.h"
 #include "mqtt_events.h"
 #include "atiny_log.h"
+#if defined (LOSCFG_COMPONENTS_OTA)
+#include "ota_port.h"
+#include "ota_api.h"
+#include "upgrade.h"
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -55,12 +60,12 @@ static void MqttDemoDataReport(void)
     uint16_t deviceIdLen = 0;
     MQTT_GetConnectDeviceId(&deviceId, &deviceIdLen);
     while (1) {
-        char *demoEventTime = "20210908T081630Z"; 
-        ret = DemoPropertiesReport(deviceId, demoEventTime);
+        char *demoEventTime = "20210908T081630Z";
+        ret = PropertiesReport(deviceId, demoEventTime);
         if (ret == ATINY_OK) {
             ATINY_LOG(LOG_DEBUG, "report data success.\n");
         }
-        (void)LOS_TaskDelay(2 * 1000); //continue mqtt publish after 1s delay.
+        (void)LOS_TaskDelay(8 * 1000); //continue mqtt publish after 8s delay.
     }
 }
 
@@ -70,10 +75,10 @@ static INT32 MqttDemoCreateReportTask(void)
     TSK_INIT_PARAM_S taskInitParam;
     uint32_t taskHandle;
 
-    taskInitParam.usTaskPrio = 1;
-    taskInitParam.pcName = "DemoDataReport";
+    taskInitParam.usTaskPrio = 5;
+    taskInitParam.pcName = "MqttDemoDataReport";
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)MqttDemoDataReport;
-    taskInitParam.uwStackSize = 0x2000;
+    taskInitParam.uwStackSize = 0x1000;
 
     ret = LOS_TaskCreate(&taskHandle, &taskInitParam);
     return ret;
@@ -109,7 +114,7 @@ static int HandleRecvMsg(char *topic, int32_t topicLen, char *payload, int32_t p
         if (propertiesType == NULL) {
             return ATINY_ERR;
         }
-        printf("propertiesType=%s\n", propertiesType++);
+        ATINY_LOG(LOG_DEBUG, "propertiesType=%s\n", propertiesType++);
         return ATINY_OK;
     }
 
@@ -119,7 +124,7 @@ static int HandleRecvMsg(char *topic, int32_t topicLen, char *payload, int32_t p
         if (commandsType == NULL) {
             return ATINY_ERR;
         }
-        printf("commandsType=%s\n", commandsType++);
+        ATINY_LOG(LOG_DEBUG, "commandsType=%s\n", commandsType++);
         return ATINY_OK;
     }
 
@@ -129,7 +134,7 @@ static int HandleRecvMsg(char *topic, int32_t topicLen, char *payload, int32_t p
         if (msgType == NULL) {
             return ATINY_ERR;
         }
-        printf("msgType=%s\n", msgType);
+        ATINY_LOG(LOG_DEBUG, "msgType=%s\n", msgType++);
         return ATINY_OK;
     }
 
@@ -139,12 +144,12 @@ static int HandleRecvMsg(char *topic, int32_t topicLen, char *payload, int32_t p
         if (eventType == NULL) {
             return ATINY_ERR;
         }
-        // EventsDownPayloadParse(payload, payloadLen);
-        printf("eventType=%s\n", eventType++);
+        ATINY_LOG(LOG_DEBUG, "eventType=%s\n", eventType++);
+        EventsDownPayloadParse(payload, payloadLen);
         return ATINY_OK;
     }
 
-    return 0; //SendResponse(items[MID_IDX]->valueint, (ret == ATINY_OK) ? MQTT_ERR_CODE_OK : MQTT_ERR_CODE_ERR, MQTT_NO_MORE_DATA, body);
+    return ATINY_OK;
 }
 
 static int MqttDemoRecvMsg(void *msg, int32_t len)
@@ -208,15 +213,6 @@ static int MqttDemoCmdIoctl(mqtt_cmd_e cmd, void *arg, int32_t len)
     return result;
 }
 
-static void AgentTinyMqttDemoInit(void)
-{
-    cJSON_InitHooks(NULL);
-    FlashAdaptorInit();
-    g_flashHandle.init = NULL;
-    g_flashHandle.write_flash_info = FlashAdaptorWriteMqttInfo;
-    g_flashHandle.read_flash_info = FlashAdaptorReadMqttInfo;
-}
-
 void AgentTinyMqttDemoEntry(void)
 {
     UINT32 ret;
@@ -230,12 +226,16 @@ void AgentTinyMqttDemoEntry(void)
     if (ret != EOK) {
         return;
     }
-
-    AgentTinyMqttDemoInit();
-
+    cJSON_InitHooks(NULL); // cjson init
+    g_flashHandle.init = FlashAdaptorInit; // flash init
+    g_flashHandle.write_flash_info = FlashAdaptorWriteMqttInfo;
+    g_flashHandle.read_flash_info = FlashAdaptorReadMqttInfo;
     if (g_flashHandle.init != NULL) {
         g_flashHandle.init();
     }
+#if defined(LOSCFG_COMPONENTS_OTA)
+    UpgradeInit();
+#endif
     MQTT_GetServerIp(&atinyParams.server_ip, &atinyParams.ip_len);
     MQTT_GetServerPort(&atinyParams.server_port, &atinyParams.port_len);
 #ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS

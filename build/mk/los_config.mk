@@ -321,9 +321,13 @@ endif
 endif
 
 ifeq ($(LOSCFG_USING_BOARD_LD), y)
-LITEOS_LD_SCRIPT := -T$(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/liteos.ld
+ifeq ($(LOSCFG_BOOTLOADER), y)
+LITEOS_LD_SCRIPT := -T$(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/liteos_bootloader.ld
+else ifeq ($(LOSCFG_COMPONENTS_OTA), y)
+LITEOS_LD_SCRIPT := -T$(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/liteos_ota.ld
 else
-LITEOS_LD_SCRIPT := -T$(LITEOSTOPDIR)/liteos.ld
+LITEOS_LD_SCRIPT := -T$(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/liteos.ld
+endif
 endif
 
 # temporary

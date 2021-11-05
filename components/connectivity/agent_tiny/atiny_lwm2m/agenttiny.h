@@ -38,7 +38,7 @@
 #include <stdint.h>
 #include "atiny_log.h"
 #ifdef CONFIG_FEATURE_FOTA
-#include "ota/ota_api.h"
+#include "ota_api.h"
 #endif
 #include "liblwm2m_api.h"
 

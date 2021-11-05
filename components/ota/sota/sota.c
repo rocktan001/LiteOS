@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Sota
  * Author: Huawei LiteOS Team
@@ -25,7 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-#include "sota/sota.h"
+#include "sota.h"
 #include "sota_hal.h"
 #include "flag_manager.h"
 
@@ -33,7 +33,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "ota/package.h"
+#include "package.h"
 #include "upgrade_flag.h"
 
 #define VER_LEN            16
@@ -168,7 +168,7 @@ int32_t sota_parse(const int8_t *in_buf, int32_t in_len, int8_t *out_buf, int32_
     buf = databuf + 1;
 
     memset(out_buf, 0, out_len);
-    HexStrToByte((const unsigned char *)buf, (unsigned char *)out_buf, buflen);
+    HexStrToBytes((const unsigned char *)buf, (unsigned char *)out_buf, buflen);
     phead = (ota_pcp_head_s *)out_buf;
 
     cmd_crc_num = htons_ota(phead->chk_code);
@@ -223,7 +223,7 @@ static int sota_at_send(msg_code_e msg_code, char *buf, int len)
     memcpy(atwbuf, hbuf, VER_LEN);
     memcpy(atwbuf + VER_LEN, buf, len);
 
-    HexStrToByte(atwbuf, (unsigned char *)tmpbuf, len + VER_LEN); // strlen(atwbuf)
+    HexStrToBytes(atwbuf, (unsigned char *)tmpbuf, len + VER_LEN); // strlen(atwbuf)
     ret = (uint32_t)crc_check((unsigned char *)tmpbuf, (len + VER_LEN) / 2);
     (void)snprintf(crcretbuf, sizeof(crcretbuf), "%04X", (unsigned int)ret);
 

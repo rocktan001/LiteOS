@@ -30,7 +30,7 @@
 #include "atiny_fota_state.h"
 #include <string.h>
 #include "firmware_update.h"
-#include "ota/package.h"
+#include "package.h"
 #include "atiny_log.h"
 
 struct atiny_fota_manager_tag_s {

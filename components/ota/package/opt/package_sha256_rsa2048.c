@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package Opt Sha256 Rsa2048
  * Author: Huawei LiteOS Team
@@ -25,7 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
-#ifdef INCLUDE_PACK_OPTION_FILE
+
 #include "package_sha256_rsa2048.h"
 #include <string.h>
 #include "mbedtls/rsa.h"
@@ -99,4 +99,3 @@ int pack_sha256_rsa2048_init(pack_sha256_rsa2048_s *thi, pack_head_s *head)
     thi->head = head;
     return PACK_OK;
 }
-#endif

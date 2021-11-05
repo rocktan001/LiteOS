@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 #ifndef MQTT_EVENTS_HANDLE_PERIOD_MS
-#define MQTT_EVENTS_HANDLE_PERIOD_MS (1 * 1000)
+#define MQTT_EVENTS_HANDLE_PERIOD_MS (2 * 1000)
 #endif
 
 #ifndef MQTT_KEEPALIVE_INTERVAL_S

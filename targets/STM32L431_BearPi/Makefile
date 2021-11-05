@@ -27,7 +27,8 @@ USER_SRC = \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/system_stm32l4xx.c \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/usart.c \
     $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/tim.c \
-    $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/user_task.c
+    $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/user_task.c \
+    $(LITEOSTOPDIR)/targets/STM32L431_BearPi/Src/flash_adaptor.c
     C_SOURCES += $(USER_SRC)
 
 # C includes

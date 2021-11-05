@@ -48,7 +48,7 @@
 
 #include "agenttiny.h"
 #include "liblwm2m.h"
-#include "ota/package.h"
+#include "package.h"
 
 #define array_size(a) (sizeof(a)/sizeof(*(a)))
 

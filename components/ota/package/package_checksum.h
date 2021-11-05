@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package Checksum HeadFile
  * Author: Huawei LiteOS Team
@@ -34,8 +34,13 @@
 #ifndef _PACKAGE_CHECKSUM_H
 #define _PACKAGE_CHECKSUM_H
 
-#include "ota/package.h"
+#include "package.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 typedef struct pack_hardware_tag_s {
     int (*read_software)(struct pack_hardware_tag_s *thi, uint32_t offset, uint8_t *buffer, uint32_t len);
@@ -47,8 +52,6 @@ typedef struct pack_hardware_tag_s {
 
 typedef struct pack_checksum_tag_s pack_checksum_s;
 
-struct pack_head_tag_s;
-
 typedef struct pack_checksum_alg_tag_s {
     void (*reset)(struct pack_checksum_alg_tag_s *thi);
     int (*update)(struct pack_checksum_alg_tag_s *thi, const uint8_t *buff, uint16_t len);
@@ -56,15 +59,7 @@ typedef struct pack_checksum_alg_tag_s {
     void (*destroy)(struct pack_checksum_alg_tag_s *thi);
 } pack_checksum_alg_s;
 
-
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-
-pack_checksum_s *pack_checksum_create(struct pack_head_tag_s *head);
+pack_checksum_s *pack_checksum_create(void *head);
 void pack_checksum_delete(pack_checksum_s *thi);
 int pack_checksum_update_data(pack_checksum_s *thi, uint32_t offset, const uint8_t *buff, uint16_t len,
     pack_hardware_s *hardware);

@@ -41,14 +41,21 @@
 int FlashAdaptorWrite(uint32_t offset, const uint8_t *buffer, uint32_t len)
 {
     int ret;
+    int blk1 = offset / FLASH_BLOCK_SIZE;
+    int blk2 = (offset + len) / FLASH_BLOCK_SIZE;
+    int addr = blk1 * FLASH_BLOCK_SIZE;
+    int readLen = offset % FLASH_BLOCK_SIZE;
+    int remain = 0;
     uint8_t *block_buff = NULL;
 
-    if ((buffer == NULL) || (len == 0) || (len > FLASH_BLOCK_SIZE)
-        || ((offset & FLASH_BLOCK_MASK))) {
-        HAL_OTA_LOG("invalid param len %ld, offset %ld", len, offset);
+    if (buffer == NULL) {
+        HAL_OTA_LOG("buffer is null.");
+    }
+    if ((len == 0) || (len > FLASH_BLOCK_SIZE)) {
+        HAL_OTA_LOG("invalid param len %ld, offset %08x", len, offset);
         return ERR;
     }
-
+    // len == FLASH_BLOCK_SIZE
     if (len == FLASH_BLOCK_SIZE) {
         ret = hal_spi_flash_erase_write(buffer, FLASH_BLOCK_SIZE, offset);
         if (ret != OK) {
@@ -56,26 +63,29 @@ int FlashAdaptorWrite(uint32_t offset, const uint8_t *buffer, uint32_t len)
         }
         return ret;
     }
-
+    // len < FLASH_BLOCK_SIZE
     block_buff = atiny_malloc(FLASH_BLOCK_SIZE);
     if (block_buff == NULL) {
         HAL_OTA_LOG("atiny_malloc fail");
         return ERR;
     }
-
-    ret = hal_spi_flash_read(block_buff + len, FLASH_BLOCK_SIZE - len, offset + len);
+    if (blk2 > blk1) {
+        remain = offset + len - blk2 * FLASH_BLOCK_SIZE;
+    }
+    ret = hal_spi_flash_read(block_buff, readLen, addr);
     if (ret != OK) {
         HAL_OTA_LOG("hal_spi_flash_read fail offset %lu, len %lu", offset + len, FLASH_BLOCK_SIZE - len);
         goto EXIT;
     }
-
-    if (memcpy_s(block_buff, FLASH_BLOCK_SIZE, buffer, len) != EOK) {
+    if (memcpy_s(block_buff + readLen, FLASH_BLOCK_SIZE, buffer, len - remain) != EOK) {
         return ERR;
     }
-
-    ret = hal_spi_flash_erase_write(block_buff, FLASH_BLOCK_SIZE, offset);
+    ret = hal_spi_flash_erase_write(block_buff, FLASH_BLOCK_SIZE, addr);
     if (ret != OK) {
         HAL_OTA_LOG("hal_ota_write_flash fail offset %lu, len %u", offset, FLASH_BLOCK_SIZE);
+    }
+    if (remain > 0) {
+        ret = hal_spi_flash_erase_write(&buffer[len - remain], remain, blk2 * FLASH_BLOCK_SIZE);
     }
 
 EXIT:

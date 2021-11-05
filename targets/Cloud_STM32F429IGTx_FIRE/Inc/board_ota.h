@@ -55,18 +55,29 @@ extern "C" {
 #define MQTT_INFO_ADDR                0x00008000
 #define MQTT_INFO_SIZE                0x00008000
 #define OTA_IMAGE_DOWNLOAD_ADDR       (MQTT_INFO_ADDR + MQTT_INFO_SIZE)
-#define OTA_IMAGE_DOWNLOAD_SIZE       0x00040000
+#define OTA_IMAGE_DOWNLOAD_SIZE       0x00080000 // default new image size: 512K
 #define OTA_IMAGE_BCK_ADDR            (OTA_IMAGE_DOWNLOAD_ADDR + OTA_IMAGE_DOWNLOAD_SIZE)
-#define OTA_IMAGE_BCK_SIZE            0x00040000
+#define OTA_IMAGE_BCK_SIZE            0x00080000 // default backup image size: 512K
 #define OTA_IMAGE_DIFF_UPGRADE_ADDR   (OTA_IMAGE_BCK_ADDR + OTA_IMAGE_BCK_SIZE)
 #define OTA_IMAGE_DIFF_UPGRADE_SIZE   0x00040000
 
 // Built in flash address
-#define OTA_DEFAULT_IMAGE_ADDR        0x08020000
+#define OTA_DEFAULT_IMAGE_ADDR        0x08020000 // same as litos_ota.ld
 
-int board_jump2app(void);
-int board_update_copy(int32_t old_image_len, int32_t new_image_len, uint32_t new_image_addr);
-int board_rollback_copy(int32_t image_len);
+#ifdef LOSCFG_OTA_DEBUG
+#define OTA_LOG(fmt, ...) \
+    do \
+    { \
+        printf("[OTA][%s:%d] " fmt "\n", \
+               __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+    } while (0)
+#else
+#define OTA_LOG(fmt, ...)
+#endif
+
+int jumpToApp(uint32_t binSize);
+int ImgUpdateCopy(int32_t oldImgLen, int32_t newImgLen, uint32_t newImgAddr);
+int ImgRollbackCopy(int32_t imgLen);
 
 #ifdef __cplusplus
 #if __cplusplus

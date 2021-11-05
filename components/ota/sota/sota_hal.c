@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Ota Sota Hal
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -59,7 +59,7 @@ int32_t crc16_ccitt_table[] = {
     0x3eb2, 0x0ed1, 0x1ef0
 };
 
-int32_t do_crc(int32_t reg_init, const unsigned char *massage, int len)
+int32_t do_crc(int32_t reg_init, const uint8_t *massage, int len)
 {
     int32_t crc_reg = 0;
     int i = 0;
@@ -71,26 +71,26 @@ int32_t do_crc(int32_t reg_init, const unsigned char *massage, int len)
     return crc_reg;
 }
 
-int32_t crc_check(const unsigned char *message, int len)
+int32_t crc_check(const uint8_t *message, int len)
 {
     int32_t crc_reg = 0x0000;
     return do_crc(crc_reg, message, len);
 }
 
-int HexStrToByte(const unsigned char *bufin, unsigned char *bufout, int sourceLen)
+int HexStrToBytes(const uint8_t *inStrings, uint8_t *outBytes, int inLen)
 {
     int i = 0;
-    unsigned char tmp2 = 0x0;
-    unsigned int tmp = 0;
-    if ((bufin == NULL) || (sourceLen <= 0) || (bufout == NULL)) {
+    uint8_t strH = 0x0;
+    uint8_t strL = 0x0;
+    if ((inStrings == NULL) || (inLen <= 0) || (outBytes == NULL)) {
         return -1;
     }
-    for (i = 0; i < sourceLen; i = i + 2) {
-        tmp2 = bufin[i];
-        tmp2 = tmp2 <= '9' ? tmp2 - 0x30 : tmp2 - 0x37;
-        tmp = bufin[i + 1];
-        tmp = tmp <= '9' ? tmp - 0x30 : tmp - 0x37;
-        bufout[i / 2] = (tmp2 << 4) | (tmp & 0x0F);
+    for (i = 0; i < inLen; i = i + 2) {
+        strH = inStrings[i];
+        strH = strH <= '9' ? (strH - 0x30) : (strH - 0x37);
+        strL = inStrings[i + 1];
+        strL = strL <= '9' ? strL - 0x30 : strL - 0x37;
+        outBytes[i / 2] = (strH << 4) | (strL & 0x0F);
     }
     return 0;
 }

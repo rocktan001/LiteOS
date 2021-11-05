@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package Write HeadFile
  * Author: Huawei LiteOS Team
@@ -34,7 +34,7 @@
 #ifndef _PACKAGE_WRITER_H
 #define _PACKAGE_WRITER_H
 
-#include "ota/package.h"
+#include "package.h"
 #include "package_head.h"
 
 

@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
  * Description: Ota Package Opt Sha256 HeadFile
  * Author: Huawei LiteOS Team
@@ -34,22 +34,8 @@
 #ifndef _PACKAGE_SHA256_H
 #define _PACKAGE_SHA256_H
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
-
-
-#include "ota/package.h"
 #include "mbedtls/sha256.h"
-
-
-typedef struct {
-    pack_checksum_alg_s base;
-    mbedtls_sha256_context sha256_context;
-} pack_sha256_s;
-
+#include "package_checksum.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -57,7 +43,12 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-int pack_sha256_init(pack_sha256_s *thi);
+typedef struct {
+    pack_checksum_alg_s base;
+    mbedtls_sha256_context sha256_context;
+} pack_sha256_s;
+
+extern int pack_sha256_init(pack_sha256_s *thi);
 
 #ifdef __cplusplus
 #if __cplusplus
