@@ -215,7 +215,7 @@ FM33LC0XX_HAL_SRC = \
     $(wildcard  $(HAL_DRIVER_SRC)/Src/*.c)
     LOCAL_SRCS = $(FM33LC0XX_HAL_SRC)
 else ifeq ($(LOSCFG_PLATFORM_APM32F103_GEEHY), y)
-    APM32F103ZET6_DRIVER_SRC = $(wildcard drivers/APM32F10x_StdPeriphDriver/src/*.c)
+    APM32F103ZET6_DRIVER_SRC = $(wildcard drivers/APM32F10x_StdPeriphDriver/Src/*.c)
     LOCAL_SRCS = $(APM32F103ZET6_DRIVER_SRC)
 else ifeq ($(LOSCFG_PLATFORM_RASPBERRY_PI2B), y)
     RASPBERRY_PI2B_DRIVER_SRC = $(wildcard $(HAL_DRIVER_SRC)/Src/*.c)

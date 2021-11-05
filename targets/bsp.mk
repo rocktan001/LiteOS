@@ -92,7 +92,7 @@ else ifeq ($(LOSCFG_PLATFORM_APM32F103_GEEHY), y)
     APM_DRIVER_TYPE := APM32F10x_StdPeriphDriver
 ######################### RASPBERRY_PI2B Options ################################
 else ifeq ($(LOSCFG_PLATFORM_RASPBERRY_PI2B), y)
-	HAL_DRIVER_TYPE = BCM2836_HAL_Driver
+    HAL_DRIVER_TYPE := BCM2836_HAL_Driver
 endif
 
 HAL_DRIVER_SRC := drivers/$(HAL_DRIVER_TYPE)
@@ -138,7 +138,7 @@ ifeq ($(LOSCFG_DRIVER_SIFIVE_LIB), y)
 endif
 
 ifeq ($(LOSCFG_DRIVER_APM_LIB), y)
-    PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/targets/bsp/drivers/$(APM_DRIVER_TYPE)/inc
+    PLATFORM_INCLUDE += -I $(LITEOSTOPDIR)/targets/bsp/drivers/$(APM_DRIVER_TYPE)/Inc
 endif
 
 LIB_SUBDIRS += targets/bsp

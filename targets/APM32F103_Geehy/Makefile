@@ -13,7 +13,7 @@ USER_SRC = \
     C_SOURCES += $(USER_SRC)
 
 # C includes
-BOARD_INCLUDES += -I $(LITEOSTOPDIR)/targets/bsp/drivers/APM32F10x_StdPeriphDriver/inc
+BOARD_INCLUDES += -I $(LITEOSTOPDIR)/targets/bsp/drivers/APM32F10x_StdPeriphDriver/Inc
 
 BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/bsp/common \

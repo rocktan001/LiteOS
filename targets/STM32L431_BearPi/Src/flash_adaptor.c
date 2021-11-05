@@ -34,7 +34,6 @@
 #include <board.h>
 #include "common.h"
 
-
 #define FLASH_BLOCK_SIZE 0x1000
 #define FLASH_BLOCK_MASK 0xfff
 
