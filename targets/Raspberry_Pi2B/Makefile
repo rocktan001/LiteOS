@@ -4,10 +4,19 @@ MODULE_NAME := $(LITEOS_PLATFORM)
 
 -include $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/config.mk
 
+#Enable GPIO LED DEMO
+#GPIO_LED_DEMO=y
+
 USER_SRC = \
     $(wildcard *.S) \
     $(wildcard Src/*.c) \
     $(wildcard os_adapt/*.c)
+
+ifeq ($(GPIO_LED_DEMO), y)
+USER_SRC += $(wildcard Src/gpio/*.c)
+C_DEFS += -DGPIO_LED_DEMO
+endif
+
 C_SOURCES += $(USER_SRC)
 
 INCLUDE_INC = \

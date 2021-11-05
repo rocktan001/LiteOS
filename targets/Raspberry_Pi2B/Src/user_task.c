@@ -29,6 +29,10 @@
 #include "los_task_pri.h"
 #include "demo_entry.h"
 
+#ifdef GPIO_LED_DEMO
+#include "led.h"
+#endif
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -39,6 +43,9 @@ VOID app_init(VOID)
 {
     printf("app init!\n");
     DemoEntry();
+#ifdef GPIO_LED_DEMO
+    LedDemo();
+#endif
 }
 
 #ifdef __cplusplus
