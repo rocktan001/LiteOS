@@ -104,3 +104,4 @@ int flag_write(flag_type_e flagType, const void *buf, int32_t len)
     ret = g_flag_op.func_flag_write(flagBuffer, FLASH_FLAG_SIZE);
     return ret; 
 }
+

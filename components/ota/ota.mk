@@ -6,3 +6,7 @@ COMPONENTS_OTA_INCLUDE := \
     -I $(LITEOSTOPDIR)/components/ota/sota \
     -I $(LITEOSTOPDIR)/components/ota/flag_operate \
     -I $(LITEOSTOPDIR)/components/ota/utility
+
+ifneq ($(OS), Linux)
+    LITEOS_BASELIB += -lota
+endif

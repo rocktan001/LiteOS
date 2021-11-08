@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2013-2021. All rights reserved.
  * Description: Ota Flag Operate Manager HeadFile
  * Author: Huawei LiteOS Team
  * Create: 2013-01-01
@@ -61,3 +61,4 @@ int flag_write(flag_type_e flag_type, const void *buf, int32_t len);
 #endif /* __cplusplus */
 
 #endif /* _FLAG_MANAGER_H */
+

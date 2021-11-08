@@ -74,3 +74,4 @@ int flag_enable_hwpatch(const uint8_t *patch_head, int32_t patch_len);
 #endif /* __cplusplus */
 
 #endif /* _UPGRADE_FLAG_H */
+

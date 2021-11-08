@@ -138,3 +138,4 @@ int recover_set_update_fail(void)
     g_flag.crc_flag = calc_crc32(0, &g_flag, sizeof(upgrade_flag_s) - sizeof(uint32_t));
     return flag_write(FLAG_BOOTLOADER, &g_flag, sizeof(upgrade_flag_s));
 }
+
