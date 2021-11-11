@@ -8,10 +8,12 @@ LOCAL_SRCS := \
 
 LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/components/connectivity/agent_tiny/atiny_lwm2m \
+    -I $(LITEOSTOPDIR)/components/ota/include \
     -I $(LITEOSTOPDIR)/components/ota/flag_operate \
+    -I $(LITEOSTOPDIR)/components/ota/package \
     -I $(LITEOSTOPDIR)/include
 
-LOCAL_FLAGS :=  $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS) $(COMPONENTS_INCLUDE)
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS) $(COMPONENTS_INCLUDE)
 
 include $(MODULE)
 
