@@ -33,8 +33,10 @@
 #include "los_vfs.h"
 #include "los_printf.h"
 
+#if defined(LOSCFG_SHELL)
 #include "shcmd.h"
 #include "shmsg.h"
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -55,12 +55,6 @@
 #include "gpio.h"
 #include "i2c.h"
 #include "spi.h"
-#include "lcd.h"
-
-#ifdef WITH_DTLS
-#include "mbedtls/net.h"
-#include "mbedtls/ssl.h"
-#endif
 
 #ifdef __cplusplus
 #if __cplusplus

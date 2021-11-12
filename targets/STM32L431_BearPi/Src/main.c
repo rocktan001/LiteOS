@@ -36,6 +36,7 @@
 #include "los_sys.h"
 #include "usart.h"
 #include "tim.h"
+#include "lcd.h"
 
 #if defined(__CC_ARM)
 extern char Image$$RW_IRAM1$$ZI$$Limit[];
