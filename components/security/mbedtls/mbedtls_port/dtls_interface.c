@@ -201,7 +201,7 @@ mbedtls_ssl_context *dtls_ssl_new(dtls_establish_info_s *info, char plat_type)
     }
 #endif
 
-#ifndef LOSCFG_COMPONENTS_CONNECTIVITY_MQTT
+#if defined(MBEDTLS_SSL_SRV_C)
     if (info->udp_or_tcp == MBEDTLS_NET_PROTO_UDP) {
         mbedtls_ssl_conf_dtls_cookies(conf, NULL, NULL, NULL);
     }
