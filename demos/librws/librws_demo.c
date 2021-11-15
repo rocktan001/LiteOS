@@ -49,7 +49,7 @@ STATIC VOID OnSocketReceivedText(rws_socket socket, const CHAR *text, const UINT
         printf("Websocket text receive failed.\n");
         return;
     }
-    CHAR *buff = (CHAR *)malloc(length);
+    buff = (CHAR *)malloc(length);
     if (buff == NULL) {
         printf("Websocket text receive failed.\n");
         return;
@@ -75,7 +75,7 @@ STATIC VOID OnSocketReceivedBin(rws_socket socket, const VOID *data, const UINT3
         printf("Websocket bin receive failed.\n");
         return;
     }
-    CHAR *buff = (CHAR *)malloc(length);
+    buff = (CHAR *)malloc(length);
     if (buff == NULL) {
         printf("Websocket bin receive failed.\n");
         return;
