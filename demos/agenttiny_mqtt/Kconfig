@@ -5,6 +5,7 @@ config LOSCFG_DEMOS_AGENT_TINY_MQTT
     default n
     select LOSCFG_COMPONENTS_LIB_CJSON
     select LOSCFG_COMPONENTS_ATINY_MQTT
+    select LOSCFG_COMPONENTS_NET_LWIP
     help
       Answer y to enable agent tiny mqtt demo.
 
