@@ -2,6 +2,7 @@ config LOSCFG_COMPONENTS_NET_LWIP
     bool "Enable Lwip"
     select LOSCFG_COMPONENTS_FS_VFS
     select LOSCFG_COMPONENTS_NETWORK
+    select LOSCFG_COMPONENTS_NET_SAL
     default n
     help
       Answer y to enable lwip.

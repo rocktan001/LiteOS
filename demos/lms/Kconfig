@@ -3,7 +3,7 @@ menu "LMS Demo"
 config LOSCFG_DEMOS_LMS
     bool "Enable LMS Demo"
     default n
-    depends on LOSCFG_KERNEL_LMS
+    select LOSCFG_KERNEL_LMS
     help
       Answer y to enable LMS demo.
 
