@@ -5,7 +5,7 @@ MODULE_NAME := inih_demo
 
 LOCAL_SRCS_y := $(wildcard *.c)
 
-LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/include
+LOCAL_INCLUDE += -I $(LITEOSTOPDIR)/components/fs/include
 LOCAL_INCLUDE += $(COMPONENTS_INIH_INCLUDE)
 LOCAL_SRCS := $(LOCAL_SRCS_y)
 

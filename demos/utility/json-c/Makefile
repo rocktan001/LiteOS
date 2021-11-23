@@ -7,7 +7,7 @@ JSON_DEMO_SRCS = $(wildcard *.c)
 
 JSON_DEMO_INCLUDE := \
     -I $(LITEOSTOPDIR)/lib/libc/include \
-    -I $(LITEOSTOPDIR)/include \
+    -I $(LITEOSTOPDIR)/components/fs/include \
     -I $(LITEOSTOPDIR)/demos/utility/json-c
 
 LOCAL_INCLUDE := $(JSON_DEMO_INCLUDE) $(COMPONENTS_JSON_INCLUDE) 
