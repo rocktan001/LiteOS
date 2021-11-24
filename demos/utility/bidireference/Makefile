@@ -8,7 +8,7 @@ BIDIREFERENCE_SRC = $(wildcard *.c)
 LOCAL_INCLUDE := $(COMPONENTS_BIDIREFERENCE_INCLUDE)
 LOCAL_INCLUDE += \
     -I $(LITEOSTOPDIR)/demos/utility/bidireference \
-    -I $(LITEOSTOPDIR)/include/fs
+    -I $(LITEOSTOPDIR)/components/fs/include
 
 LOCAL_SRCS := $(BIDIREFERENCE_SRC)
 
