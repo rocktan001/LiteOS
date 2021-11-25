@@ -60,7 +60,7 @@ INT32 main(VOID)
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
                   "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
+                  "build date : %s %s\n\n"
                   "**********************************\n",
                   HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
     UINT32 ret = OsMain();
