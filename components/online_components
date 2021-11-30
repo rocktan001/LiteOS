@@ -13,6 +13,7 @@ SMARTL-E802-SDK            &#& targets/bsp/drivers/csky_driver_qemu &#& LOSCFG_P
 gcc            &#& lib                                    &#& LOSCFG_LIB_CPP_EXTEND=y           &#& https://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-10.2.0.zip
 origin.patch   &#& components/net/lwip                    &#& LOSCFG_COMPONENTS_NET_LWIP=y      &#&
 
+apriltag-3.1.7 &#& components/utility/apriltag            &#& LOSCFG_COMPONENTS_APRILTAG=y      &#& https://github.com/AprilRobotics/apriltag/archive/refs/tags/v3.1.7.zip
 BidireferenceC-8.0.0 &#& components/utility/bidireference &#& LOSCFG_COMPONENTS_BIDIREFERENCE=y &#& sh download_bidi.sh BidireferenceC-8.0.0
 c-algorithms-1.2.0   &#& components/utility/c-algorithms  &#& LOSCFG_COMPONENTS_C_ALGORITHMS=y  &#& https://github.com/fragglet/c-algorithms/archive/refs/tags/c-algorithms-1.2.0.zip
 curl-7.54.1    &#& components/utility/curl                &#& LOSCFG_COMPONENTS_CURL=y          &#& https://github.com/curl/curl/archive/refs/tags/curl-7_54_1.zip

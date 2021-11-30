@@ -184,6 +184,14 @@ SECTIONS
      __los_heap_addr_end__ = ORIGIN(RAM) + LENGTH(RAM) - _Min_Stack_Size - 1;
 
   __fast_end = .;
+
+  . = ALIGN(8);
+  ._user_ext_heap_stack :
+  {
+    . = ALIGN(8);
+    _ext_addr_start = .;
+    _ext_addr_end = ORIGIN(SDRAM) + LENGTH(SDRAM) - 1;
+  } >SDRAM
   /* Remove information from the standard libraries */
   /DISCARD/ :
   {

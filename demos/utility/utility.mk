@@ -120,3 +120,8 @@ include $(LITEOSTOPDIR)/demos/utility/libevent/libevent.mk
 DEMOS_UTILITY_INCLUDE += $(DEMOS_LIBEVENT_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_DEMOS_APRILTAG), y)
+include $(LITEOSTOPDIR)/demos/utility/apriltag/apriltag.mk
+DEMOS_UTILITY_INCLUDE += $(DEMOS_APRILTAG_INCLUDE)
+endif
+

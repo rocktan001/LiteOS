@@ -1,5 +1,6 @@
 menu "Utility"
 
+source "components/utility/apriltag/Kconfig"
 source "components/utility/bidireference/Kconfig"
 source "components/utility/c-algorithms/Kconfig"
 source "components/utility/curl/Kconfig"

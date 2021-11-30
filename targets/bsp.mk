@@ -351,6 +351,9 @@ ifneq ($(OS), Linux)
     ifeq ($(LOSCFG_COMPONENTS_LIBEVENT), y)
         LITEOS_BASELIB += -llibevent
     endif
+    ifeq ($(LOSCFG_COMPONENTS_APRILTAG), y)
+        LITEOS_BASELIB += -lapriltag
+    endif
     ifeq ($(LOSCFG_DEMOS_KERNEL), y)
         LITEOS_BASELIB += -lkernel_demo
     endif
@@ -494,6 +497,9 @@ ifneq ($(OS), Linux)
     endif
     ifeq ($(LOSCFG_DEMOS_LIBEVENT), y)
         LITEOS_BASELIB += -llibevent_demo
+    endif
+    ifeq ($(LOSCFG_DEMOS_APRILTAG), y)
+        LITEOS_BASELIB += -lapriltag_demo
     endif
 endif
 

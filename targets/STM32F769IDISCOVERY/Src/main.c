@@ -82,6 +82,11 @@ INT32 main(VOID)
     if (ret != LOS_OK) {
         return LOS_NOK;
     }
+    ret = LOS_MemInit((VOID *)OS_SYS_EXT_MEM_ADDR, OS_SYS_EXT_MEM_SIZE);
+    if (ret != LOS_OK) {
+        PRINT_ERR("Ext mem init err.\n");
+        return ret;
+    }
 
     OsStart();
 

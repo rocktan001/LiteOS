@@ -1,5 +1,6 @@
 include $(LITEOSTOPDIR)/config.mk
 
+MODULE_$(LOSCFG_DEMOS_APRILTAG) += apriltag
 MODULE_$(LOSCFG_DEMOS_BIDIREFERENCE) += bidireference
 MODULE_$(LOSCFG_DEMOS_C_ALGORITHMS) += c-algorithms
 MODULE_$(LOSCFG_DEMOS_CURL) += curl

@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Memory Map Config HeadFile
+ * Description: Apriltag Demo HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-01-18
+ * Create: 2021-11-03
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,8 +26,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _MEMMAP_CONFIG_H
-#define _MEMMAP_CONFIG_H
+#ifndef _APRILTAG_DEMO_H
+#define _APRILTAG_DEMO_H
+
+#include "los_typedef.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,19 +37,12 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-extern UINT32 __LOS_HEAP_ADDR_START__;
-extern UINT32 __LOS_HEAP_ADDR_END__;
-#define OS_SYS_MEM_ADDR        (VOID *)(__LOS_HEAP_ADDR_START__)
-#define OS_SYS_MEM_SIZE        ((UINT32)(__LOS_HEAP_ADDR_END__ - __LOS_HEAP_ADDR_START__ + 1))
+VOID ApriltagDemoTask(VOID);
 
-extern char _ext_addr_start;
-extern char _ext_addr_end;
-#define OS_SYS_EXT_MEM_ADDR        (VOID *)(&_ext_addr_start)
-#define OS_SYS_EXT_MEM_SIZE        ((UINT32)((&_ext_addr_end) - (&_ext_addr_start) + 1))
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _MEMMAP_CONFIG_H */
+#endif /* _APRILTAG_DEMO_H */
