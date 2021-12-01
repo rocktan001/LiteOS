@@ -52,7 +52,6 @@
 
 #if !defined(MBEDTLS_CONFIG_FILE)
 #if defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
-#include "mbedtls/config.h"
 #else
 #include "los_mbedtls_config.h"
 #endif

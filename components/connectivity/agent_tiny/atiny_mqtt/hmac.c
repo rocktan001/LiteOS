@@ -31,7 +31,9 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/platform.h"
-#include "mbedtls/md_internal.h"
+#include "md_wrap.h"
+#include "mbedtls/md.h"
+
 
 #ifdef __cplusplus
 #if __cplusplus

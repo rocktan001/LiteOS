@@ -155,7 +155,7 @@ static int los_mqtt_tls_read(mbedtls_ssl_context *ssl, unsigned char *buffer, in
         return -1;
     }
 
-    mbedtls_ssl_conf_read_timeout((mbedtls_ssl_config*)ssl->conf, timeout_ms);
+    mbedtls_ssl_conf_read_timeout((mbedtls_ssl_config*)ssl->MBEDTLS_PRIVATE(conf), timeout_ms);
 
     ret = mbedtls_ssl_read(ssl, buffer, len);
     if ((ret == MBEDTLS_ERR_SSL_WANT_READ)

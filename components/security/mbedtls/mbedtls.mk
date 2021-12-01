@@ -1,6 +1,6 @@
 COMPONENTS_MBEDTLS_INCLUDE :=
 
-MBEDTLS_VERSION = mbedtls-2.16.8
+MBEDTLS_VERSION = mbedtls-3.0.0
 
 COMPONENTS_MBEDTLS_INCLUDE += \
     -I $(LITEOSTOPDIR)/components/security/mbedtls/mbedtls_port \

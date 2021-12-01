@@ -93,7 +93,7 @@ STATIC VOID DemoTaskEntry(VOID)
     do {
         unsigned char buf[64] = {0};
         ret = dtls_accept(bind_ctx, cli_ctx, NULL, 0, 0);
-        LOG("dtls_accept return ret = %d, bindfd = %d, cli_fd = %d", ret, bind_ctx->fd, cli_ctx->fd);
+        LOG("dtls_accept return ret = %d, bindfd = %d, cli_fd = %d", ret, bind_ctx->MBEDTLS_PRIVATE(fd), cli_ctx->MBEDTLS_PRIVATE(fd));
         mbedtls_ssl_set_bio(ssl, cli_ctx, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
 
         // new psk and handshake should been done for each client, now only for frist connection.

@@ -39,6 +39,7 @@ libxml2-2.6.24 &#& components/utility/libxml2             &#& LOSCFG_COMPONENTS_
 littlefs-2.3.0 &#& components/fs/littlefs                 &#& LOSCFG_COMPONENTS_FS_LITTLEFS=y   &#& https://github.com/littlefs-project/littlefs/archive/refs/tags/v2.3.0.zip
 lua-5.4.2      &#& components/language/lua                &#& LOSCFG_COMPONENTS_LUA=y           &#& https://github.com/lua/lua/archive/refs/tags/v5.4.2.zip
 lvgl-7.0.0     &#& components/gui                         &#& LOSCFG_COMPONENTS_GUI=y           &#& https://github.com/lvgl/lvgl/archive/refs/tags/v7.0.0.zip
+mbedtls-3.0.0  &#& components/security/mbedtls            &#& LOSCFG_COMPONENTS_SECURITY_MBEDTLS=y  &#& https://github.com/ARMmbed/mbedtls/archive/refs/tags/v3.0.0.zip
 micropython-1.16 &#& components/language/micropython      &#& LOSCFG_COMPONENTS_MICROPYTHON=y   &#& https://github.com/micropython/micropython/archive/refs/tags/v1.16.zip
 minmea-0.3.0   &#& components/utility/minmea              &#& LOSCFG_COMPONENTS_MINMEA=y        &#& https://github.com/kosma/minmea/archive/refs/tags/v0.3.0.zip
 openexif-2.1.4 &#& components/media/openexif              &#& LOSCFG_COMPONENTS_OPENEXIF=y      &#& https://sourceforge.net/projects/openexif/files/openexif/2.1.4/openexif-2_1_4-src.zip

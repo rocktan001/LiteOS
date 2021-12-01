@@ -54,7 +54,7 @@ extern "C" {
 
 void mbedtls_net_init(mbedtls_net_context *ctx)
 {
-    ctx->fd = -1;
+    ctx->MBEDTLS_PRIVATE(fd) = -1;
 }
 
 int  mbedtls_net_connect(mbedtls_net_context *ctx, const char *host, const char *port, int proto)
