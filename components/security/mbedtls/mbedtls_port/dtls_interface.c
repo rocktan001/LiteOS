@@ -140,7 +140,7 @@ mbedtls_ssl_context *dtls_ssl_new(dtls_establish_info_s *info, char plat_type)
     mbedtls_ssl_config_init(conf);
     mbedtls_ctr_drbg_init(ctr_drbg);
     mbedtls_entropy_init(entropy);
-    mbedtls_ssl_conf_read_timeout((mbedtls_ssl_config *)ssl->conf, 5000);
+    mbedtls_ssl_conf_read_timeout((mbedtls_ssl_config *)ssl->MBEDTLS_PRIVATE(conf), 5000);
 #if defined(MBEDTLS_DEBUG_C)
     /* Enable debug output of mbedtls */
     mbedtls_ssl_conf_dbg(conf, mbedtls_debug, NULL);
@@ -335,7 +335,7 @@ exit_fail:
 
     if (server_fd != NULL) {
         mbedtls_net_free(server_fd);
-        ssl->p_bio = NULL;
+        ssl->MBEDTLS_PRIVATE(p_bio) = NULL;
     }
 
     return ret;
@@ -354,17 +354,17 @@ void dtls_ssl_destroy(mbedtls_ssl_context *ssl)
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
     mbedtls_x509_crt *cacert = NULL;
 #endif
-    conf = (mbedtls_ssl_config *)ssl->conf;
-    server_fd = (mbedtls_net_context *)ssl->p_bio;
-    timer = (mbedtls_timing_delay_context *)ssl->p_timer;
+    conf = (mbedtls_ssl_config *)ssl->MBEDTLS_PRIVATE(conf);
+    server_fd = (mbedtls_net_context *)ssl->MBEDTLS_PRIVATE(p_bio);
+    timer = (mbedtls_timing_delay_context *)ssl->MBEDTLS_PRIVATE(p_timer);
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
-    cacert = (mbedtls_x509_crt *)conf->ca_chain;
+    cacert = (mbedtls_x509_crt *)conf->MBEDTLS_PRIVATE(ca_chain);
 #endif
 
     if (conf != NULL) {
-        ctr_drbg = conf->p_rng;
+        ctr_drbg = conf->MBEDTLS_PRIVATE(p_rng);
         if (ctr_drbg != NULL) {
-            entropy =  ctr_drbg->p_entropy;
+            entropy =  ctr_drbg->MBEDTLS_PRIVATE(p_entropy);
         }
     }
 
@@ -375,7 +375,7 @@ void dtls_ssl_destroy(mbedtls_ssl_context *ssl)
     if (conf != NULL) {
         mbedtls_ssl_config_free(conf);
         mbedtls_free(conf);
-        ssl->conf = NULL; //  need by mbedtls_debug_print_msg(), see mbedtls_ssl_free(ssl)
+        ssl->MBEDTLS_PRIVATE(conf) = NULL; //  need by mbedtls_debug_print_msg(), see mbedtls_ssl_free(ssl)
     }
 
     if (ctr_drbg != NULL) {

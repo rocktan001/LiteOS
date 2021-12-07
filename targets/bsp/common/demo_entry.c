@@ -261,6 +261,10 @@
 #include "libevent_demo.h"
 #endif
 
+#ifdef LOSCFG_DEMOS_APRILTAG
+#include "apriltag_demo.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define NETWORK_DEMO_TASK_PRIORITY 2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -534,6 +538,10 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_LIBEVENT
     LibeventDemoTask();
+#endif
+
+#ifdef LOSCFG_DEMOS_APRILTAG
+    ApriltagDemoTask();
 #endif
 
 #ifdef LOSCFG_SHELL

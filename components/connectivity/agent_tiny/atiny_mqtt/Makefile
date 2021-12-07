@@ -8,6 +8,7 @@ LOCAL_SRCS := $(wildcard *.c)
 LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/components/components/connectivity/agent_tiny/atiny_mqtt \
     -I $(LITEOSTOPDIR)/components/ota/flag_operate \
+    -I $(LITEOSTOPDIR)/components/security/mbedtls/mbedtls-3.0.0/library \
     -I $(LITEOSTOPDIR)/include
 
 LOCAL_INCLUDE += \

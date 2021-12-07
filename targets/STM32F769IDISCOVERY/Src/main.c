@@ -74,13 +74,18 @@ INT32 main(VOID)
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
                   "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
+                  "build date : %s %s\n\n"
                   "**********************************\n",
                   HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
 
     UINT32 ret = OsMain();
     if (ret != LOS_OK) {
         return LOS_NOK;
+    }
+    ret = LOS_MemInit((VOID *)OS_SYS_EXT_MEM_ADDR, OS_SYS_EXT_MEM_SIZE);
+    if (ret != LOS_OK) {
+        PRINT_ERR("Ext mem init err.\n");
+        return ret;
     }
 
     OsStart();

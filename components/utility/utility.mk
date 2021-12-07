@@ -130,3 +130,8 @@ include $(LITEOSTOPDIR)/components/utility/libevent/libevent.mk
 COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_LIBEVENT_INCLUDE)
 endif
 
+ifeq ($(LOSCFG_COMPONENTS_APRILTAG), y)
+include $(LITEOSTOPDIR)/components/utility/apriltag/apriltag.mk
+COMPONENTS_UTILITY_INCLUDE += $(COMPONENTS_APRILTAG_INCLUDE)
+endif
+

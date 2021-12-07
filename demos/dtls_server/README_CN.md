@@ -32,13 +32,9 @@ Demos --> Dtls Server Demo --> Enable Dtls Server Demo
 
 ## 编写客户端
 
-开发板上运行的是服务端程序，用户需要自行编写客户端程序与服务端进行交互。客户端需要用到mbedtls提供的接口，可拷贝<a href="https://gitee.com/LiteOS/LiteOS/blob/master/components/security/mbedtls/mbedtls-2.16.8" target="_blank">mbedtls-2.16.8软件包</a>到linux服务器上（windows上搭建环境较繁琐），客户端示列代码如下（该代码参考<a href="https://gitee.com/LiteOS/LiteOS/blob/master/components/security/mbedtls/mbedtls-2.16.8/programs/ssl/dtls_client.c" target="_blank">dtls_client.c</a>编写）：
+开发板上运行的是服务端程序，用户需要自行编写客户端程序与服务端进行交互。客户端需要用到mbedtls提供的接口，可从<a href="https://github.com/ARMmbed/mbedtls/archive/refs/tags/v3.0.0.zip" target="_blank">mbedtls-3.0.0软件包</a>下载到linux服务器上（windows上搭建环境较繁琐），客户端示列代码如下（该代码参考<a href="https://github.com/ARMmbed/mbedtls/blob/v3.0.0/programs/ssl/dtls_client.c" target="_blank">dtls_client.c</a>编写）：
 ````c
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
@@ -55,7 +51,6 @@ Demos --> Dtls Server Demo --> Enable Dtls Server Demo
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/error.h"
-#include "mbedtls/certs.h"
 #include "mbedtls/timing.h"
 
 #define SERVER_PORT "5658"

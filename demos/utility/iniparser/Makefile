@@ -6,7 +6,7 @@ MODULE_NAME := iniparser_demo
 LOCAL_SRCS := $(wildcard *.c)
 
 LOCAL_INCLUDE += \
-    -I $(LITEOSTOPDIR)/include \
+    -I $(LITEOSTOPDIR)/components/fs/include \
     -I $(LITEOSTOPDIR)/lib/libc/include \
     -I $(LITEOSTOPDIR)/lib/libsec/include \
     -I $(LITEOSTOPDIR)/demos/iniparser

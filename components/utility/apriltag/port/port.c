@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Main Process Implementation
+ * Description: Apriltag Port Implementation
  * Author: Huawei LiteOS Team
- * Create: 2021-05-13
+ * Create: 2021-11-13
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,44 +26,45 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "los_task_pri.h"
-#include "arch/canary.h"
+#include "string.h"
+#include "los_memory_pri.h"
+#include "los_typedef.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID board_config(VOID)
+#ifdef LOSCFG_EXTERNAL_MEM
+void *_calloc(size_t nitems, size_t size)
 {
-    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
-}
+    size_t realSize;
+    void *ptr = NULL;
 
-INT32 main(VOID)
-{
-#ifdef __GNUC__
-    ArchStackGuardInit();
-#endif
-    OsSetMainTask();
-    OsCurrTaskSet(OsGetMainTask());
-
-    board_config();
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build date : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
+    if ((nitems == 0) || (size == 0) || (nitems > (UINT32_MAX / size))) {
+        return NULL;
     }
 
-    OsStart();
-
-    return LOS_OK;
+    realSize = (size_t)(nitems * size);
+    ptr = LOS_MemAlloc(OS_SYS_EXT_MEM_ADDR, (UINT32)realSize);
+    if (ptr != NULL) {
+        (void)memset_s((void *)ptr, realSize, 0, realSize);
+    }
+    return ptr;
 }
+
+void _free(void *p)
+{
+    if (p >= OS_SYS_EXT_MEM_ADDR) {
+        LOS_MemFree(OS_SYS_EXT_MEM_ADDR, p);
+    } else {
+        free(p);
+    }
+}
+
+#endif
+
 #ifdef __cplusplus
 #if __cplusplus
 }

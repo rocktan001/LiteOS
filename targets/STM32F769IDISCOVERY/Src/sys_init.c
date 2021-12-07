@@ -48,7 +48,6 @@
 #include "ethernetif.h"
 
 #ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
-#include "mbedtls/net.h"
 #include "mbedtls/ssl.h"
 #endif
 

@@ -40,6 +40,10 @@ extern UINT32 __LOS_HEAP_ADDR_END__;
 #define OS_SYS_MEM_ADDR        (VOID *)(__LOS_HEAP_ADDR_START__)
 #define OS_SYS_MEM_SIZE        ((UINT32)(__LOS_HEAP_ADDR_END__ - __LOS_HEAP_ADDR_START__ + 1))
 
+extern char _ext_addr_start;
+extern char _ext_addr_end;
+#define OS_SYS_EXT_MEM_ADDR        (VOID *)(&_ext_addr_start)
+#define OS_SYS_EXT_MEM_SIZE        ((UINT32)((&_ext_addr_end) - (&_ext_addr_start) + 1))
 #ifdef __cplusplus
 #if __cplusplus
 }

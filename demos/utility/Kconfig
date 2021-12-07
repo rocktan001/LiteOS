@@ -1,5 +1,6 @@
 menu "Utility Demo"
 
+source "demos/utility/apriltag/Kconfig"
 source "demos/utility/bidireference/Kconfig"
 source "demos/utility/c-algorithms/Kconfig"
 source "demos/utility/curl/Kconfig"
