@@ -85,6 +85,7 @@ typedef struct {
 #define SCREEN_IS_FULL(timesPrint, lineCap) ((timesPrint) >= ((lineCap) * DEFAULT_SCREEN_HEIGHT))
 
 extern UINT32 OsCmdInit(VOID);
+extern VOID OsCmdDeinit(VOID);
 extern CmdModInfo *OsCmdInfoGet(VOID);
 extern UINT32 OsCmdExec(CmdParsed *cmdParsed, CHAR *cmdStr);
 extern UINT32 OsCmdKeyShift(const CHAR *cmdKey, CHAR *cmdOut, UINT32 size);

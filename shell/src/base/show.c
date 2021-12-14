@@ -57,6 +57,7 @@ STATIC UINT32 OsShellSourceInit(VOID)
 
     ret = OsShellSysCmdRegister();
     if (ret != LOS_OK) {
+        OsCmdDeinit();
         return ret;
     }
     g_shellSourceFlag = TRUE;
@@ -99,7 +100,7 @@ UINT32 OsShellInit(INT32 consoleId)
 
     shellCB = LOS_MemAlloc(m_aucSysMem0, sizeof(ShellCB));
     if (shellCB == NULL) {
-        return LOS_NOK;
+        goto ERR_OUT_INIT;
     }
     (VOID)memset_s(shellCB, sizeof(ShellCB), 0, sizeof(ShellCB));
 
@@ -141,6 +142,8 @@ ERR_OUT_DEINIT_CONSOLE:
     OsShellConsoleDeinit(consoleId);
 ERR_OUT_FREE_MEM:
     (VOID)LOS_MemFree((VOID *)m_aucSysMem0, shellCB);
+ERR_OUT_INIT:
+    OsCmdDeinit();
 
     return ret;
 }

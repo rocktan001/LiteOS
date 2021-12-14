@@ -786,6 +786,19 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsCmdInit(VOID)
     return LOS_OK;
 }
 
+LITE_OS_SEC_TEXT_MINOR VOID OsCmdDeinit(VOID)
+{
+    CmdItemNode *cmdItem = NULL;
+    while (!LOS_ListEmpty(&(g_cmdInfo.cmdList.list))) {
+        cmdItem = LOS_DL_LIST_ENTRY(g_cmdInfo.cmdList.list.pstNext, CmdItemNode, list);
+        LOS_ListDelete(&cmdItem->list);
+        (VOID)LOS_MemFree(m_aucSysMem0, cmdItem);
+    }
+
+    g_cmdInfo.initMagicFlag = 0;
+    (VOID)LOS_MuxDelete(g_cmdInfo.muxLock);
+}
+
 STATIC UINT32 OsCmdItemCreate(CmdType cmdType, CHAR *cmdKey, UINT32 paraNum, CmdCallBackFunc cmdProc)
 {
     CmdItem *cmdItem = NULL;
