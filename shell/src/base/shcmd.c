@@ -46,6 +46,7 @@ extern "C" {
 #define CTRL_C 0x03 /* 0x03: ctrl+c ASCII */
 #define SPACE  0x20 /* 0x20: space ASCII */
 STATIC CmdModInfo g_cmdInfo;
+STATIC UINT8 *g_cmdItemGroup;
 
 LOS_HAL_TABLE_BEGIN(g_shellcmd, shellcmd);
 LOS_HAL_TABLE_END(g_shellcmdEnd, shellcmd);
@@ -645,23 +646,32 @@ LITE_OS_SEC_TEXT_MINOR VOID OsShellKeyDeInit(const ShellCB *shellCB)
 LITE_OS_SEC_TEXT_MINOR UINT32 OsShellSysCmdRegister(VOID)
 {
     UINT32 i;
-    UINT8 *cmdItemGroup = NULL;
     UINT32 index = ((UINTPTR)(&g_shellcmdEnd) - (UINTPTR)(&g_shellcmd[0])) / sizeof(CmdItem);
     CmdItemNode *cmdItem = NULL;
 
-    cmdItemGroup = (UINT8 *)LOS_MemAlloc(m_aucSysMem0, index * sizeof(CmdItemNode));
-    if (cmdItemGroup == NULL) {
+    g_cmdItemGroup = (UINT8 *)LOS_MemAlloc(m_aucSysMem0, index * sizeof(CmdItemNode));
+    if (g_cmdItemGroup == NULL) {
         PRINT_ERR("[%s]System memory allocation failure!\n", __FUNCTION__);
         return (UINT32)OS_ERROR;
     }
 
     for (i = 0; i < index; ++i) {
-        cmdItem = (CmdItemNode *)(cmdItemGroup + i * sizeof(CmdItemNode));
+        cmdItem = (CmdItemNode *)(g_cmdItemGroup + i * sizeof(CmdItemNode));
         cmdItem->cmd = &g_shellcmd[i];
         OsCmdAscendingInsert(cmdItem);
     }
     g_cmdInfo.listNum += index;
     return LOS_OK;
+}
+
+LITE_OS_SEC_TEXT_MINOR VOID OsShellSysCmdUnregister(VOID)
+{
+    CmdItemNode *cmdItem = NULL;
+    while (!LOS_ListEmpty(&(g_cmdInfo.cmdList.list))) {
+        cmdItem = LOS_DL_LIST_ENTRY(g_cmdInfo.cmdList.list.pstNext, CmdItemNode, list);
+        LOS_ListDelete(&cmdItem->list);
+    }
+    (VOID)LOS_MemFree(m_aucSysMem0, g_cmdItemGroup);
 }
 
 LITE_OS_SEC_TEXT_MINOR VOID OsShellCmdPush(const CHAR *string, CmdKeyLink *cmdKeyLink)
@@ -786,15 +796,8 @@ LITE_OS_SEC_TEXT_MINOR UINT32 OsCmdInit(VOID)
     return LOS_OK;
 }
 
-LITE_OS_SEC_TEXT_MINOR VOID OsCmdDeinit(VOID)
+LITE_OS_SEC_TEXT_MINOR VOID OsCmdDeInit(VOID)
 {
-    CmdItemNode *cmdItem = NULL;
-    while (!LOS_ListEmpty(&(g_cmdInfo.cmdList.list))) {
-        cmdItem = LOS_DL_LIST_ENTRY(g_cmdInfo.cmdList.list.pstNext, CmdItemNode, list);
-        LOS_ListDelete(&cmdItem->list);
-        (VOID)LOS_MemFree(m_aucSysMem0, cmdItem);
-    }
-
     g_cmdInfo.initMagicFlag = 0;
     (VOID)LOS_MuxDelete(g_cmdInfo.muxLock);
 }

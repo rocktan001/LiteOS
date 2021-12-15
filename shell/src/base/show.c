@@ -57,11 +57,18 @@ STATIC UINT32 OsShellSourceInit(VOID)
 
     ret = OsShellSysCmdRegister();
     if (ret != LOS_OK) {
-        OsCmdDeinit();
+        OsCmdDeInit();
         return ret;
     }
     g_shellSourceFlag = TRUE;
     return LOS_OK;
+}
+
+STATIC VOID OsShellSourceDeInit(VOID)
+{
+    OsCmdDeInit();
+    OsShellSysCmdUnregister();
+    g_shellSourceFlag = FALSE;
 }
 
 STATIC UINT32 OsShellCreateTask(ShellCB *shellCB)
@@ -100,7 +107,7 @@ UINT32 OsShellInit(INT32 consoleId)
 
     shellCB = LOS_MemAlloc(m_aucSysMem0, sizeof(ShellCB));
     if (shellCB == NULL) {
-        goto ERR_OUT_INIT;
+        goto ERR_OUT_SOURCE_INIT;
     }
     (VOID)memset_s(shellCB, sizeof(ShellCB), 0, sizeof(ShellCB));
 
@@ -142,8 +149,8 @@ ERR_OUT_DEINIT_CONSOLE:
     OsShellConsoleDeinit(consoleId);
 ERR_OUT_FREE_MEM:
     (VOID)LOS_MemFree((VOID *)m_aucSysMem0, shellCB);
-ERR_OUT_INIT:
-    OsCmdDeinit();
+ERR_OUT_SOURCE_INIT:
+    OsShellSourceDeInit();
 
     return ret;
 }
