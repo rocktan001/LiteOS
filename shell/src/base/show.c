@@ -107,7 +107,7 @@ UINT32 OsShellInit(INT32 consoleId)
 
     shellCB = LOS_MemAlloc(m_aucSysMem0, sizeof(ShellCB));
     if (shellCB == NULL) {
-        goto ERR_OUT_SOURCE_INIT;
+        goto ERR_OUT_SOURCE_DEINIT;
     }
     (VOID)memset_s(shellCB, sizeof(ShellCB), 0, sizeof(ShellCB));
 
@@ -149,7 +149,7 @@ ERR_OUT_DEINIT_CONSOLE:
     OsShellConsoleDeinit(consoleId);
 ERR_OUT_FREE_MEM:
     (VOID)LOS_MemFree((VOID *)m_aucSysMem0, shellCB);
-ERR_OUT_SOURCE_INIT:
+ERR_OUT_SOURCE_DEINIT:
     OsShellSourceDeInit();
 
     return ret;
