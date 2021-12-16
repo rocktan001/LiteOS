@@ -35,6 +35,11 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+extern char __heap_start;
+extern char __heap_end;
+#define OS_SYS_MEM_ADDR        ((VOID *)(&__heap_start))
+#define OS_SYS_MEM_SIZE        (UINT32)((&__heap_end) - (&__heap_start) + 1)
+
 #ifdef __cplusplus
 #if __cplusplus
 }
