@@ -98,6 +98,10 @@ INT32 main(VOID)
 |            | trace                    |                       | Trace的demo                                                  |
 |            | utility                  |                       | 解析工具的demo                                               |
 | doc        |                          |                       | 此目录存放的是LiteOS的使用文档和API说明等文档                |
+| driver     | base                     |                       | LiteOS驱动框架                                              |
+|            | interrupt                |                       | LiteOS系统中断接口                                           |
+|            | timer                    |                       | LiteOS系统定时器接口                                          |
+|            | uart                     |                       | LiteOS系统串口接口                                             |
 | include    |                          |                       | components各个模块所依赖的头文件                             |
 | kernel     | base                     |                       | LiteOS基础内核代码，包括任务、中断、软件定时器、队列、事件、信号量、互斥锁、tick等功能 |
 |            |                          | debug                 | LiteOS内核调测代码，包括队列、信号量、互斥锁及任务调度的调测 |

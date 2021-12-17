@@ -242,11 +242,11 @@ DownloadSourceCode()
 
         # get source code
         if [ "${packageType1}" = ".zip" ]; then
-            curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.zip
+            curl -BL --insecure ${g_componentDownloadAddr} -o ${g_componentName}.zip
         elif [ "${packageType2}" = ".tar.gz" ]; then
-            curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.tar.gz
+            curl -BL --insecure ${g_componentDownloadAddr} -o ${g_componentName}.tar.gz
         elif [ "${packageType1}" = ".rar" ]; then
-            curl -BL ${g_componentDownloadAddr} -o ${g_componentName}.rar
+            curl -BL --insecure ${g_componentDownloadAddr} -o ${g_componentName}.rar
         elif [ "${packageType}" = "git" -o "${packageType1}" = ".git" ]; then
             git config --global core.autocrlf input
             ${g_componentDownloadAddr} ${g_componentName}
