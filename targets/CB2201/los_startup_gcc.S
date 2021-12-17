@@ -56,7 +56,11 @@
 #define PMU_LP_CONTROL  0x40002000
 
 .text
+.long _start
 .align   2
+_start:
+.text
+.align
 .globl   Reset_Handler
 .type    Reset_Handler, %function
 Reset_Handler:
