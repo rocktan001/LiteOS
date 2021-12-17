@@ -158,7 +158,6 @@ STATIC struct mqpersonal *DoMqueueCreate(const struct mq_attr *attr, const CHAR 
 
     mqueueCB->mq_personal = (struct mqpersonal *)LOS_MemAlloc(OS_SYS_MEM_ADDR, sizeof(struct mqpersonal));
     if (mqueueCB->mq_personal == NULL) {
-        ((LosQueueCB *)(mqueueCB->mqcb))->queueHandle = NULL;
         mqueueCB->mqcb = NULL;
         errno = ENOSPC;
         goto ERROUT_FREE_QUEUE;
