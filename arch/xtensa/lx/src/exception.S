@@ -32,7 +32,7 @@
 .extern ArchInterrupt
 .extern UserException
 
-.section    .iram,"ax"
+.section    .iram1,"ax"
 .literal_position
 .global HandleEntry
 .type       HandleEntry, @function
@@ -268,7 +268,7 @@ KernelExceptionHandler:
 
 .end        literal_prefix
 
-.section .iram,"ax"
+.section .iram1,"ax"
 .align      4
 KernelException:
 
@@ -290,7 +290,7 @@ UserExceptionHandler:
     call0   UserException
 .end        literal_prefix
 
-.section    .iram,"ax"
+.section    .iram1,"ax"
 .type       UserException,@function
 .align      4
 UserException:
@@ -300,10 +300,19 @@ UserException:
     beqi    a0, 3, LoadStoreErr
 #endif
     beqi    a0, 4, InterruptEntry1
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
+    beqi    a0, 5, AllocHandel
+#endif
     j       HandleEntry
 
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
+.section    .iram1,"ax"
+.type       AllocHandel,@function
+.align      4
+AllocHandel:
+    call0 AllocHandelEntry
+#endif
 
-.section    .iram,"ax"
 .type       InterruptEntry1,@function
 .align      4
 InterruptEntry1:
@@ -523,4 +532,34 @@ UnderFlowGroup3:
     l32i    a5, a4, 4
     l32i    a4, a4, 0
     rfwu
+
+.section    .userVector,"ax"
+.type       AllocHandelEntry,@function
+.align      4
+AllocHandelEntry:
+
+    addi    a1, a1, -16
+    s32i    a2, a1, 0x08
+    s32i    a3, a1, 0x0c
+
+    rsr     a0, PS
+    rsr     a2, WINDOWBASE
+    extui   a3, a0, PS_OWB_SHIFT, WINDOWBASEBITS
+    xor     a3, a3, a2
+    slli    a3, a3, 8
+    xor     a0, a0, a3
+    wsr     a0, PS
+    rsr     a0, EXCSAVE1
+
+    l32i    a2, a1, 0x08
+    l32i    a3, a1, 0x0c
+    addi    a1, a1, 16
+    rsync
+
+    rotw -1
+    bbci    a4, 31, UnderFlowGroup1
+    rotw -1
+    bbci    a8, 30, UnderFlowGroup2
+    rotw -1
+    j       UnderFlowGroup3
 #endif
