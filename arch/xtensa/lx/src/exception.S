@@ -32,7 +32,7 @@
 .extern ArchInterrupt
 .extern UserException
 
-.section    .iram,"ax"
+.section    .iram1,"ax"
 .literal_position
 .global HandleEntry
 .type       HandleEntry, @function
@@ -268,7 +268,7 @@ KernelExceptionHandler:
 
 .end        literal_prefix
 
-.section .iram,"ax"
+.section .iram1,"ax"
 .align      4
 KernelException:
 
@@ -290,7 +290,7 @@ UserExceptionHandler:
     call0   UserException
 .end        literal_prefix
 
-.section    .iram,"ax"
+.section    .iram1,"ax"
 .type       UserException,@function
 .align      4
 UserException:
@@ -299,11 +299,20 @@ UserException:
 #ifdef LOSCFG_COMPILER_XTENSA_L106
     beqi    a0, 3, LoadStoreErr
 #endif
-    beqi    a0, 4, InterruptEntry1
+    beqi    a0, LEVEL1_TINRERRUPT_CAUSE, InterruptEntry1
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
+    beqi    a0, ALLOC_CAUSE, AllocHandel
+#endif
     j       HandleEntry
 
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
+.section    .iram1,"ax"
+.type       AllocHandel,@function
+.align      4
+AllocHandel:
+    call0 AllocHandelEntry
+#endif
 
-.section    .iram,"ax"
 .type       InterruptEntry1,@function
 .align      4
 InterruptEntry1:
@@ -523,4 +532,34 @@ UnderFlowGroup3:
     l32i    a5, a4, 4
     l32i    a4, a4, 0
     rfwu
+
+.section    .userVector,"ax"
+.type       AllocHandelEntry,@function
+.align      4
+AllocHandelEntry:
+
+    addi    a1, a1, -(CONTEXT_OFF_A4 - CONTEXT_OFF_A0)
+    s32i    a2, a1, (CONTEXT_OFF_A2 - CONTEXT_OFF_A0)
+    s32i    a3, a1, (CONTEXT_OFF_A3 - CONTEXT_OFF_A0)
+
+    rsr     a0, PS
+    rsr     a2, WINDOWBASE
+    extui   a3, a0, PS_OWB_SHIFT, WINDOWBASEBITS
+    xor     a3, a3, a2
+    slli    a3, a3, PS_OWB_SHIFT
+    xor     a0, a0, a3
+    wsr     a0, PS
+    rsr     a0, EXCSAVE1
+
+    l32i    a2, a1, (CONTEXT_OFF_A2 - CONTEXT_OFF_A0)
+    l32i    a3, a1, (CONTEXT_OFF_A3 - CONTEXT_OFF_A0)
+    addi    a1, a1, (CONTEXT_OFF_A4 - CONTEXT_OFF_A0)
+    rsync
+
+    rotw -1
+    bbci    a4, HIGHBIT_CALLNMODE, UnderFlowGroup1
+    rotw -1
+    bbci    a8, LOWBIT_CALLNMODE, UnderFlowGroup2
+    rotw -1
+    j       UnderFlowGroup3
 #endif

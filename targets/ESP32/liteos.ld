@@ -64,6 +64,7 @@ SECTIONS
     . = 0x3C0;
     KEEP(*(.DoubleExceptionHandler.text));
     . = 0x400;
+    *(.userVector)
     *(.*_vector.literal)
 
     . = ALIGN (16);

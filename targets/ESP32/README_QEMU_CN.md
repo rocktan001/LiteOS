@@ -56,7 +56,7 @@ QEMU可以模拟内核运行在不同的单板，解除对物理开发板的依�
 
          (注：更多安装指导，请参考链接：[Home · espressif/qemu Wiki · GitHub](https://github.com/espressif/qemu/wiki#configure))
 
-## 3. 编译LiteOS SmartL_E802工程
+## 3. 编译LiteOS ESP32工程
 
    从<a href="https://gitee.com/LiteOS/LiteOS.git" target="_blank"> LiteOS 仓库 </a>拉取LiteOS源码：
 
@@ -79,7 +79,7 @@ QEMU可以模拟内核运行在不同的单板，解除对物理开发板的依�
    $ make clean && make -j
    ```
 
-   编译完成后会在 out/ESP32/ 路径下生成`Huawei_LiteOS.elf/`文件，该文件即为ESP32的执行文件。
+   编译完成后会在 out/ESP32/ 路径下生成`Huawei_LiteOS.elf`文件，该文件即为ESP32的执行文件。
 
 ## 4.在Qemu中运行镜像
 
