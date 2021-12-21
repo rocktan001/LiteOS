@@ -296,7 +296,7 @@ static int LittlefsOperationReaddir(struct dir *dir, struct dirent *dent)
     }
     while (1) {
         ret = lfs_dir_read(lfs, lfs_dir, &info);
-        if (ret == 0) {
+        if (ret < 0) {
             return 1;
         }
         if((strcmp(info.name, ".") == 0) || (strcmp(info.name, "..") == 0)) {
