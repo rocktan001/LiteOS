@@ -200,11 +200,10 @@ static off_t LittlefsOperationLseek(struct file *file, off_t off, int whence)
         return -EINVAL;
     }
     ret = lfs_file_seek(lfs, f, (lfs_soff_t)off, whence);
-    if (ret == LFS_ERR_OK) {
-        return (off_t)off;
-    } else {
+    if (ret < LFS_ERR_OK) {
         return RetToErrno(ret);
     }
+    return ret;
 }
 
 static off64_t LittlefsOperationLseek64(struct file *file, off64_t off, int whence)
