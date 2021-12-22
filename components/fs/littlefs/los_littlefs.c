@@ -200,11 +200,10 @@ static off_t LittlefsOperationLseek(struct file *file, off_t off, int whence)
         return -EINVAL;
     }
     ret = lfs_file_seek(lfs, f, (lfs_soff_t)off, whence);
-    if (ret == LFS_ERR_OK) {
-        return (off_t)off;
-    } else {
-        return RetToErrno(ret);
+    if (ret < LFS_ERR_OK) {
+        return RetToErrno((int)ret);
     }
+    return (off_t)ret;
 }
 
 static off64_t LittlefsOperationLseek64(struct file *file, off64_t off, int whence)
@@ -297,7 +296,7 @@ static int LittlefsOperationReaddir(struct dir *dir, struct dirent *dent)
     }
     while (1) {
         ret = lfs_dir_read(lfs, lfs_dir, &info);
-        if (ret == 0) {
+        if (ret < 0) {
             return 1;
         }
         if((strcmp(info.name, ".") == 0) || (strcmp(info.name, "..") == 0)) {
