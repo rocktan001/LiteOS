@@ -1,7 +1,29 @@
 # RHash Demo说明文档
-RHash是一个C语言编写的哈希函数库，详情参考<a href="https://github.com/rhash/RHash" target="_blank">RHash</a>。
+RHash是一个C语言编写的哈希函数库，用于计算和验证磁力链接和各种消息摘要。详情参考<a href="https://github.com/rhash/RHash" target="_blank">RHash</a>。
 
-Rhash支持的哈希函数列表：<a href="https://sourceforge.net/p/rhash/wiki/HashFunctions/" target="_blank">Hash Functions</a>。
+Rhash支持的哈希函数列表：
+|Name|Hash Length (bits)|Format|Specification|
+|:----|:----|:----|:----|
+|CRC32 |32 |hex |CRC32-IEEE 802.3 |
+|CRC32C |32 |hex |RFC 3385 |
+|MD4 |128 |hex |RFC 1320 |
+|MD5 |128 |hex |RFC 1321 |
+|SHA1 |160 |hex |RFC 3174 |
+|SHA2 |224/256/384/512 |hex |FIPS 180-4: Secure Hash Standard (SHS) |
+|SHA3 |224/256/384/512 |hex| The Keccak sponge function family |
+|TIGER |192 |hex |Tiger page |
+|TTH |192 |base32 |TTH description |
+|BTIH |160 |hex |BitTorrent Specification |
+|ED2K |128 |hex |ED2K description |
+|AICH |160 |base |32AICH description |
+|WHIRLPOOL |512 |hex |ISO/IEC 10118-3:2004 |
+|RIPEMD-160 |160 |hex |RIPEMD-160 page |
+|GOST R 34.11-94 |256 |hex |RFC 5831 |
+|GOST-CRYPTOPRO |256 |hex |RFC 4357 |
+|GOST R 34.11-2012 |256/512 |hex |RFC 6986 |
+|HAS-160 |160 |hex |HAS-160 specification |
+|SNEFRU |128/256 |hex |Ralph C. Merkle, 1990 |
+|EDON-R |256/512 |hex| D. Gligoroski, S. Markovski, L.Kocarev, Edon–R, An Inﬁnite Family of Cryptographic Hash Functions, 2006Functions, 2006 |
 
 ## HASH
 Hash，一般翻译做散列、杂凑，或音译为哈希，是一种将任意长度的输入通过散列算法变换成固定长度的输出的函数，详情参考<a href="https://baike.baidu.com/item/Hash/390310?fr=aladdin" target="_blank">Hash</a>。
@@ -29,13 +51,13 @@ Hash，一般翻译做散列、杂凑，或音译为哈希，是一种将任意�
 
 以`Cloud_STM32F429IGTx_FIRE`开发板为例来运行`RHash Demo`，其他开发板操作请参考<a href="https://gitee.com/LiteOS/LiteOS/blob/master/doc/LiteOS_Quick_Start.md" target="_blank">快速入门</a>。
 
-LiteOS启动后会运行`RHash Demo`，本demo演示了MD5和SHA256两种哈希函数的使用方法。通过计算给定数据的md5和sha256哈希值，原本数据的哈希值进行比较。
+LiteOS启动后会运行`RHash Demo`，本demo演示了MD5和SHA256两种哈希函数的使用方法。通过计算给定数据的md5和sha256哈希值，与在Linux平台下使用类似算法计算出来的哈希值进行比较。
 
 给定数据为：
 ```c
 #define DEMO_STR               "This is Huawei LiteOS RHash Demo.\n"
 ```
-在linux下新建文件test.txt，复制demoStr的内容到test.txt中，并执行以下命令生成md5和sha256的值：
+在linux开发环境下新建文件test.txt，复制上述给定数据内容到test.txt中并保存文件，执行以下linux命令生成md5和sha256的值：
 ```
 $ md5sum test.txt
 $ sha256sum test.txt
@@ -46,7 +68,7 @@ $ sha256sum test.txt
 #define SHA256_SUM             "d56910304664d3d3a439968b020bb465d5de33715cfb109d71704b91f85db30c"
 ```
 
-执行Demo结果如下：
+在LiteOS环境中，RHash Demo运行结果如下：
 ```
 ********Hello Huawei LiteOS********
 
@@ -72,3 +94,4 @@ RHash demo finished.
 Huawei LiteOS # 
 
 ```
+通过以上例程可知，使用RHash计算出来的哈希值与linux平台下类似工具的计算结果完全一致。
