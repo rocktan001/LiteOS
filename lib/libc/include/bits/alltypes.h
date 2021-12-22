@@ -362,8 +362,10 @@ typedef struct { unsigned __attr[2]; } pthread_rwlockattr_t;
 
 
 #if defined(__NEED_struct__IO_FILE) && !defined(__DEFINED_struct__IO_FILE)
+#ifndef __LITEOS__
 struct _IO_FILE { char __x; };
 #define __DEFINED_struct__IO_FILE
+#endif
 #endif
 
 #if defined(__NEED_FILE) && !defined(__DEFINED_FILE)
