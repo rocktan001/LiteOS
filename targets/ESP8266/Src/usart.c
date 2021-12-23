@@ -47,7 +47,7 @@ VOID UartWriteChar(const CHAR c)
 
 UINT8 UartReadChar(VOID)
 {
-    UINT8 RxFifoCnt = REG32_READ(UART_STATUS_REG);;
+    UINT8 RxFifoCnt = REG32_READ(UART_STATUS_REG);
     UINT8 c = 0;
     if (RxFifoCnt > 0) {
         c = REG32_READ(UART_FIFO_REG);
