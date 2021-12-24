@@ -437,12 +437,12 @@ STATIC INLINE VOID ArchAtomicDec(Atomic *v)
 
 STATIC INLINE INT32 ArchAtomicIncRet(Atomic *v)
 {
-    return ArchAtomicAdd(v, 1);;
+    return ArchAtomicAdd(v, 1);
 }
 
 STATIC INLINE INT32 ArchAtomicDecRet(Atomic *v)
 {
-    return ArchAtomicSub(v, 1);;
+    return ArchAtomicSub(v, 1);
 }
 
 STATIC INLINE INT32 ArchAtomicXchg32bits(Atomic *v, INT32 val)

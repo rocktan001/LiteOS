@@ -455,7 +455,7 @@ static void LTDC_Init(void)
     Layercfg.Backcolor.Red = 0;
     Layercfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
     Layercfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-    Layercfg.ImageWidth = BSP_LCD_GetXSize();;
+    Layercfg.ImageWidth = BSP_LCD_GetXSize();
     Layercfg.ImageHeight = BSP_LCD_GetYSize();
 
     HAL_LTDC_ConfigLayer(&hltdc_discovery, &Layercfg, 0);

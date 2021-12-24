@@ -17,7 +17,7 @@ static int do_sigtimedwait(const sigset_t *restrict mask, siginfo_t *restrict si
 	if (SYS_rt_sigtimedwait == SYS_rt_sigtimedwait_time64 || r!=-ENOSYS)
 		return r;
 	return __syscall_cp(SYS_rt_sigtimedwait, mask, si,
-		ts ? ((long[]){CLAMP(s), ns}) : 0, _NSIG/8);;
+		ts ? ((long[]){CLAMP(s), ns}) : 0, _NSIG/8);
 #else
 	return __syscall_cp(SYS_rt_sigtimedwait, mask, si, ts, _NSIG/8);
 #endif

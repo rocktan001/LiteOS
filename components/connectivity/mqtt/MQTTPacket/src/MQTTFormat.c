@@ -237,7 +237,7 @@ char *MQTTFormat_toServerString(char *strbuf, int strbuflen, unsigned char *buf,
         int requestedQoSs[1];
         if (MQTTDeserialize_subscribe(&dup, &packetid, maxcount, &count,
                                       topicFilters, requestedQoSs, buf, buflen) == 1)
-            strindex = MQTTStringFormat_subscribe(strbuf, strbuflen, dup, packetid, count, topicFilters, requestedQoSs);;
+            strindex = MQTTStringFormat_subscribe(strbuf, strbuflen, dup, packetid, count, topicFilters, requestedQoSs);
     }
     break;
     case UNSUBSCRIBE:
