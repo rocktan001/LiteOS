@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "syscall.h"
 #include "pthread.h"
+#include "../include/features.h"
 
 #define UNGET 8
 

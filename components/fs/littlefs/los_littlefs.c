@@ -98,7 +98,7 @@ static int RetToErrno(int result)
     }
     VFS_ERRNO_SET(err);
 
-    return err;
+    return -err;
 }
 
 static int LittlefsFlagsGet(int oflags)
@@ -142,10 +142,15 @@ static int LittlefsOperationOpen(struct file *file, const char *pathInMp, int fl
     LFS_P *p = (LFS_P *)file->f_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
     lfs_file_t *f = p->lfs_file;
+    if (f == lfs->mlist) {
+        lfs->mlist = NULL;
+    }
+
     int ret = lfs_file_open(lfs, f, pathInMp, LittlefsFlagsGet(flags));
     if (ret == LFS_ERR_OK) {
         file->f_data = (void *)&f;
     }
+
     return RetToErrno(ret);
 }
 
@@ -187,6 +192,8 @@ static ssize_t LittlefsOperationWrite(struct file *file, const char *buff, size_
         PRINT_ERR("Failed to write, write size=%d\n", (int)ret);
         return RetToErrno((int)ret);
     }
+
+    file->f_offset = f->pos;
     return (ssize_t)ret;
 }
 
@@ -197,6 +204,9 @@ static off_t LittlefsOperationLseek(struct file *file, off_t off, int whence)
     lfs_t *lfs = p->lfs_fs;
     lfs_file_t *f = p->lfs_file;
     if (f == NULL) {
+        return -EINVAL;
+    }
+    if (off < 0) {
         return -EINVAL;
     }
     ret = lfs_file_seek(lfs, f, (lfs_soff_t)off, whence);
@@ -275,7 +285,7 @@ static int LittlefsOperationOpendir(struct dir *dir, const char *path)
 
     ret = lfs_dir_open(lfs, lfs_dir, path);
     if (ret != LFS_ERR_OK) {
-        free(lfs_dir);
+        (void)free(lfs_dir);
         return RetToErrno(ret);
     }
     dir->d_data = (void *)lfs_dir;
@@ -285,24 +295,22 @@ static int LittlefsOperationOpendir(struct dir *dir, const char *path)
 
 static int LittlefsOperationReaddir(struct dir *dir, struct dirent *dent)
 {
-    int ret = 0;
+    int ret;
     LFS_P *p = (LFS_P *)dir->d_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
     lfs_dir_t *lfs_dir = (lfs_dir_t *)dir->d_data;
     struct lfs_info info;
     (void)memset_s(&info, sizeof(struct lfs_info), 0, sizeof(struct lfs_info));
     if (lfs_dir == NULL) {
-        return 1;
+        return -EINVAL;
     }
-    while (1) {
+    do {
         ret = lfs_dir_read(lfs, lfs_dir, &info);
-        if (ret < 0) {
-            return 1;
-        }
-        if((strcmp(info.name, ".") == 0) || (strcmp(info.name, "..") == 0)) {
-            continue;
-        }
-        strncpy_s((char *)dent->name, LOS_MAX_DIR_NAME_LEN, (const char *)info.name, LOS_MAX_FILE_NAME_LEN - 1);
+    } while ((ret >= 0) && ((strcmp(info.name, ".") == 0) || (strcmp(info.name, "..") == 0)));
+    if (ret < 0) {
+        return ENOENT;
+    } else {
+        (void)strncpy_s((char *)dent->name, LOS_MAX_DIR_NAME_LEN, (const char *)info.name, LOS_MAX_FILE_NAME_LEN - 1);
         dent->name[LOS_MAX_FILE_NAME_LEN - 1] = '\0';
         dent->size = info.size;
         if (info.type == LFS_TYPE_DIR) {
@@ -310,9 +318,8 @@ static int LittlefsOperationReaddir(struct dir *dir, struct dirent *dent)
         } else {
             dent->type = VFS_TYPE_FILE;
         }
-        return 0;
     }
-    return 1;
+    return LOS_OK;
 }
 
 static int LittlefsOperationClosedir(struct dir *dir)
@@ -326,7 +333,7 @@ static int LittlefsOperationClosedir(struct dir *dir)
     }
     ret = lfs_dir_close(lfs, lfs_dir);
     if (ret == LFS_ERR_OK) {
-        free(lfs_dir);
+        (void)free(lfs_dir);
     }
     return RetToErrno(ret);
 }
@@ -405,7 +412,7 @@ err_unmount:
     lfs_unmount(fs);
 err_free:
     if (fs != NULL) {
-        free(fs);
+        (void)free(fs);
     }
     return ret;
 }
@@ -418,7 +425,7 @@ int LittlefsUnmout(const char *path)
         free(littlefs_ptr);
         littlefs_ptr = NULL;
     }
-    LOS_FsUnmount(path);
+    (void)LOS_FsUnmount(path);
     return ret;
 }
 

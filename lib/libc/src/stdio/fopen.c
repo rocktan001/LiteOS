@@ -17,7 +17,7 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 #endif
 
 	/* Check for valid initial mode character */
-	if (!strchr("rwa", *mode)) {
+	if ((mode == NULL) || (!strchr("rwa", *mode))) {
 		errno = EINVAL;
 		return 0;
 	}
