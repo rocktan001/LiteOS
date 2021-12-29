@@ -55,9 +55,7 @@ static uint32_t g_efMuxId;
  */
 
 /* default environment variables set for user */
-static const ef_env g_defaultEnvSet[] = {
-
-};
+static const ef_env g_defaultEnvSet[1] = {{"TickCount", "0"}};
 
 EfErrCode ef_port_init(ef_env const **default_env, size_t *default_env_size)
 {
