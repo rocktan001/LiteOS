@@ -55,7 +55,7 @@ STATIC INT32 SfudReadData(const sfud_flash *flash, UINT32 addr, size_t rdSize)
     }
     (VOID)memset_s(buff, rdSize, 0, rdSize);
     printf("Sfud start to read.\n");
-    ret = (VOID)sfud_read(flash, addr, rdSize, buff);
+    ret = (INT32)sfud_read(flash, addr, rdSize, buff);
     if (ret != SFUD_SUCCESS) {
         printf("Sfud read failed.\n");
 	free(buff);
