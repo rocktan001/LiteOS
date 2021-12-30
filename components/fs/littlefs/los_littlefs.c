@@ -142,7 +142,7 @@ static int LittlefsOperationOpen(struct file *file, const char *pathInMp, int fl
     LFS_P *p = (LFS_P *)file->f_mp->m_data;
     lfs_t *lfs = p->lfs_fs;
     lfs_file_t *f = p->lfs_file;
-    if (f == lfs->mlist) {
+    if (f == (lfs_file_t *)lfs->mlist) {
         lfs->mlist = NULL;
     }
 
