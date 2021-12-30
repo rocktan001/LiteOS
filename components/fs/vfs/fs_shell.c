@@ -106,7 +106,7 @@ UINT32 OsShellCmdLs(UINT32 argc, const CHAR **argv)
     }
     do {
         d_item = readdir(target);
-        if (d_item != NULL) {
+        if ((d_item != NULL) && (strlen(d_item->name) > 0)) {
             if (argc == 1) {
                 if(strcmp(argv[0], "-l")) {
                     PRINTK("Argument error! Only support \"-l\"\n");
@@ -125,7 +125,7 @@ UINT32 OsShellCmdLs(UINT32 argc, const CHAR **argv)
                 }
             }
         }
-    } while(d_item != NULL);
+    } while((d_item != NULL) && (strlen(d_item->name) > 0));
 
     PRINTK("\n");
     closedir(target);

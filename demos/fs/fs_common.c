@@ -160,17 +160,17 @@ void los_vfs_io(char *file_name, char *dir_name)
     /****************************
      * dir operation
      ****************************/
+    ret = open_dir(dir_name, &pDir);
+    if (ret < 0) {
+        FS_LOG_ERR("Open dir %s failed.", dir_name);
+        (void)unlink(file_name);
+        return;
+    }
     sprintf(file_name, "%s/%s", (char *)dir_name, LOS_FILE);
     ret = write_file(file_name, s_ucaWriteBuffer, wrlen);
     if (ret < 0) {
         FS_LOG_ERR("Write file %s failed.", file_name);
         (void)closedir(pDir);
-        (void)unlink(file_name);
-        return;
-    }
-    ret = open_dir(dir_name, &pDir);
-    if (ret < 0) {
-        FS_LOG_ERR("Open dir %s failed.", dir_name);
         (void)unlink(file_name);
         return;
     }
