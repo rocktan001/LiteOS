@@ -482,7 +482,7 @@ extern VOID LOS_TaskSwitchHookReg(TSKSWITCHHOOK hook);
  * @param  param3 [IN] Type #UINTPTR The third parameter passed to the task handling function.
  * @param  param4 [IN] Type #UINTPTR The fourth parameter passed to the task handling function.
  *
- * @retval None.
+ * @retval #VOID*  This API will return the return value of task function.
  * @par Dependency:
  * <ul><li>los_task.h: the header file that contains the API declaration.</li></ul>
  * @since Huawei LiteOS V100R001C00
