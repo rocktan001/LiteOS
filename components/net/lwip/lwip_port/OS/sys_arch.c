@@ -400,7 +400,12 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
     task.uwStackSize = stacksize;
     task.pcName = (char *)name;
     task.usTaskPrio = prio;
+#ifdef LOSCFG_OBSOLETE_API
     task.auwArgs[0] = (UINTPTR)arg;
+#else
+    task.pArgs = arg;
+#endif
+
     ret = LOS_TaskCreate(&taskid, &task);
 
     if (LOS_OK != ret) {
