@@ -55,31 +55,34 @@
 表格列出了LiteOS源码的目录，其中加粗字体的目录/文件在移植过程中需要修改。
 
 **表 1**  LiteOS源码目录
-| 一级目录                    | 二级目录/文件            | 说明                                                          |
-| ----------                  | ----------------------   |  -----------------------------------------------------------  |
+| 一级目录                    | 二级目录/文件            | 说明                                                           |
+| ----------                  | ----------------------   |  ----------------------------------------------------------- |
 | arch                        |                          |  芯片架构支持                                                 |
-| build                       |                          |  LiteOS编译系统需要的配置及脚本                               |
+| build                       |                          |  LiteOS编译系统需要的配置及脚本                                |
 | compat                      |                          |  LiteOS提供的CMSIS-RTOS 1.0和2.0接口                          |
 | components                  |                          |  组件代码                                                     |
 | demos                       |                          |  组件和内核的demo                                             |
 | doc                         |                          |  LiteOS使用文档                                               |
-| include                     |                          |  components中各模块的头文件                                   |
+| include                     |                          |  components中各模块的头文件                                    |
 | kernel                      |                          |  内核代码                                                     |
 | lib                         |                          |  libc/zlib/posix接口                                          |
-| osdepends                   |                          |  LiteOS提供的部分OS适配接口                                   |
-| targets                     | bsp                      |  通用板级支持包                                               |
-|                             | Cloud_STM32F429IGTx_FIRE |  野火STM32F429（ARM Cortex-M4）开发板的开发工程源码包         |
-|                             | qemu-virt-a53            |  Cortex-A53的qemu开发工程源码包                              |
-|                             | realview-pbx-a9          |  Cortex-A9的qemu开发工程源码包                               |
-|                             | STM32F072_Nucleo         |  STM32F072_Nucleo（ARM Cortex-M0）开发板的开发工程源码包      |
-|                             | STM32F103_FIRE_Arbitrary |  野火STM32F103（ARM Cortex-M3）霸道开发板的开发工程源码包     |
-|                             | STM32F769IDISCOVERY      |  STM32F769IDISCOVERY（ARM Cortex-M7）开发板的开发工程源码包   |
-|                             | ...                      |  其他开发板的开发工程源码包                                   |
+| osdepends                   |                          |  LiteOS提供的部分OS适配接口                                    |
+| targets                     | **<font color="blue">bsp</font>**  |  通用板级支持包                                      |
+|                             | Cloud_STM32F429IGTx_FIRE |  野火STM32F429（ARM Cortex-M4）开发板的开发工程源码包           |
+|                             | qemu-virt-a53            |  Cortex-A53的qemu开发工程源码包                                |
+|                             | realview-pbx-a9          |  Cortex-A9的qemu开发工程源码包                                 |
+|                             | STM32F072_Nucleo         |  STM32F072_Nucleo（ARM Cortex-M0）开发板的开发工程源码包        |
+|                             | STM32F103_FIRE_Arbitrary |  野火STM32F103（ARM Cortex-M3）霸道开发板的开发工程源码包        |
+|                             | STM32F769IDISCOVERY      |  STM32F769IDISCOVERY（ARM Cortex-M7）开发板的开发工程源码包     |
+|                             | ...                      |  其他开发板的开发工程源码包                                     |
 |                             | Kconfig                  |                                                               |
+|                             | **<font color="blue">Kconfig.*</font>** |   不同厂商开发板menuconfig配置文件               |
 |                             | Makefile                 |                                                               |
-|                             | **<font color="blue">targets.mk</font>** |                                               |
+|                             | **<font color="blue">bsp.mk</font>** |                                                   |
+| test                        |                          |  内核测试用例集合套                                                    |
+| tests                       |                          |  组件测试用例集合套                                                    |
 | tools                       | **<font color="blue">build/config</font>** |  LiteOS支持的各开发板的编译配置文件，移植新的开发板时，需要在这个目录下增加这个新开发板的编译配置文件 |
-|                             |  menuconfig              |  LiteOS编译所需的menuconfig脚本                               |
+|                             |  menuconfig              |  LiteOS编译所需的menuconfig脚本                                |
 | Makefile                    |                          |  整个LiteOS的Makefile                                         |
 | **<font color="blue">.config</font>** |                |  开发板的编译配置文件，默认为Cloud_STM32F429IGTx_FIRE开发板的配置文件，移植时需要替换成新开发板的编译配置文件 |
 
@@ -506,8 +509,9 @@ STM32CubeMX 是意法半导体\(ST\) 推出的一款图形化开发工具，支�
     {
         HAL_Init();
         SystemClock_Config();
+        MX_GPIO_Init();
         MX_USART1_UART_Init();
-        dwt_delay_init(SystemCoreClock);
+        MX_TIM3_Init();
     }
     ```
 
@@ -796,7 +800,7 @@ STM32F407ZGTX_HAL_SRC = \
 2.  新增STM32F407\_OpenEdv.config。
 
     在tools\\build\\config文件夹下复制Cloud\_STM32F429IGTx\_FIRE.config文件，并重命名为STM32F407\_OpenEdv.config，同时将文件内容中的“**Cloud\_STM32F429IGTx\_FIRE**”改为“**STM32F407\_OpenEdv**”，将“**LOSCFG\_PLATFORM\_STM32F429IGTX**”改为“**LOSCFG\_PLATFORM\_STM32F407ZGTX**”。
-3.  修改targets\Kconfig以添加menuconfig选项。
+3.  修改targets\Kconfig.stm32以添加menuconfig选项。
 
     a. 仿照config LOSCFG_PLATFORM_STM32F429IGTX添加：
     ```
