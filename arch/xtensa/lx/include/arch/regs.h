@@ -86,6 +86,11 @@ extern "C" {
 #endif
 
 #ifdef LOSCFG_XTENSA_WINDOWSPILL
+#define LEVEL1_TINRERRUPT_CAUSE                  (4)
+#define ALLOC_CAUSE                              (5)
+#define LOWBIT_CALLNMODE                         (30)
+#define HIGHBIT_CALLNMODE                        (31)
+#define PS_OWB_SHIFT                             (8)
 #define CONTEXT_WINDOWSPILL_SIZE                 (16)
 #define INDEX_OF_ARGS0                           (6)
 #define WINDOWSTARTBITS	                         (16)	/* window start reg bits */
