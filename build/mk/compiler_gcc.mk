@@ -72,6 +72,9 @@ ifeq ($(LOSCFG_COMPILER_ARM_NONE_EABI), y)
     ifeq ($(shell if [ $(shell echo $(VERSION_NUM) | tr -d ".") -lt 921 ]; then echo y; fi), y)
         $(error The compiler version is too early. You are advised to use a version later than gcc-arm-none-eabi-9-2019-q4-major)
     endif
+    ifeq ($(shell if [ $(shell echo $(VERSION_NUM) | tr -d ".") -gt 1021 ]; then echo y; fi), y)
+        LD = $(CC)
+    endif
 endif
 
 # Generally 32 bit and 64 bit compilers has different libgcc paths.

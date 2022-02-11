@@ -72,7 +72,11 @@ $(LITEOS_TARGET):
 ifeq ($(OS), Linux)
 	$(call update_from_baselib_file)
 endif
+ifeq ($(LD), $(CC))
+	$(LD) $(LITEOS_LDFLAGS) $(LITEOS_TABLES_LDFLAGS) $(LITEOS_DYNLDFLAGS) -Wl,-Map=$(OUT)/$@.map -o $(OUT)/$@.elf -Wl,--start-group $(LITEOS_BASELIB) -Wl,--end-group
+else
 	$(LD) $(LITEOS_LDFLAGS) $(LITEOS_TABLES_LDFLAGS) $(LITEOS_DYNLDFLAGS) -Map=$(OUT)/$@.map -o $(OUT)/$@.elf --start-group $(LITEOS_BASELIB) --end-group
+endif
 ifeq ($(LOSCFG_FAMILY_RASPBERRY), y)
 ifeq ($(LOSCFG_ARCH_ARM_AARCH64), y)
 	$(OBJCOPY) -O binary $(OUT)/$@.elf $(OUT)/kernel8.img

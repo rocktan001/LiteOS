@@ -287,7 +287,11 @@ LITEOS_GCOV_OPTS := -fprofile-arcs -ftest-coverage -Wno-maybe-uninitialized
 LITEOS_BASELIB += -lgcov
 endif
 
-LITEOS_LD_OPTS += -static --gc-sections
+ifeq ($(LD), $(CC))
+    LITEOS_LD_OPTS += -static -Wl,-gc-sections
+else
+    LITEOS_LD_OPTS += -static --gc-sections
+endif
 ifeq ($(LOSCFG_COMPILER_ARM_NONE_EABI)_$(shell if [ $(shell echo $(VERSION_NUM) | tr -d ".") -gt 1021 ]; then echo y; fi), y_y)
     LITEOS_LD_OPTS +=
 else
