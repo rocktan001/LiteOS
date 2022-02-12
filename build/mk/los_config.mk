@@ -288,14 +288,9 @@ LITEOS_BASELIB += -lgcov
 endif
 
 ifeq ($(LD), $(CC))
-    LITEOS_LD_OPTS += -static -Wl,-gc-sections
+    LITEOS_LD_OPTS += -nostartfiles -static -Wl,-gc-sections
 else
-    LITEOS_LD_OPTS += -static --gc-sections
-endif
-ifeq ($(LOSCFG_COMPILER_ARM_NONE_EABI)_$(shell if [ $(shell echo $(VERSION_NUM) | tr -d ".") -gt 1021 ]; then echo y; fi), y_y)
-    LITEOS_LD_OPTS +=
-else
-    LITEOS_LD_OPTS += -nostartfiles
+    LITEOS_LD_OPTS += -nostartfiles -static --gc-sections
 endif
 
 ifeq ($(findstring y, $(LOSCFG_ARCH_CORTEX_M0)$(LOSCFG_ARCH_CORTEX_M0_PLUS)), y)
