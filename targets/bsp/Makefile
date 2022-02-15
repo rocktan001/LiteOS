@@ -220,6 +220,25 @@ else ifeq ($(LOSCFG_PLATFORM_APM32F103_GEEHY), y)
 else ifeq ($(LOSCFG_PLATFORM_RASPBERRY_PI2B), y)
     RASPBERRY_PI2B_DRIVER_SRC = $(wildcard $(HAL_DRIVER_SRC)/Src/*.c)
     LOCAL_SRCS = $(RASPBERRY_PI2B_DRIVER_SRC)
+else ifeq ($(LOSCFG_PLATFORM_STM32F103_C8T6), y)
+STM32F103C8T6_HAL_SRC = \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_spi.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_iwdg.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c \
+    drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_eth.c
+    LOCAL_SRCS = $(STM32F103C8T6_HAL_SRC)
 endif
 
 LOCAL_INCLUDE += $(PLATFORM_INCLUDE) \

@@ -38,6 +38,10 @@ else ifeq ($(LOSCFG_PLATFORM_STM32F072_Nucleo), y)
 else ifeq ($(LOSCFG_PLATFORM_STM32F103_FIRE_ARBITRARY), y)
     LITEOS_CMACRO_TEST += -D__FPU_PRESENT -DSTM32F103xE
     HAL_DRIVER_TYPE := STM32F1xx_HAL_Driver
+######################### STM32F103_C8T6 #####################
+else ifeq ($(LOSCFG_PLATFORM_STM32F103_C8T6), y)
+    LITEOS_CMACRO_TEST += -D__FPU_PRESENT -DSTM32F103xB
+    HAL_DRIVER_TYPE := STM32F1xx_HAL_Driver
 ######################### STM32F407_ATK_Explorer Options #######################
 else ifeq ($(LOSCFG_PLATFORM_STM32F407_ATK_EXPLORER), y)
     LITEOS_CMACRO_TEST += -DSTM32F407xx
