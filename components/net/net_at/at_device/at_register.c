@@ -29,6 +29,7 @@
 #include "stdio.h"
 #include "stdint.h"
 #include "los_typedef.h"
+#include "at_main.h"
 #include "at_api.h"
 #include "securec.h"
 
