@@ -85,8 +85,9 @@ extern "C" {
 #define CONTEXT_LOOPS_SIZE                       (0)
 #endif
 
-#ifdef LOSCFG_XTENSA_WINDOWSPILL
 #define LEVEL1_TINRERRUPT_CAUSE                  (4)
+
+#ifdef LOSCFG_XTENSA_WINDOWSPILL
 #define ALLOC_CAUSE                              (5)
 #define LOWBIT_CALLNMODE                         (30)
 #define HIGHBIT_CALLNMODE                        (31)

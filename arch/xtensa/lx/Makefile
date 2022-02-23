@@ -8,7 +8,7 @@ ifneq ($(LOSCFG_XTENSA_WINDOWSPILL), y)
 LOCAL_SRCS := $(filter-out src/los_window.S, $(LOCAL_SRCS))
 endif
 
-LOCAL_INCLUDE := -I $(LITEOSTOPDIR)/arch/xtensa/esp/include
+LOCAL_INCLUDE := -I $(LITEOSTOPDIR)/arch/xtensa/lx/include
 
 LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LITEOS_GCOV_OPTS)
 
