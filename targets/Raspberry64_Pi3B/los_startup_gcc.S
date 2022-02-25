@@ -10,7 +10,7 @@
 .global __startup_stack_top
 .global __startup_stack
 .global psci_call
-.extern board_config
+.extern BoardConfig
 
 .align 5
 .text
@@ -87,7 +87,7 @@ excstatck_loop_done:
     and     x9, x9, #0xfffffffffff0
     mov     sp, x9
     bl      uart_early_init
-    bl      board_config  /* initialize g_sys_mem_addr_end  before MmuSectionMap */
+    bl      BoardConfig  /* initialize g_sys_mem_addr_end  before MmuSectionMap */
 
 pagetable_init:
 /* clear first_page_table */

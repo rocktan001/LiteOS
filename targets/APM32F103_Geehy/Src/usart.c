@@ -88,7 +88,7 @@ VOID UsartWrite(const CHAR c)
 
 UINT8 UsartRead(VOID)
 {
-    UINT8 ch = 0;
+    UINT8 ch = 0xff;
     if (USART_ReadStatusFlag(USART1, USART_INT_RXBNE) == SET) {
         ch = (UINT8)USART_RxData(USART1);
     }

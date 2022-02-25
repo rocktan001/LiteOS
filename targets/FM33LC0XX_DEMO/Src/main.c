@@ -37,7 +37,7 @@
 #include "user_init.h"
 #include "usart.h"
 
-VOID board_config(VOID)
+VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
 }
@@ -47,11 +47,11 @@ VOID HardwareInit(VOID)
     /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
     /* SHOULD BE KEPT!!! */
     MF_Clock_Init();
-    
+
     /* Configure the system clock */
     /* SHOULD BE KEPT!!! */
     MF_SystemClock_Config();
-    
+
     /* Initialize all configured peripherals */
     /* SHOULD BE KEPT!!! */
     MF_Config_Init();
@@ -68,7 +68,7 @@ INT32 main(VOID)
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
 
-	board_config();
+	BoardConfig();
     HardwareInit();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"

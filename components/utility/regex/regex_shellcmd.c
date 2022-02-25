@@ -38,8 +38,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-typedef struct regex_t regex_t;
-extern void re_print(regex_t *pattern);
+typedef struct regex_t RegexT;
+extern void re_print(RegexT *pattern);
 
 static void Usage(void)
 {
@@ -55,6 +55,7 @@ static void Usage(void)
 
 static int TinyRegexShellCmd(int argc, char **argv)
 {
+    RegexT *reCompile = NULL;
     if ((argc == 1) && (((strlen("-h") == strlen(argv[0])) && (strncmp("-h", argv[0], strlen("-h")) == 0)) ||
         ((strlen("--help") == strlen(argv[0])) && (strncmp("--help", argv[0], strlen("--help")) == 0)))) {
         Usage();
@@ -62,22 +63,25 @@ static int TinyRegexShellCmd(int argc, char **argv)
     }
 
     int length;
-    if (argc == 2) {
+    if (argc == 2) { // Determine whether the input parameter is 2.
         int m = re_match(argv[0], argv[1], &length);
         if (m != -1) {
             printf("regex run success [%d].\n", length);
             return 0;
         }
-        re_print(re_compile(argv[0]));
+        reCompile = (re_t)re_compile(argv[0]);
+        if (reCompile != NULL) {
+            re_print(reCompile);
+        }
         printf("pattern '%s' matched '%s' unexpectedly, matched %i chars. \n", argv[0], argv[1], length);
     } else {
         printf("Input error, please execute 'regex -h' to view help.");
     }
-    return -2;
+    return -2; // -2, Shell error return code.
 }
 
 #ifdef LOSCFG_SHELL
-SHELLCMD_ENTRY(regex_shellcmd, CMD_TYPE_EX, "regex", XARGS, (CMD_CBK_FUNC)TinyRegexShellCmd);
+SHELLCMD_ENTRY(regexShellcmd, CMD_TYPE_EX, "regex", XARGS, (CMD_CBK_FUNC)TinyRegexShellCmd);
 #endif
 
 #ifdef __cplusplus

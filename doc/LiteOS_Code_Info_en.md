@@ -6,7 +6,7 @@ The LiteOS entry is in the main.c file of a project. The basic process is as fol
 ```c
 INT32 main(VOID)
 {
-    board_config();
+    BoardConfig();
     HardwareInit();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
@@ -26,7 +26,7 @@ INT32 main(VOID)
 }
 ```
 
-Configure the memory end address using board_config(), initialize the hardware using HardwareInit(), and print the version information of Huawei LiteOS.
+Configure the memory end address using BoardConfig(), initialize the hardware using HardwareInit(), and print the version information of Huawei LiteOS.
 
 Execute OsMain() to initialize the Huawei LiteOS kernel and routines. A user task is created in the OsMain() function, and the task processing function is app_init().
 

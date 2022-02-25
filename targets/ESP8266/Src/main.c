@@ -27,21 +27,21 @@
  * --------------------------------------------------------------------------- */
 
 #include "main.h"
-#include "usart.h"
 #include "los_task_pri.h"
 #include "arch/canary.h"
 
 STATIC VOID BssClean(VOID)
 {
-    memset_s(&__bss_start, ((UINTPTR)&__bss_end - (UINTPTR)&__bss_start), 0, ((UINTPTR)&__bss_end - (UINTPTR)&__bss_start));
+    (VOID)memset_s(&__bss_start, ((UINTPTR)&__bss_end - (UINTPTR)&__bss_start),
+                    0, ((UINTPTR)&__bss_end - (UINTPTR)&__bss_start));
 }
 
 typedef struct {
     UINT8 magic;
     UINT8 segmentCount;
     UINT8 spiMode;
-    UINT8 spiSpeed: 4;
-    UINT8 spiSize: 4;
+    UINT8 spiSpeed : 4;
+    UINT8 spiSize : 4;
     UINT32 entryAddr;
 } __attribute__((packed)) EspImageHead;
 
@@ -57,13 +57,13 @@ STATIC VOID AnalysisImage(UINT32 imageAddr)
 {
     EspImageHead *imageHead = (EspImageHead *)(FLASH_BASE + (imageAddr & (FLASH_SIZE - 1)));
     EspImageSegmentHead *segment = (EspImageSegmentHead *)((UINTPTR)imageHead + sizeof(EspImageHead));
-    UINT8 segmentCount = ((*(volatile UINT32 *)imageHead) & 0xFF00) >> 8; /* only access for a word */
+    UINT8 segmentCount = ((*(volatile UINT32 *)imageHead) & 0xFF00) >> 8; /* 8, only access for a word */
     for (INT32 i = 1; i < segmentCount; i++) {
         segment = (EspImageSegmentHead *)((UINTPTR)segment + sizeof(EspImageSegmentHead) + segment->dataLen);
         if ((segment->loadAddr >= FLASH_BASE) && (segment->loadAddr < (FLASH_BASE + FLASH_SIZE))) {
             continue;
         }
-            
+
         UINT32 *dest = (UINT32 *)segment->loadAddr;
         UINT32 *src = segment->data;
         UINT32 size = segment->dataLen / sizeof(UINT32);
@@ -86,11 +86,11 @@ INT32 main(UINT32 imageAddr)
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
     printf("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build date : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-    
+            "\nLiteOS Kernel Version : %s\n"
+            "build date : %s %s\n\n"
+            "**********************************\n",
+            HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
+
     UINT32 ret = OsMain();
     if (ret != LOS_OK) {
         return LOS_NOK;

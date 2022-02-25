@@ -34,7 +34,7 @@
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
- 
+
 #define AUX_BASE                 (PERIPHERAL_BASE_PHYS + 0x215000)
 #define AUX_ENABLES              (AUX_BASE + 0x4)
 #define AUX_MU_IO_REG            (AUX_BASE + 0x40)
@@ -47,12 +47,12 @@ extern "C" {
 #define AUX_MU_SCRATCH           (AUX_BASE + 0x5c)
 #define AUX_MU_CNTL_REG          (AUX_BASE + 0x60)
 #define AUX_MU_BAUD_REG          (AUX_BASE + 0x68)
- 
+
 #define GPFSEL0                  GPIO_REG_BASE
 #define GPSET0                   (GPIO_REG_BASE + 0x1C)
 #define GPCLR0                   (GPIO_REG_BASE + 0x28)
 #define GPPUPPDN0                (GPIO_REG_BASE + 0xE4)
- 
+
 #define TIMER_LOAD               0x0
 #define TIMER_VALUE              0x4
 #define TIMER_CONTROL            0x8
@@ -60,7 +60,7 @@ extern "C" {
 #define TIMER_RIS                0x10
 #define TIMER_MIS                0x14
 #define TIMER_BGLOAD             0x18
- 
+
 #define PULL_NONE                0b00
 #define PULL_UP                  0b01
 #define PULL_DOWN                0b10

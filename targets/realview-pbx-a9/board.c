@@ -41,7 +41,7 @@
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
 
-VOID board_config(VOID)
+VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = 0x1000000;
 }

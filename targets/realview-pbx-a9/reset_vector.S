@@ -21,7 +21,7 @@
 .extern _osExceptPrefetchAbortHdl
 .extern _osExceptSwiHdl
 .extern _osExceptUndefInstrHdl
-.extern board_config
+.extern BoardConfig
 .global enable_scu
 
 /* param0 is stack top, param1 is stack size, param2 is magic num */
@@ -95,7 +95,7 @@ excstatck_loop_done:
     bne     cpu_start
     /* only cpu0 will call following functions */
     bl      enable_scu
-    bl      board_config
+    bl      BoardConfig
     bl      main
     b       .
 
@@ -119,7 +119,7 @@ stack_init:
     ldr     r2, =OS_STACK_INIT
     ldr     r3, =OS_STACK_INIT
 
-/* 
+/*
  * Main loop sets 32 bytes at a time.
  */
 stack_init_loop:

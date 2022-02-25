@@ -30,7 +30,7 @@
 #include "platform.h"
 #include "usart.h"
 
-#define REG32_WRITE(addr, val)       (*(volatile UINT32 *)(addr) = val)
+#define REG32_WRITE(addr, val)       (*(volatile UINT32 *)(addr) = (val))
 #define REG32_READ(addr)             (*(volatile UINT32 *)(addr))
 
 #define UART_RXREADY_FLAG            (0x1)
@@ -39,28 +39,29 @@
 #define UART_BAUD                    (115200)
 #define AUX_UART_CLOCK               (500000000)
 
-#define BYTE_OF_REG                     (4)
+#define BYTE_OF_REG                  (4)
+#define PIN_NUMS                     (10) /* Each register controls 10 pins */
 
 VOID GpioPinMode(UINT32 pinNo, UINT32 value, UINTPTR base)
 {
-    UINT32 pinNums = 10; /* Each register controls 10 pins */
-    UINTPTR reg = base + ((pinNo / pinNums) * BYTE_OF_REG);
-    UINT32 shift = (pinNo % pinNums) * 3; /* Each pin mode is controlled by 3bit */
+    UINTPTR reg = base + ((pinNo / PIN_NUMS) * BYTE_OF_REG);
+    UINT32 shift = (pinNo % PIN_NUMS) * 3; /* Each pin mode is controlled by 3bit */
 
     UINT32 curval = REG32_READ(reg);
-    curval &= ~(0x7 << shift); /* 0x7:0b111 */
+    curval &= ~(0x7U << shift); /* 0x7:0b111 */
     curval |= value << shift;
     REG32_WRITE(reg, curval);
 }
 
-VOID UsartInit(VOID) {
+VOID UsartInit(VOID)
+{
     REG32_WRITE(AUX_ENABLES, 1);       /* Enable aux uart */
     REG32_WRITE(AUX_MU_IER_REG, 0);
     REG32_WRITE(AUX_MU_CNTL_REG, 0);
     REG32_WRITE(AUX_MU_LCR_REG, 0x3);  /* Set to 8 bit mode */
     REG32_WRITE(AUX_MU_MCR_REG, 0);
     REG32_WRITE(AUX_MU_IIR_REG, 0xC6); /* Enable fifo and clear tx/rx fifo */
-    REG32_WRITE(AUX_MU_BAUD_REG, (AUX_UART_CLOCK / (UART_BAUD * 8)) - 1); /* BAUD_REG = (clock / baudrate * 8 - 1) */
+    REG32_WRITE(AUX_MU_BAUD_REG, ((AUX_UART_CLOCK / (UART_BAUD * 8)) - 1)); /* BAUD_REG = (clock / baudrate * 8 - 1) */
 
     GpioPinMode(GPIO_TX0, FUNC5_ALT, GPFSEL0);
     GpioPinMode(GPIO_RX0, FUNC5_ALT, GPFSEL0);
@@ -69,13 +70,13 @@ VOID UsartInit(VOID) {
 
 VOID UsartWrite(const CHAR c)
 {
-    while (!(REG32_READ(AUX_MU_LSR_REG) & UART_TXEMPTY_FLAG));
+    while (!(REG32_READ(AUX_MU_LSR_REG) & UART_TXEMPTY_FLAG)) {};
     REG32_WRITE(AUX_MU_IO_REG, (UINT32)c);
 }
 
 UINT8 UsartRead(VOID)
 {
-    UINT8 ch;
+    UINT8 ch = 0xff;
     if (REG32_READ(AUX_MU_LSR_REG) & UART_RXREADY_FLAG) {
         ch = (UINT8)(REG32_READ(AUX_MU_IO_REG) & 0xff);
     }
@@ -96,9 +97,9 @@ INT32 UsartHwi(VOID)
         PRINT_ERR("%s,%d, uart interrupt created error:%x\n", __FUNCTION__, __LINE__, ret);
     } else {
         REG32_WRITE(AUX_MU_IER_REG, 0x1);
-        ArchIrqUnmask(NUM_HAL_INTERRUPT_UART);
+        (VOID)ArchIrqUnmask(NUM_HAL_INTERRUPT_UART);
     }
-    return ret;
+    return (INT32)ret;
 }
 
 UartControllerOps g_genericUart = {

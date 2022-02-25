@@ -36,7 +36,7 @@
 #include "gpio.h"
 #include "tim.h"
 
-VOID board_config(VOID)
+VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
 }
@@ -59,7 +59,7 @@ INT32 main(VOID)
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
 
-    board_config();
+    BoardConfig();
     HardwareInit();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"

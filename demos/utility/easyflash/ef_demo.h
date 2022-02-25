@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Easyflash Demo Header File
  * Author: Huawei LiteOS Team
  * Create: 2021-07-01
@@ -26,8 +26,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _EF_DEMO_H
-#define _EF_DEMO_H
+#ifndef EF_DEMO_H
+#define EF_DEMO_H
 
 #include "los_typedef.h"
 
@@ -45,5 +45,5 @@ VOID EasyFlashDemoTask(VOID);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* _EF_DEMO_H */
+#endif /* EF_DEMO_H */
 

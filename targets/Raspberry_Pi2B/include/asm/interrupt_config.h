@@ -2,7 +2,7 @@
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Interrupt Config HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2020-07-01
+ * Create: 2021-07-01
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -58,7 +58,7 @@ extern "C" {
 #define ARMTIMER_REG_BASE           ((ARMTIMER_INFO *)(0x3F000000 + 0xB000 + 0x400))
 #define CORE_MAILBOX_REG_BASE       ((MAILBOXES_INFO *)(0x40000000 + 0x40))
 
-typedef struct tagInterruptsInfo {
+typedef struct TagInterruptsInfo {
     volatile UINT32 basicPending;       /* IRQ basic pending */
     volatile UINT32 pending[2];         /* IRQ pending x */
     volatile UINT32 FIQControl;         /* FIQ control */
@@ -68,7 +68,7 @@ typedef struct tagInterruptsInfo {
     volatile UINT32 disableBasicIRQs;   /* Disable Basic IRQs */
 } INTERRUPTS_INFO;
 
-typedef struct tagArmTimerInfo {
+typedef struct TagArmTimerInfo {
     volatile UINT32 load;
     volatile UINT32 value;
     volatile UINT32 control;
@@ -80,18 +80,18 @@ typedef struct tagArmTimerInfo {
     volatile UINT32 freeRunningCounter;
 } ARMTIMER_INFO;
 
-typedef struct tagSystemTimerInfo {
+typedef struct TagSystemTimerInfo {
     volatile UINT32 CS;         /* System Timer Control/Status  */
     volatile UINT32 CLO;        /* System Timer Counter Lower 32 bits */
     volatile UINT32 CHI;        /* System Timer Counter Higher 32 bits */
     volatile UINT32 C[4];       /* System Timer Compare x */
 } SYSTEMTIMER_INFO;
 
-typedef struct tagMailboxesInfo {
+typedef struct TagMailboxesInfo {
     volatile UINT32 CoreTimeIRQ[4]; /* Core timers interrupts */
     volatile UINT32 IRQControl[4];  /* Core x timers Interrupt control */
-    volatile UINT32 IRQSource[4];   /* Core x IRQ Source*/
-    volatile UINT32 FIQSource[4];   /* Core x FIQ Source*/
+    volatile UINT32 IRQSource[4];   /* Core x IRQ Source */
+    volatile UINT32 FIQSource[4];   /* Core x FIQ Source */
     volatile UINT32 writeSet[16];   /* Core x Mailbox x write-set */
     volatile UINT32 readClear[16];  /* Core x Mailbox x read & write-high-to-clear */
 } MAILBOXES_INFO;

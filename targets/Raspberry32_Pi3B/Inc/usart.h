@@ -47,7 +47,7 @@ extern "C" {
 #define MINI_UART       ((MINIUART_INFO *)(AUX_REG_BASE + 0x40))
 #define GPIO_REG_BASE   ((GPIO_INFO *)(AUX_BASE + 0x200000))
 
-typedef struct tagGpioInfo {
+typedef struct TagGpioInfo {
     volatile UINT32 GPFSEL[6];      /* GPIO Function Select x */
     volatile UINT32 RES0;           /* Reserved */
     volatile UINT32 GPSET[2];       /* GPIO Pin Output Set x */
@@ -74,7 +74,7 @@ typedef struct tagGpioInfo {
     volatile UINT32 GPPUDCLK[2];    /* GPIO Pin Pull-up/down Enable Clock x */
 } GPIO_INFO;
 
-typedef struct tagMiniUartInfo {
+typedef struct TagMiniUartInfo {
     volatile UINT32 IO;         /* Mini Uart I/O Data 8 */
     volatile UINT32 IIR;        /* Mini Uart Interrupt Identify */
     volatile UINT32 IER;        /* Mini Uart Interrupt Enable */

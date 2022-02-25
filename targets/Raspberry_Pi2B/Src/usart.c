@@ -28,7 +28,6 @@
 
 #include <los_hwi.h>
 #include "usart.h"
-#include "register_config.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -36,15 +35,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-MINIUART_INFO *miniUart;
+MINIUART_INFO *g_miniUart;
 
-#define GPIO_MODE_INPUT     0
-#define GPIO_MODE_OUTPUT    1
-#define GPIO_ALT_FUNC0      4
-#define GPIO_ALT_FUNC1      5
-#define GPIO_ALT_FUNC2      6
-#define GPIO_ALT_FUNC3      7
-#define GPIO_ALT_FUNC4      3
 #define GPIO_ALT_FUNC5      2
 #define GPIO_FSEL_MASK      0x7
 #define MINI_UART_TX        14
@@ -59,37 +51,37 @@ STATIC VOID MiniUartInit(VOID)
 
     value = gpio->GPFSEL[1];
     value &= ~(GPIO_FSEL_MASK << ((MINI_UART_TX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM));
-    value |= GPIO_ALT_FUNC5 << ((MINI_UART_TX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM) ;
+    value |= GPIO_ALT_FUNC5 << ((MINI_UART_TX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM);
     value &= ~(GPIO_FSEL_MASK << ((MINI_UART_RX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM));
-    value |= GPIO_ALT_FUNC5 << ((MINI_UART_RX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM) ;
+    value |= GPIO_ALT_FUNC5 << ((MINI_UART_RX % PER_GPFSEL_GPIONUM) * GPIO_FSEL_BITNUM);
     gpio->GPFSEL[1] = value;
 
     gpio->GPPUD = 0;
     gpio->GPPUDCLK[0] = (1 << MINI_UART_TX) | (1 << MINI_UART_RX);
     gpio->GPPUDCLK[0] = 0;
 
-    miniUart = MINI_UART;
+    g_miniUart = MINI_UART;
     *((volatile UINT32 *)(AUX_ENABLES)) |= 1;   /* Mini UART enable */
-    miniUart->LCR = 3;     /* UART works in 8-bit mode */
-    miniUart->IIR = 0;     /* disable receive interrupt,transmit interrupt */
-    miniUart->CNTL = 0;    /* disable receive,transmit  */
-    miniUart->MCR = 0;     /* RTS set 0 */
-    miniUart->IER = 0xC6;  /* Enable FIFO, Clear FIFO */
-    miniUart->BAUD = 270;  /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
-    miniUart->CNTL = 3;    /* enable receive,transmit  */
+    g_miniUart->LCR = 3;     /* UART works in 8-bit mode */
+    g_miniUart->IIR = 0;     /* disable receive interrupt, transmit interrupt */
+    g_miniUart->CNTL = 0;    /* disable receive, transmit  */
+    g_miniUart->MCR = 0;     /* RTS set 0 */
+    g_miniUart->IER = 0xC6;  /* Enable FIFO, Clear FIFO */
+    g_miniUart->BAUD = 270;  /* baudrate = system_clock_freq/(8 * baudrate_reg + 1) */
+    g_miniUart->CNTL = 3;    /* enable receive, transmit  */
 }
 
 STATIC VOID MiniUartWriteChar(const CHAR c)
 {
-    while (!(miniUart->LSR & UART_TXEMPTY_FLAG)) {};
-    miniUart->IO = c;
+    while (!(g_miniUart->LSR & UART_TXEMPTY_FLAG)) {};
+    g_miniUart->IO = c;
 }
 
 STATIC UINT8 MiniUartReadChar(VOID)
 {
     UINT8 ch = 0xFF;
-    if (miniUart->LSR & UART_RXREADY_FLAG) {
-        ch = (UINT8)(miniUart->IO & 0xFF);
+    if (g_miniUart->LSR & UART_RXREADY_FLAG) {
+        ch = (UINT8)(g_miniUart->IO & 0xFF);
     }
     return ch;
 }
@@ -106,14 +98,14 @@ STATIC INT32 MiniUartHwi(VOID)
     if (ret != LOS_OK) {
         PRINT_ERR("%s,%d, uart interrupt created error:%x\n", __FUNCTION__, __LINE__, ret);
     } else {
-        miniUart->IIR = 0x1;
-        if (miniUart->LSR & UART_RXREADY_FLAG) {
-            (VOID)(miniUart->IO & 0xFF);
+        g_miniUart->IIR = 0x1;
+        if (g_miniUart->LSR & UART_RXREADY_FLAG) {
+            (VOID)(g_miniUart->IO & 0xFF);
         }
-        LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+        (VOID)LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
     }
 
-    return ret;
+    return (INT32)ret;
 }
 
 UartControllerOps g_genericUart = {
@@ -128,4 +120,3 @@ UartControllerOps g_genericUart = {
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-

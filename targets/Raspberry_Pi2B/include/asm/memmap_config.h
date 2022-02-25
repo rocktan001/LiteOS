@@ -36,7 +36,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define OS_SYS_MEM_ADDR        ((void *)(&__bss_end))
-#define LOS_HEAP_ADDR_END      (void*)(0x0 + 4 * 1024 * 1024)
+#define LOS_HEAP_ADDR_END      (void *)(4 * 1024 * 1024)
 #define OS_SYS_MEM_SIZE        (UINT32)(((UINT32)LOS_HEAP_ADDR_END - (UINT32)OS_SYS_MEM_ADDR + (64 - 1)) & ~(64 - 1))
 
 #ifdef __cplusplus

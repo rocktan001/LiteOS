@@ -25,7 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
- 
+
 #include "canary.h"
 #include "los_task_pri.h"
 #include "mmu.h"
@@ -42,7 +42,7 @@ extern "C" {
 
 #define SPIN_TABLE_BASE 0xD8
 
-VOID board_config(VOID)
+VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = (UINTPTR)LOS_HEAP_ADDR_END;
 }
@@ -100,15 +100,16 @@ INT32 main(VOID)
     UINT8 coreId;
     for (coreId = 1; coreId < LOSCFG_KERNEL_CORE_NUM; coreId++) {
         *(((UINTPTR *)SPIN_TABLE_BASE) + coreId) = (UINTPTR)reset_vector;
-        ArchDCacheCleanByAddr((UINTPTR)SPIN_TABLE_BASE, (UINTPTR)(SPIN_TABLE_BASE+LOSCFG_KERNEL_CORE_NUM * sizeof(UINTPTR)));
+        ArchDCacheCleanByAddr((UINTPTR)SPIN_TABLE_BASE, \
+                              (UINTPTR)(SPIN_TABLE_BASE+LOSCFG_KERNEL_CORE_NUM * sizeof(UINTPTR)));
         asm("SEV");
     }
 
-    LOS_HwiEnable(MAILBOX0_IRQ);
-    LOS_HwiEnable(MAILBOX1_IRQ);
-    LOS_HwiEnable(MAILBOX2_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX0_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX1_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX2_IRQ);
 #ifdef LOSCFG_KERNEL_SMP_CALL
-    LOS_HwiEnable(MAILBOX3_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX3_IRQ);
 #endif
 #endif
 
@@ -122,17 +123,17 @@ LITE_OS_SEC_TEXT_INIT INT32 secondary_cpu_start(VOID)
 {
     OsCurrTaskSet(OsGetMainTask());
     HalIrqInitPercpu();
-    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
-    LOS_HwiEnable(MAILBOX0_IRQ);
-    LOS_HwiEnable(MAILBOX1_IRQ);
-    LOS_HwiEnable(MAILBOX2_IRQ);
+    (VOID)LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+    (VOID)LOS_HwiEnable(MAILBOX0_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX1_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX2_IRQ);
 #ifdef LOSCFG_KERNEL_SMP_CALL
-    LOS_HwiEnable(MAILBOX3_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX3_IRQ);
 #endif
 #ifdef LOSCFG_BASE_CORE_SWTMR
-    OsSwtmrInit();
+    (VOID)OsSwtmrInit();
 #endif
-    OsIdleTaskCreate();
+    (VOID)OsIdleTaskCreate();
     OsStart();
 
     return LOS_OK;

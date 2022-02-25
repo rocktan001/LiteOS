@@ -6,7 +6,7 @@ LiteOS入口在工程对应的main.c中，基本流程如下：
 ```c
 INT32 main(VOID)
 {
-    board_config();
+    BoardConfig();
     HardwareInit();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
@@ -26,7 +26,7 @@ INT32 main(VOID)
 }
 ```
 
-首先进行内存结束地址配置board_config()，硬件初始化HardwareInit()，然后打印Huawei LiteOS的版本信息；
+首先进行内存结束地址配置BoardConfig()，硬件初始化HardwareInit()，然后打印Huawei LiteOS的版本信息；
 
 接着执行OsMain()初始化Huawei LiteOS内核及例程，在OsMain()函数中会创建用户任务，其任务处理函数为app_init()；
 

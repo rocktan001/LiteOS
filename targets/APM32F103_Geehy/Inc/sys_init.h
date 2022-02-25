@@ -39,11 +39,11 @@ extern "C" {
 
 UINT32 HAL_GetTick(VOID);
 VOID SystemClock_Config(VOID);
-VOID _Error_Handler(CHAR *, INT32);
+VOID ErrorHandler(CHAR *, INT32);
 
 STATIC INLINE VOID Error_Handler(VOID)
 {
-    _Error_Handler(__FILE__, __LINE__);
+    ErrorHandler(__FILE__, __LINE__);
 }
 
 #ifdef __cplusplus

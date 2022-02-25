@@ -28,7 +28,6 @@
 
 #include "usart.h"
 #include "los_hwi.h"
-#include "platform.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -42,28 +41,32 @@ VOID UartWriteChar(const CHAR c)
     do {
         txFifoCnt = (REG32_READ(UART_STATUS_REG) >> TXFIFP_CNT_SHIFT) & TXFIFO_CNT_MASK;
     } while (txFifoCnt == (UART_FIFO_BUFFER - 1));
+    if (c == 0) {
+        return;
+    }
     REG32_WRITE(UART_FIFO_REG, c);
 }
 
 UINT8 UartReadChar(VOID)
 {
-    UINT8 RxFifoCnt = REG32_READ(UART_STATUS_REG);
+    UINT8 rxFifoCnt = (UINT8)REG32_READ(UART_STATUS_REG);
     UINT8 c = 0;
-    if (RxFifoCnt > 0) {
-        c = REG32_READ(UART_FIFO_REG);
+    if (rxFifoCnt > 0) {
+        c = (UINT8)REG32_READ(UART_FIFO_REG);
     }
     return c;
 }
 
-VOID UartPutc(CHAR c) {
+VOID UartPutc(CHAR c)
+{
     UartWriteChar(c);
 }
 
 STATIC VOID UartHandler(VOID)
 {
-    uart_getc();
-    REG32_MASK_SET(UART_INTCLR_REG, RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK);
-    LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
+    (VOID)uart_getc();
+    REG32_MASK_SET(UART_INTCLR_REG, (RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK));
+    (VOID)LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
 }
 
 STATIC INT32 UartHwi(VOID)
@@ -72,11 +75,11 @@ STATIC INT32 UartHwi(VOID)
     if (ret != LOS_OK) {
         PRINT_ERR("%s, %d, uart interrupt created failed, ret = %x.\n", __FILE__, __LINE__, ret);
     } else {
-        REG32_MASK_SET(UART_INTCLR_REG, RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK);
-        REG32_MASK_SET(UART_INTENA_REG, RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK);
-        LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+        REG32_MASK_SET(UART_INTCLR_REG, (RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK));
+        REG32_MASK_SET(UART_INTENA_REG, (RXFIFO_TOUT_INT_MASK | RXFIFO_FULL_INT_MASK));
+        (VOID)LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
     }
-    return ret;
+    return (INT32)ret;
 }
 
 UartControllerOps g_genericUart = {

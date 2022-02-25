@@ -49,7 +49,6 @@
 #include "ethernetif.h"
 
 #ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
-#include "mbedtls/net.h"
 #include "mbedtls/ssl.h"
 #endif
 
@@ -57,10 +56,13 @@
 #endif
 
 #ifdef LOSCFG_COMPONENTS_NET_LWIP
-struct netif gnetif;
-uint8_t IP_ADDRESS[4];
-uint8_t NETMASK_ADDRESS[4];
-uint8_t GATEWAY_ADDRESS[4];
+struct netif g_netif;
+// Set the actual ip address, eg: 192.168.3.122
+uint8_t ipAddr[4] = {192, 168, 3, 122};
+// Set the actual netmask address, eg: 255.255.255.0
+uint8_t netmaskAddr[4] = {255, 255, 255, 0};
+// Set the actual gateway address, eg: 192.168.3.1
+uint8_t gatewayAddr[4] = {192, 168, 3, 1};
 
 #if LWIP_IPV4 && LWIP_IPV6
 ip_addr_t ipaddr;
@@ -89,44 +91,32 @@ void net_init(void)
     (void)ethernetif_api_register(&ethAapi);
 
     printf("lwip_init OK!!\n");
-    (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
-    netif_set_default(&gnetif);
-    if (netif_is_link_up(&gnetif)) {
-        netif_set_up(&gnetif);
+    (void)netif_add(&g_netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
+    netif_set_default(&g_netif);
+    if (netif_is_link_up(&g_netif)) {
+        netif_set_up(&g_netif);
     } else {
-        netif_set_down(&gnetif);
+        netif_set_down(&g_netif);
     }
 
-    result = dhcp_start(&gnetif);
+    result = dhcp_start(&g_netif);
     if (result != ERR_OK) {
         printf("dhcp start error!...\n result = %d\n", result);
     }
     printf("dhcp start...\n");
 #else /* LWIP_DHCP */
     /* IP addresses initialization */
-    IP_ADDRESS[0] = 192;
-    IP_ADDRESS[1] = 168;
-    IP_ADDRESS[2] = 3;
-    IP_ADDRESS[3] = 122;
-    NETMASK_ADDRESS[0] = 255;
-    NETMASK_ADDRESS[1] = 255;
-    NETMASK_ADDRESS[2] = 255;
-    NETMASK_ADDRESS[3] = 0;
-    GATEWAY_ADDRESS[0] = 192;
-    GATEWAY_ADDRESS[1] = 168;
-    GATEWAY_ADDRESS[2] = 3;
-    GATEWAY_ADDRESS[3] = 1;
 
 #if LWIP_IPV4 && LWIP_IPV6
-    IP_ADDR4(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
-    IP_ADDR4(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
-    IP_ADDR4(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
+    IP_ADDR4(&ipaddr, ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
+    IP_ADDR4(&netmask, netmaskAddr[0], netmaskAddr[1], netmaskAddr[2], netmaskAddr[3]);
+    IP_ADDR4(&gw, gatewayAddr[0], gatewayAddr[1], gatewayAddr[2], gatewayAddr[3]);
 #elif LWIP_IPV6
 #else
     /* IP addresses initialization without DHCP (IPv4) */
-    IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
-    IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
-    IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
+    IP4_ADDR(&ipaddr, ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
+    IP4_ADDR(&netmask, netmaskAddr[0], netmaskAddr[1], netmaskAddr[2], netmaskAddr[3]);
+    IP4_ADDR(&gw, gatewayAddr[0], gatewayAddr[1], gatewayAddr[2], gatewayAddr[3]);
 #endif
 
     /* Initilialize the LwIP stack without RTOS */
@@ -136,10 +126,10 @@ void net_init(void)
     (void)ethernetif_api_register(&ethAapi);
     /* Add the network interface (IPv4/IPv6) without RTOS */
 #if LWIP_IPV4 && LWIP_IPV6
-    (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
+    (void)netif_add(&g_netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
 #elif LWIP_IPV6
-    (void)netif_add(&gnetif, NULL, ethernetif_init, tcpip_input);
-    netif_create_ip6_linklocal_address(&gnetif, 1);
+    (void)netif_add(&g_netif, NULL, ethernetif_init, tcpip_input);
+    netif_create_ip6_linklocal_address(&g_netif, 1);
     {
         ip6_addr_t ip6;
         err_t ret;
@@ -150,7 +140,7 @@ void net_init(void)
             printf("set source ip6 failed \n");
             return;
         }
-        ret = netif_add_ip6_address(&gnetif, &ip6, &idx);
+        ret = netif_add_ip6_address(&g_netif, &ip6, &idx);
         if (ret != 0) {
             printf("netif_add_ip6_address failed,ret %d\n", ret);
             return;
@@ -160,20 +150,20 @@ void net_init(void)
             printf("inet_pton failed\n");
             return;
         }
-        set_lwip_ipv6_default_gw(&gnetif, &ipv6_gw);
+        set_lwip_ipv6_default_gw(&g_netif, &ipv6_gw);
     }
 #else
-    (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
+    (void)netif_add(&g_netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
 #endif
     /* Registers the default network interface */
-    netif_set_default(&gnetif);
-    if (netif_is_link_up(&gnetif)) {
+    netif_set_default(&g_netif);
+    if (netif_is_link_up(&g_netif)) {
         /* When the netif is fully configured this function must be called */
-        gnetif.flags |= NETIF_FLAG_LINK_UP;
-        netif_set_up(&gnetif);
+        g_netif.flags |= NETIF_FLAG_LINK_UP;
+        netif_set_up(&g_netif);
     } else {
         /* When the netif link is down this function must be called */
-        netif_set_down(&gnetif);
+        netif_set_down(&g_netif);
     }
 #endif /* LWIP_DHCP */
 }
@@ -188,7 +178,7 @@ void hieth_hw_init(void)
 #endif
 
 uint32_t HAL_GetTick(void) {
-    return (UINT32) LOS_TickCountGet();
+    return (UINT32)LOS_TickCountGet();
 }
 
 /**
@@ -197,10 +187,13 @@ uint32_t HAL_GetTick(void) {
   * @param  line: The line in file as a number.
   * @retval None
   */
-void _Error_Handler(char *file, int line) {
+void _Error_Handler(char const *file, int line) {
     /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
-    while (1) {}
+    (void)file;
+    (void)line;
+    while (1) {
+    }
     /* USER CODE END Error_Handler_Debug */
 }
 
@@ -209,9 +202,9 @@ void _Error_Handler(char *file, int line) {
   * @retval None
   */
 void SystemClock_Config(void) {
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+    RCC_OscInitTypeDef rccOscInitStruct = {0};
+    RCC_ClkInitTypeDef rccClkInitStruct = {0};
+    RCC_PeriphCLKInitTypeDef periphClkInitStruct = {0};
 
     /** Configure LSE Drive Capability
     */
@@ -224,29 +217,29 @@ void SystemClock_Config(void) {
     * in the RCC_OscInitTypeDef structure.
     */
 #ifdef CLK_SOURCE_HSE
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 4;
-    RCC_OscInitStruct.PLL.PLLN = 216;
-    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ = 9;
-    RCC_OscInitStruct.PLL.PLLR = 2;
+    rccOscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    rccOscInitStruct.HSEState = RCC_HSE_BYPASS;
+    rccOscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    rccOscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    rccOscInitStruct.PLL.PLLM = 4; // 4, Division factor for PLL VCO iput clock.
+    rccOscInitStruct.PLL.PLLN = 216; // 216, Multiplication factor for PLL VCO output clock.
+    rccOscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    rccOscInitStruct.PLL.PLLQ = 9; // 9, Division factor for
+    rccOscInitStruct.PLL.PLLR = 2;
 #else
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-    RCC_OscInitStruct.PLL.PLLM = 8;
-    RCC_OscInitStruct.PLL.PLLN = 216;
-    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ = 9;
-    RCC_OscInitStruct.PLL.PLLR = 2;
-
+    rccOscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+    rccOscInitStruct.HSIState = RCC_HSI_ON;
+    rccOscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    rccOscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    rccOscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+    rccOscInitStruct.PLL.PLLM = 8;
+    rccOscInitStruct.PLL.PLLN = 216;
+    rccOscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    rccOscInitStruct.PLL.PLLQ = 9;
+    rccOscInitStruct.PLL.PLLR = 2;
 #endif
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+
+    if (HAL_RCC_OscConfig(&rccOscInitStruct) != HAL_OK) {
         Error_Handler();
     }
     /** Activate the Over-Drive mode
@@ -256,22 +249,22 @@ void SystemClock_Config(void) {
     }
     /** Initializes the CPU, AHB and APB buses clocks
     */
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+    rccClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
                                   | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+    rccClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    rccClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    rccClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    rccClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK) {
+    if (HAL_RCC_ClockConfig(&rccClkInitStruct, FLASH_LATENCY_7) != HAL_OK) {
         Error_Handler();
     }
-    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3 | RCC_PERIPHCLK_I2C1
+    periphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3 | RCC_PERIPHCLK_I2C1
                                                | RCC_PERIPHCLK_CLK48;
-    PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
-    PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
-    PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK) {
+    periphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+    periphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+    periphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
+    if (HAL_RCCEx_PeriphCLKConfig(&periphClkInitStruct) != HAL_OK) {
         Error_Handler();
     }
     /** Enables the Clock Security System
@@ -279,7 +272,8 @@ void SystemClock_Config(void) {
     HAL_RCC_EnableCSS();
 }
 
-void HAL_MspInit(void) {
+void HAL_MspInit(void)
+{
     __HAL_RCC_PWR_CLK_ENABLE();
     __HAL_RCC_SYSCFG_CLK_ENABLE();
 }

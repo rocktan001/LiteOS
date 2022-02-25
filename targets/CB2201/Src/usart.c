@@ -35,14 +35,14 @@ STATIC usart_handle_t g_consoleHandle;
 
 VOID UsartInit(VOID)
 {
-    drv_pinmux_config(CONSOLE_TXD, CONSOLE_TXD_FUNC);
-    drv_pinmux_config(CONSOLE_RXD, CONSOLE_RXD_FUNC);
+    (VOID)drv_pinmux_config(CONSOLE_TXD, CONSOLE_TXD_FUNC);
+    (VOID)drv_pinmux_config(CONSOLE_RXD, CONSOLE_RXD_FUNC);
 
     /* init the console */
     g_consoleHandle = csi_usart_initialize(CONSOLE_IDX, NULL);
 
     /* config the UART */
-    csi_usart_config(g_consoleHandle, UART_BAUDRATE, USART_MODE_ASYNCHRONOUS,
+    (VOID)csi_usart_config(g_consoleHandle, UART_BAUDRATE, USART_MODE_ASYNCHRONOUS,
                      USART_PARITY_NONE, USART_STOP_BITS_1, USART_DATA_BITS_8);
 }
 
@@ -52,7 +52,7 @@ void UsartWrite(const CHAR ch)
         return;
     }
 
-    csi_usart_putchar(g_consoleHandle, ch);
+    (VOID)csi_usart_putchar(g_consoleHandle, ch);
 }
 
 UINT8 UsartRead(VOID)
@@ -60,10 +60,10 @@ UINT8 UsartRead(VOID)
     UINT8 ch = 0;
 
     if (g_consoleHandle == NULL) {
-        return -1;
+        return 0;
     }
 
-    csi_usart_getchar(g_consoleHandle, &ch);
+    (VOID)csi_usart_getchar(g_consoleHandle, &ch);
 
     return ch;
 }
@@ -71,13 +71,13 @@ UINT8 UsartRead(VOID)
 STATIC VOID UartHandler(VOID)
 {
     (VOID)uart_getc();
-    LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
+    (VOID)LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
 }
 
 INT32 UsartHwi(VOID)
 {
     (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
-    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+    (VOID)LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
 
     return LOS_OK;
 }

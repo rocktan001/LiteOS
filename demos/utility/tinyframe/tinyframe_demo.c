@@ -44,7 +44,7 @@ extern "C" {
 STATIC UINT32 g_demoTaskId;
 TinyFrame *g_tfDemo;
 
-TF_Result idListenerDemo(TinyFrame *tf, TF_Msg *msg)
+TF_Result IdListenerDemo(TinyFrame *tf, TF_Msg *msg)
 {
     printf("IdListener demo\n");
     dumpFrameInfo(msg);
@@ -62,7 +62,7 @@ VOID TF_WriteImpl(TinyFrame *tf, const UINT8 *buff, UINT32 len)
     TF_Accept(tf, buff, len);
 }
  
-TF_Result genericListenerDemo(TinyFrame *tf, TF_Msg *msg)
+TF_Result GenericListenerDemo(TinyFrame *tf, TF_Msg *msg)
 {
     printf("GenericListener demo\n");
     dumpFrameInfo(msg);
@@ -79,7 +79,7 @@ STATIC VOID MasterDemo(VOID)
         printf  ("Tinyframe init failed.\n");
         return;
     }
-    ret = TF_AddGenericListener(g_tfDemo, genericListenerDemo);
+    ret = TF_AddGenericListener(g_tfDemo, GenericListenerDemo);
     if (!ret) {
         printf("Tinyframe add generic listener error.\n");
         return;
@@ -91,7 +91,7 @@ STATIC VOID MasterDemo(VOID)
         return;
     }
 
-    ret = TF_QuerySimple(g_tfDemo, 1, (pu8)queryStr, (TF_LEN)strlen(queryStr), idListenerDemo, 0);
+    ret = TF_QuerySimple(g_tfDemo, 1, (pu8)queryStr, (TF_LEN)strlen(queryStr), IdListenerDemo, 0);
     if (!ret) {
         printf("TinyFrame query simple error.\n");
         return;
@@ -107,7 +107,7 @@ STATIC VOID TfSimpleDemo(VOID)
 
     // Set up the TinyFrame library, 1 = master, 0 = slave
     g_tfDemo = TF_Init(TF_MASTER);
-    ret = TF_AddGenericListener(g_tfDemo, genericListenerDemo);
+    ret = TF_AddGenericListener(g_tfDemo, GenericListenerDemo);
     if (!ret) {
         printf("Tinyframe add generic listener failed.\n");
         return;

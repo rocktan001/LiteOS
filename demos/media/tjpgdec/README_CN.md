@@ -47,20 +47,14 @@ app init!
 Hello, welcome to liteos demo!
 File system mount success.
 Tjpgdec demo start to run.
-Image size is 506 x 168.
+Image size is 160 x 87.
 3096 bytes of work ares is used.
 
 0%
-9%
-19%
-28%
-38%
-47%
-57%
-66%
-76%
-85%
-95%
+18%
+36%
+55%
+73%
 Decompression succeeded.
 Tjpgdec demo finished.
 

@@ -40,7 +40,7 @@ extern "C" {
 /* USER CODE END Includes */
 
 extern ETH_HandleTypeDef heth;
-extern void _Error_Handler(char *, int);
+extern void _Error_Handler(char const *, int);
 
 /* USER CODE BEGIN Private defines */
 #define MCO_Pin GPIO_PIN_0

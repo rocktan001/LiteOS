@@ -53,18 +53,29 @@ STATIC UINT32 g_demoTaskId;
 
 struct event_base *g_base = NULL;
 
-struct sockEvent {
+struct SocketEvent {
     struct event *readEvent;
     struct event *writeEvent;
     CHAR *buffer;
 };
 
-VOID FreeSocketEvent(struct sockEvent* ev)
+VOID FreeSocketEvent(struct SocketEvent* ev)
 {
-    event_del(ev->readEvent);
-    free(ev->readEvent);
-    free(ev->writeEvent);
-    free(ev->buffer);
+    if (ev == NULL) {
+        return;
+    }
+    if (ev->readEvent != NULL) {
+        event_del(ev->readEvent);
+    }
+    if (ev->readEvent != NULL) {
+        free(ev->readEvent);
+    }
+    if (ev->writeEvent != NULL) {
+        free(ev->writeEvent);
+    }
+    if (ev->buffer != NULL) {
+        free(ev->buffer);
+    }
     free(ev);
 }
 
@@ -77,7 +88,7 @@ void WriteEvent(int sock, short event, void *arg)
     ret = send(sock, buffer, strlen(buffer), 0);
     if (ret < 0) {
         printf("Send data failed.\n");
-	return;
+	    return;
     }
     printf("Send data : %s success.\n", buffer);
 }
@@ -90,7 +101,7 @@ void ReadEvent(int sock, short event, void *arg)
     if (arg == NULL) {
         return;
     }
-    struct sockEvent *ev = (struct sockEvent*)arg;
+    struct SocketEvent *ev = (struct SocketEvent*)arg;
     ev->buffer = (CHAR *)malloc(EVENT_SIZE);
     if (ev->buffer == NULL) {
         return;
@@ -98,23 +109,25 @@ void ReadEvent(int sock, short event, void *arg)
     ev->writeEvent = (struct event *)malloc(sizeof(struct event));
     if (ev->writeEvent == NULL) {
         free(ev->buffer);
-	return;
+        return;
     }
     bzero(ev->buffer, EVENT_SIZE);
     size = recv(sock, ev->buffer, EVENT_SIZE, 0);
-    if (size == 0) {
-        FreeSocketEvent(ev);
-        close(sock);
+    if (size <= 0) {
+        free(ev->buffer);
+        free(ev->writeEvent);
+        (VOID)close(sock);
         return;
     }
+    ev->buffer[size] = '\0';
     printf("Receive data : %s, size : %d\n", ev->buffer, size);
-    event_set(ev->writeEvent, sock, EV_WRITE, WriteEvent, ev->buffer);
+    event_set(ev->writeEvent, sock, EV_WRITE, WriteEvent, NULL);
     ret = event_base_set(g_base, ev->writeEvent);
     if (ret != 0) {
         printf("Event base set failed.\n");
         free(ev->buffer);
         free(ev->writeEvent);
-	return;
+        return;
     }
     ret = event_add(ev->writeEvent, NULL);
     if (ret == -1) {
@@ -130,40 +143,36 @@ void ReadEvent(int sock, short event, void *arg)
 
 void AcceptEvent(int sock, short event, void *arg)
 {
+    (VOID)event;
     struct sockaddr_in clientAddr;
     INT32 ret;
     INT32 newFd;
     INT32 sinSize;
-    struct sockEvent *ev = (struct sockEvent *)malloc(sizeof(struct sockEvent));
-    if (ev == NULL) {
-        return;
-    }
+    struct SocketEvent *ev = (struct SocketEvent*)arg;
     ev->readEvent = (struct event *)malloc(sizeof(struct event));
     if (ev->readEvent == NULL) {
-        free(ev);
-	return;
+        return;
     }
-    sinSize = sizeof(struct sockaddr_in);
-    newFd = accept(sock, (struct sockaddr*)&clientAddr, &sinSize);
+    sinSize = (INT32)sizeof(struct sockaddr_in);
+    newFd = accept(sock, (struct sockaddr *)&clientAddr, &sinSize);
     if (newFd < 0) {
         printf("Establish a connection with the client failed.\n");
-	free(ev);
-	free(ev->readEvent);
-	return;
+        free(ev->readEvent);
+        return;
     }
     printf("Establish a connection with the client success.\n");
-    event_set(ev->readEvent, newFd, EV_READ|EV_PERSIST, ReadEvent, ev);
+    event_set(ev->readEvent, newFd, EV_READ | EV_PERSIST, ReadEvent, ev);
     ret = event_base_set(g_base, ev->readEvent);
     if (ret != 0) {
         printf("Event base set failed.\n");
-	free(ev);
-	free(ev->readEvent);
-	return;
+        free(ev->readEvent);
+        return;
     }
     ret = event_add(ev->readEvent, NULL);
     if (ret == -1) {
         printf("Event add failed.\n");
     }
+    return;
 }
 
 VOID DemoTaskEntry(VOID)
@@ -173,36 +182,46 @@ VOID DemoTaskEntry(VOID)
     INT32 ret;
     INT32 sock;
     INT32 flag = 1;
-
+    struct SocketEvent *ev = (struct SocketEvent *)malloc(sizeof(struct SocketEvent));
+    if (ev == NULL) {
+        return;
+    }
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(INT32));
-    ret = (UINT32)memset_s(&myAddr, sizeof(myAddr), 0, sizeof(myAddr));
+    if (sock < 0) {
+        return;
+    }
+    (VOID)setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(INT32));
+    ret = memset_s(&myAddr, sizeof(myAddr), 0, sizeof(myAddr));
     if (ret != EOK) {
+        (VOID)close(sock);
         return;
     }
     myAddr.sin_family = AF_INET;
     myAddr.sin_port = htons(PORT);
     myAddr.sin_addr.s_addr = INADDR_ANY;
-    bind(sock, (struct sockaddr*)&myAddr, sizeof(struct sockaddr));
-    listen(sock, LISTEN);
+    (VOID)bind(sock, (struct sockaddr*)&myAddr, sizeof(struct sockaddr));
+    (VOID)listen(sock, LISTEN);
 
     struct event listenEvent;
     g_base = event_base_new();
-    event_set(&listenEvent, sock, EV_READ|EV_PERSIST, AcceptEvent, NULL);
-    event_base_set(g_base, &listenEvent);
+    event_set(&listenEvent, sock, EV_READ | EV_PERSIST, AcceptEvent, ev);
+    ret = event_base_set(g_base, &listenEvent);
     if (ret != EOK) {
         printf("Event base set failed.\n");
-	return;
+        FreeSocketEvent(ev);
+        return;
     }
     ret = event_add(&listenEvent, NULL);
     if (ret == -1) {
         printf("Event add failed.\n");
-	return;
+        FreeSocketEvent(ev);
+        return;
     }
     ret = event_base_dispatch(g_base);
     if (ret == -1) {
         printf("Event base dispatch failed.\n");
     }
+    FreeSocketEvent(ev);
     printf("Libevents demo task finished.\n");
 }
 

@@ -40,9 +40,9 @@
 
 #define SPIN_TABLE_BASE 0xD8
 
-Atomic ncpu = 1;
+Atomic g_ncpu = 1;
 
-VOID board_config(VOID)
+VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = (UINTPTR)&__LOS_HEAP_ADDR_END__;
 }
@@ -73,42 +73,43 @@ VOID MmuSectionMap(VOID)
 LITE_OS_SEC_TEXT_INIT void osSystemInfo(VOID)
 {
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n\n"
-            "LiteOS Kernel Version : %s\n"
-            "Processor   : %s"
+                  "LiteOS Kernel Version : %s\n"
+                  "Processor   : %s"
 #ifdef LOSCFG_KERNEL_SMP
-            " * %d\n"
-            "Run Mode    : SMP\n"
+                  " * %d\n"
+                  "Run Mode    : SMP\n"
 #else
-            "\n"
-            "Run Mode    : UP\n"
+                  "\n"
+                  "Run Mode    : UP\n"
 #endif
-            "GIC Rev     : %s\n"
-            "build time  : %s %s\n\n"
-            "**********************************\n",
-            HW_LITEOS_KERNEL_VERSION_STRING,
-            LOS_CpuInfo(),
+                  "GIC Rev     : %s\n"
+                  "build time  : %s %s\n\n"
+                  "**********************************\n",
+                  HW_LITEOS_KERNEL_VERSION_STRING,
+                  LOS_CpuInfo(),
 #ifdef LOSCFG_KERNEL_SMP
-            LOSCFG_KERNEL_SMP_CORE_NUM,
+                  LOSCFG_KERNEL_SMP_CORE_NUM,
 #endif
-            HalIrqVersion(), __DATE__, __TIME__);
+                  HalIrqVersion(), __DATE__, __TIME__);
 }
 
 LITE_OS_SEC_TEXT_INIT int secondary_cpu_start(VOID)
 {
-    int cpuId = ArchCurrCpuid();
+    int cpuId;
+    cpuId = ArchCurrCpuid();
 
     OsCurrTaskSet(OsGetMainTask());
 
     /* increase cpu counter */
-    LOS_AtomicInc(&ncpu);
+    LOS_AtomicInc(&g_ncpu);
 
     /* store each core's hwid */
     CPU_MAP_SET(cpuId, OsHwIDGet());
     HalIrqInitPercpu();
 #ifdef LOSCFG_BASE_CORE_SWTMR
-    OsSwtmrInit();
+    (VOID)OsSwtmrInit();
 #endif
-    OsIdleTaskCreate();
+    (VOID)OsIdleTaskCreate();
     OsStart();
 
     while (1) {
@@ -120,14 +121,15 @@ LITE_OS_SEC_TEXT_INIT VOID release_secondary_cores(VOID)
 {
     for (UINT32 i = 1; i < LOSCFG_KERNEL_CORE_NUM; i++) {
         *(((UINTPTR *)SPIN_TABLE_BASE) + i) = (UINTPTR)SYS_MEM_BASE;
-        flush_dcache((UINTPTR)(SPIN_TABLE_BASE + sizeof(UINTPTR) * i), (UINTPTR)(SPIN_TABLE_BASE + sizeof(UINTPTR) * (i + 1)));
+        flush_dcache((UINTPTR)(SPIN_TABLE_BASE + sizeof(UINTPTR) * i), \
+                     (UINTPTR)(SPIN_TABLE_BASE + sizeof(UINTPTR) * (i + 1)));
         __asm volatile("sev");
     }
 }
 
 LITE_OS_SEC_TEXT_INIT int main(VOID)
 {
-    UINT32 ret = LOS_OK;
+    UINT32 ret;
 
 #ifdef __GNUC__
     ArchStackGuardInit();

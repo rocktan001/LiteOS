@@ -33,14 +33,14 @@
 #include "usart.h"
 #include "tim.h"
 
-VOID board_config(VOID)
+VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
 }
 
 INT32 HardwareInit(VOID)
 {
-    HAL_Init();
+    (VOID)HAL_Init();
     SystemClock_Config();
     MX_GPIO_Init();
     MX_USART3_UART_Init();
@@ -56,8 +56,8 @@ INT32 main (VOID)
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
 
-    board_config();
-    HardwareInit();
+    BoardConfig();
+    (VOID)HardwareInit();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
                   "\nLiteOS Kernel Version : %s\n"

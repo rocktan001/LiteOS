@@ -111,7 +111,8 @@ extern "C" {
 #define SECOND_PAGE_TABLE_APP_LEN (0x100000 * 8)
 
 #define OS_SYS_MEM_ADDR        ((void *)(&__heap_start))
-#define OS_SYS_MEM_SIZE        (UINT32)(((UINTPTR)&__LOS_HEAP_ADDR_END__ - (UINTPTR)OS_SYS_MEM_ADDR + (64 - 1)) & ~(64 - 1))
+#define OS_SYS_MEM_SIZE        (UINT32)(((UINTPTR)&__LOS_HEAP_ADDR_END__ \
+                                        - (UINTPTR)OS_SYS_MEM_ADDR + (64 - 1)) & ~(64 - 1))
 
 extern UINT32 __LOS_HEAP_ADDR_START__;
 extern UINT32 __LOS_HEAP_ADDR_END__;

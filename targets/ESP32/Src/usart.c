@@ -28,7 +28,6 @@
 
 #include "usart.h"
 #include "los_hwi.h"
-#include "platform.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,7 +47,7 @@ extern int uart_rx_one_char(uint8_t *ch);
 
 VOID UartPutc(CHAR c)
 {
-    uart_tx_one_char(c);
+    (VOID)uart_tx_one_char(c);
 }
 
 STATIC VOID UartWriteChar(const CHAR c)
@@ -60,16 +59,16 @@ STATIC UINT8 UartReadChar(VOID)
 {
     uint8_t ch;
 
-    uart_rx_one_char(&ch);
+    (VOID)uart_rx_one_char(&ch);
 
     return ch;
 }
- 
+
 STATIC VOID UartHandler(VOID)
 {
-    uart_getc();
-    *(UART_INT_CLR_REG) |= (1 << 0);        /* 1 << 0: clear UART_RXFIFO_FULL_INT interrupt */
-    LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
+    (VOID)uart_getc();
+    *(UART_INT_CLR_REG) |= 0x1; /* 0x1: clear UART_RXFIFO_FULL_INT interrupt */
+    (VOID)LOS_HwiClear(NUM_HAL_INTERRUPT_UART);
 }
 
 STATIC INT32 UartHwi(VOID)
@@ -79,15 +78,15 @@ STATIC INT32 UartHwi(VOID)
     if (ret != LOS_OK) {
         PRINT_ERR("%s, %d, uart interrupt created failed, ret = %x.\n", __FILE__, __LINE__, ret);
     } else {
-        *(UART_INT_ENA_REG) |= (1 << 0);    /* 1 << 0: UART_RXFIFO_FULL_INT interrupt enable bit */
-        *(UART_INT_ENA_REG) |= (1 << 4);    /* 1 << 4: UART_FRM_ERR_INT interrupt enable bit */
+        *(UART_INT_ENA_REG) |= 0x1; /* 0x1: UART_RXFIFO_FULL_INT interrupt enable bit */
+        *(UART_INT_ENA_REG) |= (1 << 4); /* 1 << 4: UART_FRM_ERR_INT interrupt enable bit */
         reg = *(UART_CONF1_REG);
         reg = (reg & (~0x7f)) | 0x1;
         *UART_CONF1_REG = reg;
         *(PRO_UART_INTR_MAP_REG) = NUM_HAL_INTERRUPT_UART;
-        LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+        (VOID)LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
     }
-    return ret;
+    return (INT32)ret;
 }
 
 UartControllerOps g_genericUart = {

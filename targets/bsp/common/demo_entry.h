@@ -29,6 +29,8 @@
 #ifndef _DEMO_ENTRY_H
 #define _DEMO_ENTRY_H
 
+#include "los_typedef.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

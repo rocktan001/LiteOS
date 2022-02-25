@@ -35,15 +35,15 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define WDT_WRWITE_MASK                0x50d83aa1
-#define RTC_CNTL                       0x3ff48000
-#define RTC_WDT_PROTECT                0x3ff480a4
-#define RTC_WDT_CFG0                   0x3ff4808c
-#define RTC_WDT_FEED                   0x3ff480a0
-#define TIMER_GROUP0                   0x3ff5F000
-#define WDT_TIMER_GROUP0_CNTL          0x3ff5F048
-#define TIMER_GROUP1                   0x3ff60000
-#define WDT_TIMER_GROUP1_CNTL          0x3ff60048
+#define WDT_WRWITE_MASK                0x50d83aa1U
+#define RTC_CNTL                       0x3ff48000U
+#define RTC_WDT_PROTECT                0x3ff480a4U
+#define RTC_WDT_CFG0                   0x3ff4808cU
+#define RTC_WDT_FEED                   0x3ff480a0U
+#define TIMER_GROUP0                   0x3ff5F000U
+#define WDT_TIMER_GROUP0_CNTL          0x3ff5F048U
+#define TIMER_GROUP1                   0x3ff60000U
+#define WDT_TIMER_GROUP1_CNTL          0x3ff60048U
 #define REG32_READ(reg)                (*(volatile UINT32*) (reg))
 #define REG32_WRITE(reg, value)        (*(volatile UINT32*) (reg) = (value))
 #define RTC_CNTL_WDT_FEED_BIT          (31)

@@ -25,7 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
- 
+
 #include "usart.h"
 #include "canary.h"
 #include "los_task_pri.h"
@@ -39,7 +39,7 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID board_config(VOID)
+VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = (UINTPTR)LOS_HEAP_ADDR_END;
 }
@@ -68,7 +68,8 @@ VOID OsSystemInfo(VOID)
 
 VOID CpuInit(VOID)
 {
-    UINT32 coreId = ArchCurrCpuid();
+    UINT32 coreId;
+    coreId = ArchCurrCpuid();
     __asm__ (
     "msr cpsr_c, %1\n\t"
     "mov sp, %0\n\t"
@@ -99,9 +100,14 @@ extern UINT8 g_firstPageTable[MMU_16K];
 #ifdef LOSCFG_APC_ENABLE
 VOID MmuSectionInit(VOID)
 {
-    UINT32 ttbBase = (UINTPTR)g_firstPageTable;
+    INT32 ret;
+    UINT32 ttbBase;
      /* First clear all TT entries - ie Set them to Faulting */
-    (VOID)memset_s((VOID *)(UINTPTR)ttbBase, MMU_16K, 0, MMU_16K);
+    ret = memset_s((VOID *)(UINT8 *)g_firstPageTable, MMU_16K, 0, MMU_16K);
+    if (ret != 0) {
+        return;
+    }
+    ttbBase = (UINT32)g_firstPageTable;
 
     /* Set all mem 4G as uncacheable & rw first */
     X_MMU_SECTION(0, 0, (MMU_4G >> SHIFT_1M),
@@ -122,14 +128,14 @@ INT32 main(VOID)
 
     CpuInit();
     uart_early_init();
-    board_config();
+    BoardConfig();
     OsSystemInfo();
     UINT32 ret = OsMain();
     if (ret != LOS_OK) {
         return LOS_NOK;
     }
 #ifdef LOSCFG_KERNEL_SMP
-    MAILBOXES_INFO * mailbox = CORE_MAILBOX_REG_BASE;
+    MAILBOXES_INFO *mailbox = CORE_MAILBOX_REG_BASE;
     UINT8 coreId;
     for (coreId = 1; coreId < LOSCFG_KERNEL_CORE_NUM; coreId++) {
         /* per cpu 4 mailbox */
@@ -139,11 +145,11 @@ INT32 main(VOID)
     while (LOS_AtomicRead(&g_cpuNum) < LOSCFG_KERNEL_CORE_NUM) {
         asm volatile("wfe");
     }
-    LOS_HwiEnable(MAILBOX0_IRQ);
-    LOS_HwiEnable(MAILBOX1_IRQ);
-    LOS_HwiEnable(MAILBOX2_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX0_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX1_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX2_IRQ);
 #ifdef LOSCFG_KERNEL_SMP_CALL
-    LOS_HwiEnable(MAILBOX3_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX3_IRQ);
 #endif
 #endif
     OsStart();
@@ -157,21 +163,21 @@ LITE_OS_SEC_TEXT_INIT INT32 secondary_cpu_start(VOID)
 {
     OsCurrTaskSet(OsGetMainTask());
     CpuInit();
-    
+
     /* increase cpu counter */
     LOS_AtomicInc(&g_cpuNum);
     HalIrqInitPercpu();
-    LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
-    LOS_HwiEnable(MAILBOX0_IRQ);
-    LOS_HwiEnable(MAILBOX1_IRQ);
-    LOS_HwiEnable(MAILBOX2_IRQ);
+    (VOID)LOS_HwiEnable(NUM_HAL_INTERRUPT_UART);
+    (VOID)LOS_HwiEnable(MAILBOX0_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX1_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX2_IRQ);
 #ifdef LOSCFG_KERNEL_SMP_CALL
-    LOS_HwiEnable(MAILBOX3_IRQ);
+    (VOID)LOS_HwiEnable(MAILBOX3_IRQ);
 #endif
 #ifdef LOSCFG_BASE_CORE_SWTMR
-    OsSwtmrInit();
+    (VOID)OsSwtmrInit();
 #endif
-    OsIdleTaskCreate();
+    (VOID)OsIdleTaskCreate();
     OsStart();
 
     return LOS_OK;

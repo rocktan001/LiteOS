@@ -27,7 +27,6 @@
  * --------------------------------------------------------------------------- */
 
 #include "stdio.h"
-#include "sys_init.h"
 #include "demo_entry.h"
 #include "los_task_pri.h"
 #include "gpio.h"
@@ -44,17 +43,21 @@ STATIC UINT32 LedTask(VOID)
 {
     while (1) {
         ApmMiniLed2Toggle();
-        LOS_TaskDelay(TASK_DELAY);
+        (VOID)LOS_TaskDelay(TASK_DELAY);
     }
     return 0;
 }
 
 STATIC UINT32 LedTaskCreate(VOID)
 {
+    UINT32 ret;
     UINT32 taskId = 0;
     TSK_INIT_PARAM_S ledTaskParam;
 
-    (VOID)memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    if (ret != EOK) {
+        return ret;
+    }
     ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask;
     ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     ledTaskParam.pcName = "ledTask";

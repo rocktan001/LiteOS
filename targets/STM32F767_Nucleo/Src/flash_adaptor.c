@@ -1,8 +1,8 @@
-/*----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Main Process
+/* ----------------------------------------------------------------------------
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: Flash Adaptor Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2021-07-29
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,59 +26,26 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "main.h"
-#include "sys_init.h"
-#include "los_base.h"
-#include "los_task_pri.h"
-#include "arch/canary.h"
-#include "los_typedef.h"
-#include "los_sys.h"
-#include "hal_rng.h"
-#include "tim.h"
-#ifdef LOSCFG_DEMO_CAN
-#include "can.h"
-#endif
+#include "flash_adaptor.h"
+#include <string.h>
+#include <stdlib.h>
+#include "osdepends/atiny_osdep.h"
+#include "securec.h"
 
-VOID BoardConfig(VOID)
+#define MQTT_INFO_ADDR                0x00008000
+#define MQTT_INFO_SIZE                0x00008000
+
+void FlashAdaptorInit(void)
 {
-    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
+    return;
 }
 
-VOID HardwareInit(VOID)
+int FlashAdaptorWriteMqttInfo(const void *buffer, uint32_t len)
 {
-    SystemClock_Config();
-    MX_USART1_UART_Init();
-    MX_TIM3_Init();
-#ifdef LOSCFG_DEMO_CAN
-    MX_CAN1_Init();
-#endif
-    hal_rng_config();
-    dwt_delay_init(SystemCoreClock);
+    return 0;
 }
 
-INT32 main(VOID)
+int FlashAdaptorReadMqttInfo(void *buffer, uint32_t len)
 {
-#ifdef __GNUC__
-    ArchStackGuardInit();
-#endif
-    OsSetMainTask();
-    OsCurrTaskSet(OsGetMainTask());
-
-    BoardConfig();
-    HardwareInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build date : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-
     return 0;
 }

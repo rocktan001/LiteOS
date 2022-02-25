@@ -9,9 +9,12 @@ LOCAL_INCLUDE := \
     -I $(LITEOSTOPDIR)/demos/utility/easyflash \
     -I $(LITEOSTOPDIR)/include
 
+LOCAL_EXT_FLAG := \
+    -fstack-protector-strong  -Wno-comment
+
 LOCAL_INCLUDE += $(COMPONENTS_EASYFLASH_INCLUDE)
 
-LOCAL_FLAGS := $(LOCAL_INCLUDE) -Wno-comment
+LOCAL_FLAGS := $(LOCAL_INCLUDE) $(LOCAL_EXT_FLAG)
 
 include $(MODULE)
 

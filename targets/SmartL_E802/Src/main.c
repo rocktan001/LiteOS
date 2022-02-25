@@ -57,7 +57,7 @@ LITE_OS_SEC_TEXT_INIT void osSystemInfo(void)
 
 void SystemInit(void)
 {
-    csi_coret_config(drv_get_sys_freq() / CONFIG_SYSTICK_HZ, CORET_IRQn);
+    (VOID)csi_coret_config((UINT32)drv_get_sys_freq() / CONFIG_SYSTICK_HZ, CORET_IRQn);
 }
 
 LITE_OS_SEC_TEXT_INIT int main(void)

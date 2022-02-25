@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: Targets Stm32f769 Hardware Src Rng Hal Implementation
  * Author: Huawei LiteOS Team
@@ -59,7 +59,7 @@ int HalRngGenerateBuffer(void *buf, size_t len)
     size_t i;
     uint32_t random_number;
     uint8_t *pbuf = NULL;
-    int ret = 0;
+    int ret;
 
     if (buf == NULL) {
         return -1;

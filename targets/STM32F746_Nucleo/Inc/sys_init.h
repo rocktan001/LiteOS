@@ -43,7 +43,7 @@ extern "C" {
 
 uint32_t HAL_GetTick(void);
 void SystemClock_Config(void);
-void _Error_Handler(char *, int);
+void _Error_Handler(char const *, int);
 
 STATIC INLINE VOID Error_Handler(VOID)
 {

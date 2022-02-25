@@ -25,7 +25,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
- 
+
 #include "canary.h"
 #include "los_task_pri.h"
 #include "uart.h"
@@ -36,12 +36,12 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-VOID board_config(VOID)
+static VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = (UINTPTR)LOS_HEAP_ADDR_END;
 }
 
-VOID cpuInit(VOID)
+static VOID CpuInit(VOID)
 {
     __asm__ (
     "msr	cpsr_c, %1\n\t"
@@ -68,19 +68,19 @@ VOID cpuInit(VOID)
 
 INT32 main(VOID)
 {
-	#ifdef __GNUC__
+#ifdef __GNUC__
     ArchStackGuardInit();
-	#endif
+#endif
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
 
-    board_config();
-    cpuInit();
+    BoardConfig();
+    CpuInit();
     uart_early_init();
 
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
                   "\nLiteOS Kernel Version : %s\n"
-                  "build data : %s %s\n\n"
+                  "build date : %s %s\n\n"
                   "**********************************\n",
                   HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
 

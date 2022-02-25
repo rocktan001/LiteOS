@@ -66,46 +66,46 @@ STATIC VOID EventTask(VOID)
             printf("Get Env, TickCount=%s\n", ef_get_env("TickCount"));
             (VOID)LOS_MuxPost(g_mutexHandle);
             /* clear read event mark */
-            LOS_EventClear(&g_eventGroup, ~READ_EVENT);
+            (VOID)LOS_EventClear(&g_eventGroup, ~READ_EVENT);
             break;
         }
 
         if ((ret & WRITE_EVENT) == WRITE_EVENT) {
-            (VOID)LOS_MuxPend(g_mutexHandle , LOS_WAIT_FOREVER );
+            (VOID)LOS_MuxPend(g_mutexHandle ,LOS_WAIT_FOREVER);
             /* clear write event mark */
-            UINT32 tickTime = (UINT32)LOS_TickCountGet();
+            UINT64 tickTime = LOS_TickCountGet();
             CHAR tick[64];
-            printf("Save env, \"TickCount\"=%ld\n", tickTime);
-            (VOID)sprintf_s(tick, sizeof(tick), "%ld", tickTime);
-            ef_set_and_save_env("TickCount", tick);
+            printf("Save env, \"TickCount\"=%llu\n", tickTime);
+            (VOID)sprintf_s(tick, sizeof(tick), "%llu", tickTime);
+            (VOID)ef_set_and_save_env("TickCount", tick);
             count += 1;
             (VOID)LOS_MuxPost(g_mutexHandle);
-            LOS_EventClear(&g_eventGroup, ~WRITE_EVENT);
+            (VOID)LOS_EventClear(&g_eventGroup, ~WRITE_EVENT);
             if (count > RUN_COUNT) {
-                LOS_EventWrite(&g_eventGroup, READ_EVENT);
+                (VOID)LOS_EventWrite(&g_eventGroup, READ_EVENT);
             }
         }
     }
     printf("Swtmr delete.\n");
-    LOS_SwtmrDelete(g_timerHandle);
+    (VOID)LOS_SwtmrDelete(g_timerHandle);
     printf("Mutex delete.\n");
-    LOS_MuxDelete(g_mutexHandle);
+    (VOID)LOS_MuxDelete(g_mutexHandle);
     printf("Event destroy.\n");
-    LOS_EventDestroy(&g_eventGroup);
+    (VOID)LOS_EventDestroy(&g_eventGroup);
     printf("Easyflash task delete.\n");
-    LOS_TaskDelete(g_demoTaskId);
+    (VOID)LOS_TaskDelete(g_demoTaskId);
 }
 
 STATIC VOID SwtmrCallback(VOID)
 {
     printf("Ready to write Event.\n");
-    LOS_EventWrite(&g_eventGroup, WRITE_EVENT);
+    (VOID)LOS_EventWrite(&g_eventGroup, WRITE_EVENT);
 }
 
 STATIC VOID EasyflashDemoEntry(VOID)
 {
     if (easyflash_init() == EF_NO_ERR) {
-       ef_set_and_save_env("TickCount", "0");
+       (VOID)ef_set_and_save_env("TickCount", "0");
        EventTask();
     }
 }
@@ -115,12 +115,12 @@ VOID EasyFlashDemoTask(VOID)
     UINT32 ret;
     TSK_INIT_PARAM_S taskInitParam;
 
-    ret = memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&taskInitParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return;
     }
     ret = LOS_EventInit(&g_eventGroup);
-    if (ret != LOS_OK) {   
+    if (ret != LOS_OK) {
         printf("Event init failed.\n");
         return;
     }
@@ -136,7 +136,7 @@ VOID EasyFlashDemoTask(VOID)
         printf("Create Swtmr failed.\n");
         return;
     }
-    LOS_SwtmrStart(g_timerHandle); // start run software timer
+    (VOID)LOS_SwtmrStart(g_timerHandle); // start run software timer
 
     taskInitParam.pfnTaskEntry = (TSK_ENTRY_FUNC)EasyflashDemoEntry;
     taskInitParam.pcName = "EasyflashDemoTask";

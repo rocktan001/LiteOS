@@ -236,6 +236,7 @@ SECTIONS
   . = ALIGN(0x8);
   __heap_start = .;
   __heap_end = ORIGIN(O-SRAM) + LENGTH(O-SRAM) - _Min_Stack_Size - 1;
+
   __fast_end = .;
 
   /* Remove information from the standard libraries */

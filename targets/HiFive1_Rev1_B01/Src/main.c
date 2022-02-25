@@ -35,7 +35,7 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 
-VOID board_config(VOID)
+VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
 }
@@ -48,7 +48,7 @@ INT32 main(VOID)
     OsSetMainTask();
     OsCurrTaskSet(OsGetMainTask());
 
-    board_config();
+    BoardConfig();
     PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
                   "\nLiteOS Kernel Version : %s\n"
                   "build date : %s %s\n\n"

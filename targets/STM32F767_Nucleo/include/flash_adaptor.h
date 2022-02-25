@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Timer Init Implementation
+ * Description: Targets Stm32f767 Flash Adaptor HeadFile
  * Author: Huawei LiteOS Team
- * Create: 2021-07-23
+ * Create: 2021-7-29
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,93 +26,32 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "tim.h"
-#include "apm32f10x_tmr.h"
-#include "apm32f10x_misc.h"
-#include "apm32f10x_rcm.h"
-#include "los_hwi.h"
+/**
+ * @defgroup atiny_adapter Agenttiny Adapter
+ * @ingroup agent
+ */
+
+#ifndef _FLASH_ADAPTOR_H
+#define _FLASH_ADAPTOR_H
+#include <stdbool.h>
+#include <stdint.h>
+
+#define FLASH_BLOCK_SIZE 0x1000
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#define TIMER3_RELOAD 50000
-
-VOID ApmMiniTim3Init(VOID)
-{
-    TMR_BaseConfig_T tmrBaseConfigStruct;
-    
-    RCM_EnableAPB1PeriphClock(RCM_APB1_PERIPH_TMR3);
-    
-     /** Set clockDivision = 1 */
-    tmrBaseConfigStruct.clockDivision = TMR_CLOCK_DIV_1;
-     /** Up-counter */
-    tmrBaseConfigStruct.countMode = TMR_COUNTER_MODE_UP;
-     /** Set divider = 7199.So TMR3 clock freq ~= 72000/(7199 + 1) = 10kHZ */
-    tmrBaseConfigStruct.division = 7199;
-     /** Set counter = 49999 + 1 */
-    tmrBaseConfigStruct.period = 49999;
-     /** Repetition counter = 0x0 */
-    tmrBaseConfigStruct.repetitionCounter = 0;
-    TMR_ConfigTimeBase(TMR3, &tmrBaseConfigStruct);
-    
-    TMR_Enable(TMR3);
-}
-
-VOID Tim3IrqHandler(VOID)
-{
-    if (TMR_ReadIntFlag(TMR3, TMR_INT_UPDATE) == SET) {
-        TMR_ClearIntFlag(TMR3, TMR_INT_UPDATE);
-    }
-}
-
-VOID TimInit(VOID)
-{
-    ApmMiniTim3Init();
-}
-
-VOID TimerHwiCreate(VOID)
-{
-    UINT32 ret;
-
-    ret = LOS_HwiCreate(TIM_IRQ, 0, 0, Tim3IrqHandler, 0); // 16: cortex-m irq num shift
-    if (ret != 0) {
-        printf("ret of TIM3 LOS_HwiCreate = %#x\n", ret);
-        return;
-    }
-    TMR_EnableInterrupt(TMR3, TMR_INT_UPDATE);
-    NVIC_EnableIRQRequest(TMR3_IRQn, 0, 0);
-}
-
-UINT64 GetTimerCycles(VOID)
-{
-    STATIC UINT64 bacCycle = 0;
-    STATIC UINT64 cycleTimes = 0;
-    UINT64 cycles;
-    UINT64 swCycles = TMR3->CNT;
-
-    if (swCycles < bacCycle) {
-        cycleTimes++;
-    }
-    bacCycle = swCycles;
-    if (cycleTimes > 0xffff) {
-        return 0;
-    }
-    cycles = swCycles + cycleTimes * TIMER3_RELOAD;
-
-    return cycles;
-}
-
-TimControllerOps g_cpupTimerOps = {
-    .timInit = TimInit,
-    .timHwiCreate = TimerHwiCreate,
-    .timGetTimerCycles = GetTimerCycles
-};
+void FlashAdaptorInit(void);
+int FlashAdaptorWriteMqttInfo(const void *buffer, uint32_t len);
+int FlashAdaptorReadMqttInfo(void *buffer, uint32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
+#endif /* _FLASH_ADAPTOR_H */

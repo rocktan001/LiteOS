@@ -33,23 +33,23 @@
 #define LED_TASK_PRIORITY   7
 #define LED_TASK_STACK_SIZE 0x500
 
-#define GPIO_OUT_REG        ((volatile UINT32 *)0x3FF44004)  /* GPIO 0-31 output enable register */
-#define GPIO_ENABLE_REG     ((volatile UINT32 *)0x3FF44020)  /* GPIO 0-31 output register */
+#define GPIO_OUT_REG        ((volatile UINT32 *)0x3FF44004) /* GPIO 0-31 output enable register */
+#define GPIO_ENABLE_REG     ((volatile UINT32 *)0x3FF44020) /* GPIO 0-31 output register */
 
 VOID LedGpio(VOID)
 {
-    INT32 flag = 0;
-    *(GPIO_ENABLE_REG) |= (1 << 2);         /* GPIO 2 output enable */
+    UINT32 flag = 0;
+    *(GPIO_ENABLE_REG) |= (1 << 2); /* GPIO 2 output enable */
     while (1) {
         if (flag == 0) {
-            *(GPIO_OUT_REG) |= (1 << 2);    /* GPIO 2 output 1 */
+            *(GPIO_OUT_REG) |= (1 << 2); /* GPIO 2 output 1 */
         } else {
-            *(GPIO_OUT_REG) &= ~(1 << 2);   /* GPIO 2 output 0 */
+            *(GPIO_OUT_REG) &= ~(1 << 2); /* GPIO 2 output 0 */
         }
         flag = ~flag;
-        LOS_TaskDelay(1000);                /* 1000: delay 1000ms */
+        (VOID)LOS_TaskDelay(1000); /* 1000: delay 1000ms */
     }
-    *(GPIO_ENABLE_REG) &= ~(1 << 2);
+    *(GPIO_ENABLE_REG) &= ~(1 << 2); /* GPIO 2 output disable */
 }
 
 VOID LedTask(VOID)

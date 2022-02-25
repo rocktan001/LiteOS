@@ -34,7 +34,8 @@ UINT32 HAL_GetTick(VOID)
     return (UINT32)LOS_TickCountGet();
 }
 
-VOID _Error_Handler(CHAR *file, INT32 line)
+VOID ErrorHandler(CHAR *file, INT32 line)
 {
+    printf("[ERROR] [file:%s] [line:%d]\n", file, line);
     while (1) {}
 }

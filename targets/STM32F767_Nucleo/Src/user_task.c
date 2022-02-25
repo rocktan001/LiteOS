@@ -35,7 +35,7 @@ STATIC UINT32 LedTask(VOID)
 {
     while (1) {
         HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
-        LOS_TaskDelay(500);
+        (VOID)LOS_TaskDelay(500);
     }
     return 0;
 }
@@ -46,7 +46,7 @@ STATIC UINT32 LedTaskCreate(VOID)
     UINT32 taskId = 0;
     TSK_INIT_PARAM_S ledTaskParam;
 
-    ret = memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
+    ret = (UINT32)memset_s(&ledTaskParam, sizeof(TSK_INIT_PARAM_S), 0, sizeof(TSK_INIT_PARAM_S));
     if (ret != EOK) {
         return ret;
     }

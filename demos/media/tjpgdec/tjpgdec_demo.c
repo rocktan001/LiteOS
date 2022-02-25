@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include "tjpgd.h"
 #include "los_task.h"
 
@@ -41,6 +42,8 @@ extern "C" {
 #define TJPGDEC_TASK_PRIORITY   5
 #define WORKSPACE_SIZE          3500
 #define DEMO_FILENAME           "/fatfs/test.jpg"
+
+#define MAX_LENGTH (1024 * 1024) // max length: 1024 * 1024
 
 STATIC UINT32 g_demoTaskId;
 
@@ -67,12 +70,15 @@ STATIC size_t InputFunc(JDEC *jd, UINT8 *buff, size_t nbyte)
     /* Session identifier (5th argument of jd_prepare function) */
     Iodev *dev = (Iodev *)jd->device;
 
-    if (buff) {
-        /* Raad data from imput stream */
+    if ((buff != NULL) && (dev->fp != NULL))  {
+        /* Read data from imput stream */
         return fread(buff, 1, nbyte, dev->fp);
     } else {
         /* Remove data from input stream */
-        return fseek(dev->fp, nbyte, SEEK_CUR) ? 0 : nbyte;
+        if (dev->fp == NULL) {
+            return 0;
+        }
+        return (size_t)fseek(dev->fp, (long)nbyte, SEEK_CUR) ? 0 : nbyte;
     }
 }
 
@@ -83,7 +89,7 @@ STATIC size_t InputFunc(JDEC *jd, UINT8 *buff, size_t nbyte)
  * @param {JRECT*} rect Rectangular region of output image
  * @return {*} Returns 1 to continue, 0 to abort
  */
-STATIC INT32 OutputFunc(JDEC* jd, VOID *bitmap, JRECT *rect)
+STATIC INT32 OutputFunc(JDEC *jd, VOID *bitmap, JRECT *rect)
 {
     if ((jd == NULL) || (jd->device == NULL)) {
         printf("jd data error.\n");
@@ -92,7 +98,8 @@ STATIC INT32 OutputFunc(JDEC* jd, VOID *bitmap, JRECT *rect)
     /* Session identifier (5th argument of jd_prepare function) */
     Iodev *dev = (Iodev *)jd->device;
     UINT8 *src, *dst;
-    UINT16 y, bws;
+    UINT32 y;
+    UINT32 bws;
     INT32 ret;
     UINT32 bwd;
     /* Put progress indicator */
@@ -104,9 +111,18 @@ STATIC INT32 OutputFunc(JDEC* jd, VOID *bitmap, JRECT *rect)
     src = (UINT8 *)bitmap;
     /* 3: Left-top of destination rectangular */
     dst = dev->fbuf + 3 * (rect->top * dev->wfbuf + rect->left);
+    if (rect->right < rect->left || dev->wfbuf > MAX_LENGTH) {
+        return 0;
+    }
     /* 3: Width of output rectangular [byte] */
-    bws = 3 * (rect->right - rect->left + 1);
+    bws = (UINT32)((UINT16)3 * (UINT16)(rect->right - rect->left + 1));
     /* 3: Width of frame buffer [byte] */
+    if (bws > WORKSPACE_SIZE) {
+        return 0;
+    }
+    if (dev->wfbuf > (UINT32_MAX / 3)) {
+        return 0;
+    }
     bwd = 3 * dev->wfbuf;
     for (y = rect->top; y <= rect->bottom; y++) {
         /* Copy a line */
@@ -115,66 +131,86 @@ STATIC INT32 OutputFunc(JDEC* jd, VOID *bitmap, JRECT *rect)
             return 0;
         }
         /* Next line */
-        src += bws; dst += bwd;
+        src += bws;
+        dst += bwd;
     }
     /* Continue to decompress */
     return 1;
 }
 
-VOID DemoTaskEntry(VOID)
+STATIC VOID DemoTaskEntry(VOID)
 {
     JRESULT res;      /* Result code of TJpgDec API */
     JDEC jdec;        /* Decompression object */
     VOID *work;       /* Pointer to the work area */
     Iodev devid;      /* Session identifier */
-
+    UINT32 devidBufLen;
     printf("Tjpgdec demo start to run.\n");
     /* Initialize input stream */
     devid.fp = fopen(DEMO_FILENAME, "rb");
-    if (!devid.fp) {
-        printf("Open %s failed.\n", DEMO_FILENAME);
+    if (devid.fp == NULL) {
         return;
     }
     /* Prepare to decompress */
     work = (VOID *)malloc(WORKSPACE_SIZE);
-    if (!work) {
-        printf("Malloc workspace failed.\n");
-        fclose(devid.fp);
+    if (work == NULL) {
+        (VOID)fclose(devid.fp);
         return;
     }
     res = jd_prepare(&jdec, InputFunc, work, WORKSPACE_SIZE, &devid);
     if (res == JDR_OK) {
         /* It is ready to dcompress and image info is available here */
         printf("Image size is %u x %u.\n%u bytes of work ares is used.\n",
-               jdec.width, jdec.height, WORKSPACE_SIZE - jdec.sz_pool);
+               (UINT32)jdec.width, (UINT32)jdec.height, (UINT32)(WORKSPACE_SIZE - jdec.sz_pool));
 
         /* Initialize output device */
         /* Create frame buffer for output image (assuming RGB888 cfg) */
-        devid.fbuf = (UINT8 *)malloc(3 * jdec.width * jdec.height);
-        if (!devid.fbuf) {
-            printf("Malloc frame buffer failed.\n");
+        devidBufLen = jdec.width * jdec.height;
+        // 3,
+        if (devidBufLen > (UINT32_MAX / 3) || devidBufLen == 0) {
             free(work);
-            fclose(devid.fp);
+            (VOID)fclose(devid.fp);
             return;
         }
-        devid.wfbuf = jdec.width;
+
+        devidBufLen *= 3; // 3, add devidBufLen length.
+        UINT32 memUsed0 = LOS_MemTotalUsedGet(m_aucSysMem0);
+        UINT32 totalMem0 = LOS_MemPoolSizeGet(m_aucSysMem0);
+        UINT32 freeMem0 = totalMem0 - memUsed0;
+        if (devidBufLen > freeMem0) {
+            printf("Insufficient memory remaining.\n");
+            free(work);
+            (VOID)fclose(devid.fp);
+            return;
+        }
+        devid.fbuf = (UINT8 *)malloc(devidBufLen);
+        if (devid.fbuf == NULL) {
+            free(work);
+            (VOID)fclose(devid.fp);
+            return;
+        }
+        if (jdec.width >= devidBufLen || jdec.height >= devidBufLen) {
+            free(work);
+            (VOID)fclose(devid.fp);
+            free(devid.fbuf);
+            return;
+        }
+        devid.wfbuf = (UINT32)jdec.width;
         /* 3: Start to decompress with 1/8 scaling */
         res = jd_decomp(&jdec, OutputFunc, 3);
         if (res == JDR_OK) {
             /* Decompression succeeded. You have the decompressed image in the frame buffer here. */
             printf("\rDecompression succeeded.\n");
-        } else {
-            printf("jd_decomp() failed (rc=%d)\n", res);
         }
         /* Discard frame buffer */
         free(devid.fbuf);
     } else {
-        printf("jd_prepare() failed (rc=%d)\n", res);
+        printf("jd_prepare() failed (rc=%d)\n", (INT32)res);
     }
     /* Discard work area */
     free(work);
     /* Close the JPEG file */
-    fclose(devid.fp);
+    (VOID)fclose(devid.fp);
     printf("Tjpgdec demo finished.\n");
 }
 

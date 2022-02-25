@@ -43,7 +43,7 @@ extern "C" {
 #define SHA256_LEN             32
 
 #define DEMO_STR               "This is Huawei LiteOS RHash Demo.\n"
-#define MD5_SUM                "7990beea258031735be06254cea58a89"
+#define ORI_STR                "7990beea258031735be06254cea58a89"
 #define SHA256_SUM             "d56910304664d3d3a439968b020bb465d5de33715cfb109d71704b91f85db30c"
 
 STATIC UINT32 g_demoTaskId;
@@ -55,10 +55,10 @@ STATIC VOID RHashMd5Demo(VOID)
     rhash_md5_init(&ctx);
     rhash_md5_update(&ctx, (UINT8 *)DEMO_STR, strlen(DEMO_STR));
     rhash_md5_final(&ctx, result);
-    printf("Original md5:\n%s\n", MD5_SUM);
+    printf("Original md5:\n%s\n", ORI_STR);
     printf("RHash calculate md5:\n");
-    for (INT32 i = 0; i < MD5_LEN; i++) {
-        printf("%02x", result[i]);
+    for (UINT32 i = 0; i < MD5_LEN; i++) {
+        printf("%02x", (UINT32)result[i]);
     }
     printf("\n");
 }
@@ -72,8 +72,8 @@ STATIC VOID RHashSha256Demo(VOID)
     rhash_sha256_final(&ctx, result);
     printf("Original sha256:\n%s\n", SHA256_SUM);
     printf("RHash calculate sha256:\n");
-    for (INT32 i = 0; i < SHA256_LEN; i++) {
-        printf("%02x", result[i]);
+    for (UINT32 i = 0; i < SHA256_LEN; i++) {
+        printf("%02x", (UINT32)result[i]);
     }
     printf("\n");
 }

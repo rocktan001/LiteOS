@@ -64,9 +64,9 @@ void MX_TIM3_Init(void)
     TIM_MasterConfigTypeDef sMasterConfig = { 0 };
 
     htim3.Instance = TIM3;
-    htim3.Init.Prescaler = 10800 - 1;
+    htim3.Init.Prescaler = 10800 - 1; // 10800, Set timer3 prescaler.
     htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim3.Init.Period = 50000 - 1;
+    htim3.Init.Period = 50000 - 1; // 50000 - 1, Set timer3 period.
     htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim3) != HAL_OK) {
@@ -85,6 +85,9 @@ void MX_TIM3_Init(void)
 
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *tim_baseHandle)
 {
+    if (tim_baseHandle == NULL) {
+        return;
+    }
     if (tim_baseHandle->Instance == TIM3) {
         /* USER CODE BEGIN TIM3_MspInit 0 */
 
@@ -99,6 +102,9 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *tim_baseHandle)
 
 void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *tim_baseHandle)
 {
+    if (tim_baseHandle == NULL) {
+        return;
+    }
     if (tim_baseHandle->Instance == TIM3) {
         /* USER CODE BEGIN TIM3_MspDeInit 0 */
 
@@ -145,8 +151,11 @@ VOID TimerHwiCreate(VOID)
 
 UINT64 GetTimerCycles(VOID)
 {
-    static UINT64 bacCycle;
-    static UINT64 cycleTimes;
+    static UINT64 bacCycle = 0;
+    static UINT64 cycleTimes = 0;
+    if (htim3.Instance == NULL) {
+        return 0;
+    }
     UINT64 swCycles = htim3.Instance->CNT;
 
     if (swCycles < bacCycle) {
