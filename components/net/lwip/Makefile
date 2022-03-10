@@ -18,6 +18,7 @@ LWIP_SRCS = \
     $(wildcard $(LWIP_VERION)/src/core/*.c)               \
     $(wildcard $(LWIP_VERION)/src/core/ipv4/*.c)          \
     $(wildcard $(LWIP_VERION)/src/core/ipv6/*.c)          \
+    $(wildcard $(LWIP_VERION)/src/core/nip/*.c)           \
     $(wildcard $(LWIP_VERION)/src/netif/*.c)              \
     $(wildcard $(LWIP_VERION)/src/netif/ppp/*.c)          \
     $(wildcard $(LWIP_VERION)/src/netif/ppp/polarssl/*.c) \

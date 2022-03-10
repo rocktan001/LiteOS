@@ -33,8 +33,9 @@
 #include "lwip/timeouts.h"
 #include "netif/etharp.h"
 #include <string.h>
-
-
+#if LOSCFG_LWIP_NIP
+#include "lwip/netif.h"
+#endif
 #define netifINTERFACE_TASK_STACK_SIZE              4096u
 #define netifINTERFACE_TASK_PRIORITY                6u
 /* The time to block waiting for input. */
@@ -66,6 +67,22 @@ static sys_sem_t s_xSemaphore;
 /* Global Ethernet handle */
 static ETH_HandleTypeDef heth;
 
+#if LOSCFG_LWIP_NIP
+static uint8_t MACAddr[6] = {0x00, 0x80, 0xE1, 0x00, 0x00, 0x03};
+static int8_t eth_init(struct netif *netif);
+
+void ChangeMac(uint8_t mac[6])
+{
+    for (int i = 0; i < 6; i++) {
+        netif_default->hwaddr[i] = mac[i];
+        MACAddr[i] = mac[i];
+        heth.Init.MACAddr[i] = mac[i];
+    }
+    (void)HAL_ETH_Stop(&heth);
+    HAL_ETH_DeInit(&heth);
+    eth_init(netif_default);
+}
+#endif
 /* Os ethernet interrupt handler */
 void ETH_IRQHandler(void)
 {
@@ -254,15 +271,18 @@ static int8_t eth_init(struct netif *netif)
 
     /* set MAC hardware address length */
     netif->hwaddr_len = ETH_HWADDR_LEN;
-
-    /* set MAC hardware address */
-    netif->hwaddr[0] =  heth.Init.MACAddr[0];
-    netif->hwaddr[1] =  heth.Init.MACAddr[1];
-    netif->hwaddr[2] =  heth.Init.MACAddr[2];
-    netif->hwaddr[3] =  heth.Init.MACAddr[3];
-    netif->hwaddr[4] =  heth.Init.MACAddr[4];
-    netif->hwaddr[5] =  heth.Init.MACAddr[5];
-
+#if LOSCFG_LWIP_NIP
+	if (netif->hwaddr[1] == 0)
+#endif
+	{
+	    /* set MAC hardware address */
+	    netif->hwaddr[0] =  heth.Init.MACAddr[0];
+	    netif->hwaddr[1] =  heth.Init.MACAddr[1];
+	    netif->hwaddr[2] =  heth.Init.MACAddr[2];
+	    netif->hwaddr[3] =  heth.Init.MACAddr[3];
+	    netif->hwaddr[4] =  heth.Init.MACAddr[4];
+	    netif->hwaddr[5] =  heth.Init.MACAddr[5];
+	}
     /* maximum transfer unit */
     netif->mtu = 1500;
 

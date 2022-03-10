@@ -121,6 +121,14 @@
 #define LWIP_IPV4 0
 #endif
 
+#if defined(LOSCFG_LWIP_NIP)
+#define LWIP_NIP        1
+#define NIP_FRAG        0
+#define NIP_REASSEMBLY  0
+#else
+#define LWIP_NIP        0
+#endif
+
 /* *
  * SYS_LIGHTWEIGHT_PROT==1: if you want inter-task protection for certain
  * critical regions during buffer allocation, deallocation and memory

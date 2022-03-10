@@ -25,13 +25,18 @@ USER_SRC = \
     Src/tim.c
     C_SOURCES += $(USER_SRC)
 
+ifeq ($(LOSCFG_LWIP_NIP), y)
+C_SOURCES += \
+    ${wildcard Src/nip_cmd/*.c}
+endif
+
 ifeq ($(LOSCFG_BOOTLOADER), y)
-USER_SRC += \
+C_SOURCES += \
     Src/bootloader_ota.c \
     Src/board_ota.c \
     Src/ota_port.c
 else
-    USER_SRC += Src/main.c
+C_SOURCES += Src/main.c
 endif
 
 ifeq ($(LOSCFG_COMPONENTS_FS), y)

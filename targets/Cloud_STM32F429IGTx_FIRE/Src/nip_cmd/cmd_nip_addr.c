@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Targets Stm32f429 Eth HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: NewIP Addres Command Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2022-02-17
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,17 +26,34 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _STM32F429_ETH_H
-#define _STM32F429_ETH_H
-
-#ifdef LOSCFG_COMPONENTS_NET_LWIP
-#include "ethernetif.h"
-
-void ETH_IRQHandler(void);
-struct ethernet_api EthInterface(void);
 #if LOSCFG_LWIP_NIP
-void ChangeMac(uint8_t mac[6]);
-#endif
-#endif
+#include "shell.h"
+#include "shcmd.h"
 
-#endif /* _STM32F429_ETH_H */
+#include "lwip/inet.h"
+#include "lwip/nip_addr.h"
+#include "lwip/netif.h"
+
+int CmdNipAddr(int argc, const char **argv)
+{
+    if (argc == 0) {
+        nip_addr_debug_print_val(0x80U, netif_default->nip_addr);
+        printf("\n");
+    } else if (argc != 2) {
+        printf("Wrong number of parameters.");
+        return -1;
+    } else {
+        nip_addr_t *ipaddr;
+        ipaddr = malloc(sizeof(*ipaddr));
+        int aton_err = nipaddr_aton2(argv[0], argv[1], ipaddr);
+        if (aton_err < 0) {
+            printf("Address format error.");
+            return -1;
+        }
+        const nip_addr_t *gw = &(netif_default->nip_gw);
+        netif_set_nipaddr(netif_default, ipaddr, gw);
+        return 0;
+    }
+    return 0;
+}
+#endif /* LOSCFG_LWIP_NIP */

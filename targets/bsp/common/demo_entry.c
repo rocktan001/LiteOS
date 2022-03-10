@@ -210,7 +210,7 @@
 #endif
 
 #ifdef LOSCFG_DEMOS_URIPARSER
-#include "uriparser_demo.h" 
+#include "uriparser_demo.h"
 #endif
 
 #ifdef LOSCFG_DEMOS_C_ALGORITHMS
@@ -265,6 +265,10 @@
 #include "apriltag_demo.h"
 #endif
 
+#ifdef LOSCFG_LWIP_NIP
+#include "nip_bupt.h"
+#endif
+
 #ifdef LOSCFG_COMPONENTS_NETWORK
 #define NETWORK_DEMO_TASK_PRIORITY 2
 #if defined(CONFIG_FEATURE_FOTA) || defined(LOSCFG_COMPONENTS_CONNECTIVITY_MQTT)
@@ -305,6 +309,10 @@ STATIC VOID NetworkDemoTaskEntry(VOID)
 #ifdef LOSCFG_DEMOS_HTTP_CLIENT
     HttpClientDemoTask();
 #endif
+
+#ifdef LOSCFG_LWIP_NIP
+    NewipCmdTask();
+#endif
 }
 
 VOID NetworkDemoTask(VOID)
@@ -332,6 +340,13 @@ VOID DemoEntry(VOID)
 {
 #ifndef LOSCFG_KERNEL_SMP
     printf("Hello, welcome to liteos demo!\n");
+#endif
+
+#ifdef LOSCFG_SHELL
+    (VOID)ShellQueueCreat();
+    if (OsShellInit(0) != LOS_OK) {
+        printf("Shell init failed.\n");
+    }
 #endif
 
 #ifdef LOSCFG_COMPONENTS_FS
@@ -542,12 +557,5 @@ VOID DemoEntry(VOID)
 
 #ifdef LOSCFG_DEMOS_APRILTAG
     ApriltagDemoTask();
-#endif
-
-#ifdef LOSCFG_SHELL
-    (VOID)ShellQueueCreat();
-    if (OsShellInit(0) != LOS_OK) {
-        printf("Shell init failed.\n");
-    }
 #endif
 }

@@ -65,6 +65,43 @@ ip_addr_t ipaddr;
 ip_addr_t netmask;
 ip_addr_t gw;
 #elif LWIP_IPV6
+#elif LWIP_NIP
+nip_addr_t ipaddr = { \
+    .level_num = 3, \
+    .laddrs = { { \
+    .type = 1, \
+    .u = { \
+    .top_addr = { \
+    .bitlen = 8,\
+    .v = { { { 0x01 } } }\
+     } } }, \
+    { \
+    .type = 1, \
+    .u = { \
+    .top_addr = { \
+    .bitlen = 8,\
+    .v = { { { 0x01 } } } \
+    } } }, {
+    }, {
+    } } };
+nip_addr_t gw = { \
+    .level_num = 2, \
+    .laddrs = { { \
+    .type = 1, \
+    .u = { \
+    .top_addr = { \
+    .bitlen = 8,\
+    .v = { { { 0x01 } } }\
+     } } }, \
+    { \
+    .type = 1, \
+    .u = { \
+    .top_addr = { \
+    .bitlen = 8,\
+    .v = { { { 0x01 } } } \
+    } } }, {
+    }, {
+    } } };
 #else
 ip4_addr_t ipaddr;
 ip4_addr_t netmask;
@@ -120,6 +157,7 @@ void net_init(void)
     IP_ADDR4(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
     IP_ADDR4(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
 #elif LWIP_IPV6
+#elif LWIP_NIP
 #else
     /* IP addresses initialization without DHCP (IPv4) */
     IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
@@ -160,6 +198,8 @@ void net_init(void)
         }
         set_lwip_ipv6_default_gw(&gnetif, &ipv6_gw);
     }
+#elif LWIP_NIP
+    (void)netif_add(&gnetif, &ipaddr, &gw, NULL, ethernetif_init, tcpip_input);
 #else
     (void)netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
 #endif

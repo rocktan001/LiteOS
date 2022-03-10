@@ -1,8 +1,8 @@
 /* ----------------------------------------------------------------------------
- * Copyright (c) Huawei Technologies Co., Ltd. 2013-2020. All rights reserved.
- * Description: Targets Stm32f429 Eth HeadFile
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Description: NewIP Task Implementation
  * Author: Huawei LiteOS Team
- * Create: 2013-01-01
+ * Create: 2022-02-17
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of
@@ -26,17 +26,22 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#ifndef _STM32F429_ETH_H
-#define _STM32F429_ETH_H
-
-#ifdef LOSCFG_COMPONENTS_NET_LWIP
-#include "ethernetif.h"
-
-void ETH_IRQHandler(void);
-struct ethernet_api EthInterface(void);
 #if LOSCFG_LWIP_NIP
-void ChangeMac(uint8_t mac[6]);
-#endif
-#endif
+#include "sys_init.h"
+#include "demo_entry.h"
+#include "nip_bupt.h"
+#include "shell.h"
+#include "print.h"
 
-#endif /* _STM32F429_ETH_H */
+VOID NewipCmdTask(VOID)
+{
+    osCmdReg(CMD_TYPE_EX, "udpclient", 2, (CMD_CBK_FUNC)CmdUdpClient);
+    osCmdReg(CMD_TYPE_EX, "udpserver", 1, (CMD_CBK_FUNC)CmdUdpserver);
+    osCmdReg(CMD_TYPE_EX, "nip_neigh", 4, (CMD_CBK_FUNC)CmdNipNeigh);
+    osCmdReg(CMD_TYPE_EX, "nip_addr", 2, (CMD_CBK_FUNC)CmdNipAddr);
+    osCmdReg(CMD_TYPE_EX, "mac", 2, (CMD_CBK_FUNC)CmdMac);
+    osCmdReg(CMD_TYPE_EX, "kill", 1, (CMD_CBK_FUNC)CmdKill);
+    osCmdReg(CMD_TYPE_EX, "nip_gw", 2, (CMD_CBK_FUNC)CmdNipGw);
+    osCmdReg(CMD_TYPE_EX, "print", 0, (CMD_CBK_FUNC)CmdPrint);
+}
+#endif /* LOSCFG_LWIP_NIP */

@@ -77,6 +77,8 @@
 #if LWIP_IPV4 && LWIP_IPV6
 #elif LWIP_IPV6
 #include "lwip/ethip6.h"
+#elif LWIP_NIP
+#include "lwip/ethnip.h"
 #else
 #include "netif/etharp.h"
 #endif
@@ -94,6 +96,7 @@ static struct ethernet_api s_eth_api;
 
 #if LWIP_IPV4 && LWIP_IPV6
 #elif LWIP_IPV6
+#elif LWIP_NIP
 #else
 static void arp_timer(void *arg);
 #endif
@@ -239,6 +242,8 @@ err_t ethernetif_init(struct netif *netif)
 #if LWIP_IPV4 && LWIP_IPV6
 #elif LWIP_IPV6
     netif->output_ip6 = ethip6_output;
+#elif LWIP_NIP
+    netif->output_nip = ethnip_output;
 #else
     netif->output = etharp_output;
 #endif
@@ -249,6 +254,7 @@ err_t ethernetif_init(struct netif *netif)
     low_level_init(netif);
 #if LWIP_IPV4 && LWIP_IPV6
 #elif LWIP_IPV6
+#elif LWIP_NIP
 #else
     etharp_init();
     sys_timeout(ARP_TMR_INTERVAL, arp_timer, NULL);
@@ -259,6 +265,7 @@ err_t ethernetif_init(struct netif *netif)
 
 #if LWIP_IPV4 && LWIP_IPV6
 #elif LWIP_IPV6
+#elif LWIP_NIP
 #else
 static void arp_timer(void *arg)
 {
