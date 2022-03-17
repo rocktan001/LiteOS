@@ -22,7 +22,7 @@
 #include <los_hwi.h>
 #include "platform.h"
 #include "main.h"
-
+#include "led.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -73,7 +73,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 {
 
-  if(uartHandle->Instance==USART3)
+  if(uartHandle->Instance==USART1)
   {
     /* Peripheral clock disable */
     __HAL_RCC_USART1_CLK_DISABLE();
@@ -96,7 +96,9 @@ VOID UsartWrite(const CHAR c)
 UINT8 UsartRead(VOID)
 {
     UINT8 ch;
+    Fire_LED_GREEN_ON(1);
     (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
+    Fire_LED_GREEN_ON(0);
     return ch;
 }
 
@@ -113,6 +115,7 @@ INT32 UsartHwi(VOID)
     HAL_NVIC_EnableIRQ(USART1_IRQn);
     __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_TC);
     (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    HAL_NVIC_SetPriority(USART1_IRQn, 15, 0U);
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
     return LOS_OK;
 }

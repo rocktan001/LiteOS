@@ -30,11 +30,14 @@
 #include "los_typedef.h"
 #include "demo_entry.h"
 #include "los_task.h"
-
+#include "led.h"
 STATIC UINT32 LedTask(VOID)
 {
     while (1) {
-        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+        // HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+        Fire_LED_RED_ON(1);
+        (VOID)LOS_TaskDelay(500);
+        Fire_LED_RED_ON(0);
         (VOID)LOS_TaskDelay(500);
     }
     return 0;
@@ -53,7 +56,7 @@ STATIC UINT32 LedTaskCreate(VOID)
     ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask;
     ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     ledTaskParam.pcName = "ledTask";
-    ledTaskParam.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+    ledTaskParam.usTaskPrio = 1;//LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
     ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
     return LOS_TaskCreate(&taskId, &ledTaskParam);
 }

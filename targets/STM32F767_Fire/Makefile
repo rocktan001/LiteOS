@@ -11,8 +11,8 @@ USER_SRC = \
 
 # C includes
 HAL_DRIVER_INC = \
-   -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver/Inc \
-   -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver/Inc/Legacy
+   -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver_1_2_10/Inc \
+   -I $(LITEOSTOPDIR)/targets/bsp/drivers/STM32F7xx_HAL_Driver_1_2_10/Inc/Legacy
     BOARD_INCLUDES += $(HAL_DRIVER_INC)
 
 INCLUDE_INC = \

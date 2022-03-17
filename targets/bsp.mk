@@ -58,7 +58,7 @@ else ifeq ($(LOSCFG_PLATFORM_STM32F767_NUCLEO), y)
 ######################### STM32F767_Fire Options ##########################
 else ifeq ($(LOSCFG_PLATFORM_STM32F767_FIRE), y)
     LITEOS_CMACRO_TEST += -DSTM32F767xx
-    HAL_DRIVER_TYPE := STM32F7xx_HAL_Driver
+    HAL_DRIVER_TYPE := STM32F7xx_HAL_Driver_1_2_10
 ######################### STM32F746_Nucleo Options ##########################
 else ifeq ($(LOSCFG_PLATFORM_STM32F746_NUCLEO), y)
     LITEOS_CMACRO_TEST += -DSTM32F746xx

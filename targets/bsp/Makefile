@@ -3,7 +3,7 @@ include $(LITEOSTOPDIR)/config.mk
 MODULE_NAME := bsp
 
 STM32F7xx_HAL_SRC = $(wildcard $(HAL_DRIVER_SRC)/Src/*.c)
-ifeq ($(LOSCFG_PLATFORM_STM32F769IDISCOVERY)$(LOSCFG_PLATFORM_STM32F746_NUCLEO)$(LOSCFG_PLATFORM_STM32F767_NUCLEO)$(LOSCFG_PLATFORM_STM32F767_FIRE), y)
+ifeq ($(LOSCFG_PLATFORM_STM32F769IDISCOVERY)$(LOSCFG_PLATFORM_STM32F746_NUCLEO)$(LOSCFG_PLATFORM_STM32F767_NUCLEO), y)
 STM32F7xx_HAL_OUT = \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_crc.c \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_usb.c \
@@ -30,6 +30,33 @@ STM32F7xx_HAL_OUT = \
     drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_utils.c
     STM32F7xx_HAL_SRC := $(filter-out $(STM32F7xx_HAL_OUT), $(STM32F7xx_HAL_SRC))
     LOCAL_SRCS = $(STM32F7xx_HAL_SRC)
+else ifeq ($(LOSCFG_PLATFORM_STM32F767_FIRE), y)
+STM32F7xx_HAL_OUT = \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_hal_crc.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_usb.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_utils.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_hal_mmc.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_hal_smbus.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_hal_timebase_rtc_alarm_template.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_hal_timebase_rtc_wakeup_template.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_hal_timebase_tim_template.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_dac.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_dma.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_dma2d.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_exti.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_gpio.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_i2c.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_lptim.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_pwr.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_rcc.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_rng.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_rtc.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_spi.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_tim.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_usart.c \
+    drivers/STM32F7xx_HAL_Driver_1_2_10/Src/stm32f7xx_ll_utils.c
+    STM32F7xx_HAL_SRC := $(filter-out $(STM32F7xx_HAL_OUT), $(STM32F7xx_HAL_SRC))
+    LOCAL_SRCS = $(STM32F7xx_HAL_SRC)   
 else ifeq ($(LOSCFG_PLATFORM_STM32F429IGTX), y)
 STM32F429IGTX_HAL_SRC = \
     drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c \

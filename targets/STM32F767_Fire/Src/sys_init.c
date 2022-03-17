@@ -216,28 +216,17 @@ void SystemClock_Config(void) {
     /** Initializes the RCC Oscillators according to the specified parameters
     * in the RCC_OscInitTypeDef structure.
     */
-#ifdef CLK_SOURCE_HSE
+
     rccOscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    rccOscInitStruct.HSEState = RCC_HSE_BYPASS;
+    rccOscInitStruct.HSEState = RCC_HSE_ON;
     rccOscInitStruct.PLL.PLLState = RCC_PLL_ON;
     rccOscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    rccOscInitStruct.PLL.PLLM = 4; // 4, Division factor for PLL VCO iput clock.
-    rccOscInitStruct.PLL.PLLN = 216; // 216, Multiplication factor for PLL VCO output clock.
+    rccOscInitStruct.PLL.PLLM = 25;// 4, Division factor for PLL VCO iput clock.
+    rccOscInitStruct.PLL.PLLN = 432; // 216, Multiplication factor for PLL VCO output clock.
     rccOscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    rccOscInitStruct.PLL.PLLQ = 9; // 9, Division factor for
+    rccOscInitStruct.PLL.PLLQ = 2; // 9, Division factor for
     rccOscInitStruct.PLL.PLLR = 2;
-#else
-    rccOscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-    rccOscInitStruct.HSIState = RCC_HSI_ON;
-    rccOscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    rccOscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    rccOscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-    rccOscInitStruct.PLL.PLLM = 8;
-    rccOscInitStruct.PLL.PLLN = 216;
-    rccOscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    rccOscInitStruct.PLL.PLLQ = 9;
-    rccOscInitStruct.PLL.PLLR = 2;
-#endif
+
 
     if (HAL_RCC_OscConfig(&rccOscInitStruct) != HAL_OK) {
         Error_Handler();

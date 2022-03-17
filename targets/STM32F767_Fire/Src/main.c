@@ -31,12 +31,10 @@
 #include "arch/canary.h"
 #include "gpio.h"
 #include "usart.h"
-#include "tim.h"
-#include "eth.h"
 #ifdef HAL_RNG_MODULE_ENABLED
 #include "hal_rng.h"
 #endif
-
+#include "led.h"
 VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
@@ -48,11 +46,11 @@ INT32 HardwareInit(VOID)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_USART1_UART_Init();
-    MX_TIM3_Init();
 #ifdef HAL_RNG_MODULE_ENABLED
     HalRngConfig();
 #endif
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+    Fire_LED_GPIO_Config();
     return 0;
 }
 
