@@ -23,8 +23,12 @@
 #include "platform.h"
 #include "main.h"
 #include "led.h"
+#include "user_task.h"
 /* USER CODE BEGIN 0 */
-
+#define RX_BUFFER_SIZE 256
+unsigned char aRxBuffer[RX_BUFFER_SIZE];
+int rxConut = 0;
+int g_uartinterruptCnt = 0;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -96,16 +100,47 @@ VOID UsartWrite(const CHAR c)
 UINT8 UsartRead(VOID)
 {
     UINT8 ch;
-    Fire_LED_GREEN_ON(1);
+    LedTaskTrigger();
     (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
-    Fire_LED_GREEN_ON(0);
     return ch;
 }
 
-STATIC VOID UartHandler(VOID)
+//回调函数
+void USART1_IdleCallback(uint8_t *pData,uint16_t len)
 {
-    (VOID)uart_getc();
+    while(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_TC) != SET);
+    // HAL_UART_Transmit(&huart1,pData,len,1000);
 }
+
+void __USART1_IRQHandler(void)
+{
+
+    if(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_ORE) != RESET) {
+        __HAL_UART_CLEAR_FLAG(&huart1, UART_CLEAR_OREF);
+        goto out;
+    }
+
+    //接收中断
+    if(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_RXNE) != RESET) {
+        (VOID)uart_getc();
+        __HAL_UART_CLEAR_FLAG(&huart1,UART_FLAG_RXNE);
+        goto out;
+    }
+    //空闲中断
+    if(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE) != RESET) {
+        //一帧数据接收完成  
+        USART1_IdleCallback(aRxBuffer,rxConut);
+        __HAL_UART_CLEAR_FLAG(&huart1,UART_CLEAR_IDLEF);
+        goto out;
+    }
+
+    while(1) {
+        printf("huart1.Instance->ISR 0x%x\n",huart1.Instance->ISR);
+    }
+    out:
+    return;
+}
+
 
 INT32 UsartHwi(VOID)
 {
@@ -114,9 +149,11 @@ INT32 UsartHwi(VOID)
     }
     HAL_NVIC_EnableIRQ(USART1_IRQn);
     __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_TC);
-    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, UartHandler, NULL);
+    (VOID)LOS_HwiCreate(NUM_HAL_INTERRUPT_UART, 0, 0, __USART1_IRQHandler, NULL);
     HAL_NVIC_SetPriority(USART1_IRQn, 15, 0U);
-    __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+
+    __HAL_UART_ENABLE_IT(&huart1,UART_IT_RXNE);//接收中断
+    __HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);//空闲中断
     return LOS_OK;
 }
 

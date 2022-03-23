@@ -204,7 +204,7 @@ void _Error_Handler(char const *file, int line) {
 void SystemClock_Config(void) {
     RCC_OscInitTypeDef rccOscInitStruct = {0};
     RCC_ClkInitTypeDef rccClkInitStruct = {0};
-    RCC_PeriphCLKInitTypeDef periphClkInitStruct = {0};
+    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
     /** Configure LSE Drive Capability
     */
@@ -248,12 +248,11 @@ void SystemClock_Config(void) {
     if (HAL_RCC_ClockConfig(&rccClkInitStruct, FLASH_LATENCY_7) != HAL_OK) {
         Error_Handler();
     }
-    periphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3 | RCC_PERIPHCLK_I2C1
-                                               | RCC_PERIPHCLK_CLK48;
-    periphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
-    periphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
-    periphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
-    if (HAL_RCCEx_PeriphCLKConfig(&periphClkInitStruct) != HAL_OK) {
+
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1;
+    PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
         Error_Handler();
     }
     /** Enables the Clock Security System

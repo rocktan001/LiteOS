@@ -36,6 +36,9 @@
 #include "stm32f0xx_hal.h"
 #endif
 
+#ifdef LOSCFG_PLATFORM_STM32F767_FIRE
+#include "led.h"
+#endif
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -43,7 +46,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 STATIC UINT32 g_curIrqNum = 0;
-
+UINT32 g_interruptTimer = 0;
 LITE_OS_SEC_BSS HwiHandleInfo g_hwiForm[LOSCFG_PLATFORM_HWI_LIMIT] = { 0 };
 
 LITE_OS_SEC_DATA_VEC HWI_PROC_FUNC g_hwiVec[LOSCFG_PLATFORM_HWI_LIMIT] = {
@@ -69,14 +72,21 @@ LITE_OS_SEC_DATA_VEC HWI_PROC_FUNC g_hwiVec[LOSCFG_PLATFORM_HWI_LIMIT] = {
 LITE_OS_SEC_TEXT_MINOR VOID IrqEntryV7M(VOID)
 {
     UINT32 hwiIndex;
-
     hwiIndex = __get_IPSR();
     g_curIrqNum = hwiIndex;
+#ifdef LOSCFG_PLATFORM_STM32F767_FIRE
+        // Fire_LED_BLUE_ON(1);
+    Fire_DEBUG_GPIOB6(1);
+#endif    
     OsIntHandle(hwiIndex, &g_hwiForm[hwiIndex]);
 
     if (OsTaskProcSignal() != 0) {
         OsSchedPreempt();
     }
+#ifdef LOSCFG_PLATFORM_STM32F767_FIRE    
+   Fire_DEBUG_GPIOB6(0);
+    // Fire_LED_BLUE_ON(0);
+#endif  
 }
 
 UINT32 ArchIrqUnmask(UINT32 hwiNum)

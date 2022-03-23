@@ -20,29 +20,31 @@
 
 void Fire_LED_RED_ON(int on)
 {
-	if(on){
-		HAL_GPIO_WritePin(LED_RED_GPIO_PORT,LED_RED_PIN,ON);
-	}else{
-		HAL_GPIO_WritePin(LED_RED_GPIO_PORT,LED_RED_PIN,OFF);
-	}
+    HAL_GPIO_WritePin(LED_RED_GPIO_PORT,LED_RED_PIN,!on);
 }
 
 void Fire_LED_GREEN_ON(int on)
 {
-	if(on){
-		HAL_GPIO_WritePin(LED_GREEN_GPIO_PORT,LED_GREEN_PIN,ON);
-	}else{
-		HAL_GPIO_WritePin(LED_GREEN_GPIO_PORT,LED_GREEN_PIN,OFF);
-	}
+
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_PORT,LED_GREEN_PIN,!on);
+
 }
 
 void Fire_LED_BLUE_ON(int on)
 {
-	if(on){
-		HAL_GPIO_WritePin(LED_BLUE_GPIO_PORT,LED_BLUE_PIN,ON);
-	}else{
-		HAL_GPIO_WritePin(LED_BLUE_GPIO_PORT,LED_BLUE_PIN,OFF);
-	}
+
+	HAL_GPIO_WritePin(LED_BLUE_GPIO_PORT,LED_BLUE_PIN,!on);
+
+}
+
+void Fire_DEBUG_GPIOB6(int on)
+{
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, !on);
+}
+
+void Fire_DEBUG_GPIOB7(int on)
+{
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, !on);
 }
 
 void Fire_LED_GPIO_Config(void)

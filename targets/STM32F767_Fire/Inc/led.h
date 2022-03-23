@@ -4,4 +4,6 @@ void Fire_LED_GPIO_Config(void);
 void Fire_LED_RED_ON(int on);
 void Fire_LED_GREEN_ON(int on);
 void Fire_LED_BLUE_ON(int on);
+void Fire_DEBUG_GPIOB6(int on);
+void Fire_DEBUG_GPIOB7(int on);
 #endif
