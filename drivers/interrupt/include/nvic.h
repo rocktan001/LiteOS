@@ -210,6 +210,14 @@ extern VOID IrqEntryV7M(VOID);
 /* Reset handle entry */
 extern VOID Reset_Handler(VOID);
 
+/**
+* 2022-03-25 tanzhongqiang 用来测试中断调用时，之前的PC   
+**/
+uint32_t g_interrupt_pc;
+
+extern VOID IrqEntryV7M_Handler(VOID);
+
+
 extern VOID osPendSV(VOID);
 
 /*

@@ -32,19 +32,43 @@
 #include "los_task.h"
 #include "los_event.h"
 #include "led.h"
+#include "los_spinlock.h"
+extern uint32_t g_interrupt_pc;
 static UINT32 g_ledtriggler = 0;
 static EVENT_CB_S g_pevent;
 /* 等待的事件类型 */
 #define EVENT_WAIT 0x00000001
+
+// 测试LOS_SpinLockSave 使用场景
+#if 0
+int a;
+STATIC SPIN_LOCK_INIT(g_testSpin);
+#define HWI_LOCK(state)       LOS_SpinLockSave(&g_ledtaskSpin, &(state))
+#define HWI_UNLOCK(state)     LOS_SpinUnlockRestore(&g_ledtaskSpin, (state))
+#endif
 STATIC UINT32 LedTask(VOID)
 {
     UINT32 event;
+        // UINT32 intSave;
+   
+    // uint8_t result;
     while (1) {
         event = LOS_EventRead(&g_pevent, EVENT_WAIT, LOS_WAITMODE_AND, LOS_WAIT_FOREVER);
         if (event == EVENT_WAIT) {
             LOS_EventClear(&g_pevent, ~g_pevent.uwEventID);
             Fire_LED_RED_ON(g_ledtriggler);
             g_ledtriggler = !g_ledtriggler;
+            printf("last_pc : 0x%x\n",g_interrupt_pc);
+            // Fire_DEBUG_GPIOB6_TRIGGER();
+#if 0
+            LOS_SpinLockSave(&g_testSpin, &intSave);
+            a++;
+            LOS_SpinUnlockRestore(&g_testSpin, intSave);
+#endif            
+#if 0
+            __ASM volatile ("MRS %0, control" : "=r" (result) );
+            printf("control 0x%x\n",result);
+#endif                    
         }
     }
     return 0;

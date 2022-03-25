@@ -37,6 +37,7 @@
 #endif
 
 #ifdef LOSCFG_PLATFORM_STM32F767_FIRE
+// #include "debug_pc.h"
 #include "led.h"
 #endif
 #ifdef __cplusplus
@@ -48,7 +49,7 @@ extern "C" {
 STATIC UINT32 g_curIrqNum = 0;
 UINT32 g_interruptTimer = 0;
 LITE_OS_SEC_BSS HwiHandleInfo g_hwiForm[LOSCFG_PLATFORM_HWI_LIMIT] = { 0 };
-
+#if 0 //
 LITE_OS_SEC_DATA_VEC HWI_PROC_FUNC g_hwiVec[LOSCFG_PLATFORM_HWI_LIMIT] = {
     (HWI_PROC_FUNC)0,             /* [0] Top of Stack */
     (HWI_PROC_FUNC)Reset_Handler, /* [1] reset */
@@ -67,24 +68,42 @@ LITE_OS_SEC_DATA_VEC HWI_PROC_FUNC g_hwiVec[LOSCFG_PLATFORM_HWI_LIMIT] = {
     (HWI_PROC_FUNC)osPendSV,      /* [14] PendSV Handler */
     (HWI_PROC_FUNC)IrqEntryV7M,   /* [15] SysTick Handler */
 };
-
-
+#endif
+#if 1 //2022-03-25 tanzhongqiang 用来测试中断调用时，之前的PC 
+LITE_OS_SEC_DATA_VEC HWI_PROC_FUNC g_hwiVec[LOSCFG_PLATFORM_HWI_LIMIT] = {
+    (HWI_PROC_FUNC)0,             /* [0] Top of Stack */
+    (HWI_PROC_FUNC)Reset_Handler, /* [1] reset */
+    (HWI_PROC_FUNC)IrqEntryV7M_Handler,   /* [2] NMI Handler */
+    (HWI_PROC_FUNC)IrqEntryV7M_Handler,   /* [3] Hard Fault Handler */
+    (HWI_PROC_FUNC)IrqEntryV7M_Handler,   /* [4] MPU Fault Handler */
+    (HWI_PROC_FUNC)IrqEntryV7M_Handler,   /* [5] Bus Fault Handler */
+    (HWI_PROC_FUNC)IrqEntryV7M_Handler,   /* [6] Usage Fault Handler */
+    (HWI_PROC_FUNC)0,             /* [7] Reserved */
+    (HWI_PROC_FUNC)0,             /* [8] Reserved */
+    (HWI_PROC_FUNC)0,             /* [9] Reserved */
+    (HWI_PROC_FUNC)0,             /* [10] Reserved */
+    (HWI_PROC_FUNC)IrqEntryV7M_Handler,   /* [11] SVCall Handler */
+    (HWI_PROC_FUNC)IrqEntryV7M_Handler,   /* [12] Debug Monitor Handler */
+    (HWI_PROC_FUNC)0,             /* [13] Reserved */
+    (HWI_PROC_FUNC)osPendSV,      /* [14] PendSV Handler */
+    (HWI_PROC_FUNC)IrqEntryV7M_Handler,   /* [15] SysTick Handler */
+};
+#endif
 LITE_OS_SEC_TEXT_MINOR VOID IrqEntryV7M(VOID)
 {
-    UINT32 hwiIndex;
-    hwiIndex = __get_IPSR();
-    g_curIrqNum = hwiIndex;
 #ifdef LOSCFG_PLATFORM_STM32F767_FIRE
         // Fire_LED_BLUE_ON(1);
-    Fire_DEBUG_GPIOB6(1);
+    // Fire_DEBUG_GPIOB6(1);
+    // DEBUG_INT_PC
 #endif    
-    OsIntHandle(hwiIndex, &g_hwiForm[hwiIndex]);
+    g_curIrqNum = __get_IPSR();
+    OsIntHandle(g_curIrqNum, &g_hwiForm[g_curIrqNum]);
 
     if (OsTaskProcSignal() != 0) {
         OsSchedPreempt();
     }
 #ifdef LOSCFG_PLATFORM_STM32F767_FIRE    
-   Fire_DEBUG_GPIOB6(0);
+   // Fire_DEBUG_GPIOB6(0);
     // Fire_LED_BLUE_ON(0);
 #endif  
 }

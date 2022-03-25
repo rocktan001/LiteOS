@@ -34,7 +34,17 @@ void Fire_LED_BLUE_ON(int on)
 {
 
 	HAL_GPIO_WritePin(LED_BLUE_GPIO_PORT,LED_BLUE_PIN,!on);
+}
 
+
+void Fire_DEBUG_GPIOB6_TRIGGER(void)
+{
+ HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);
+}
+
+void Fire_DEBUG_GPIOB7_TRIGGER(void)
+{
+ HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
 }
 
 void Fire_DEBUG_GPIOB6(int on)

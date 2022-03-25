@@ -132,6 +132,23 @@ LoopFillZerobss:
 .size  Reset_Handler, .-Reset_Handler
 
 /**
+* 2022-03-25 tanzhongqiang 用来测试中断调用时，之前的PC   
+**/
+    .section  .text.IrqEntryV7M_Handler
+  .weak  IrqEntryV7M_Handler
+  .type  IrqEntryV7M_Handler, %function
+IrqEntryV7M_Handler: 
+
+   push  {r0, r1}
+   mrs  r0, psp
+   ldr r0, [r0,#24]
+   ldr  r1, =g_interrupt_pc
+   str  r0, [r1]
+   pop  {r0,r1}
+  
+   b IrqEntryV7M
+.size  IrqEntryV7M_Handler, .-IrqEntryV7M_Handler
+/**
  * @brief  This is the code that gets called when the processor receives an 
  *         unexpected interrupt.  This simply enters an infinite loop, preserving
  *         the system state for examination by a debugger.
