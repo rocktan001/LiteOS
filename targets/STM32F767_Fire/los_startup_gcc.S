@@ -139,12 +139,26 @@ LoopFillZerobss:
   .type  IrqEntryV7M_Handler, %function
 IrqEntryV7M_Handler: 
 
-   push  {r0, r1}
-   mrs  r0, psp
-   ldr r0, [r0,#24]
-   ldr  r1, =g_interrupt_pc
-   str  r0, [r1]
-   pop  {r0,r1}
+   push  {r0, r1}                      /* 保存R0,R1 */
+   and.w  r0, lr, #4                   /* 判断中断返回使用MSP/PSP */
+   cmp  r0, #0                         /*判断逻辑 EXC_RETUR 第2位 */
+                                       /* 0=从主堆栈中做出栈操作，返回后使用MSP*/ 
+                                       /* 1=从进程堆栈中做出栈操作，返回后使用PSP */
+   beq SAVE_MSP
+
+SAVE_PSP:     
+   mrs  r0, psp                       /* 保存PSP进程堆栈指针到R0 */
+   b SAVE_END 
+
+SAVE_MSP:                             /* 只有ISR 被中断情况，才会用MSP */
+   bl  Fire_DEBUG_GPIOB7_TRIGGER
+   mrs  r0, msp                       /* 保存MSP中断堆栈指针到R0 */
+
+SAVE_END:  
+   ldr r0, [r0,#24]                   /* R0+4*6 => PC */
+   ldr  r1, =g_interrupt_pc           /* g_interrupt_pc 地址赋值给R1 */
+   str  r0, [r1]                      /* 把PC 值赋值g_interrupt_pc */
+   pop  {r0,r1}                       /* 恢复RO,R1 */
   
    b IrqEntryV7M
 .size  IrqEntryV7M_Handler, .-IrqEntryV7M_Handler
