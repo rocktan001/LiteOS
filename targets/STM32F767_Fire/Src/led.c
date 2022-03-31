@@ -49,12 +49,12 @@ void Fire_DEBUG_GPIOB7_TRIGGER(void)
 
 void Fire_DEBUG_GPIOB6(int on)
 {
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, !on);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, on);
 }
 
 void Fire_DEBUG_GPIOB7(int on)
 {
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, !on);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, on);
 }
 
 void Fire_LED_GPIO_Config(void)

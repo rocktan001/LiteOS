@@ -109,7 +109,6 @@ OsStartToRun:
 ArchIntLock:
     .fnstart
     .cantunwind
-    bl      Fire_DEBUG_GPIOB6_TRIGGER
     mrs     r0, PRIMASK
     cpsid   I
     bx      lr
@@ -120,7 +119,6 @@ ArchIntLock:
 ArchIntUnlock:
     .fnstart
     .cantunwind
-    bl      Fire_DEBUG_GPIOB6_TRIGGER
     mrs     r0, PRIMASK
     cpsie   I
     bx      lr

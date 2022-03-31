@@ -93,6 +93,7 @@ UINT64 HalClockGetCycles(VOID)
     hwCycle = SysTick->VAL;
 
     /* tick has come, but may interrupt environment, not counting the Tick interrupt response */
+    // 2022-03-31 tanzhongqiang 检查中断控制状态寄存器。是否有systick 被悬起。因为此时已经关闭中断了。
     if ((SCB->ICSR & TICK_INTR_CHECK) != 0) {
         hwCycle = SysTick->VAL;
         swTick++;

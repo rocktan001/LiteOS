@@ -58,7 +58,9 @@ VOID OsLowpowerInit(const PowerMgrOps *pmOps)
 
     LOS_IntWakeupHookReg(OsPowerMgrWakeUpFromInterrupt);
 }
-
+#ifdef LOSCFG_PLATFORM_STM32F767_FIRE
+extern void Fire_DEBUG_GPIOB6(int on);
+#endif
 VOID OsPowerMgrProcess(VOID)
 {
 #ifdef LOSCFG_KERNEL_POWER_MGR
@@ -67,7 +69,14 @@ VOID OsPowerMgrProcess(VOID)
     if (g_pmOps == NULL) {
 #ifdef LOSCFG_KERNEL_TICKLESS
         OsTicklessOpen();
+#ifdef LOSCFG_PLATFORM_STM32F767_FIRE
+    // 2022-03-31 tanzhongqiang 测试进入休眠期的间隔
+    Fire_DEBUG_GPIOB6(1);
+    __asm__ volatile("nop" );
+    Fire_DEBUG_GPIOB6(0);
+#endif
         wfi();
+       
 #endif
     } else {
         CALL_PMOPS_FUNC_VOID(process);

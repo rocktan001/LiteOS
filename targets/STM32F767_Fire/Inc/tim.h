@@ -1,6 +1,25 @@
-/* ----------------------------------------------------------------------------
+/* *
+ * *****************************************************************************
+ * @file    tim.h
+ * @brief   This file contains all the function prototypes for
+ * the tim.c file
+ * *****************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ * opensource.org/licenses/BSD-3-Clause
+ *
+ * *****************************************************************************
+ */
+
+/*----------------------------------------------------------------------------
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Main
+ * Description: Tim
  * Author: Huawei LiteOS Team
  * Create: 2021-07-01
  * Redistribution and use in source and binary forms, with or without modification,
@@ -26,60 +45,30 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------------------- */
 
-#include "main.h"
-#include "los_task_pri.h"
-#include "arch/canary.h"
-#include "gpio.h"
-#include "usart.h"
-#include "tim.h"
+/* Define to prevent recursive inclusion ------------------------------------- */
+#ifndef __TIM_H__
+#define __TIM_H__
 
-#ifdef HAL_RNG_MODULE_ENABLED
-#include "hal_rng.h"
+#include "los_typedef.h"
+#include "platform.h"
+
+#ifdef __cplusplus
+extern "C" {
 #endif
-#include "led.h"
-VOID BoardConfig(VOID)
-{
-    g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
-}
 
-INT32 HardwareInit(VOID)
-{
-    (VOID)HAL_Init();
-    SystemClock_Config();
-    MX_GPIO_Init();
-    MX_USART1_UART_Init();
-    MX_TIM3_Init();
-#ifdef HAL_RNG_MODULE_ENABLED
-    HalRngConfig();
+/* USER CODE BEGIN Private defines */
+void MX_TIM3_Init(void);
+/* USER CODE END Private defines */
+
+/* USER CODE BEGIN Prototypes */
+VOID TimInit(VOID);
+extern TimControllerOps g_cpupTimerOps;
+/* USER CODE END Prototypes */
+
+#ifdef __cplusplus
+}
 #endif
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-    Fire_LED_GPIO_Config();
-    return 0;
-}
 
-INT32 main (VOID)
-{
-#ifdef __GNUC__
-    ArchStackGuardInit();
-#endif
-    OsSetMainTask();
-    OsCurrTaskSet(OsGetMainTask());
+#endif /* __TIM_H__ */
 
-    BoardConfig();
-    (VOID)HardwareInit();
-
-    PRINT_RELEASE("\n********Hello Huawei LiteOS********\n"
-                  "\nLiteOS Kernel Version : %s\n"
-                  "build date : %s %s\n\n"
-                  "**********************************\n",
-                  HW_LITEOS_KERNEL_VERSION_STRING, __DATE__, __TIME__);
-
-    UINT32 ret = OsMain();
-    if (ret != LOS_OK) {
-        return LOS_NOK;
-    }
-
-    OsStart();
-
-    return LOS_OK;
-}
+/* *********************** (C) COPYRIGHT STMicroelectronics *****END OF FILE*** */

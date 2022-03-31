@@ -27,52 +27,47 @@
  * --------------------------------------------------------------------------- */
 
 #include <stdio.h>
+#include "user_task.h"
 #include "los_typedef.h"
 #include "demo_entry.h"
 #include "los_task.h"
 #include "los_event.h"
 #include "led.h"
 #include "los_spinlock.h"
+#include "los_exc.h"
 extern uint32_t g_interrupt_pc;
 static UINT32 g_ledtriggler = 0;
 static EVENT_CB_S g_pevent;
 /* 等待的事件类型 */
 #define EVENT_WAIT 0x00000001
 
-// 测试LOS_SpinLockSave 使用场景
-#if 0
-int a;
-STATIC SPIN_LOCK_INIT(g_testSpin);
-#endif
-STATIC UINT32 LedTask(VOID)
-{
+STATIC UINT32 LedTask1(VOID)
+{// 2022-3-31 tanzhongqiang 测试event 在中断，任务优先级方面的影响。在更高优先级没有让渡CPU情况，event 得不到响应。
+
     UINT32 event;
-          // UINT32 intSave;
-    // uint8_t result;
-    while (1) {
+
+    while (1) {       
         event = LOS_EventRead(&g_pevent, EVENT_WAIT, LOS_WAITMODE_AND, LOS_WAIT_FOREVER);
         if (event == EVENT_WAIT) {
             LOS_EventClear(&g_pevent, ~g_pevent.uwEventID);
             Fire_LED_RED_ON(g_ledtriggler);
             g_ledtriggler = !g_ledtriggler;
-            // printf("last_pc : 0x%x\n",g_interrupt_pc);
-            // Fire_DEBUG_GPIOB6_TRIGGER();
-#if 0
-            LOS_SpinLockSave(&g_testSpin, &intSave);
-            LOS_SpinLockSave(&g_testSpin, &intSave);
-            a++;
-            LOS_SpinUnlockRestore(&g_testSpin, intSave);
-            LOS_SpinUnlockRestore(&g_testSpin, intSave);
-#endif            
-#if 0
-            __ASM volatile ("MRS %0, control" : "=r" (result) );
-            printf("control 0x%x\n",result);
-#endif                    
+            // printf("last_pc : 0x%x\n",g_interrupt_pc);  
+            // Fire_DEBUG_GPIOB6_TRIGGER();                 
         }
     }
     return 0;
 }
 
+STATIC UINT32 LedTask2(VOID)
+{
+    while (1) {       
+        LOS_TaskDelay(0);
+        Fire_DEBUG_GPIOB7_TRIGGER();
+        LedTaskTrigger();
+    }
+    return 0;
+}
 STATIC UINT32 LedTaskCreate(VOID)
 {
     UINT32 ret;
@@ -90,12 +85,21 @@ STATIC UINT32 LedTaskCreate(VOID)
     if (ret != EOK) {
         return ret;
     }
-    ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask;
+
+    ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask1;
     ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
-    ledTaskParam.pcName = "ledTask";
-    ledTaskParam.usTaskPrio = 1;//LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
+    ledTaskParam.pcName = "ledTask1";
+    ledTaskParam.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
     ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
-    return LOS_TaskCreate(&taskId, &ledTaskParam);
+    LOS_TaskCreate(&taskId, &ledTaskParam);
+
+    ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask2;
+    ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
+    ledTaskParam.pcName = "ledTask2";
+    ledTaskParam.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO+1;
+    ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
+    LOS_TaskCreate(&taskId, &ledTaskParam);
+    return 0; 
 }
 
 VOID app_init(VOID)
@@ -105,7 +109,7 @@ VOID app_init(VOID)
     DemoEntry();
 }
 
-VOID LedTaskTrigger(VOID)
+void LedTaskTrigger(void)
 {
     LOS_EventWrite(&g_pevent, EVENT_WAIT);
 }

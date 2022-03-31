@@ -151,7 +151,6 @@ SAVE_PSP:
    b SAVE_END 
 
 SAVE_MSP:                             /* 只有ISR 被中断情况，才会用MSP */
-   bl  Fire_DEBUG_GPIOB7_TRIGGER
    mrs  r0, msp                       /* 保存MSP中断堆栈指针到R0 */
 
 SAVE_END:  
