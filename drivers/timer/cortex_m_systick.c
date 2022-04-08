@@ -87,6 +87,13 @@ UINT64 HalClockGetCycles(VOID)
     UINT32 hwCycle;
     UINT32 intSave;
 
+
+#ifdef LOSCFG_PLATFORM_STM32F767_FIRE
+    if (g_cpupTimerOps.timGetTimerCycles != NULL) {
+        cycle = g_cpupTimerOps.timGetTimerCycles();
+        return cycle;
+    }
+#endif
     intSave = LOS_IntLock();
 
     swTick = LOS_TickCountGet();

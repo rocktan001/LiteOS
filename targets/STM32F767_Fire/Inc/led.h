@@ -6,6 +6,10 @@ void Fire_LED_GREEN_ON(int on);
 void Fire_LED_BLUE_ON(int on);
 void Fire_DEBUG_GPIOB6(int on);
 void Fire_DEBUG_GPIOB7(int on);
+void Fire_DEBUG_GPIOA4(int on);
+void Fire_DEBUG_GPIOI7(int on);
 void Fire_DEBUG_GPIOB6_TRIGGER(void);
 void Fire_DEBUG_GPIOB7_TRIGGER(void);
+void Fire_DEBUG_GPIOA4_TRIGGER(void);
+void Fire_DEBUG_GPIOI7_TRIGGER(void);
 #endif

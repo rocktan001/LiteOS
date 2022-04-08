@@ -25,9 +25,7 @@ void Fire_LED_RED_ON(int on)
 
 void Fire_LED_GREEN_ON(int on)
 {
-
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_PORT,LED_GREEN_PIN,!on);
-
 }
 
 void Fire_LED_BLUE_ON(int on)
@@ -36,15 +34,35 @@ void Fire_LED_BLUE_ON(int on)
 	HAL_GPIO_WritePin(LED_BLUE_GPIO_PORT,LED_BLUE_PIN,!on);
 }
 
-
 void Fire_DEBUG_GPIOB6_TRIGGER(void)
 {
- HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);
 }
 
 void Fire_DEBUG_GPIOB7_TRIGGER(void)
 {
- HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+}
+
+void Fire_DEBUG_GPIOA4_TRIGGER(void)
+{
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+}
+void Fire_DEBUG_GPIOI7_TRIGGER(void)
+{
+    // HAL_GPIO_TogglePin(GPIOI, GPIO_PIN_7);
+    HAL_GPIO_WritePin(GPIOI, GPIO_PIN_7, 1);
+    HAL_GPIO_WritePin(GPIOI, GPIO_PIN_7, 0);
+}
+
+void Fire_DEBUG_GPIOI7(int on)
+{
+    HAL_GPIO_WritePin(GPIOI, GPIO_PIN_7, on);
+
+}
+void Fire_DEBUG_GPIOA4(int on)
+{
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, on);
 }
 
 void Fire_DEBUG_GPIOB6(int on)

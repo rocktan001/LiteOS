@@ -59,7 +59,15 @@ typedef enum {
     INT_PEND_RESCH,     /* pending schedule flag */
 } SchedFlag;
 
-/* Check if preemptable with counter flag */
+/**
+ * @ingroup los_sched
+ * @brief Check if preemptable with counter flag.
+ *
+ * @par Description: 2022-04-01 tanzhongqiang
+ * 判读正在运行的CPU 是否可以抢占。
+ * 如果可以抢占，那么后面调度任务就可以把当前任务切换出去。
+ * 如果不可以抢占，注意还要设置 percpu->schedFlag = INT_PEND_RESCH，表示期待合适机会调用。
+ */
 STATIC INLINE BOOL OsPreemptable(VOID)
 {
     /*
@@ -112,10 +120,17 @@ extern VOID OsSchedResched(VOID);
  * taken place while there're no other higher priority tasks or locked.
  */
 extern VOID OsSchedPreempt(VOID);
-
-/*
+/**
+ * @ingroup los_sched
+ * @brief 
  * Just like OsSchedPreempt, except this function will do the OS_INT_ACTIVE
  * check, in case the schedule taken place in the middle of an interrupt.
+
+ * @par Description: 2022-04-01 tanzhongqiang  任务调度
+ * LOS_Schedule 发生调用时机: 一：任务的时间到期(默认2个tick)。二：主动调用，例如 LOS_TaskDelay，OsEventWrite，等
+ * 如果是任务到期，一定是在systick 中断里调用的。此时只做INT_PEND_RESCH 标记，期待适合机会再调度。
+ * 每次中断到来，都会先处理中断注册ISR ，然后处理中断下半部。
+ * 中断下半部处理任务信号后，如果INT_PEND_RESCH 标记了，就执行抢占调度(OsSchedPreempt)。
  */
 STATIC INLINE VOID LOS_Schedule(VOID)
 {
