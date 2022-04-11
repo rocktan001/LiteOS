@@ -307,6 +307,10 @@ VOID BackTraceSub(UINTPTR sp)
     while ((stackPointer < stackBottom) && (count < OS_MAX_BACKTRACE)) {
         if ((*(UINT32 *)stackPointer >= (UINT32)g_textStart) &&
             (*(UINT32 *)stackPointer <= (UINT32)g_textEnd) &&
+            /**
+             * 2022-04-11 tanzhongqiang 堆栈中保存的LR 值，一定是奇数。应该是thumb 指令都是16bit 。
+             * 如何判断堆栈中保存是LR 还是函数地址？ 通过判断LR 值 对应上一条指令是否BL,BX 。
+             * */
             IS_ALIGNED(*(UINT32 *)stackPointer - 1, THUM_OFFSET)) {
             /* Get the entry address of current function. */
             UINTPTR checkBL = CalculateTargetAddress(*(UINT32 *)stackPointer - 1);
