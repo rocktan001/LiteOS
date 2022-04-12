@@ -93,7 +93,7 @@ LITE_OS_SEC_TEXT_MINOR VOID IrqEntryV7M(VOID)
 {
 #ifdef LOSCFG_PLATFORM_STM32F767_FIRE
         // Fire_LED_BLUE_ON(1);
-    // Fire_DEBUG_GPIOB6(1);
+    Fire_DEBUG_GPIOB6(1);
     // DEBUG_INT_PC
 #endif    
     g_curIrqNum = __get_IPSR();
@@ -103,7 +103,7 @@ LITE_OS_SEC_TEXT_MINOR VOID IrqEntryV7M(VOID)
         OsSchedPreempt();
     }
 #ifdef LOSCFG_PLATFORM_STM32F767_FIRE    
-   // Fire_DEBUG_GPIOB6(0);
+   Fire_DEBUG_GPIOB6(0);
     // Fire_LED_BLUE_ON(0);
 #endif  
 }

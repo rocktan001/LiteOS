@@ -71,9 +71,9 @@ VOID OsPowerMgrProcess(VOID)
         OsTicklessOpen();
 #ifdef LOSCFG_PLATFORM_STM32F767_FIRE
     // 2022-03-31 tanzhongqiang 测试进入休眠期的间隔
-    Fire_DEBUG_GPIOB6(1);
-    __asm__ volatile("nop" );
-    Fire_DEBUG_GPIOB6(0);
+    //Fire_DEBUG_GPIOB6(1);
+   // __asm__ volatile("nop" );
+   // Fire_DEBUG_GPIOB6(0);
 #endif
         wfi();
        

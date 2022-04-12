@@ -28,157 +28,14 @@
 
 #include "sys_init.h"
 #include "los_sys.h"
-#include "hal_rng.h"
-
-#ifdef LOSCFG_COMPONENTS_NET_LWIP
-#include "lwip/netif.h"
-#if defined ( __CC_ARM )  /* MDK ARM Compiler */
-#include "lwip/sio.h"
-#endif /* MDK ARM Compiler */
-#include "lwip/opt.h"
-#include "lwip/mem.h"
-#include "lwip/memp.h"
-#include "netif/etharp.h"
-#include "lwip/sockets.h"
-#include "lwip/tcpip.h"
-#include "lwip/init.h"
-#include "lwip/dhcp.h"
-#include "lwip/netif.h"
-#include "lwip/ip_addr.h"
-#include "lwip/timeouts.h"
-#include "ethernetif.h"
-
-#ifdef LOSCFG_COMPONENTS_SECURITY_MBEDTLS
-#include "mbedtls/ssl.h"
-#endif
-
-#include "eth.h"
-#endif
-
-#ifdef LOSCFG_COMPONENTS_NET_LWIP
-struct netif g_netif;
-// Set the actual ip address, eg: 192.168.3.122
-uint8_t ipAddr[4] = {192, 168, 3, 122};
-// Set the actual netmask address, eg: 255.255.255.0
-uint8_t netmaskAddr[4] = {255, 255, 255, 0};
-// Set the actual gateway address, eg: 192.168.3.1
-uint8_t gatewayAddr[4] = {192, 168, 3, 1};
-
-#if LWIP_IPV4 && LWIP_IPV6
-ip_addr_t ipaddr;
-ip_addr_t netmask;
-ip_addr_t gw;
-#elif LWIP_IPV6
-#else
-ip4_addr_t ipaddr;
-ip4_addr_t netmask;
-ip4_addr_t gw;
-#endif
-
-void net_init(void)
-{
-    struct ethernet_api ethAapi;
-
-    ethAapi = EthInterface();
-#if defined(LWIP_DHCP) && (LWIP_DHCP == 1)
-    err_t result;
-
-    ipaddr.addr = 0;
-    netmask.addr = 0;
-    gw.addr = 0;
-
-    tcpip_init(NULL, NULL);
-    (void)ethernetif_api_register(&ethAapi);
-
-    printf("lwip_init OK!!\n");
-    (void)netif_add(&g_netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
-    netif_set_default(&g_netif);
-    if (netif_is_link_up(&g_netif)) {
-        netif_set_up(&g_netif);
-    } else {
-        netif_set_down(&g_netif);
-    }
-
-    result = dhcp_start(&g_netif);
-    if (result != ERR_OK) {
-        printf("dhcp start error!...\n result = %d\n", result);
-    }
-    printf("dhcp start...\n");
-#else /* LWIP_DHCP */
-    /* IP addresses initialization */
-
-#if LWIP_IPV4 && LWIP_IPV6
-    IP_ADDR4(&ipaddr, ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
-    IP_ADDR4(&netmask, netmaskAddr[0], netmaskAddr[1], netmaskAddr[2], netmaskAddr[3]);
-    IP_ADDR4(&gw, gatewayAddr[0], gatewayAddr[1], gatewayAddr[2], gatewayAddr[3]);
-#elif LWIP_IPV6
-#else
-    /* IP addresses initialization without DHCP (IPv4) */
-    IP4_ADDR(&ipaddr, ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
-    IP4_ADDR(&netmask, netmaskAddr[0], netmaskAddr[1], netmaskAddr[2], netmaskAddr[3]);
-    IP4_ADDR(&gw, gatewayAddr[0], gatewayAddr[1], gatewayAddr[2], gatewayAddr[3]);
-#endif
-
-    /* Initilialize the LwIP stack without RTOS */
-    tcpip_init(NULL, NULL);
-    printf("lwip test init ok.\n");
-
-    (void)ethernetif_api_register(&ethAapi);
-    /* Add the network interface (IPv4/IPv6) without RTOS */
-#if LWIP_IPV4 && LWIP_IPV6
-    (void)netif_add(&g_netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
-#elif LWIP_IPV6
-    (void)netif_add(&g_netif, NULL, ethernetif_init, tcpip_input);
-    netif_create_ip6_linklocal_address(&g_netif, 1);
-    {
-        ip6_addr_t ip6;
-        err_t ret;
-        s8_t idx;
-        ip6_addr_t ipv6_gw;
-
-        if (inet_pton(AF_INET6, "2000::2", &ip6) <= 0) {
-            printf("set source ip6 failed \n");
-            return;
-        }
-        ret = netif_add_ip6_address(&g_netif, &ip6, &idx);
-        if (ret != 0) {
-            printf("netif_add_ip6_address failed,ret %d\n", ret);
-            return;
-        }
-
-        if (inet_pton(AF_INET6, "2000::1", &ipv6_gw) <= 0) {
-            printf("inet_pton failed\n");
-            return;
-        }
-        set_lwip_ipv6_default_gw(&g_netif, &ipv6_gw);
-    }
-#else
-    (void)netif_add(&g_netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
-#endif
-    /* Registers the default network interface */
-    netif_set_default(&g_netif);
-    if (netif_is_link_up(&g_netif)) {
-        /* When the netif is fully configured this function must be called */
-        g_netif.flags |= NETIF_FLAG_LINK_UP;
-        netif_set_up(&g_netif);
-    } else {
-        /* When the netif link is down this function must be called */
-        netif_set_down(&g_netif);
-    }
-#endif /* LWIP_DHCP */
-}
-#endif
-
-
-#ifdef LOSCFG_COMPONENTS_NET_LWIP
-void hieth_hw_init(void)
-{
-    (void)LOS_HwiCreate(ETH_IRQn + 16, 1, 0, ETH_IRQHandler, 0); // 16: cortex-m irq num shift
-}
-#endif
 
 uint32_t HAL_GetTick(void) {
+#ifdef LOSCFG_PLATFORM_STM32F767_FIRE
+    extern UINT64 Hal_STM32F767_Get_Timer_CNT(VOID);
+    return Hal_STM32F767_Get_Timer_CNT()/1000;
+#else
     return (UINT32)LOS_TickCountGet();
+#endif    
 }
 
 /**
@@ -196,6 +53,7 @@ void _Error_Handler(char const *file, int line) {
     }
     /* USER CODE END Error_Handler_Debug */
 }
+
 
 /**
   * @brief System Clock Configuration
@@ -266,20 +124,3 @@ void HAL_MspInit(void)
     __HAL_RCC_SYSCFG_CLK_ENABLE();
 }
 
-/*
- * atiny_adapter user interface
- */
-void atiny_usleep(unsigned long usec)
-{
-    delayus((uint32_t)usec);
-}
-
-int atiny_random(void *output, size_t len)
-{
-    return HalRngGenerateBuffer(output, len);
-}
-
-void atiny_reboot(void)
-{
-    HAL_NVIC_SystemReset();
-}

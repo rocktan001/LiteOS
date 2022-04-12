@@ -32,11 +32,47 @@
 #include "gpio.h"
 #include "usart.h"
 #include "tim.h"
-
+#include "fmc.h"
 #ifdef HAL_RNG_MODULE_ENABLED
 #include "hal_rng.h"
 #endif
 #include "led.h"
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+// uint32_t pbuff[(32*1024*1024)/4] __attribute__((at(0xD0000000)));
+/* USER CODE END 0 */
+
 VOID BoardConfig(VOID)
 {
     g_sys_mem_addr_end = __LOS_HEAP_ADDR_END__;
@@ -46,17 +82,18 @@ INT32 HardwareInit(VOID)
 {
     (VOID)HAL_Init();
     SystemClock_Config();
+    TimInit();
     MX_GPIO_Init();
     MX_USART1_UART_Init();
-    MX_TIM3_Init();
-#ifdef HAL_RNG_MODULE_ENABLED
-    HalRngConfig();
-#endif
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-    Fire_LED_GPIO_Config();
+    MX_FMC_Init();   
     return 0;
 }
 
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
 INT32 main (VOID)
 {
 #ifdef __GNUC__

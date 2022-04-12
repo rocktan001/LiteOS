@@ -100,7 +100,7 @@ VOID UsartWrite(const CHAR c)
 UINT8 UsartRead(VOID)
 {
     UINT8 ch;
-    LedTaskTrigger();
+    // LedTaskTrigger();
     (VOID)HAL_UART_Receive(&huart1, &ch, sizeof(UINT8), 0);
     return ch;
 }

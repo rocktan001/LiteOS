@@ -66,7 +66,7 @@ STATIC UINT32 LedTask2(VOID)
         // LOS_TaskDelay(10); 
         LOS_TaskYield();   
         Fire_DEBUG_GPIOB7_TRIGGER();
-        LedTaskTrigger();
+        // LedTaskTrigger();
     }
     return 0;
 }
@@ -78,6 +78,7 @@ STATIC UINT32 LedTaskCreate(VOID)
     UINT32 taskId = 0;
     TSK_INIT_PARAM_S ledTaskParam;
 
+    printf("LedTaskCreate\n");
        /* 事件初始化 */
     ret = LOS_EventInit(&g_pevent);
     if (ret != LOS_OK) {

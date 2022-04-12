@@ -135,6 +135,10 @@ void TIM3_IRQHandler(void)
 VOID TimInit(VOID)
 {
     MX_TIM3_Init();
+    
+    // 开启定时器中断方式更新中断
+    // (VOID)HAL_TIM_Base_Start_IT(&htim3);
+    HAL_TIM_Base_Start(&htim3);
 }
 
 VOID TimerHwiCreate(VOID)
@@ -146,9 +150,7 @@ VOID TimerHwiCreate(VOID)
         printf("ret of TIM3 LOS_HwiCreate = %#x\n", ret);
         return;
     }
-    // 开启定时器中断方式更新中断
-    // (VOID)HAL_TIM_Base_Start_IT(&htim3);
-    HAL_TIM_Base_Start(&htim3);
+
 }
 
 /* 2022-04-07 tanzhongqiang  
