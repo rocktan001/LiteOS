@@ -35,12 +35,12 @@
 #include "led.h"
 #include "los_spinlock.h"
 #include "los_exc.h"
+#include "los_swtmr.h"
 extern uint32_t g_interrupt_pc;
 static EVENT_CB_S g_pevent;
 /* 等待的事件类型 */
 #define EVENT_WAIT 0x00000001
-
-
+UINT64 g_lastTick;
 STATIC UINT32 LedTask1(VOID)
 {// 2022-3-31 tanzhongqiang 测试event 在中断，任务优先级方面的影响。在更高优先级没有让渡CPU情况，event 得不到响应。
 
@@ -59,26 +59,29 @@ STATIC UINT32 LedTask1(VOID)
     return 0;
 }
 
-#if 1
 STATIC UINT32 LedTask2(VOID)
 {
     while (1) {       
-        // LOS_TaskDelay(10); 
-        LOS_TaskYield();   
+        LOS_TaskDelay(100); 
+        // LOS_TaskYield();   
         Fire_DEBUG_GPIOB7_TRIGGER();
         // LedTaskTrigger();
     }
     return 0;
 }
-#endif
+VOID Timer1_CallBack(UINT32 arg)
+{
+    g_lastTick=LOS_TickCountGet();
+}
 
 STATIC UINT32 LedTaskCreate(VOID)
 {
     UINT32 ret;
     UINT32 taskId = 0;
+    UINT16 id1;     // Timer1 id
+
     TSK_INIT_PARAM_S ledTaskParam;
 
-    printf("LedTaskCreate\n");
        /* 事件初始化 */
     ret = LOS_EventInit(&g_pevent);
     if (ret != LOS_OK) {
@@ -99,14 +102,15 @@ STATIC UINT32 LedTaskCreate(VOID)
     ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
     LOS_TaskCreate(&taskId, &ledTaskParam);
 
-#if 1
     ledTaskParam.pfnTaskEntry = (TSK_ENTRY_FUNC)LedTask2;
     ledTaskParam.uwStackSize = LOSCFG_BASE_CORE_TSK_DEFAULT_STACK_SIZE;
     ledTaskParam.pcName = "ledTask2";
     ledTaskParam.usTaskPrio = LOSCFG_BASE_CORE_TSK_DEFAULT_PRIO;
     ledTaskParam.uwResved = LOS_TASK_STATUS_DETACHED;
     LOS_TaskCreate(&taskId, &ledTaskParam);
-#endif 
+
+    LOS_SwtmrCreate(1000*30, LOS_SWTMR_MODE_PERIOD, Timer1_CallBack, &id1, 1);
+    LOS_SwtmrStart(id1);
     // LOS_TaskUnlock();
     return 0; 
 }

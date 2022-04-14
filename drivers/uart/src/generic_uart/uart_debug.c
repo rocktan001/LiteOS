@@ -34,7 +34,9 @@
 #define UART_QUEUE_BUF_MAX_LEN 1
 #define UART_QUEUE_REC_DELAY   5
 
-STATIC UINT32 g_uartQueue;
+#define QUEUE_MAGIC 0xfafbfcfd
+
+STATIC UINT32 g_uartQueue = QUEUE_MAGIC;
 
 INT32 uart_putc(CHAR c)
 {
@@ -47,7 +49,8 @@ UINT8 uart_getc(VOID)
     if (g_genericUart.uartReadChar != NULL) {
         ch = g_genericUart.uartReadChar();
     }
-    (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
+    if(g_uartQueue != QUEUE_MAGIC)
+        (VOID)LOS_QueueWriteCopy(g_uartQueue, &ch, sizeof(UINT8), 0);
     return ch;
 }
 
