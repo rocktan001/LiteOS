@@ -6,7 +6,8 @@ MODULE_NAME := $(LITEOS_PLATFORM)
 
 USER_SRC = \
     os_adapt/os_adapt.c \
-    $(wildcard Src/*.c)
+    $(wildcard Src/*.c) \
+    $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers/BSP/stm32f767_fire_lcd.c
     C_SOURCES += $(USER_SRC)
 
 # C includes
@@ -25,7 +26,8 @@ BSP_INC = \
     -I $(LITEOSTOPDIR)/targets/bsp/hw/include \
     -I $(LITEOSTOPDIR)/targets/$(LITEOS_PLATFORM)/include \
     -I $(LITEOSTOPDIR)/kernel/extended/include \
-    -I $(LITEOSTOPDIR)/kernel/include
+    -I $(LITEOSTOPDIR)/kernel/include \
+    -I $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers/BSP/
     BOARD_INCLUDES += $(BSP_INC)
 
 USER_INC = \

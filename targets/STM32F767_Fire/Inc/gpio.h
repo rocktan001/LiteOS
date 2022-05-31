@@ -59,7 +59,8 @@ extern "C" {
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+#define LTDC_BL_GPIO_PIN_Pin GPIO_PIN_7
+#define LTDC_BL_GPIO_PIN_GPIO_Port GPIOD
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

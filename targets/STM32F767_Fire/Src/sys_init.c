@@ -59,63 +59,63 @@ void _Error_Handler(char const *file, int line) {
   * @brief System Clock Configuration
   * @retval None
   */
-void SystemClock_Config(void) {
-    RCC_OscInitTypeDef rccOscInitStruct = {0};
-    RCC_ClkInitTypeDef rccClkInitStruct = {0};
-    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-    /** Configure LSE Drive Capability
-    */
-    HAL_PWR_EnableBkUpAccess();
-    /** Configure the main internal regulator output voltage
-    */
-    __HAL_RCC_PWR_CLK_ENABLE();
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-    /** Initializes the RCC Oscillators according to the specified parameters
-    * in the RCC_OscInitTypeDef structure.
-    */
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLN = 432;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Activate the Over-Drive mode
+  */
+  if (HAL_PWREx_EnableOverDrive() != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-    rccOscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    rccOscInitStruct.HSEState = RCC_HSE_ON;
-    rccOscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    rccOscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    rccOscInitStruct.PLL.PLLM = 25;// 4, Division factor for PLL VCO iput clock.
-    rccOscInitStruct.PLL.PLLN = 432; // 216, Multiplication factor for PLL VCO output clock.
-    rccOscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    rccOscInitStruct.PLL.PLLQ = 2; // 9, Division factor for
-    rccOscInitStruct.PLL.PLLR = 2;
-
-
-    if (HAL_RCC_OscConfig(&rccOscInitStruct) != HAL_OK) {
-        Error_Handler();
-    }
-    /** Activate the Over-Drive mode
-    */
-    if (HAL_PWREx_EnableOverDrive() != HAL_OK) {
-        Error_Handler();
-    }
-    /** Initializes the CPU, AHB and APB buses clocks
-    */
-    rccClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-                                  | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    rccClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    rccClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    rccClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-    rccClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-
-    if (HAL_RCC_ClockConfig(&rccClkInitStruct, FLASH_LATENCY_7) != HAL_OK) {
-        Error_Handler();
-    }
-
-    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1;
-    PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-    {
-        Error_Handler();
-    }
-    /** Enables the Clock Security System
-    */
-    HAL_RCC_EnableCSS();
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC|RCC_PERIPHCLK_USART1;
+  PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
+  PeriphClkInitStruct.PLLSAI.PLLSAIR = 2;
+  PeriphClkInitStruct.PLLSAI.PLLSAIQ = 2;
+  PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV2;
+  PeriphClkInitStruct.PLLSAIDivQ = 1;
+  PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_4;
+  PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 void HAL_MspInit(void)

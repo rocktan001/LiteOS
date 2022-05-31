@@ -27,6 +27,7 @@
  * --------------------------------------------------------------------------- */
 
 #include "main.h"
+#include "dma2d.h"
 #include "los_task_pri.h"
 #include "arch/canary.h"
 #include "gpio.h"
@@ -37,6 +38,7 @@
 #include "hal_rng.h"
 #endif
 #include "led.h"
+#include "stm32f767_fire_lcd.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -85,7 +87,21 @@ INT32 HardwareInit(VOID)
     TimInit();
     MX_GPIO_Init();
     MX_USART1_UART_Init();
-    MX_FMC_Init();   
+    MX_FMC_Init();
+    MX_DMA2D_Init();
+    BSP_LCD_DisplayOn();
+    BSP_LCD_Init();
+    BSP_LCD_LayerDefaultInit(0, LCD_FB_START_ADDRESS);
+    BSP_LCD_SelectLayer(1);
+    BSP_LCD_Clear(0);
+    BSP_LCD_SelectLayer(0);
+    BSP_LCD_Clear(0);
+    BSP_LCD_SetTextColor(0xff0000);
+    // BSP_LCD_FillRect(0,0,400,400);
+    // BSP_LCD_SetLayerVisible(0, ENABLE);
+    BSP_LCD_DisplayChar(100,100,'h');
+ 
+
     return 0;
 }
 
