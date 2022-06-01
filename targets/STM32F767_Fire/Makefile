@@ -41,7 +41,23 @@ C_DEFS += \
     -DNDEBUG \
     -D__LITEOS__ \
     -D_ALL_SOURCE
+###########################################add support for lvgl########################################################
+ifeq ($(LOSCFG_GUI_ENABLE), y)
+LITEGL_INCLUDE += $(DEMOS_INCLUDE)
+LVGl_GUI_INC = \
+    -I $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers
+    LITEGL_INCLUDE += $(LVGl_GUI_INC)
 
+LVGL_DRIVER_SRC = \
+    ${wildcard $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers/tft/*.c}
+    C_SOURCES += $(LVGL_DRIVER_SRC)
+
+LITEGL_LIB = -Xlinker -no-enum-size-warning
+
+BOARD_INCLUDES += $(LITEGL_INCLUDE) $(LIBSEC_INCLUDE) $(HAL_DRIVER_INC) $(USER_INC) $(CMSIS_INC) $(KERNEL_INC) $(ARCH_INC)
+C_DEFS += -DLV_CONF_INCLUDE_SIMPLE
+endif
+#######################################################################################################################
 ASM_SOURCES = \
     ${wildcard los_startup_gcc.S}
 

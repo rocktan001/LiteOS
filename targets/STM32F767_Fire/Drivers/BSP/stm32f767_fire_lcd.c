@@ -1,6 +1,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f767_fire_lcd.h"
 #include "gpio.h"
+#include "lv_conf.h"
 #include "../../Utilities/Fonts/fonts.h"
 #include "../../Utilities/Fonts/font24.c"
 #include "../../Utilities/Fonts/font20.c"
@@ -39,7 +40,7 @@ static LCD_DrawPropTypeDef DrawProp[LTDC_MAX_LAYER_NUMBER];
 
 void MX_LTDC_Init(void);
 static void DrawChar(uint16_t Xpos, uint16_t Ypos, const uint8_t *c);
-static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex);
+void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex);
 static void LL_ConvertLineToARGB8888(void * pSrc, void *pDst, uint32_t xSize, uint32_t ColorMode);
 /**
   * @brief  Initializes the DSI LCD.
@@ -94,7 +95,12 @@ void MX_LTDC_Init(void)
   pLayerCfg.WindowX1 = STM32F767_FIRE_LCD_PIXEL_WIDTH;
   pLayerCfg.WindowY0 = 0;
   pLayerCfg.WindowY1 = STM32F767_FIRE_LCD_PIXEL_HEIGHT;
-  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB888;
+#if LV_COLOR_DEPTH == 16
+    pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+#endif
+#if LV_COLOR_DEPTH == 32
+    pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
+#endif 
   pLayerCfg.Alpha = 255;
   pLayerCfg.Alpha0 = 0;
   pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
@@ -394,7 +400,12 @@ void BSP_LCD_LayerDefaultInit(uint16_t LayerIndex, uint32_t FB_Address)
   Layercfg.WindowX1 = BSP_LCD_GetXSize();
   Layercfg.WindowY0 = 0;
   Layercfg.WindowY1 = BSP_LCD_GetYSize(); 
-  Layercfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB888;
+#if LV_COLOR_DEPTH == 16
+    Layercfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+#endif
+#if LV_COLOR_DEPTH == 32
+    Layercfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
+#endif   
   Layercfg.FBStartAdress = FB_Address;
   Layercfg.Alpha = 255;
   Layercfg.Alpha0 = 0;
@@ -812,7 +823,7 @@ void BSP_LCD_FillRect(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Hei
   * @param  OffLine: Offset
   * @param  ColorIndex: Color index
   */
-static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex) 
+void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex) 
 {
 
   Dma2d_Handler.Init.Mode         = DMA2D_R2M;
@@ -890,6 +901,17 @@ static void LL_ConvertLineToARGB8888(void *pSrc, void *pDst, uint32_t xSize, uin
   }
 }
 
+void __CopyBuffer(const uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y, uint16_t xsize, uint16_t ysize)
+{
+  uint32_t  Xaddress = 0;
+
+  /* Set the text color */
+  BSP_LCD_SetTextColor(DrawProp[ActiveLayer].TextColor);
+
+  /* Get the rectangle start address */
+  Xaddress = (hltdc.LayerCfg[ActiveLayer].FBStartAdress) + 4*(BSP_LCD_GetXSize()*y + x);
+  LL_FillBuffer(ActiveLayer,(uint32_t *)Xaddress,xsize,ysize,(BSP_LCD_GetXSize() - xsize),*pSrc);
+}
 /**
   * @}
   */

@@ -89,6 +89,8 @@ INT32 HardwareInit(VOID)
     MX_USART1_UART_Init();
     MX_FMC_Init();
     MX_DMA2D_Init();
+
+#if 0    
     BSP_LCD_DisplayOn();
     BSP_LCD_Init();
     BSP_LCD_LayerDefaultInit(0, LCD_FB_START_ADDRESS);
@@ -100,7 +102,7 @@ INT32 HardwareInit(VOID)
     // BSP_LCD_FillRect(0,0,400,400);
     // BSP_LCD_SetLayerVisible(0, ENABLE);
     BSP_LCD_DisplayChar(100,100,'h');
- 
+#endif
 
     return 0;
 }

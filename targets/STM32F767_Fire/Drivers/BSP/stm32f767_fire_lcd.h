@@ -214,7 +214,7 @@ typedef enum
   LCD_ORIENTATION_INVALID   = 0x02  /*!< Invalid orientation choice of LCD screen   */
 } LCD_OrientationTypeDef;
 
-
+void __CopyBuffer(const uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y, uint16_t xsize, uint16_t ysize);
 uint8_t  BSP_LCD_Init(void);
 
 uint32_t BSP_LCD_GetXSize(void);

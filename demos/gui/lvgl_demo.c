@@ -50,7 +50,7 @@ extern "C" {
 #define DELAY_5MS 5
 
 #define LVGL_TASK_STACK_SIZE  0x2000
-#define LVGL_TASK_PRIORITY    5
+#define LVGL_TASK_PRIORITY    11
 STATIC UINT32 g_demoTaskId;
 
 STATIC VOID EnableCache(VOID)
@@ -71,7 +71,7 @@ STATIC VOID DemoTaskEntry(VOID)
     lv_init();
 
     tft_init();
-    touchpad_init();
+    // touchpad_init();
 
 #ifdef LV_USE_DEMO_WIDGETS
     lv_demo_widgets();
