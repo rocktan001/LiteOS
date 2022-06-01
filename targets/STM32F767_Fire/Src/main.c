@@ -39,6 +39,7 @@
 #endif
 #include "led.h"
 #include "stm32f767_fire_lcd.h"
+#include "gt9xx.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -89,7 +90,7 @@ INT32 HardwareInit(VOID)
     MX_USART1_UART_Init();
     MX_FMC_Init();
     MX_DMA2D_Init();
-
+    // GTP_Init_Panel();
 #if 0    
     BSP_LCD_DisplayOn();
     BSP_LCD_Init();

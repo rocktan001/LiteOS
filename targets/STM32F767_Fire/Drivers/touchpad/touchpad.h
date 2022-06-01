@@ -1,23 +1,20 @@
 /**
- * @file disp.h
+ * @file indev.h
  *
  */
 
-#ifndef DISP_H
-#define DISP_H
+#ifndef INDEV_H
+#define INDEV_H
 
 /*********************
  *      INCLUDES
  *********************/
+#include <stdbool.h>
 #include <stdint.h>
-#include "lvgl.h"
-#include "stm32f767_fire_lcd.h"
+
 /*********************
  *      DEFINES
  *********************/
-#define TFT_HOR_RES     STM32F767_FIRE_LCD_PIXEL_WIDTH
-#define TFT_VER_RES     STM32F767_FIRE_LCD_PIXEL_HEIGHT
-#define TFT_NO_TEARING  0   /*1: no tearing but slower*/
 
 /**********************
  *      TYPEDEFS
@@ -26,7 +23,7 @@
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
-void tft_init(void);
+void touchpad_init(void);
 
 /**********************
  *      MACROS

@@ -36,6 +36,7 @@
 #include "los_spinlock.h"
 #include "los_exc.h"
 #include "los_swtmr.h"
+#include "gt9xx.h"
 extern uint32_t g_interrupt_pc;
 static EVENT_CB_S g_pevent;
 /* 等待的事件类型 */
@@ -62,7 +63,7 @@ STATIC UINT32 LedTask1(VOID)
 STATIC UINT32 LedTask2(VOID)
 {
     while (1) {       
-        LOS_TaskDelay(100); 
+        LOS_TaskDelay(500); 
         // LOS_TaskYield();   
         Fire_DEBUG_GPIOB7_TRIGGER();
         // LedTaskTrigger();
@@ -80,6 +81,9 @@ STATIC UINT32 LedTaskCreate(VOID)
     UINT32 taskId = 0;
     UINT16 id1;     // Timer1 id
 
+#if 0
+    GTP_Init_Panel();
+#endif
     TSK_INIT_PARAM_S ledTaskParam;
 
        /* 事件初始化 */

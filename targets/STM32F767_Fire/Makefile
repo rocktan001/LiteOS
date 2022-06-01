@@ -6,8 +6,7 @@ MODULE_NAME := $(LITEOS_PLATFORM)
 
 USER_SRC = \
     os_adapt/os_adapt.c \
-    $(wildcard Src/*.c) \
-    $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers/BSP/stm32f767_fire_lcd.c
+    $(wildcard Src/*.c)
     C_SOURCES += $(USER_SRC)
 
 # C includes
@@ -49,7 +48,9 @@ LVGl_GUI_INC = \
     LITEGL_INCLUDE += $(LVGl_GUI_INC)
 
 LVGL_DRIVER_SRC = \
-    ${wildcard $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers/tft/*.c}
+    ${wildcard $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers/tft/*.c} \
+    ${wildcard $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers/touchpad/*.c} \
+    ${wildcard $(LITEOSTOPDIR)/targets/STM32F767_Fire/Drivers/BSP/*.c}
     C_SOURCES += $(LVGL_DRIVER_SRC)
 
 LITEGL_LIB = -Xlinker -no-enum-size-warning
